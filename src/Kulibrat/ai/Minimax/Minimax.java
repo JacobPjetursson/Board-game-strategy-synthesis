@@ -1,15 +1,15 @@
-package ai.Minimax;
+package kulibrat.ai.Minimax;
 
-import ai.AI;
-import game.Logic;
-import game.Move;
-import game.State;
+import kulibrat.ai.AI;
+import kulibrat.game.Logic;
+import kulibrat.game.Move;
+import kulibrat.game.State;
 
 import java.util.HashMap;
 import java.util.Random;
 
-import static misc.Config.BLACK;
-import static misc.Config.RED;
+import static kulibrat.misc.Config.BLACK;
+import static kulibrat.misc.Config.RED;
 
 public class Minimax extends AI {
     private long calculationTime;
@@ -137,6 +137,7 @@ public class Minimax extends AI {
         searchCutOff = false;
 
     }
+
     // Either returns 1000 or -1000 if terminal, or the material of a state, if intermediate.
     // The material is the objective value of a state
     private int heuristic(State state) {

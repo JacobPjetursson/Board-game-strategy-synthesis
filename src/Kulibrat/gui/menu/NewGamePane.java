@@ -1,7 +1,5 @@
-package gui.menu;
+package kulibrat.gui.menu;
 
-import game.Controller;
-import game.State;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -16,7 +14,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import misc.Config;
+import kulibrat.game.Controller;
+import kulibrat.game.State;
+import kulibrat.misc.Config;
+
 
 public class NewGamePane extends AnchorPane {
     private int choiceWidth = Config.WIDTH / 4;
@@ -203,12 +204,12 @@ public class NewGamePane extends AnchorPane {
 
             int playerBlackMode = (blackValue.equals(human)) ? Config.HUMAN :
                     (blackValue.equals(minimax)) ? Config.MINIMAX :
-                    (blackValue.equals(mcts)) ? Config.MONTE_CARLO :
-                    (blackValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
+                            (blackValue.equals(mcts)) ? Config.MONTE_CARLO :
+                                    (blackValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
             int playerRedMode = (redValue.equals(human)) ? Config.HUMAN :
                     (redValue.equals(minimax)) ? Config.MINIMAX :
-                    (redValue.equals(mcts)) ? Config.MONTE_CARLO :
-                    (redValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
+                            (redValue.equals(mcts)) ? Config.MONTE_CARLO :
+                                    (redValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
             Config.SCORELIMIT = scoreLimitChoices.getValue();
             new Controller(stage, playerRedMode,
                     playerBlackMode, new State(),

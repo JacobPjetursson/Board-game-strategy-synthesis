@@ -1,6 +1,6 @@
-package FFT;
+package fftlib;
 
-import misc.Config;
+import kulibrat.misc.Config;
 
 import java.util.Objects;
 

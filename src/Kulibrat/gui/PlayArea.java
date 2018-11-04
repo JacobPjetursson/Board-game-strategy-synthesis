@@ -1,18 +1,21 @@
-package gui;
+package kulibrat.gui;
 
-import game.Controller;
-import gui.board.Board;
-import gui.board.Goal;
-import gui.board.Player;
-import gui.info.InfoPane;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import misc.Config;
+import kulibrat.game.Controller;
+import kulibrat.gui.board.Board;
+import kulibrat.gui.board.Goal;
+import kulibrat.gui.board.Player;
+import kulibrat.gui.info.InfoPane;
+import kulibrat.misc.Config;
 
-import static misc.Config.*;
+import static kulibrat.misc.Config.BLACK;
+import static kulibrat.misc.Config.RED;
+import static kulibrat.misc.Config.WIDTH;
+
 
 public class PlayArea extends GridPane {
 

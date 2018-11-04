@@ -1,6 +1,6 @@
-package ai.Minimax;
+package kulibrat.ai.Minimax;
 
-import game.Move;
+import kulibrat.game.Move;
 
 // Class binds a move to a score for the minimax algorithm
 public class MinimaxPlay {

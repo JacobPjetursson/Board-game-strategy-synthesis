@@ -1,8 +1,9 @@
-package FFT;
+package fftlib.gui;
 
-import game.Controller;
-import game.Logic;
-import game.Move;
+
+import fftlib.FFTManager;
+import fftlib.Rule;
+import fftlib.RuleGroup;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -17,7 +18,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import misc.Config;
+import kulibrat.game.Controller;
+import kulibrat.game.Logic;
+import kulibrat.game.Move;
+import kulibrat.misc.Config;
 
 public class ShowFFTPane extends BorderPane {
     private ListView<VBox> lw;

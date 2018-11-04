@@ -1,6 +1,6 @@
-package gui.info;
+package kulibrat.gui.info;
 
-import game.State;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -8,15 +8,16 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import kulibrat.game.State;
 
-import static misc.Config.BLACK;
-import static misc.Config.RED;
+import static kulibrat.misc.Config.BLACK;
+import static kulibrat.misc.Config.RED;
 
 public class ScoreBoard extends VBox {
     private Label redLabel;
     private Label blackLabel;
 
-    ScoreBoard() {
+    public ScoreBoard() {
         setAlignment(Pos.CENTER);
         setSpacing(10);
         setPadding(new Insets(20));

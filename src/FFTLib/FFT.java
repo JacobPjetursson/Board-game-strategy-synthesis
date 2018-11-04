@@ -1,23 +1,24 @@
-package FFT;
-import ai.Minimax.Node;
-import game.Logic;
-import game.Move;
-import game.State;
-import game.StateAndMove;
-import misc.Config;
-import misc.Database;
+package fftlib;
+import kulibrat.ai.Minimax.Node;
+import kulibrat.game.Logic;
+import kulibrat.game.Move;
+import kulibrat.game.State;
+import kulibrat.game.StateAndMove;
+import kulibrat.misc.Config;
+import kulibrat.misc.Database;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-import static misc.Config.BLACK;
-import static misc.Config.RED;
+import static kulibrat.misc.Config.BLACK;
+import static kulibrat.misc.Config.RED;
+
 
 public class FFT {
     public String name;
     public ArrayList<RuleGroup> ruleGroups;
-    StateAndMove failingPoint = null;
+    public StateAndMove failingPoint = null;
 
     public FFT(String name) {
         this.name = name;

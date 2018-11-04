@@ -1,14 +1,14 @@
-package game;
+package kulibrat.game;
 
-import misc.Config;
+import kulibrat.misc.Config;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static misc.Config.BLACK;
-import static misc.Config.RED;
+import static kulibrat.misc.Config.BLACK;
+import static kulibrat.misc.Config.RED;
 
 public class State {
     private int[][] board;
@@ -88,12 +88,12 @@ public class State {
         return scoreLimit;
     }
 
-    void addUnPlaced(int team) {
+    public void addUnPlaced(int team) {
         if (team == RED) unplacedRed++;
         else unplacedBlack++;
     }
 
-    void removeUnPlaced(int team) {
+    public void removeUnPlaced(int team) {
         if (team == RED) unplacedRed--;
         else unplacedBlack--;
     }
@@ -104,7 +104,7 @@ public class State {
     }
 
     // Get a list of pieces/points from this state
-    ArrayList<Point> getPieces(int team) {
+    public ArrayList<Point> getPieces(int team) {
         ArrayList<Point> entries = new ArrayList<>();
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
@@ -124,7 +124,7 @@ public class State {
     }
 
     // Get the next state based on the input move
-    State getNextState(Move m) {
+    public State getNextState(Move m) {
         State state = new State(this);
         Logic.doTurn(m, state);
         state.move = m;

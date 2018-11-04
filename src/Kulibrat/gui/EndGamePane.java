@@ -1,8 +1,5 @@
-package gui;
+package kulibrat.gui;
 
-import game.Controller;
-import game.State;
-import gui.menu.MenuPane;
 import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,9 +11,15 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import misc.Config;
+import kulibrat.game.Controller;
+import kulibrat.game.State;
+import kulibrat.gui.menu.MenuPane;
+import kulibrat.misc.Config;
 
-import static misc.Config.*;
+import static kulibrat.misc.Config.BLACK;
+import static kulibrat.misc.Config.HUMAN_VS_AI;
+import static kulibrat.misc.Config.RED;
+
 
 public class EndGamePane extends VBox {
 

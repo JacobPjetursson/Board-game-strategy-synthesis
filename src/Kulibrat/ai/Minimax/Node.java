@@ -1,21 +1,21 @@
-package ai.Minimax;
+package kulibrat.ai.Minimax;
 
-import game.Logic;
-import game.Move;
-import game.State;
+import kulibrat.game.Logic;
+import kulibrat.game.Move;
+import kulibrat.game.State;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import static misc.Config.BLACK;
-import static misc.Config.RED;
+import static kulibrat.misc.Config.BLACK;
+import static kulibrat.misc.Config.RED;
 
 public class Node implements Serializable {
     private State state;
     private long zobrist_key;
 
     // Starting Root state
-    public Node(State startState)  {
+    public Node(State startState) {
         this.state = new State(startState);
         this.zobrist_key = initHashCode();
     }

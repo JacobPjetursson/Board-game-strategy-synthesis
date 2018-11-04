@@ -1,8 +1,7 @@
-package FFT;
+package fftlib;
 
-import game.State;
-import misc.Config;
-
+import kulibrat.game.State;
+import kulibrat.misc.Config;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;

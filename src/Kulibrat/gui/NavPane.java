@@ -1,8 +1,5 @@
-package gui;
+package kulibrat.gui;
 
-import game.Controller;
-import gui.Dialogs.RestartGameDialog;
-import gui.menu.MenuPane;
 import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -15,7 +12,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import misc.Config;
+import kulibrat.game.Controller;
+import kulibrat.gui.Dialogs.RestartGameDialog;
+import kulibrat.gui.menu.MenuPane;
+import kulibrat.misc.Config;
 
 import java.util.ArrayList;
 
@@ -134,7 +134,9 @@ public class NavPane extends VBox {
         getChildren().add(FFTWidgets);
     }
 
-    public void addShowFFTButton() { getChildren().add(showFFTButton); }
+    public void addShowFFTButton() {
+        getChildren().add(showFFTButton);
+    }
 
     public Button getEditFFTButton() {
         return editFFTButton;

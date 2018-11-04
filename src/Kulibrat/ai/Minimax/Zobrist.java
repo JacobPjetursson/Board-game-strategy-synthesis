@@ -1,14 +1,14 @@
-package ai.Minimax;
+package kulibrat.ai.Minimax;
 
-import misc.Config;
+import kulibrat.misc.Config;
 
 import java.util.Random;
 
 public class Zobrist {
     public static long[][][] board;
     public static long[] turn;
-    static long[] redPoints;
-    static long[] blackPoints;
+    public static long[] redPoints;
+    public static long[] blackPoints;
 
     public static void initialize() {
         long range = Long.MAX_VALUE;

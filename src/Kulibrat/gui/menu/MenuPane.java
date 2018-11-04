@@ -1,4 +1,4 @@
-package gui.menu;
+package kulibrat.gui.menu;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -12,7 +12,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import misc.Config;
+import kulibrat.misc.Config;
 
 import java.util.ArrayList;
 

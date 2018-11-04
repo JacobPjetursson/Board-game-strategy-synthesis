@@ -1,10 +1,10 @@
-package game;
+package kulibrat.game;
 
 public class StateAndMove {
+    public boolean random;
     private State state;
     private Move move;
     private int turnNo;
-    public boolean random;
 
     public StateAndMove(State state, Move move, int turnNo) {
         this.state = state;

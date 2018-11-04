@@ -1,4 +1,4 @@
-package gui.menu;
+package kulibrat.gui.menu;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -8,7 +8,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import misc.Config;
+import kulibrat.gui.menu.MenuPane;
+import kulibrat.misc.Config;
+
 
 public class ReadMePane extends VBox {
 

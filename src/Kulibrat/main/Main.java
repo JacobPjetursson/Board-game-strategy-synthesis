@@ -1,10 +1,10 @@
-package main;
+package kulibrat.main;
 
-import gui.menu.MenuPane;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import misc.Config;
+import kulibrat.gui.menu.MenuPane;
+import kulibrat.misc.Config;
 
 public class Main extends Application {
 

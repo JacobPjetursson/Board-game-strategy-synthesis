@@ -1,11 +1,12 @@
-package gui.board;
+package kulibrat.gui.board;
 
-import game.Controller;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import misc.Config;
+import kulibrat.game.Controller;
+import kulibrat.misc.Config;
 
-import static misc.Config.*;
+import static kulibrat.misc.Config.*;
+
 
 public class BoardPiece extends Circle {
     private Controller cont;
@@ -61,7 +62,7 @@ public class BoardPiece extends Circle {
         });
     }
 
-    BoardPiece(int team, Controller cont, int row, int col, int radius, boolean clickable) {
+    public BoardPiece(int team, Controller cont, int row, int col, int radius, boolean clickable) {
         this(team, cont, radius, clickable);
         this.row = row;
         this.col = col;

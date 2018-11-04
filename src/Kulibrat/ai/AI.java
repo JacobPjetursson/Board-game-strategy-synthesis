@@ -1,7 +1,7 @@
-package ai;
+package kulibrat.ai;
 
-import game.Move;
-import game.State;
+import kulibrat.game.Move;
+import kulibrat.game.State;
 
 public abstract class AI {
     public int team;

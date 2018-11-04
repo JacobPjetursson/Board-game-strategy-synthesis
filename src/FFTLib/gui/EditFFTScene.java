@@ -1,8 +1,9 @@
-package FFT;
+package fftlib.gui;
 
-import game.Controller;
-import gui.Dialogs.DeleteFFTDialog;
-import gui.Dialogs.DeleteRGDialog;
+import fftlib.FFT;
+import fftlib.FFTManager;
+import fftlib.Rule;
+import fftlib.RuleGroup;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,10 +20,13 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import misc.Database;
-import misc.Config;
+import kulibrat.game.Controller;
+import kulibrat.gui.Dialogs.DeleteFFTDialog;
+import kulibrat.gui.Dialogs.DeleteRGDialog;
+import kulibrat.misc.Config;
+import kulibrat.misc.Database;
 
-import static misc.Config.WIDTH;
+import static kulibrat.misc.Config.WIDTH;
 
 public class EditFFTScene extends VBox {
     private int textFieldWidth = 150;
@@ -169,7 +173,7 @@ public class EditFFTScene extends VBox {
             boolean verified = fftManager.currFFT.verify(team, wholeFFT);
             if (!verified && fftManager.currFFT.failingPoint != null) {
                 Scene scene = primaryStage.getScene();
-                primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager, cont), Config.WIDTH, Config.HEIGHT));
+                primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager, cont), WIDTH, Config.HEIGHT));
             } else if (verified && !getChildren().contains(verifiedLabel)) {
                 getChildren().add(4, verifiedLabel);
 

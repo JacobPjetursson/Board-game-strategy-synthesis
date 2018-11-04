@@ -1,7 +1,6 @@
-package FFT;
-import FFT.RuleGroup;
-import misc.Config;
+package fftlib;
 
+import kulibrat.misc.Config;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -13,7 +12,7 @@ import java.util.List;
 
 public class FFTManager {
     static String path = Config.FFT_PATH;
-    static ArrayList<FFT> ffts;
+    public static ArrayList<FFT> ffts;
     public FFT currFFT;
 
     public FFTManager() {

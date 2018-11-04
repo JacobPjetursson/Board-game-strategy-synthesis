@@ -1,13 +1,5 @@
-package gui;
+package kulibrat.gui;
 
-import game.Controller;
-import game.Move;
-import game.State;
-import gui.board.Board;
-import gui.board.BoardTile;
-import gui.board.Goal;
-import gui.board.Player;
-import gui.menu.Arrow;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Bounds;
@@ -15,8 +7,16 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import kulibrat.game.Controller;
+import kulibrat.game.Move;
+import kulibrat.game.State;
+import kulibrat.gui.board.Board;
+import kulibrat.gui.board.BoardTile;
+import kulibrat.gui.board.Goal;
+import kulibrat.gui.board.Player;
+import kulibrat.gui.menu.Arrow;
 
-import static misc.Config.RED;
+import static kulibrat.misc.Config.RED;
 
 public class PlayBox extends Group {
     private Board board;

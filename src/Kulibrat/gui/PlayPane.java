@@ -1,10 +1,10 @@
-package gui;
+package kulibrat.gui;
 
-import game.Controller;
 import javafx.geometry.Pos;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import misc.Config;
+import kulibrat.game.Controller;
+import kulibrat.misc.Config;
 
 public class PlayPane extends GridPane {
     private PlayArea playArea;

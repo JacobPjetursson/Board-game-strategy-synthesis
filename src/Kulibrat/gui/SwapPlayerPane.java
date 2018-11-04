@@ -1,7 +1,5 @@
-package gui;
+package kulibrat.gui;
 
-import game.Controller;
-import gui.board.Player;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,10 +15,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import misc.Config;
+import kulibrat.game.Controller;
+import kulibrat.gui.board.Player;
+import kulibrat.misc.Config;
 
-import static misc.Config.RED;
-
+import static kulibrat.misc.Config.RED;
 
 public class SwapPlayerPane extends AnchorPane {
     private String human = "Human";

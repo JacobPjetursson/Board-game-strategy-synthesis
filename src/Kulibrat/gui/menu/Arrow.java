@@ -1,4 +1,4 @@
-package gui.menu;
+package kulibrat.gui.menu;
 
 import javafx.scene.Group;
 import javafx.scene.paint.Color;

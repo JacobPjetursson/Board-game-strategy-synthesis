@@ -1,13 +1,9 @@
-package FFT;
+package fftlib.gui;
 
-import ai.Minimax.Node;
-import game.Controller;
-import game.Move;
-import game.StateAndMove;
-import gui.PlayBox;
-import gui.board.Board;
-import gui.board.Goal;
-import gui.board.Player;
+
+import fftlib.FFTManager;
+import fftlib.Rule;
+import fftlib.RuleGroup;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -23,12 +19,21 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import misc.Database;
+import kulibrat.ai.Minimax.Node;
+import kulibrat.game.Controller;
+import kulibrat.game.Move;
+import kulibrat.game.StateAndMove;
+import kulibrat.gui.PlayBox;
+import kulibrat.gui.board.Board;
+import kulibrat.gui.board.Goal;
+import kulibrat.gui.board.Player;
+import kulibrat.misc.Database;
 
 import java.util.ArrayList;
 
-import static misc.Config.BLACK;
-import static misc.Config.RED;
+import static kulibrat.misc.Config.BLACK;
+import static kulibrat.misc.Config.RED;
+
 
 public class FFTFailurePane extends BorderPane {
     private FFTManager fftManager;

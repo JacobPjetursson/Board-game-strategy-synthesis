@@ -1,10 +1,10 @@
-package FFT;
+package fftlib;
 
-import ai.AI;
-import game.Logic;
-import game.Move;
-import game.State;
-import misc.Config;
+import kulibrat.ai.AI;
+import kulibrat.game.Logic;
+import kulibrat.game.Move;
+import kulibrat.game.State;
+import kulibrat.misc.Config;
 
 public class FFT_Follower extends AI {
     private FFTManager fftManager;

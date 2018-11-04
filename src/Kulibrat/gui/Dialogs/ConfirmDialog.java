@@ -1,4 +1,4 @@
-package gui.Dialogs;
+package kulibrat.gui.Dialogs;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;

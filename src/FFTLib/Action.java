@@ -1,7 +1,7 @@
-package FFT;
+package fftlib;
 
-import game.Move;
-import misc.Config;
+import kulibrat.game.Move;
+import kulibrat.misc.Config;
 
 import java.util.ArrayList;
 
@@ -45,7 +45,7 @@ public class Action {
         this.remClauses = new ArrayList<>(remClauses);
     }
 
-    // Kulibrat specific
+    // kulibrat specific
     public Move getMove() {
         int newRow = -1; int newCol = -1; int oldRow = -1; int oldCol = -1;
 

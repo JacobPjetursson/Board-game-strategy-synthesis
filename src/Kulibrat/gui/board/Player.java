@@ -1,7 +1,6 @@
-package gui.board;
+package kulibrat.gui.board;
 
-import game.Controller;
-import game.State;
+
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -11,12 +10,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import misc.Config;
+import kulibrat.game.Controller;
+import kulibrat.game.State;
 
 import java.net.URL;
 import java.util.ArrayList;
 
-import static misc.Config.*;
+import static kulibrat.misc.Config.*;
+
 
 public class Player extends VBox {
     private int team;

@@ -1,4 +1,4 @@
-package gui.menu;
+package kulibrat.gui.menu;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -9,7 +9,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
-import misc.Config;
+import kulibrat.misc.Config;
 
 class RulesPane extends VBox {
 

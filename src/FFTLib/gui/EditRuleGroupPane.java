@@ -1,5 +1,8 @@
-package FFT;
+package fftlib.gui;
 
+import fftlib.FFTManager;
+import fftlib.Rule;
+import fftlib.RuleGroup;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;

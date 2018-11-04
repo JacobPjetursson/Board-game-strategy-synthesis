@@ -1,7 +1,7 @@
-package gui.Dialogs;
+package kulibrat.gui.Dialogs;
 
 import javafx.stage.Stage;
-import misc.Database;
+import kulibrat.misc.Database;
 
 public class OverwriteDBDialog extends ConfirmDialog {
     boolean fft;

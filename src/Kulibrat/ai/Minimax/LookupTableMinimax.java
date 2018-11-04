@@ -1,23 +1,22 @@
-package ai.Minimax;
-
-import ai.AI;
-import game.Logic;
-import game.Move;
-import game.State;
-import misc.Database;
+package kulibrat.ai.Minimax;
+import kulibrat.ai.AI;
+import kulibrat.game.Logic;
+import kulibrat.game.Move;
+import kulibrat.game.State;
+import kulibrat.misc.Database;
 
 import java.sql.SQLException;
 import java.util.HashMap;
 
-import static misc.Config.BLACK;
-import static misc.Config.RED;
+import static kulibrat.misc.Config.BLACK;
+import static kulibrat.misc.Config.RED;
+
 
 public class LookupTableMinimax extends AI {
     private boolean useDB = true;
     private int CURR_MAX_DEPTH;
     private int unevaluatedNodes = 0;
     private HashMap<Long, MinimaxPlay> lookupTable;
-
 
 
     public LookupTableMinimax(int team, State state, boolean overwriteDB) {

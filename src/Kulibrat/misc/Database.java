@@ -1,23 +1,24 @@
-package misc;
+package kulibrat.misc;
 
-import ai.Minimax.LookupTableMinimax;
-import ai.Minimax.MinimaxPlay;
-import ai.Minimax.Node;
-import game.Logic;
-import game.Move;
-import game.State;
-import gui.Dialogs.OverwriteDBDialog;
 import javafx.event.Event;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import kulibrat.ai.Minimax.LookupTableMinimax;
+import kulibrat.ai.Minimax.MinimaxPlay;
+import kulibrat.ai.Minimax.Node;
+import kulibrat.game.Logic;
+import kulibrat.game.Move;
+import kulibrat.game.State;
+import kulibrat.gui.Dialogs.OverwriteDBDialog;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static misc.Config.BLACK;
-import static misc.Config.RED;
+import static kulibrat.misc.Config.BLACK;
+import static kulibrat.misc.Config.RED;
 
 public class Database {
     public static Connection dbConnection;
@@ -119,8 +120,7 @@ public class Database {
                 int score = queryPlay(child).score;
                 if (score == bestScore) {
                     nonLosingPlays.add(m);
-                }
-                else if (won && m.team == RED && score > 0)
+                } else if (won && m.team == RED && score > 0)
                     nonLosingPlays.add(m);
                 else if (won && m.team == BLACK && score < 0)
                     nonLosingPlays.add(m);
@@ -179,6 +179,7 @@ public class Database {
             }
         }
     }
+
     // Opens the overwrite pane for DB
     private static void showOverwritePane() {
         Stage newStage = new Stage();
@@ -189,7 +190,6 @@ public class Database {
         newStage.setOnCloseRequest(Event::consume);
         newStage.show();
     }
-
 
 
     public static void fillLookupTable(HashMap<Long, MinimaxPlay> lookupTable) throws SQLException {

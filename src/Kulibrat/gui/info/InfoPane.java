@@ -1,7 +1,5 @@
-package gui.info;
+package kulibrat.gui.info;
 
-import game.Controller;
-import game.State;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -10,9 +8,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import misc.Config;
+import kulibrat.game.Controller;
+import kulibrat.game.State;
+import kulibrat.misc.Config;
 
-import static misc.Config.*;
+import static kulibrat.misc.Config.HUMAN_VS_AI;
+import static kulibrat.misc.Config.HUMAN_VS_HUMAN;
+import static kulibrat.misc.Config.RED;
+
 
 public class InfoPane extends VBox {
     private ScoreBoard scoreBoard;

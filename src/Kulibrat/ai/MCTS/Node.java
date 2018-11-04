@@ -1,8 +1,8 @@
-package ai.MCTS;
+package kulibrat.ai.MCTS;
 
-import game.Logic;
-import game.Move;
-import game.State;
+import kulibrat.game.Logic;
+import kulibrat.game.Move;
+import kulibrat.game.State;
 
 import java.util.ArrayList;
 

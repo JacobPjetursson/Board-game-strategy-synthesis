@@ -1,7 +1,7 @@
-package gui.Dialogs;
+package kulibrat.gui.Dialogs;
 
-import FFT.EditFFTScene;
-import FFT.FFTManager;
+import fftlib.FFTManager;
+import fftlib.gui.EditFFTScene;
 import javafx.stage.Stage;
 
 public class DeleteFFTDialog extends ConfirmDialog {

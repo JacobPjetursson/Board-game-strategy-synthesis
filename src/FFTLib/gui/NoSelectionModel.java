@@ -1,4 +1,4 @@
-package FFT;
+package fftlib.gui;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

@@ -1,8 +1,11 @@
-package game;
+package kulibrat.game;
 
 import java.awt.*;
 import java.util.ArrayList;
-import static misc.Config.*;
+
+import static kulibrat.misc.Config.BLACK;
+import static kulibrat.misc.Config.CUSTOMIZABLE;
+import static kulibrat.misc.Config.RED;
 
 public abstract class Logic {
     // Outputs a list of legal moves from a state
@@ -15,7 +18,7 @@ public abstract class Logic {
     }
 
     // Outputs a list of legal moves from a single piece
-    static ArrayList<Move> legalMovesFromPiece(int oldRow, int oldCol, int team, State state) {
+    public static ArrayList<Move> legalMovesFromPiece(int oldRow, int oldCol, int team, State state) {
         ArrayList<Move> list = new ArrayList<>();
         int[][] board = state.getBoard();
         int maxRow = board.length - 1;

@@ -1,10 +1,10 @@
-package ai.MCTS;
+package kulibrat.ai.MCTS;
 
-import ai.AI;
-import ai.Minimax.Minimax;
-import game.Logic;
-import game.Move;
-import game.State;
+import kulibrat.ai.AI;
+import kulibrat.ai.Minimax.Minimax;
+import kulibrat.game.Logic;
+import kulibrat.game.Move;
+import kulibrat.game.State;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,7 +60,7 @@ public class MCTS extends AI {
                 if (useMinimax) {
                     // Shallow minimax search as rollout
                     minimax.setTeam(sim_node.getState().getTurn());
-                    ai.Minimax.Node node = new ai.Minimax.Node(sim_node.getState());
+                    kulibrat.ai.Minimax.Node node = new kulibrat.ai.Minimax.Node(sim_node.getState());
                     Move move = minimax.minimax(node, minimaxDepth, Integer.MIN_VALUE,
                             Integer.MAX_VALUE, System.currentTimeMillis()).move;
 

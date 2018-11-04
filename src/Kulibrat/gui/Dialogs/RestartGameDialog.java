@@ -1,16 +1,19 @@
-package gui.Dialogs;
+package kulibrat.gui.Dialogs;
 
-import game.Controller;
-import game.State;
+
 import javafx.stage.Stage;
+import kulibrat.game.Controller;
+import kulibrat.game.State;
 
-import static misc.Config.BLACK;
-import static misc.Config.RED;
+import static kulibrat.misc.Config.BLACK;
+import static kulibrat.misc.Config.RED;
+
 
 public class RestartGameDialog extends ConfirmDialog {
 
     Controller cont;
     Stage primaryStage;
+
     public RestartGameDialog(String labelText, Stage primaryStage, Controller cont) {
         super(labelText);
         this.primaryStage = primaryStage;

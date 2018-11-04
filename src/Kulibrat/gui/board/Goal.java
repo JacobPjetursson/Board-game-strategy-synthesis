@@ -1,4 +1,4 @@
-package gui.board;
+package kulibrat.gui.board;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;

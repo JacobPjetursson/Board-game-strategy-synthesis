@@ -1,6 +1,6 @@
-package game;
+package kulibrat.game;
 
-import misc.Config;
+import kulibrat.misc.Config;
 import java.util.Objects;
 
 public class Move {
@@ -48,7 +48,7 @@ public class Move {
 
     public Move reflect() {
         int[][] board = new int[Config.bWidth][Config.bHeight];
-        if(oldCol != -1)
+        if (oldCol != -1)
             board[oldRow][oldCol] = -team;
         if (newCol != -1)
             board[newRow][newCol] = team;

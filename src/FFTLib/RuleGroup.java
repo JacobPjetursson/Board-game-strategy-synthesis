@@ -1,4 +1,4 @@
-package FFT;
+package fftlib;
 
 import java.util.ArrayList;
 

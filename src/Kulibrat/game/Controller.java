@@ -1,20 +1,9 @@
-package game;
+package kulibrat.game;
 
-import FFT.EditFFTScene;
-import FFT.FFTManager;
-import FFT.FFT_Follower;
-import FFT.ShowFFTPane;
-import ai.AI;
-import ai.MCTS.MCTS;
-import ai.Minimax.LookupTableMinimax;
-import ai.Minimax.Minimax;
-import ai.Minimax.Node;
-import ai.Minimax.Zobrist;
-import gui.*;
-import gui.board.BoardPiece;
-import gui.board.BoardTile;
-import gui.board.Goal;
-import gui.board.Player;
+import fftlib.FFTManager;
+import fftlib.FFT_Follower;
+import fftlib.gui.EditFFTScene;
+import fftlib.gui.ShowFFTPane;
 import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.scene.Scene;
@@ -24,15 +13,27 @@ import javafx.scene.input.KeyCode;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import misc.Database;
-import misc.Config;
+import kulibrat.ai.AI;
+import kulibrat.ai.MCTS.MCTS;
+import kulibrat.ai.Minimax.LookupTableMinimax;
+import kulibrat.ai.Minimax.Minimax;
+import kulibrat.ai.Minimax.Node;
+import kulibrat.ai.Minimax.Zobrist;
+import kulibrat.gui.*;
+import kulibrat.gui.board.BoardPiece;
+import kulibrat.gui.board.BoardTile;
+import kulibrat.gui.board.Goal;
+import kulibrat.gui.board.Player;
+import kulibrat.misc.Config;
+import kulibrat.misc.Database;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-import static misc.Config.*;
+import static kulibrat.misc.Config.*;
 
 public class Controller {
+    public Stage primaryStage;
     private int mode;
     private int playerRedInstance;
     private int playerBlackInstance;
@@ -54,7 +55,6 @@ public class Controller {
     private NavPane navPane;
     private BoardPiece selected;
     private ArrayList<Move> curHighLights;
-    public Stage primaryStage;
     private State state;
     private PlayArea playArea;
     private Goal goalRed;
@@ -273,6 +273,7 @@ public class Controller {
             }
         }
     }
+
     // Is called when a tile is pressed by the user. If vs. the AI, it calls the doAITurn after. This function also highlights
     // the best pieces for the opponent, if it is human vs human.
     private void doHumanTurn(Move move) {
@@ -292,8 +293,7 @@ public class Controller {
         if ((playerRedInstance == FFT && state.getTurn() == BLACK) ||
                 (playerBlackInstance == FFT && state.getTurn() == RED)) {
             startAIButton.fire();
-        }
-        else if ((playerBlackInstance != HUMAN && state.getTurn() == BLACK) ||
+        } else if ((playerBlackInstance != HUMAN && state.getTurn() == BLACK) ||
                 (playerRedInstance != HUMAN && state.getTurn() == RED)) {
             doAITurn();
         } else if (helpHumanBox.isSelected()) {
@@ -383,8 +383,7 @@ public class Controller {
                 System.out.println("Defaulting to user interaction");
                 fftAllowInteraction = true;
                 return;
-            }
-            else {
+            } else {
                 System.out.println("Defaulting to random move");
                 move = getDefaultFFTMove();
             }
@@ -543,7 +542,7 @@ public class Controller {
         int oldMode = mode;
         this.mode = setMode(playerRedInstance, playerBlackInstance);
         instantiateAI(team);
-        if (state.getTurn() == team && playerInstance != Config.HUMAN && mode != AI_VS_AI) {
+        if (state.getTurn() == team && playerInstance != HUMAN && mode != AI_VS_AI) {
             doAITurn();
         } else if (state.getTurn() != team && oldMode == AI_VS_AI && mode != AI_VS_AI) {
             doAITurn();

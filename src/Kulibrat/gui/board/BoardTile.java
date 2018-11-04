@@ -1,4 +1,4 @@
-package gui.board;
+package kulibrat.gui.board;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -6,7 +6,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
-import static misc.Config.BLACK;
+import static kulibrat.misc.Config.BLACK;
 
 public class BoardTile extends StackPane {
     private int row;
@@ -16,7 +16,7 @@ public class BoardTile extends StackPane {
     private boolean help;
     private Label turnsToTerminalLabel;
 
-    BoardTile(int row, int col, int tilesize) {
+    public BoardTile(int row, int col, int tilesize) {
         this.row = row;
         this.col = col;
         setBorder(new Border(new BorderStroke(Color.BLACK,
