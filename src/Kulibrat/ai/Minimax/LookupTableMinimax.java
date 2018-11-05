@@ -1,4 +1,5 @@
 package kulibrat.ai.Minimax;
+
 import kulibrat.ai.AI;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
@@ -8,8 +9,8 @@ import kulibrat.misc.Database;
 import java.sql.SQLException;
 import java.util.HashMap;
 
-import static kulibrat.misc.Config.BLACK;
-import static kulibrat.misc.Config.RED;
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
 
 
 public class LookupTableMinimax extends AI {
@@ -23,7 +24,7 @@ public class LookupTableMinimax extends AI {
         super(team);
         lookupTable = new HashMap<>();
         if (useDB && overwriteDB) {
-            this.team = RED;
+            this.team = PLAYER1;
             System.out.println("Rebuilding lookup table. This will take some time.");
             buildLookupTable(state);
             try {
@@ -39,7 +40,7 @@ public class LookupTableMinimax extends AI {
 
     // This function fetches the best move from the DB, if it exists
     public Move makeMove(State state) {
-        String teamstr = (team == BLACK) ? "BLACK" : "RED";
+        String teamstr = (team == PLAYER2) ? "CROSS" : "CIRCLE";
         System.out.println("Finding best play for " + teamstr);
         if (state.getLegalMoves().size() == 1) {
             return state.getLegalMoves().get(0);
@@ -57,9 +58,9 @@ public class LookupTableMinimax extends AI {
             System.exit(0);
         }
         Move move = play.move;
-        String winner = (play.score >= 1000) ? "RED" : (play.score == 0) ? "DRAW" : "BLACK";
+        String winner = (play.score >= 1000) ? "CIRCLE" : (play.score == 0) ? "DRAW" : "CROSS";
         System.out.print("BEST PLAY:  " + "oldRow: " + move.oldRow +
-                ", oldCol: " + move.oldCol + ", newRow: " + move.newRow + ", newCol: " + move.newCol +
+                ", oldCol: " + move.oldCol + ", row: " + move.newRow + ", col: " + move.newCol +
                 ", WINNER IS: " + winner);
         System.out.println(" in " + (play.score >= 1000 ? 2000 - play.score : (play.score == 0) ? "∞" : 2000 + play.score) + " moves!");
         return move;
@@ -87,8 +88,8 @@ public class LookupTableMinimax extends AI {
             if (doneCounter == 2) done = true;
 
             if (Math.abs(play.score) >= 1000) {
-                String player = (team == RED) ? "RED" : "BLACK";
-                String opponent = (player.equals("RED")) ? "BLACK" : "RED";
+                String player = (team == PLAYER1) ? "CIRCLE" : "CROSS";
+                String opponent = (player.equals("CIRCLE")) ? "CROSS" : "CIRCLE";
                 String winner = (play.score >= 1000) ? player : opponent;
                 System.out.println("A SOLUTION HAS BEEN FOUND, WINNING STRAT GOES TO: " + winner);
             }
@@ -137,7 +138,7 @@ public class LookupTableMinimax extends AI {
 
     // Heuristic function which values red with 2000 for a win, and -2000 for a loss. All other nodes are 0
     private int heuristic(State state) {
-        int opponent = (team == RED) ? BLACK : RED;
+        int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
         if (Logic.gameOver(state)) {
             int winner = Logic.getWinner(state);
             if (winner == team)

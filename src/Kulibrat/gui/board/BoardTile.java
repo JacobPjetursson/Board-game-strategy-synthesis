@@ -6,7 +6,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
-import static kulibrat.misc.Config.BLACK;
+import static misc.Config.PLAYER2;
 
 public class BoardTile extends StackPane {
     private int row;
@@ -71,7 +71,7 @@ public class BoardTile extends StackPane {
             getChildren().add(turnsToTerminalLabel);
             if (getChildren().size() > 1) {
                 BoardPiece bp = (BoardPiece) getChildren().get(0);
-                if (bp.getTeam() == BLACK) {
+                if (bp.getTeam() == PLAYER2) {
                     turnsToTerminalLabel.setTextFill(Color.WHITE);
                 }
             }

@@ -1,6 +1,6 @@
 package kulibrat.ai.Minimax;
 
-import kulibrat.misc.Config;
+import misc.Config;
 
 import java.util.Random;
 

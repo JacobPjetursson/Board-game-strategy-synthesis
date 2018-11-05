@@ -30,8 +30,8 @@ import kulibrat.misc.Database;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import static kulibrat.misc.Config.BLACK;
-import static kulibrat.misc.Config.RED;
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
 
 public class ReviewPane extends VBox {
     private ListView<HBox> lw;
@@ -137,9 +137,9 @@ public class ReviewPane extends VBox {
 
             int index = lw.getSelectionModel().getSelectedIndex();
             StateAndMove selected = currCont.getPreviousStates().get(index);
-            Controller selectedCont = new Controller(primaryStage, currCont.getPlayerInstance(RED),
-                    currCont.getPlayerInstance(BLACK), selected.getState(),
-                    currCont.getTime(RED), currCont.getTime(BLACK), false);
+            Controller selectedCont = new Controller(primaryStage, currCont.getPlayerInstance(PLAYER1),
+                    currCont.getPlayerInstance(PLAYER2), selected.getState(),
+                    currCont.getTime(PLAYER1), currCont.getTime(PLAYER2), false);
             selectedCont.setTurnNo(selected.getTurnNo());
             selectedCont.getPlayArea().update(selectedCont);
 
@@ -158,10 +158,10 @@ public class ReviewPane extends VBox {
 
     private PlayBox getPlayBox(Controller cont, StateAndMove ps, ArrayList<Move> bestPlays) {
         Board b = new Board(20, 7, false);
-        Player playerBlack = new Player(BLACK, cont, 20, 7, false);
+        Player playerBlack = new Player(PLAYER2, cont, 20, 7, false);
         Goal goalRed = new Goal(3 * b.getTileSize(), 17);
         Goal goalBlack = new Goal(3 * b.getTileSize(), 17);
-        Player playerRed = new Player(RED, cont, 20, 7, false);
+        Player playerRed = new Player(PLAYER1, cont, 20, 7, false);
 
         PlayBox pb = new PlayBox(playerBlack, goalRed, b, goalBlack, playerRed);
         pb.update(cont, ps.getState());

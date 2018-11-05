@@ -8,8 +8,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import kulibrat.gui.menu.MenuPane;
-import kulibrat.misc.Config;
+import misc.Config;
 
 
 public class ReadMePane extends VBox {

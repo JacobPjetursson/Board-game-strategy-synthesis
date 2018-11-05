@@ -20,13 +20,10 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import kulibrat.game.Controller;
-import kulibrat.gui.Dialogs.DeleteFFTDialog;
-import kulibrat.gui.Dialogs.DeleteRGDialog;
-import kulibrat.misc.Config;
 import kulibrat.misc.Database;
+import misc.Config;
 
-import static kulibrat.misc.Config.WIDTH;
+import static misc.Config.WIDTH;
 
 public class EditFFTScene extends VBox {
     private int textFieldWidth = 150;
@@ -56,9 +53,9 @@ public class EditFFTScene extends VBox {
         // set items
         changeBox.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
             // In case of clear selection
-            if ((Integer)newValue == -1)
+            if ((Integer) newValue == -1)
                 return;
-            fftManager.setCurrFFT((Integer)newValue);
+            fftManager.setCurrFFT((Integer) newValue);
             Platform.runLater(() -> changeBox.getSelectionModel().clearSelection());
             update();
         });
@@ -185,7 +182,6 @@ public class EditFFTScene extends VBox {
         verifyBox.getChildren().addAll(verifyBtn, teamChoice, forLabel, verificationChoice);
 
 
-
         Button back = new Button("Back");
         back.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
@@ -211,8 +207,7 @@ public class EditFFTScene extends VBox {
         if (isNull) {
             title.setText("Please make a new FFT");
             return;
-        }
-        else
+        } else
             title.setText("Edit FFT with name:\n" + fftManager.currFFT.name);
         // Items in changeBox (combobox)
         ObservableList<String> fftStrs = FXCollections.observableArrayList();
@@ -326,6 +321,7 @@ public class EditFFTScene extends VBox {
             super(labelText);
             this.rename = rename;
         }
+
         @Override
         void setSaveBtnMouseClicked() {
             if (!tf.getText().replace(" ", "").isEmpty()) {

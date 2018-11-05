@@ -1,9 +1,11 @@
 package kulibrat.game;
 
-import kulibrat.misc.Config;
+import fftlib.game.FFTMove;
+import misc.Config;
+
 import java.util.Objects;
 
-public class Move {
+public class Move implements FFTMove {
     public int oldRow;
     public int oldCol;
     public int newRow;
@@ -44,6 +46,15 @@ public class Move {
     @Override
     public int hashCode() {
         return Objects.hash(oldRow, oldCol, newRow, newCol, team);
+    }
+
+
+    public int getTeam() {
+        return team;
+    }
+
+    public void setTeam(int team) {
+        this.team = team;
     }
 
     public Move reflect() {

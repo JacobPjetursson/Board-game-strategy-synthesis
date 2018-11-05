@@ -1,9 +1,11 @@
 package fftlib.gui;
 
-
 import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
+import fftlib.game.FFTMove;
+import fftlib.game.FFTNode;
+import fftlib.game.FFTStateAndMove;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -19,20 +21,12 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import kulibrat.ai.Minimax.Node;
-import kulibrat.game.Controller;
-import kulibrat.game.Move;
-import kulibrat.game.StateAndMove;
-import kulibrat.gui.PlayBox;
-import kulibrat.gui.board.Board;
 import kulibrat.gui.board.Goal;
-import kulibrat.gui.board.Player;
-import kulibrat.misc.Database;
 
 import java.util.ArrayList;
 
-import static kulibrat.misc.Config.BLACK;
-import static kulibrat.misc.Config.RED;
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
 
 
 public class FFTFailurePane extends BorderPane {
@@ -50,9 +44,9 @@ public class FFTFailurePane extends BorderPane {
         setTop(title);
         BorderPane.setAlignment(title, Pos.CENTER);
 
-        StateAndMove ps = fftManager.currFFT.failingPoint;
-        Node n = new Node(ps.getState());
-        ArrayList<Move> nonLosingPlays = Database.nonLosingPlays(n);
+        FFTStateAndMove ps = fftManager.currFFT.failingPoint;
+        FFTNode n = new FFTNode(ps.getState());
+        ArrayList<FFTMove> nonLosingPlays = FFTManager.db.nonLosingPlays(n);
         PlayBox playBox = getPlayBox(cont, ps, nonLosingPlays);
         setCenter(playBox);
 
@@ -97,10 +91,10 @@ public class FFTFailurePane extends BorderPane {
         int pieceRad = 20;
         int goalH = 50;
         Board b = new Board(tileW, pieceRad, false);
-        Player playerBlack = new Player(BLACK, cont, tileW, pieceRad, false);
+        Player playerBlack = new Player(PLAYER2, cont, tileW, pieceRad, false);
         Goal goalRed = new Goal(3 * b.getTileSize(), goalH);
         Goal goalBlack = new Goal(3 * b.getTileSize(), goalH);
-        Player playerRed = new Player(RED, cont, tileW, pieceRad, false);
+        Player playerRed = new Player(PLAYER1, cont, tileW, pieceRad, false);
 
         PlayBox pb = new PlayBox(playerBlack, goalRed, b, goalBlack, playerRed);
         pb.update(cont, ps.getState());
@@ -111,6 +105,7 @@ public class FFTFailurePane extends BorderPane {
         }
         return pb;
     }
+
     private void showRuleGroups() {
         ObservableList<VBox> ruleGroups = FXCollections.observableArrayList();
         for (int i = 0; i < fftManager.currFFT.ruleGroups.size(); i++) {
@@ -126,11 +121,11 @@ public class FFTFailurePane extends BorderPane {
                 Label rLabel = new Label((j + 1) + ": " + r.printRule());
                 rLabel.setFont(Font.font("Verdana", 10));
                 // TODO - below is hacky
-                int tempTeam = fftManager.currFFT.failingPoint.getMove().team;
-                fftManager.currFFT.failingPoint.getMove().team = -1;
+                int tempTeam = fftManager.currFFT.failingPoint.getMove().getTeam();
+                fftManager.currFFT.failingPoint.getMove().setTeam(-1);
                 if (r.action.getMove().equals(fftManager.currFFT.failingPoint.getMove()))
                     rLabel.setTextFill(Color.BLUE);
-                fftManager.currFFT.failingPoint.getMove().team = tempTeam;
+                fftManager.currFFT.failingPoint.getMove().setTeam(tempTeam);
                 rgVBox.getChildren().add(rLabel);
             }
             ruleGroups.add(rgVBox);

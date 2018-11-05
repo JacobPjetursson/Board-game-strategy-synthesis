@@ -4,7 +4,7 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import kulibrat.game.Controller;
-import kulibrat.misc.Config;
+import misc.Config;
 
 public class PlayPane extends GridPane {
     private PlayArea playArea;

@@ -17,9 +17,9 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import kulibrat.game.Controller;
 import kulibrat.gui.board.Player;
-import kulibrat.misc.Config;
+import misc.Config;
 
-import static kulibrat.misc.Config.RED;
+import static misc.Config.PLAYER1;
 
 public class SwapPlayerPane extends AnchorPane {
     private String human = "Human";
@@ -38,7 +38,7 @@ public class SwapPlayerPane extends AnchorPane {
 
     public SwapPlayerPane(Controller cont, Player currPlayer) {
         int team = currPlayer.getTeam();
-        Label title = new Label("Swap Player " + ((team == RED) ? "RED" : "BLACK"));
+        Label title = new Label("Swap Player " + ((team == PLAYER1) ? "Red" : "Black"));
         title.setFont(Font.font("Verdana", FontWeight.BOLD, 25));
         title.setAlignment(Pos.CENTER);
         AnchorPane.setTopAnchor(title, 20.0);

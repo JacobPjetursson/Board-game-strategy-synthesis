@@ -12,7 +12,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import kulibrat.misc.Config;
+import misc.Config;
 
 import java.util.ArrayList;
 

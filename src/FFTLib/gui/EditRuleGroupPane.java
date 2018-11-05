@@ -13,7 +13,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
@@ -186,10 +189,12 @@ public class EditRuleGroupPane extends VBox {
     public class RenameRGPane extends RenamePane {
 
         RuleGroup rg;
+
         RenameRGPane(String labelText, RuleGroup rg) {
             super(labelText);
             this.rg = rg;
         }
+
         @Override
         void setSaveBtnMouseClicked() {
             if (!tf.getText().replace(" ", "").isEmpty()) {

@@ -1,14 +1,15 @@
 package fftlib;
 
+import fftlib.game.FFTMove;
 import kulibrat.game.Move;
-import kulibrat.misc.Config;
+import misc.Config;
 
 import java.util.ArrayList;
 
 public class Action {
     protected ArrayList<Clause> addClauses;
-    ArrayList<Clause> remClauses;
     protected boolean actionErr;
+    ArrayList<Clause> remClauses;
 
     protected Action(ArrayList<String> clauses) {
         this.addClauses = new ArrayList<>();
@@ -18,8 +19,7 @@ public class Action {
             if (c.startsWith("+") && Character.isDigit(c.charAt(1))) {
                 c = c.substring(1);
                 addClauses.add(new Clause(c));
-            }
-            else if (c.startsWith("-") && Character.isDigit(c.charAt(1))) {
+            } else if (c.startsWith("-") && Character.isDigit(c.charAt(1))) {
                 c = c.substring(1);
                 remClauses.add(new Clause(c));
             } else {
@@ -34,6 +34,7 @@ public class Action {
             actionErr = true;
             return;
         }
+        // TODO - this is kulibrat specific
         if (addClauses.size() > 1 || remClauses.size() > 1) {
             System.err.println("Only moves with a single add clause and/or a single remove clause is allowed in this game");
             actionErr = true;
@@ -46,8 +47,12 @@ public class Action {
     }
 
     // kulibrat specific
-    public Move getMove() {
-        int newRow = -1; int newCol = -1; int oldRow = -1; int oldCol = -1;
+    // TODO - support tic tac toe
+    public FFTMove getMove() {
+        int newRow = -1;
+        int newCol = -1;
+        int oldRow = -1;
+        int oldCol = -1;
 
         for (Clause c : addClauses) {
             newRow = c.row;
@@ -60,8 +65,9 @@ public class Action {
         return new Move(oldRow, oldCol, newRow, newCol, -1);
     }
 
+    // TODO - do for all
     public Action applySymmetry(int symmetry) {
-        switch(symmetry) {
+        switch (symmetry) {
             case Config.SYM_HREF:
                 return reflectH();
             default:
@@ -112,10 +118,10 @@ public class Action {
 
     public void addClauseBoardToList(int[][] cb, ArrayList<Clause> addClauses, ArrayList<Clause> remClauses) {
         // Add back to list
-        for(int i = 0; i < cb.length; i++) {
+        for (int i = 0; i < cb.length; i++) {
             for (int j = 0; j < cb[i].length; j++) {
                 int val = cb[i][j];
-                if(val == -Clause.PIECEOCC_NONE)
+                if (val == -Clause.PIECEOCC_NONE)
                     remClauses.add(new Clause(i, j, Clause.PIECEOCC_NONE, false));
                 else if (val == Clause.PIECEOCC_NONE)
                     addClauses.add(new Clause(i, j, Clause.PIECEOCC_NONE, false));

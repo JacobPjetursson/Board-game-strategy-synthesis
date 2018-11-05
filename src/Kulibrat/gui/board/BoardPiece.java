@@ -3,9 +3,8 @@ package kulibrat.gui.board;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import kulibrat.game.Controller;
-import kulibrat.misc.Config;
 
-import static kulibrat.misc.Config.*;
+import static misc.Config.*;
 
 
 public class BoardPiece extends Circle {
@@ -25,21 +24,21 @@ public class BoardPiece extends Circle {
         this.team = team;
         this.row = -1;
         this.col = -1;
-        this.color = (team == RED) ? Color.RED : Color.BLACK;
+        this.color = (team == PLAYER1) ? Color.RED : Color.BLACK;
         setRadius(radius);
         setStrokeWidth(3.5);
         setColor(color, color);
 
         setOnMouseEntered(me -> {
             if (!isControllable()) return;
-            if (team == RED && !selected) {
+            if (team == PLAYER1 && !selected) {
                 Color lightRed = new Color(1.0, 0.5, 0.5, 1.0);
                 if (best) {
                     setColor(lightRed, green);
                 } else {
                     setColor(lightRed, lightRed);
                 }
-            } else if (team == BLACK && !selected) {
+            } else if (team == PLAYER2 && !selected) {
                 Color gray = new Color(0.3, 0.3, 0.3, 1.0);
                 if (best) {
                     setColor(gray, green);
@@ -85,7 +84,7 @@ public class BoardPiece extends Circle {
     }
 
     private boolean isControllable() {
-        return Config.CUSTOMIZABLE || clickable && cont.getState().getTurn() == this.team &&
+        return clickable && cont.getState().getTurn() == this.team &&
                 (cont.getPlayerInstance(team) == HUMAN || (cont.getPlayerInstance(team) == FFT && cont.getFFTAllowInteraction()));
     }
 

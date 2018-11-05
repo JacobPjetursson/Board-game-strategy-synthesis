@@ -1,5 +1,7 @@
 package kulibrat.ai.Minimax;
 
+import fftlib.game.FFTMove;
+import fftlib.game.FFTNode;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
 import kulibrat.game.State;
@@ -7,10 +9,10 @@ import kulibrat.game.State;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import static kulibrat.misc.Config.BLACK;
-import static kulibrat.misc.Config.RED;
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
 
-public class Node implements Serializable {
+public class Node implements Serializable, FFTNode {
     private State state;
     private long zobrist_key;
 
@@ -35,6 +37,10 @@ public class Node implements Serializable {
         this.state = new State(node.state);
         zobrist_key = node.zobrist_key;
         this.state.setMove(node.state.getMove());
+    }
+
+    public Node getNextNode(FFTMove m) {
+        return getNextNode((Move) m);
     }
 
     public Node getNextNode(Move m) {
@@ -82,8 +88,8 @@ public class Node implements Serializable {
             }
         }
         hash = hash ^ Zobrist.turn[state.getTurn()];
-        hash = hash ^ Zobrist.redPoints[state.getScore(RED)];
-        hash = hash ^ Zobrist.blackPoints[state.getScore(BLACK)];
+        hash = hash ^ Zobrist.redPoints[state.getScore(PLAYER1)];
+        hash = hash ^ Zobrist.blackPoints[state.getScore(PLAYER2)];
         return hash;
     }
 
@@ -103,13 +109,13 @@ public class Node implements Serializable {
             zobrist_key ^= Zobrist.turn[parent.getTurn()];
             zobrist_key ^= Zobrist.turn[state.getTurn()];
         }
-        if (state.getScore(RED) != parent.getScore(RED)) {
-            zobrist_key ^= Zobrist.redPoints[parent.getScore(RED)];
-            zobrist_key ^= Zobrist.redPoints[state.getScore(RED)];
+        if (state.getScore(PLAYER1) != parent.getScore(PLAYER1)) {
+            zobrist_key ^= Zobrist.redPoints[parent.getScore(PLAYER1)];
+            zobrist_key ^= Zobrist.redPoints[state.getScore(PLAYER1)];
         }
-        if (state.getScore(BLACK) != parent.getScore(BLACK)) {
-            zobrist_key ^= Zobrist.blackPoints[parent.getScore(BLACK)];
-            zobrist_key ^= Zobrist.blackPoints[state.getScore(BLACK)];
+        if (state.getScore(PLAYER2) != parent.getScore(PLAYER2)) {
+            zobrist_key ^= Zobrist.blackPoints[parent.getScore(PLAYER2)];
+            zobrist_key ^= Zobrist.blackPoints[state.getScore(PLAYER2)];
         }
     }
 }

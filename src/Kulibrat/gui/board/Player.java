@@ -16,7 +16,7 @@ import kulibrat.game.State;
 import java.net.URL;
 import java.util.ArrayList;
 
-import static kulibrat.misc.Config.*;
+import static misc.Config.*;
 
 
 public class Player extends VBox {
@@ -57,7 +57,7 @@ public class Player extends VBox {
         }
         URL urlRed = this.getClass().getClassLoader().getResource("playerIconRed.png");
         URL urlBlack = this.getClass().getClassLoader().getResource("playerIconBlack.png");
-        Image img = (team == RED) ? new Image(urlRed.toExternalForm()) :
+        Image img = (team == PLAYER1) ? new Image(urlRed.toExternalForm()) :
                 new Image(urlBlack.toExternalForm());
         ImageView imgView = new ImageView(img);
 
@@ -86,7 +86,7 @@ public class Player extends VBox {
         gridPaneDisplay.add(imgPane, 1, 0);
         gridPaneDisplay.add(typeLabel, 2, 0);
         getChildren().add(gridPaneBoard);
-        if (clickable && team == RED) getChildren().add(1, gridPaneDisplay);
+        if (clickable && team == PLAYER1) getChildren().add(1, gridPaneDisplay);
         else if (clickable) getChildren().add(0, gridPaneDisplay);
 
     }
@@ -127,7 +127,7 @@ public class Player extends VBox {
     }
 
     private Color getColor() {
-        if (team == RED) return Color.RED;
+        if (team == PLAYER1) return Color.RED;
         else return Color.BLACK;
     }
 

@@ -10,11 +10,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import kulibrat.game.Controller;
 import kulibrat.game.State;
-import kulibrat.misc.Config;
+import misc.Config;
 
-import static kulibrat.misc.Config.HUMAN_VS_AI;
-import static kulibrat.misc.Config.HUMAN_VS_HUMAN;
-import static kulibrat.misc.Config.RED;
+import static misc.Config.*;
 
 
 public class InfoPane extends VBox {
@@ -68,7 +66,7 @@ public class InfoPane extends VBox {
     }
 
     private void updateTurn(State state) {
-        if (state.getTurn() == RED) {
+        if (state.getTurn() == PLAYER1) {
             turnCircle.setFill(Color.RED);
         } else {
             turnCircle.setFill(Color.BLACK);

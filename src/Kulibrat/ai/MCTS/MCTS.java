@@ -121,11 +121,11 @@ public class MCTS extends AI {
             double payOff = (child.getPlays() == 0) ? 0 : (child.getWins() / child.getPlays());
             if (child.getPlays() == 0) {
                 System.out.println("No records for play: " + "oldRow: " + child.getState().getMove().oldRow + ", oldCol: "
-                        + child.getState().getMove().oldCol + ", newRow: " + child.getState().getMove().newRow + ", newCol: " +
+                        + child.getState().getMove().oldCol + ", row: " + child.getState().getMove().newRow + ", col: " +
                         child.getState().getMove().newCol + ", board: " + Arrays.deepToString(child.getState().getBoard()));
             } else {
                 System.out.println("payOff: " + payOff + ", play: " + "oldRow: " + child.getState().getMove().oldRow + ", oldCol: "
-                        + child.getState().getMove().oldCol + ", newRow: " + child.getState().getMove().newRow + ", newCol: " +
+                        + child.getState().getMove().oldCol + ", row: " + child.getState().getMove().newRow + ", col: " +
                         child.getState().getMove().newCol + ", plays: " + child.getPlays() + ", wins: " + child.getWins());
             }
             if (payOff > best_val) {

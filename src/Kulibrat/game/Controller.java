@@ -24,13 +24,13 @@ import kulibrat.gui.board.BoardPiece;
 import kulibrat.gui.board.BoardTile;
 import kulibrat.gui.board.Goal;
 import kulibrat.gui.board.Player;
-import kulibrat.misc.Config;
 import kulibrat.misc.Database;
+import misc.Config;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-import static kulibrat.misc.Config.*;
+import static misc.Config.*;
 
 public class Controller {
     public Stage primaryStage;
@@ -43,6 +43,7 @@ public class Controller {
     private int turnNo;
     private AI aiRed;
     private AI aiBlack;
+    private FFT_Follower fftFollower;
     private Button startAIButton;
     private Button stopAIButton;
     private Button reviewButton;
@@ -66,6 +67,8 @@ public class Controller {
     private boolean fftInteractiveMode;
     private boolean fftAllowInteraction;
     private ShowFFTPane shownFFT;
+    private Logic logic;
+    private Database database;
 
     public Controller(Stage primaryStage, int playerRedInstance, int playerBlackInstance,
                       State state, int redTime, int blackTime, boolean overwriteDB) {
@@ -82,7 +85,10 @@ public class Controller {
         this.endGamePopup = false;
         this.curHighLights = new ArrayList<>();
         this.previousStates = new ArrayList<>();
-        this.fftManager = new FFTManager();
+
+        this.logic = new Logic();
+        this.database = new Database();
+        this.fftManager = new FFTManager(new Node(state), logic, database);
 
         PlayPane playPane = new PlayPane(this);
         primaryStage.setScene(new Scene(playPane,
@@ -91,8 +97,8 @@ public class Controller {
         playArea = playPane.getPlayArea();
         window = playArea.getScene().getWindow();
 
-        instantiateAI(RED);
-        instantiateAI(BLACK);
+        instantiateAI(PLAYER1);
+        instantiateAI(Config.PLAYER2);
 
         // Fetch all gui elements that invoke something game-related
         startAIButton = navPane.getStartAIButton();
@@ -102,8 +108,8 @@ public class Controller {
         showFFTButton = navPane.getShowFFTButton();
         editFFTButton = navPane.getEditFFTButton();
         interactiveFFTBox = navPane.getInteractiveFFTBox();
-        goalRed = playArea.getGoal(RED);
-        goalBlack = playArea.getGoal(BLACK);
+        goalRed = playArea.getGoal(PLAYER1);
+        goalBlack = playArea.getGoal(PLAYER2);
 
         showNavButtons();
 
@@ -111,8 +117,8 @@ public class Controller {
         // Swap player buttons
         swapButtons = new Button[2];
         Player[] players = new Player[2];
-        players[0] = playArea.getPlayer(RED);
-        players[1] = playArea.getPlayer(BLACK);
+        players[0] = playArea.getPlayer(PLAYER1);
+        players[1] = playArea.getPlayer(PLAYER2);
         swapButtons[0] = players[0].getSwapBtn();
         swapButtons[1] = players[1].getSwapBtn();
         for (int i = 0; i < swapButtons.length; i++) {
@@ -143,7 +149,7 @@ public class Controller {
             for (int j = 0; j < tiles[i].length; j++) {
                 BoardTile tile = tiles[i][j];
                 tile.setOnMouseClicked(event -> {
-                    if (tile.getHighlight() || Config.CUSTOMIZABLE) {
+                    if (tile.getHighlight()) {
                         BoardPiece piece = selected;
                         doHumanTurn(new Move(piece.getRow(), piece.getCol(), tile.getRow(), tile.getCol(), piece.getTeam()));
                     }
@@ -169,14 +175,14 @@ public class Controller {
 
         // Goal Red
         goalRed.setOnMouseClicked(event -> {
-            if (goalRed.getHighlight() || Config.CUSTOMIZABLE) {
+            if (goalRed.getHighlight()) {
                 BoardPiece piece = selected;
                 doHumanTurn(new Move(piece.getRow(), piece.getCol(), -1, -1, piece.getTeam()));
             }
         });
         // Goal Black
         goalBlack.setOnMouseClicked(event -> {
-            if (goalBlack.getHighlight() || Config.CUSTOMIZABLE) {
+            if (goalBlack.getHighlight()) {
                 BoardPiece piece = selected;
                 doHumanTurn(new Move(piece.getRow(), piece.getCol(), -1, -1, piece.getTeam()));
             }
@@ -217,14 +223,14 @@ public class Controller {
         showFFTButton.setOnAction(event -> {
             deselect();
             Stage newStage = new Stage();
-            shownFFT = new ShowFFTPane(fftManager, this);
+            shownFFT = new ShowFFTPane(fftManager, state);
             newStage.setScene(new Scene(shownFFT, 450, 550));
             newStage.show();
             newStage.setOnCloseRequest(otherevent -> shownFFT = null);
 
         });
 
-        if (mode == HUMAN_VS_AI && playerRedInstance != HUMAN && state.getTurn() == RED) {
+        if (mode == HUMAN_VS_AI && playerRedInstance != HUMAN && state.getTurn() == PLAYER1) {
             aiThread = new Thread(this::doAITurn);
             aiThread.setDaemon(true);
             aiThread.start();
@@ -248,28 +254,28 @@ public class Controller {
     }
 
     private void instantiateAI(int team) {
-        if (team == RED) {
+        if (team == PLAYER1) {
             if (playerRedInstance == MINIMAX) {
-                aiRed = new Minimax(RED, redTime);
+                aiRed = new Minimax(PLAYER1, redTime);
             } else if (playerRedInstance == LOOKUP_TABLE) {
-                aiRed = new LookupTableMinimax(RED, state, overwriteDB);
+                aiRed = new LookupTableMinimax(PLAYER1, state, overwriteDB);
             } else if (playerRedInstance == MONTE_CARLO) {
-                aiRed = new MCTS(state, RED, redTime);
+                aiRed = new MCTS(state, PLAYER1, redTime);
             } else if (playerRedInstance == FFT) {
-                aiRed = new FFT_Follower(RED, fftManager);
+                aiRed = new FFT_Follower(PLAYER1, fftManager);
             }
         } else {
             if (playerBlackInstance == MINIMAX) {
-                aiBlack = new Minimax(BLACK, blackTime);
+                aiBlack = new Minimax(PLAYER2, blackTime);
             } else if (playerBlackInstance == LOOKUP_TABLE) {
                 if (playerRedInstance == LOOKUP_TABLE) {
                     overwriteDB = false;
                 }
-                aiBlack = new LookupTableMinimax(BLACK, state, overwriteDB);
+                aiBlack = new LookupTableMinimax(PLAYER2, state, overwriteDB);
             } else if (playerBlackInstance == MONTE_CARLO) {
-                aiBlack = new MCTS(state, BLACK, blackTime);
+                aiBlack = new MCTS(state, PLAYER2, blackTime);
             } else if (playerBlackInstance == FFT) {
-                aiBlack = new FFT_Follower(BLACK, fftManager);
+                aiBlack = new FFT_Follower(PLAYER2, fftManager);
             }
         }
     }
@@ -282,7 +288,7 @@ public class Controller {
         updatePostHumanTurn();
         if (Logic.gameOver(state)) return;
         if (state.getTurn() == move.team) {
-            String skipped = (state.getTurn() == RED) ? "Black" : "Red";
+            String skipped = (state.getTurn() == PLAYER1) ? "Black" : "Red";
             System.out.println("TEAM " + skipped + "'s turn has been skipped!");
             playArea.getInfoPane().displaySkippedTurn(skipped);
             if (helpHumanBox.isSelected()) {
@@ -290,11 +296,11 @@ public class Controller {
             }
             return;
         }
-        if ((playerRedInstance == FFT && state.getTurn() == BLACK) ||
-                (playerBlackInstance == FFT && state.getTurn() == RED)) {
+        if ((playerRedInstance == FFT && state.getTurn() == PLAYER2) ||
+                (playerBlackInstance == FFT && state.getTurn() == PLAYER1)) {
             startAIButton.fire();
-        } else if ((playerBlackInstance != HUMAN && state.getTurn() == BLACK) ||
-                (playerRedInstance != HUMAN && state.getTurn() == RED)) {
+        } else if ((playerBlackInstance != HUMAN && state.getTurn() == PLAYER2) ||
+                (playerRedInstance != HUMAN && state.getTurn() == PLAYER1)) {
             doAITurn();
         } else if (helpHumanBox.isSelected()) {
             highlightBestPieces(true);
@@ -342,9 +348,9 @@ public class Controller {
                     }
                     if (playerRedInstance == LOOKUP_TABLE && playerBlackInstance == LOOKUP_TABLE) {
                         Thread.sleep(redTime);
-                    } else if (state.getTurn() == RED && playerRedInstance == FFT && !fftAllowInteraction)
+                    } else if (state.getTurn() == PLAYER1 && playerRedInstance == FFT && !fftAllowInteraction)
                         Thread.sleep(redTime);
-                    else if (state.getTurn() == BLACK && playerBlackInstance == FFT && !fftAllowInteraction)
+                    else if (state.getTurn() == PLAYER2 && playerBlackInstance == FFT && !fftAllowInteraction)
                         Thread.sleep(blackTime);
                     else {
                         Thread.sleep(0); // To allow thread interruption
@@ -369,7 +375,7 @@ public class Controller {
         boolean makeDefaultMove = false;
         int turn = state.getTurn();
         Move move;
-        if (aiRed != null && turn == RED) {
+        if (aiRed != null && turn == PLAYER1) {
             move = aiRed.makeMove(state);
             if (playerRedInstance == FFT && move == null)
                 makeDefaultMove = true;
@@ -393,15 +399,15 @@ public class Controller {
         if (Logic.gameOver(state)) return;
         if (mode == HUMAN_VS_AI) {
             if (turn == state.getTurn()) {
-                String skipped = (turn == RED) ? "Black" : "Red";
+                String skipped = (turn == PLAYER1) ? "Black" : "Red";
                 System.out.println("TEAM " + skipped + "'s turn has been skipped!");
                 playArea.getInfoPane().displaySkippedTurn(skipped);
                 doAITurn();
             } else if (helpHumanBox.isSelected()) {
                 highlightBestPieces(true);
             }
-        } else if (((state.getTurn() == RED && playerRedInstance == FFT) ||
-                (state.getTurn() == BLACK && playerBlackInstance == FFT)) &&
+        } else if (((state.getTurn() == PLAYER1 && playerRedInstance == FFT) ||
+                (state.getTurn() == PLAYER2 && playerBlackInstance == FFT)) &&
                 helpHumanBox.isSelected()) {
             highlightBestPieces(true);
         }
@@ -420,8 +426,8 @@ public class Controller {
             endGamePopup = true;
             Stage newStage = new Stage();
             int winner = Logic.getWinner(state);
-            if (playerRedInstance == HUMAN) state.setTurn(RED);
-            else if (playerBlackInstance == HUMAN) state.setTurn(BLACK);
+            if (playerRedInstance == HUMAN) state.setTurn(PLAYER1);
+            else if (playerBlackInstance == HUMAN) state.setTurn(PLAYER2);
 
             newStage.setScene(new Scene(new EndGamePane(primaryStage, winner,
                     this), 400, 150));
@@ -465,7 +471,7 @@ public class Controller {
                 bestMove = true;
             }
             if (m.newCol == -1 && m.newRow == -1) {
-                if (team == RED) {
+                if (team == PLAYER1) {
                     goalRed.setHighlight(highlight, helpHumanBox.isSelected(), bestMove, turns);
                 } else {
                     goalBlack.setHighlight(highlight, helpHumanBox.isSelected(), bestMove, turns);
@@ -503,7 +509,7 @@ public class Controller {
                 }
             }
         }
-        int opponent = (player == RED) ? BLACK : RED;
+        int opponent = (player == PLAYER1) ? PLAYER2 : PLAYER1;
         for (BoardPiece p : playArea.getPlayer(opponent).getPieces()) {
             p.setBest(false);
         }
@@ -526,7 +532,7 @@ public class Controller {
     }
 
     public int getPlayerInstance(int team) {
-        if (team == RED) {
+        if (team == PLAYER1) {
             return playerRedInstance;
         } else {
             return playerBlackInstance;
@@ -534,7 +540,7 @@ public class Controller {
     }
 
     public void setPlayerInstance(int team, int playerInstance) {
-        if (team == RED) {
+        if (team == PLAYER1) {
             playerRedInstance = playerInstance;
         } else {
             playerBlackInstance = playerInstance;
@@ -599,7 +605,7 @@ public class Controller {
     }
 
     public int getTime(int team) {
-        if (team == RED) return redTime;
+        if (team == PLAYER1) return redTime;
         else return blackTime;
     }
 
@@ -612,7 +618,7 @@ public class Controller {
     }
 
     public void setPlayerCalcTime(int team, int time) {
-        if (team == RED)
+        if (team == PLAYER1)
             redTime = time;
         else
             blackTime = time;

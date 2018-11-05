@@ -16,7 +16,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import kulibrat.game.Controller;
 import kulibrat.game.State;
-import kulibrat.misc.Config;
+import misc.Config;
 
 
 public class NewGamePane extends AnchorPane {

@@ -14,11 +14,9 @@ import javafx.stage.Stage;
 import kulibrat.game.Controller;
 import kulibrat.game.State;
 import kulibrat.gui.menu.MenuPane;
-import kulibrat.misc.Config;
+import misc.Config;
 
-import static kulibrat.misc.Config.BLACK;
-import static kulibrat.misc.Config.HUMAN_VS_AI;
-import static kulibrat.misc.Config.RED;
+import static misc.Config.*;
 
 
 public class EndGamePane extends VBox {
@@ -27,7 +25,7 @@ public class EndGamePane extends VBox {
         setAlignment(Pos.CENTER);
         setSpacing(20);
         Label label = new Label();
-        if (team == RED) label.setText("Congratulations player Red!");
+        if (team == PLAYER1) label.setText("Congratulations player Red!");
         else label.setText(("Congratulations player Black!"));
 
         label.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
@@ -49,8 +47,8 @@ public class EndGamePane extends VBox {
         restartGameBtn.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
-            new Controller(primaryStage, cont.getPlayerInstance(RED),
-                    cont.getPlayerInstance(BLACK), new State(), cont.getTime(RED), cont.getTime(BLACK), cont.getOverwriteDB());
+            new Controller(primaryStage, cont.getPlayerInstance(PLAYER1),
+                    cont.getPlayerInstance(PLAYER2), new State(), cont.getTime(PLAYER1), cont.getTime(PLAYER2), cont.getOverwriteDB());
         });
         restartGameBtn.setPrefWidth(110);
         hBox.getChildren().add(restartGameBtn);

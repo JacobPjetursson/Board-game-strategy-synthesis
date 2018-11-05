@@ -1,16 +1,19 @@
 package kulibrat.game;
 
-import kulibrat.misc.Config;
+import fftlib.Clause;
+import fftlib.game.FFTState;
+import misc.Config;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
 
-import static kulibrat.misc.Config.BLACK;
-import static kulibrat.misc.Config.RED;
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
 
-public class State {
+public class State implements FFTState {
     private int[][] board;
     private int turn;
     private int redScore;
@@ -31,7 +34,7 @@ public class State {
         unplacedRed = 4;
         unplacedBlack = 4;
 
-        turn = RED;
+        turn = PLAYER1;
         this.scoreLimit = Config.SCORELIMIT;
     }
 
@@ -59,7 +62,7 @@ public class State {
     }
 
     public void addPoint(int team) {
-        if (team == RED) {
+        if (team == PLAYER1) {
             redScore++;
             unplacedRed++;
         } else {
@@ -89,17 +92,17 @@ public class State {
     }
 
     public void addUnPlaced(int team) {
-        if (team == RED) unplacedRed++;
+        if (team == PLAYER1) unplacedRed++;
         else unplacedBlack++;
     }
 
     public void removeUnPlaced(int team) {
-        if (team == RED) unplacedRed--;
+        if (team == PLAYER1) unplacedRed--;
         else unplacedBlack--;
     }
 
     public int getUnplaced(int team) {
-        if (team == RED) return unplacedRed;
+        if (team == PLAYER1) return unplacedRed;
         else return unplacedBlack;
     }
 
@@ -120,7 +123,7 @@ public class State {
     }
 
     public int getScore(int team) {
-        return (team == RED) ? redScore : blackScore;
+        return (team == PLAYER1) ? redScore : blackScore;
     }
 
     // Get the next state based on the input move
@@ -156,8 +159,8 @@ public class State {
         score += (getLegalMoves().size() * 2);
 
         // Bonus for being in front of opponent on your turn
-        for (Point pR : getPieces(RED)) {
-            for (Point pB : getPieces(BLACK)) {
+        for (Point pR : getPieces(PLAYER1)) {
+            for (Point pB : getPieces(PLAYER2)) {
 
                 if (pR.x == pB.x && (pR.y - 1) == pB.y) {
                     score += 2;
@@ -169,8 +172,8 @@ public class State {
         boolean mid = false;
         boolean top = false;
         int tempScore = 0;
-        // RED
-        for (Point p : getPieces(RED)) {
+        // CIRCLE
+        for (Point p : getPieces(PLAYER1)) {
             if (p.x == 1) {
                 if (p.y == 0) top = true;
                 else if (p.y == 1) mid = true;
@@ -181,14 +184,14 @@ public class State {
             tempScore += 20;
         }
         if (top && mid && bot) tempScore += 100;
-        score += (turn == RED) ? tempScore : -tempScore;
+        score += (turn == PLAYER1) ? tempScore : -tempScore;
 
         bot = false;
         mid = false;
         top = false;
         tempScore = 0;
-        // BLACK
-        for (Point p : getPieces(BLACK)) {
+        // CROSS
+        for (Point p : getPieces(PLAYER2)) {
             if (p.x == 1) {
                 if (p.y == 3) top = true;
                 else if (p.y == 2) mid = true;
@@ -199,7 +202,7 @@ public class State {
             tempScore += 20;
         }
         if (top && mid && bot) tempScore += 100;
-        score += (turn == BLACK) ? tempScore : -tempScore;
+        score += (turn == PLAYER2) ? tempScore : -tempScore;
         return score;
     }
 
@@ -209,8 +212,8 @@ public class State {
         State state = (State) obj;
         return this == state || turn == state.getTurn() &&
                 (Arrays.deepEquals(board, state.board)) &&
-                redScore == state.getScore(RED) &&
-                blackScore == state.getScore(BLACK);
+                redScore == state.getScore(PLAYER1) &&
+                blackScore == state.getScore(PLAYER2);
     }
 
     @Override
@@ -220,6 +223,26 @@ public class State {
         //result += Arrays.deepHashCode(this.reflect().board);
         return result;
 
+    }
+
+    public HashSet<Clause> getClauses() {
+        HashSet<Clause> clauses = new HashSet<>();
+
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                int pieceOcc = board[i][j];
+                if (pieceOcc > 0) {
+                    if (turn == PLAYER1)
+                        clauses.add(new Clause(i, j, pieceOcc, false));
+                    else {
+                        pieceOcc = (pieceOcc == 1) ? 2 : 1;
+                        clauses.add(new Clause(i, j, pieceOcc, false));
+                    }
+                }
+            }
+        }
+        clauses.add(new Clause("SL=" + scoreLimit));
+        return clauses;
     }
 
     public String print() {

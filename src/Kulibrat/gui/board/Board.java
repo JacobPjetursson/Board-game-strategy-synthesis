@@ -4,7 +4,7 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
 import kulibrat.game.Controller;
 import kulibrat.game.State;
-import kulibrat.misc.Config;
+import misc.Config;
 
 public class Board extends GridPane {
     private static final int boardRows = Config.bHeight;

@@ -8,8 +8,8 @@ import kulibrat.game.State;
 import java.util.HashMap;
 import java.util.Random;
 
-import static kulibrat.misc.Config.BLACK;
-import static kulibrat.misc.Config.RED;
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
 
 public class Minimax extends AI {
     private long calculationTime;
@@ -57,7 +57,7 @@ public class Minimax extends AI {
             bestPlay = new MinimaxPlay(state.getLegalMoves().get(r), Integer.MIN_VALUE, 0);
         }
         System.out.println("Score: " + bestPlay.score + ", Depth: " + CURR_MAX_DEPTH + ", Play:  oldRow: " + bestPlay.move.oldRow + ", oldCol: " +
-                bestPlay.move.oldCol + ", newRow: " + bestPlay.move.newRow + ", newCol: " + bestPlay.move.newCol + ", team: " + bestPlay.move.team);
+                bestPlay.move.oldCol + ", row: " + bestPlay.move.newRow + ", col: " + bestPlay.move.newCol + ", team: " + bestPlay.move.team);
         return bestPlay;
     }
 
@@ -141,7 +141,7 @@ public class Minimax extends AI {
     // Either returns 1000 or -1000 if terminal, or the material of a state, if intermediate.
     // The material is the objective value of a state
     private int heuristic(State state) {
-        int opponent = (team == BLACK) ? BLACK : RED;
+        int opponent = (team == PLAYER2) ? PLAYER2 : PLAYER1;
         if (Logic.gameOver(state)) {
             int winner = Logic.getWinner(state);
             if (winner == team) {

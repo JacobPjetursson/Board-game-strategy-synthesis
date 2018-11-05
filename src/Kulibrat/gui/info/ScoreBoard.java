@@ -10,8 +10,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import kulibrat.game.State;
 
-import static kulibrat.misc.Config.BLACK;
-import static kulibrat.misc.Config.RED;
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
 
 public class ScoreBoard extends VBox {
     private Label redLabel;
@@ -35,7 +35,7 @@ public class ScoreBoard extends VBox {
     }
 
     void updateScore(State state) {
-        redLabel.setText("Red: " + state.getScore(RED));
-        blackLabel.setText("Black: " + state.getScore(BLACK));
+        redLabel.setText("Red: " + state.getScore(PLAYER1));
+        blackLabel.setText("Black: " + state.getScore(PLAYER2));
     }
 }

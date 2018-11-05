@@ -16,7 +16,7 @@ import kulibrat.gui.board.Goal;
 import kulibrat.gui.board.Player;
 import kulibrat.gui.menu.Arrow;
 
-import static kulibrat.misc.Config.RED;
+import static misc.Config.PLAYER1;
 
 public class PlayBox extends Group {
     private Board board;
@@ -56,7 +56,7 @@ public class PlayBox extends Group {
             double startX, startY, endX, endY;
             Bounds b;
             if (m.oldCol == -1) {
-                if (m.team == RED) b = playerRed.localToParent(playerRed.getBoundsInLocal());
+                if (m.team == PLAYER1) b = playerRed.localToParent(playerRed.getBoundsInLocal());
                 else b = playerBlack.localToParent(playerBlack.getBoundsInLocal());
             } else {
                 BoardTile t = board.getTiles()[m.oldRow][m.oldCol];
@@ -66,7 +66,7 @@ public class PlayBox extends Group {
             startY = (b.getMaxY() + b.getMinY()) / 2.0;
 
             if (m.newCol == -1) {
-                if (m.team == RED) b = goalRed.localToParent(goalRed.getBoundsInLocal());
+                if (m.team == PLAYER1) b = goalRed.localToParent(goalRed.getBoundsInLocal());
                 else b = goalBlack.localToParent(goalBlack.getBoundsInLocal());
             } else {
                 BoardTile t = board.getTiles()[m.newRow][m.newCol];

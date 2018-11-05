@@ -4,7 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import kulibrat.gui.menu.MenuPane;
-import kulibrat.misc.Config;
+import misc.Config;
 
 public class Main extends Application {
 

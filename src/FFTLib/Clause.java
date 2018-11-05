@@ -1,6 +1,6 @@
 package fftlib;
 
-import kulibrat.misc.Config;
+import misc.Config;
 
 import java.util.Objects;
 
@@ -8,10 +8,10 @@ public class Clause {
     public static final int PIECEOCC_NONE = -1;
     public static final int PIECEOCC_PLAYER = 1;
     public static final int PIECEOCC_ENEMY = 2;
-
+    public int row = -1;
+    public int col = -1;
     String name;
     boolean boardPlacement;
-    public int row = -1; public int col = -1;
     int pieceOcc = PIECEOCC_NONE;
     boolean negation;
     boolean clauseErr;
@@ -76,7 +76,7 @@ public class Clause {
         String nameCopy = name;
         if (nameCopy.startsWith("!"))
             nameCopy = nameCopy.substring(1);
-        if(nameCopy.startsWith("E") || nameCopy.startsWith("e") ||
+        if (nameCopy.startsWith("E") || nameCopy.startsWith("e") ||
                 nameCopy.startsWith("P") || nameCopy.startsWith("p"))
             nameCopy = nameCopy.substring(1);
 

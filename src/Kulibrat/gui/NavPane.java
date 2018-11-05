@@ -15,7 +15,7 @@ import javafx.stage.Stage;
 import kulibrat.game.Controller;
 import kulibrat.gui.Dialogs.RestartGameDialog;
 import kulibrat.gui.menu.MenuPane;
-import kulibrat.misc.Config;
+import misc.Config;
 
 import java.util.ArrayList;
 

@@ -1,6 +1,10 @@
 package fftlib;
 
-import kulibrat.misc.Config;
+import fftlib.game.FFTDatabase;
+import fftlib.game.FFTLogic;
+import fftlib.game.FFTNode;
+import misc.Config;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -11,35 +15,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FFTManager {
-    static String path = Config.FFT_PATH;
     public static ArrayList<FFT> ffts;
+    public static FFTDatabase db;
+    public static FFTLogic logic;
+    static String path = Config.FFT_PATH;
+    static FFTNode initialFFTNode;
     public FFT currFFT;
 
-    public FFTManager() {
+    public FFTManager(FFTNode node, FFTLogic fftLogic, FFTDatabase fftDB) {
         ffts = new ArrayList<>();
+        initialFFTNode = node;
+        logic = fftLogic;
+        db = fftDB;
         // Try loading ffts from file in working directory
         load();
         if (!ffts.isEmpty())
             currFFT = ffts.get(0);
 
-    }
-
-    public void setCurrFFT(int index) {
-        currFFT = ffts.get(index);
-    }
-
-    public void addNewFFT(String name) {
-        FFT newFFT = new FFT(name);
-        ffts.add(newFFT);
-        currFFT = newFFT;
-    }
-
-    public void deleteCurrFFT() {
-        ffts.remove(currFFT);
-        if (!ffts.isEmpty())
-            currFFT = ffts.get(0);
-        else
-            currFFT = null;
     }
 
     public static void save() {
@@ -98,7 +90,7 @@ public class FFTManager {
                 }
                 // In case of at least 1 FFT
                 if (fft != null) {
-                    if(rg != null)
+                    if (rg != null)
                         fft.ruleGroups.add(rg);
 
                     ffts.add(fft);
@@ -107,6 +99,24 @@ public class FFTManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setCurrFFT(int index) {
+        currFFT = ffts.get(index);
+    }
+
+    public void addNewFFT(String name) {
+        FFT newFFT = new FFT(name);
+        ffts.add(newFFT);
+        currFFT = newFFT;
+    }
+
+    public void deleteCurrFFT() {
+        ffts.remove(currFFT);
+        if (!ffts.isEmpty())
+            currFFT = ffts.get(0);
+        else
+            currFFT = null;
     }
 
 

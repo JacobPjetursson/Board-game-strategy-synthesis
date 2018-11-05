@@ -1,5 +1,9 @@
 package kulibrat.misc;
 
+import fftlib.game.FFTDatabase;
+import fftlib.game.FFTMinimaxPlay;
+import fftlib.game.FFTMove;
+import fftlib.game.FFTNode;
 import javafx.event.Event;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
@@ -11,16 +15,18 @@ import kulibrat.game.Logic;
 import kulibrat.game.Move;
 import kulibrat.game.State;
 import kulibrat.gui.Dialogs.OverwriteDBDialog;
+import misc.Config;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static kulibrat.misc.Config.BLACK;
-import static kulibrat.misc.Config.RED;
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
 
-public class Database {
+
+public class Database implements FFTDatabase {
     public static Connection dbConnection;
 
     // Connects to the database. If the table in question is incomplete or missing, show a pane to allow creating the DB on the spot.
@@ -120,9 +126,9 @@ public class Database {
                 int score = queryPlay(child).score;
                 if (score == bestScore) {
                     nonLosingPlays.add(m);
-                } else if (won && m.team == RED && score > 0)
+                } else if (won && m.team == PLAYER1 && score > 0)
                     nonLosingPlays.add(m);
-                else if (won && m.team == BLACK && score < 0)
+                else if (won && m.team == PLAYER2 && score < 0)
                     nonLosingPlays.add(m);
                 else if (bestScore > 0 && score > 0) {
                     nonLosingPlays.add(m);
@@ -166,13 +172,13 @@ public class Database {
             return "∞";
         }
         if (score > 0) {
-            if (turn == BLACK) {
+            if (turn == PLAYER2) {
                 return "" + (-2000 + score);
             } else {
                 return "" + (2000 - score);
             }
         } else {
-            if (turn == BLACK) {
+            if (turn == PLAYER2) {
                 return "" + (2000 + score);
             } else {
                 return "" + (-2000 - score);
@@ -190,7 +196,6 @@ public class Database {
         newStage.setOnCloseRequest(Event::consume);
         newStage.show();
     }
-
 
     public static void fillLookupTable(HashMap<Long, MinimaxPlay> lookupTable) throws SQLException {
         System.out.println("Inserting data into table. This will take some time");
@@ -240,7 +245,15 @@ public class Database {
     // Builds the DB
     public static void buildLookupDB() {
         State state = new State();
-        new LookupTableMinimax(RED, state, true);
+        new LookupTableMinimax(PLAYER1, state, true);
+    }
+
+    public ArrayList<? extends FFTMove> nonLosingPlays(FFTNode n) {
+        return nonLosingPlays((Node) n);
+    }
+
+    public FFTMinimaxPlay queryPlay(FFTNode n) {
+        return queryPlay((Node) n);
     }
 
 

@@ -1,13 +1,16 @@
 package kulibrat.game;
 
+import fftlib.game.FFTLogic;
+import fftlib.game.FFTMove;
+import fftlib.game.FFTState;
+
 import java.awt.*;
 import java.util.ArrayList;
 
-import static kulibrat.misc.Config.BLACK;
-import static kulibrat.misc.Config.CUSTOMIZABLE;
-import static kulibrat.misc.Config.RED;
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
 
-public abstract class Logic {
+public class Logic implements FFTLogic {
     // Outputs a list of legal moves from a state
     static ArrayList<Move> legalMoves(int team, State state) {
         ArrayList<Move> moves = new ArrayList<>();
@@ -18,13 +21,13 @@ public abstract class Logic {
     }
 
     // Outputs a list of legal moves from a single piece
-    public static ArrayList<Move> legalMovesFromPiece(int oldRow, int oldCol, int team, State state) {
+    static ArrayList<Move> legalMovesFromPiece(int oldRow, int oldCol, int team, State state) {
         ArrayList<Move> list = new ArrayList<>();
         int[][] board = state.getBoard();
         int maxRow = board.length - 1;
         int maxCol = board[0].length - 1;
 
-        if (team == RED) {
+        if (team == PLAYER1) {
             // INITIAL MOVE
             if (oldRow == -1 && oldCol == -1) {
                 for (int i = 0; i < maxCol + 1; i++) {
@@ -44,12 +47,12 @@ public abstract class Logic {
                     list.add(new Move(oldRow, oldCol, oldRow - 1, oldCol - 1, team));
                 }
                 // ATTACK MOVE
-                if (board[oldRow - 1][oldCol] == BLACK) {
+                if (board[oldRow - 1][oldCol] == PLAYER2) {
                     list.add(new Move(oldRow, oldCol, oldRow - 1, oldCol, team));
                 }
                 // JUMP MOVE
                 int jump = 1;
-                while (board[oldRow - jump][oldCol] == BLACK) {
+                while (board[oldRow - jump][oldCol] == PLAYER2) {
                     jump++;
                     if (oldRow - jump < 0) {
                         list.add(new Move(oldRow, oldCol, -1, -1, team));
@@ -81,12 +84,12 @@ public abstract class Logic {
                     list.add(new Move(oldRow, oldCol, oldRow + 1, oldCol - 1, team));
                 }
                 // ATTACK MOVE
-                if (board[oldRow + 1][oldCol] == RED) {
+                if (board[oldRow + 1][oldCol] == PLAYER1) {
                     list.add(new Move(oldRow, oldCol, oldRow + 1, oldCol, team));
                 }
                 // JUMP MOVE
                 int jump = 1;
-                while (board[oldRow + jump][oldCol] == RED) {
+                while (board[oldRow + jump][oldCol] == PLAYER1) {
                     jump++;
                     if (oldRow + jump > maxRow) {
                         list.add(new Move(oldRow, oldCol, -1, -1, team));
@@ -106,7 +109,7 @@ public abstract class Logic {
     // It also adds the points and changes the board based on the move
     public static void doTurn(Move m, State state) {
         if (gameOver(state)) return;
-        else if (m.team != state.getTurn() && !CUSTOMIZABLE) {
+        else if (m.team != state.getTurn()) {
             System.out.println("Not your turn");
             return;
         }
@@ -114,10 +117,10 @@ public abstract class Logic {
         if (m.newCol == -1 && m.newRow == -1) {
             state.addPoint(m.team);
         } else {
-            if (state.getBoard()[m.newRow][m.newCol] == RED) {
-                state.addUnPlaced(RED);
-            } else if (state.getBoard()[m.newRow][m.newCol] == BLACK) {
-                state.addUnPlaced(BLACK);
+            if (state.getBoard()[m.newRow][m.newCol] == PLAYER1) {
+                state.addUnPlaced(PLAYER1);
+            } else if (state.getBoard()[m.newRow][m.newCol] == PLAYER2) {
+                state.addUnPlaced(PLAYER2);
             }
             state.setBoardEntry(m.newRow, m.newCol, m.team);
         }
@@ -128,8 +131,8 @@ public abstract class Logic {
             state.setBoardEntry(m.oldRow, m.oldCol, 0);
         }
         // Change turn
-        if (m.team == RED) state.setTurn(BLACK);
-        else state.setTurn(RED);
+        if (m.team == PLAYER1) state.setTurn(PLAYER2);
+        else state.setTurn(PLAYER1);
         // If the new player has no move, pass that turn
         if (legalMoves(state.getTurn(), state).isEmpty()) {
             Logic.passTurn(state);
@@ -138,19 +141,19 @@ public abstract class Logic {
 
     // Passes the turn for the current player
     public static boolean gameOver(State state) {
-        return state.getScore(RED) == state.getScoreLimit() ||
-                state.getScore(BLACK) == state.getScoreLimit() || locked(state);
+        return state.getScore(PLAYER1) == state.getScoreLimit() ||
+                state.getScore(PLAYER2) == state.getScoreLimit() || locked(state);
     }
 
     private static void passTurn(State state) {
-        if (state.getTurn() == RED) state.setTurn(BLACK);
-        else state.setTurn(RED);
+        if (state.getTurn() == PLAYER1) state.setTurn(PLAYER2);
+        else state.setTurn(PLAYER1);
     }
 
     // Finds the winner, granted that the game is over
     public static int getWinner(State state) {
         if (gameOver(state)) {
-            if (locked(state)) return (state.getMove().team) == RED ? BLACK : RED;
+            if (locked(state)) return (state.getMove().team) == PLAYER1 ? PLAYER2 : PLAYER1;
             else return state.getMove().team;
         }
         return 0;
@@ -158,10 +161,19 @@ public abstract class Logic {
 
     // This is called when checking for game over, and checks if no agents can move
     private static boolean locked(State state) {
-        return legalMoves(RED, state).isEmpty() && legalMoves(BLACK, state).isEmpty();
+        return legalMoves(PLAYER1, state).isEmpty() && legalMoves(PLAYER2, state).isEmpty();
     }
 
-    public static boolean isLegalMove(State state, Move move) {
-        return legalMoves(move.team, state).contains(move);
+    public boolean gameOver(FFTState state) {
+        return gameOver((State) state);
+    }
+
+    public int getWinner(FFTState state) {
+        return getWinner((State) state);
+    }
+
+    public boolean isLegalMove(FFTState state, FFTMove move) {
+        Move m = (Move) move;
+        return legalMoves(move.getTeam(), (State) state).contains(m);
     }
 }

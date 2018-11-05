@@ -5,8 +5,8 @@ import javafx.stage.Stage;
 import kulibrat.game.Controller;
 import kulibrat.game.State;
 
-import static kulibrat.misc.Config.BLACK;
-import static kulibrat.misc.Config.RED;
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
 
 
 public class RestartGameDialog extends ConfirmDialog {
@@ -24,7 +24,7 @@ public class RestartGameDialog extends ConfirmDialog {
     public void setYesBtnMouseClicked() {
         Stage stage = (Stage) getScene().getWindow();
         stage.close();
-        new Controller(primaryStage, cont.getPlayerInstance(RED),
-                cont.getPlayerInstance(BLACK), new State(), cont.getTime(RED), cont.getTime(BLACK), cont.getOverwriteDB());
+        new Controller(primaryStage, cont.getPlayerInstance(PLAYER1),
+                cont.getPlayerInstance(PLAYER2), new State(), cont.getTime(PLAYER1), cont.getTime(PLAYER2), cont.getOverwriteDB());
     }
 }

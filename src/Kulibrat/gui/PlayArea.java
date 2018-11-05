@@ -10,11 +10,9 @@ import kulibrat.gui.board.Board;
 import kulibrat.gui.board.Goal;
 import kulibrat.gui.board.Player;
 import kulibrat.gui.info.InfoPane;
-import kulibrat.misc.Config;
+import misc.Config;
 
-import static kulibrat.misc.Config.BLACK;
-import static kulibrat.misc.Config.RED;
-import static kulibrat.misc.Config.WIDTH;
+import static misc.Config.*;
 
 
 public class PlayArea extends GridPane {
@@ -31,8 +29,8 @@ public class PlayArea extends GridPane {
         setAlignment(Pos.CENTER);
 
         board = new Board(60, 20, true);
-        playerBlack = new Player(BLACK, cont, 60, 20, true);
-        playerRed = new Player(RED, cont, 60, 20, true);
+        playerBlack = new Player(PLAYER2, cont, 60, 20, true);
+        playerRed = new Player(PLAYER1, cont, 60, 20, true);
         goalRed = new Goal(Config.bWidth * board.getTileSize(), 50);
         goalBlack = new Goal(Config.bWidth * board.getTileSize(), 50);
         info = new InfoPane(cont.getScoreLimit(), cont.getMode());
@@ -62,12 +60,12 @@ public class PlayArea extends GridPane {
     }
 
     public Goal getGoal(int team) {
-        if (team == RED) return goalRed;
+        if (team == PLAYER1) return goalRed;
         else return goalBlack;
     }
 
     public Player getPlayer(int team) {
-        if (team == RED) {
+        if (team == PLAYER1) {
             return playerRed;
         } else {
             return playerBlack;

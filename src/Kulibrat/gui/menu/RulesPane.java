@@ -9,7 +9,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
-import kulibrat.misc.Config;
+import misc.Config;
 
 class RulesPane extends VBox {
 
