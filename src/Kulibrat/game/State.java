@@ -1,19 +1,21 @@
 package kulibrat.game;
 
 import fftlib.Clause;
+import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
+import kulibrat.ai.Minimax.Zobrist;
 import misc.Config;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Objects;
 
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
 
-public class State implements FFTState {
+public class State implements Serializable, FFTState {
     private int[][] board;
     private int turn;
     private int redScore;
@@ -23,8 +25,9 @@ public class State implements FFTState {
     private int unplacedBlack;
     private ArrayList<Move> legalMoves;
     private Move move;
+    private long zobrist_key;
 
-    // Starting state
+    // Starting Root state
     public State() {
         int rows = Config.bHeight;
         int columns = Config.bWidth;
@@ -36,9 +39,19 @@ public class State implements FFTState {
 
         turn = PLAYER1;
         this.scoreLimit = Config.SCORELIMIT;
+        this.zobrist_key = initHashCode();
     }
 
-    // Duplicate constructor
+    // Non-root state
+    private State(State parent, Move m) {
+        this(parent);
+        zobrist_key = parent.zobrist_key;
+        move = m;
+        Logic.doTurn(m, this);
+        updateHashCode(parent);
+    }
+
+    // Duplicate constructor, for "root" state
     public State(State state) {
         board = new int[state.board.length][];
         for (int i = 0; i < state.board.length; i++) {
@@ -51,7 +64,67 @@ public class State implements FFTState {
         turn = state.turn;
         scoreLimit = state.scoreLimit;
         move = state.move;
+        zobrist_key = state.zobrist_key;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof State)) return false;
+        return (((State) obj).getHashCode() == getHashCode());
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) zobrist_key;
+    }
+
+    public long getHashCode() {
+        return this.zobrist_key;
+    }
+
+
+    private long initHashCode() {
+        long hash = 0L;
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                if (board[i][j] != 0) {
+                    int k = board[i][j]; // team occupying spot
+                    hash = hash ^ Zobrist.board[i][j][k];
+                }
+            }
+        }
+        hash = hash ^ Zobrist.turn[turn];
+        hash = hash ^ Zobrist.redPoints[redScore];
+        hash = hash ^ Zobrist.blackPoints[blackScore];
+        return hash;
+    }
+
+    private void updateHashCode(State parent) {
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                if (board[i][j] != parent.getBoard()[i][j]) {
+                    int k_parent = parent.getBoard()[i][j]; // team occupying spot
+                    int k = board[i][j];
+                    if (k_parent != 0) zobrist_key ^= Zobrist.board[i][j][k_parent];
+                    if (k != 0) zobrist_key ^= Zobrist.board[i][j][k];
+                }
+            }
+        }
+        if (turn != parent.getTurn()) {
+            zobrist_key ^= Zobrist.turn[parent.getTurn()];
+            zobrist_key ^= Zobrist.turn[turn];
+        }
+        if (redScore != parent.getScore(PLAYER1)) {
+            zobrist_key ^= Zobrist.redPoints[parent.getScore(PLAYER1)];
+            zobrist_key ^= Zobrist.redPoints[redScore];
+        }
+        if (blackScore != parent.getScore(PLAYER2)) {
+            zobrist_key ^= Zobrist.blackPoints[parent.getScore(PLAYER2)];
+            zobrist_key ^= Zobrist.blackPoints[blackScore];
+        }
+    }
+
+
 
     public int[][] getBoard() {
         return board;
@@ -126,21 +199,22 @@ public class State implements FFTState {
         return (team == PLAYER1) ? redScore : blackScore;
     }
 
-    // Get the next state based on the input move
-    public State getNextState(Move m) {
-        State state = new State(this);
-        Logic.doTurn(m, state);
-        state.move = m;
-        return state;
-    }
-
     public ArrayList<State> getChildren() {
         ArrayList<State> children = new ArrayList<>();
         for (Move m : getLegalMoves()) {
-            State child = new State(this).getNextState(m);
+            State child = new State(this, m);
             children.add(child);
         }
         return children;
+    }
+
+    @Override
+    public FFTState getNextState(FFTMove move) {
+        return getNextState((Move) move);
+    }
+
+    public State getNextState(Move m) {
+        return new State(this, m);
     }
 
     // Creates and/or returns a list of new state objects which correspond to the children of the given state.
@@ -149,6 +223,27 @@ public class State implements FFTState {
         legalMoves = Logic.legalMoves(turn, this);
         return legalMoves;
     }
+
+    public HashSet<Clause> getClauses() {
+        HashSet<Clause> clauses = new HashSet<>();
+
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                int pieceOcc = board[i][j];
+                if (pieceOcc > 0) {
+                    if (turn == PLAYER1)
+                        clauses.add(new Clause(i, j, pieceOcc, false));
+                    else {
+                        pieceOcc = (pieceOcc == 1) ? 2 : 1;
+                        clauses.add(new Clause(i, j, pieceOcc, false));
+                    }
+                }
+            }
+        }
+        clauses.add(new Clause("SL=" + scoreLimit));
+        return clauses;
+    }
+
 
     // Returns the material of a state, which is the value of the state based on various heuristics.
     // It checks the current turn, and outputs a positive number if it is good, or negative if bad
@@ -205,66 +300,4 @@ public class State implements FFTState {
         score += (turn == PLAYER2) ? tempScore : -tempScore;
         return score;
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof State)) return false;
-        State state = (State) obj;
-        return this == state || turn == state.getTurn() &&
-                (Arrays.deepEquals(board, state.board)) &&
-                redScore == state.getScore(PLAYER1) &&
-                blackScore == state.getScore(PLAYER2);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Objects.hash(turn, redScore, blackScore);
-        result += Arrays.deepHashCode(board);
-        //result += Arrays.deepHashCode(this.reflect().board);
-        return result;
-
-    }
-
-    public HashSet<Clause> getClauses() {
-        HashSet<Clause> clauses = new HashSet<>();
-
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                int pieceOcc = board[i][j];
-                if (pieceOcc > 0) {
-                    if (turn == PLAYER1)
-                        clauses.add(new Clause(i, j, pieceOcc, false));
-                    else {
-                        pieceOcc = (pieceOcc == 1) ? 2 : 1;
-                        clauses.add(new Clause(i, j, pieceOcc, false));
-                    }
-                }
-            }
-        }
-        clauses.add(new Clause("SL=" + scoreLimit));
-        return clauses;
-    }
-
-    public String print() {
-        String boardStr = "";
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board.length; j++) {
-                boardStr += board[i][j] + " ";
-            }
-            boardStr += "\n";
-        }
-        return boardStr;
-    }
-/*
-    private State reflect() {
-        State copy = new State(this);
-        for (int i = 0; i < copy.board.length; i++) {
-            for (int j = 0; j < copy.board[i].length; j++) {
-                copy.board[i][j] = board[i][board[i].length - 1 - j];
-            }
-        }
-        return copy;
-    }
-*/
-
 }

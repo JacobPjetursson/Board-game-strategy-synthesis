@@ -33,7 +33,7 @@ public class EditFFTScene extends VBox {
     private Button delBtn, renameBtn, newBtn, addNewRuleGroupBtn, verifyBtn;
     private ComboBox<String> changeBox;
 
-    public EditFFTScene(Stage primaryStage, Scene prevScene, FFTManager fftManager, Controller cont) {
+    public EditFFTScene(Stage primaryStage, Scene prevScene, FFTManager fftManager, FFTGameBoard gameBoard) {
         setSpacing(15);
         setAlignment(Pos.CENTER);
         this.fftManager = fftManager;
@@ -170,7 +170,7 @@ public class EditFFTScene extends VBox {
             boolean verified = fftManager.currFFT.verify(team, wholeFFT);
             if (!verified && fftManager.currFFT.failingPoint != null) {
                 Scene scene = primaryStage.getScene();
-                primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager, cont), WIDTH, Config.HEIGHT));
+                primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager, gameBoard), WIDTH, Config.HEIGHT));
             } else if (verified && !getChildren().contains(verifiedLabel)) {
                 getChildren().add(4, verifiedLabel);
 

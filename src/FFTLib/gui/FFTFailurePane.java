@@ -4,12 +4,13 @@ import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
 import fftlib.game.FFTMove;
-import fftlib.game.FFTNode;
+import fftlib.game.FFTState;
 import fftlib.game.FFTStateAndMove;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -21,19 +22,14 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import kulibrat.gui.board.Goal;
-
 import java.util.ArrayList;
-
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
 
 
 public class FFTFailurePane extends BorderPane {
     private FFTManager fftManager;
     private ListView<VBox> lw;
 
-    public FFTFailurePane(Scene prevScene, FFTManager fftManager, Controller cont) {
+    public FFTFailurePane(Scene prevScene, FFTManager fftManager, FFTGameBoard fftGameBoard) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         this.fftManager = fftManager;
         Label title = new Label("This is the first encountered state where the FFT failed");
@@ -45,9 +41,9 @@ public class FFTFailurePane extends BorderPane {
         BorderPane.setAlignment(title, Pos.CENTER);
 
         FFTStateAndMove ps = fftManager.currFFT.failingPoint;
-        FFTNode n = new FFTNode(ps.getState());
-        ArrayList<FFTMove> nonLosingPlays = FFTManager.db.nonLosingPlays(n);
-        PlayBox playBox = getPlayBox(cont, ps, nonLosingPlays);
+        FFTState s = ps.getState();
+        ArrayList<? extends FFTMove> nonLosingPlays = FFTManager.db.nonLosingPlays(s);
+        Node playBox = fftGameBoard.getGameBoard(ps, nonLosingPlays);
         setCenter(playBox);
 
         lw = new ListView<>();
@@ -83,27 +79,6 @@ public class FFTFailurePane extends BorderPane {
         bottomBox.getChildren().addAll(arrowInfoLabel, moveInfoLabel, back);
         setBottom(bottomBox);
         BorderPane.setAlignment(bottomBox, Pos.CENTER);
-    }
-
-
-    private PlayBox getPlayBox(Controller cont, StateAndMove ps, ArrayList<Move> nonLosingPlays) {
-        int tileW = 60;
-        int pieceRad = 20;
-        int goalH = 50;
-        Board b = new Board(tileW, pieceRad, false);
-        Player playerBlack = new Player(PLAYER2, cont, tileW, pieceRad, false);
-        Goal goalRed = new Goal(3 * b.getTileSize(), goalH);
-        Goal goalBlack = new Goal(3 * b.getTileSize(), goalH);
-        Player playerRed = new Player(PLAYER1, cont, tileW, pieceRad, false);
-
-        PlayBox pb = new PlayBox(playerBlack, goalRed, b, goalBlack, playerRed);
-        pb.update(cont, ps.getState());
-        pb.addArrow(ps.getMove(), Color.BLUE);
-        for (Move m : nonLosingPlays) {
-            if (m.equals(ps.getMove())) continue;
-            pb.addArrow(m, Color.GREEN);
-        }
-        return pb;
     }
 
     private void showRuleGroups() {

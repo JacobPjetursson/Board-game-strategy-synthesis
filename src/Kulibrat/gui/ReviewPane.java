@@ -17,7 +17,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import kulibrat.ai.Minimax.Node;
+import kulibrat.game.State;
 import kulibrat.game.Controller;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
@@ -84,7 +84,7 @@ public class ReviewPane extends VBox {
             VBox vBox = new VBox(18);
             vBox.setAlignment(Pos.CENTER);
             vBox.setFillWidth(true);
-            Node n = new Node(ps.getState());
+            State n = new State(ps.getState());
             ArrayList<Move> bestPlays = Database.bestPlays(n);
             PlayBox playBox = getPlayBox(currCont, ps, bestPlays);
             Label turnL = new Label("Turns Played: " + (ps.getTurnNo()));
@@ -109,12 +109,12 @@ public class ReviewPane extends VBox {
             performance.setAlignment(Pos.CENTER);
             vBox.getChildren().add(performance);
 
-            Node nextNode = n.getNextNode(ps.getMove());
+            State nextState = n.getNextState(ps.getMove());
             String scoreStr;
-            if (Logic.gameOver(nextNode.getState())) {
+            if (Logic.gameOver(nextState)) {
                 scoreStr = "0";
             } else {
-                scoreStr = Database.turnsToTerminal(currCont.getState().getTurn(), nextNode);
+                scoreStr = Database.turnsToTerminal(currCont.getState().getTurn(), nextState);
             }
             int score;
             if (scoreStr.equals("∞")) score = 0;

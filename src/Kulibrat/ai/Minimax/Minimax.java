@@ -18,7 +18,7 @@ public class Minimax extends AI {
     private boolean moveOrdering = true;
     private boolean useTranspo = true;
     private HashMap<Long, MinimaxPlay> transTable;
-    private Node prevBestNode;
+    private State prevBestState;
 
     public Minimax(int team, int calculationTime) {
         super(team);
@@ -27,7 +27,7 @@ public class Minimax extends AI {
     }
 
     // Runs the iterative deepening minimax with a set timelimit
-    public Move makeMove(State state) {
+    public Move makeMove(kulibrat.game.State state) {
         long startTime = System.currentTimeMillis();
         if (state.getLegalMoves().size() == 1) {
             chill(startTime);
@@ -40,14 +40,14 @@ public class Minimax extends AI {
     }
 
     // Iteratively increases the depth limit while called minimax continuously. Stops when win is ensured or time is up.
-    private MinimaxPlay iterativeDeepeningMinimax(State state, long startTime) {
+    private MinimaxPlay iterativeDeepeningMinimax(kulibrat.game.State state, long startTime) {
         resetVariables();
         MinimaxPlay bestPlay = null;
         boolean winCutOff = false;
         while (!outOfTime(startTime) && !winCutOff) {
-            Node simNode = new Node(state); // Start from fresh (Don't reuse previous game tree in new iterations)
+            State simState = new State(state); // Start from fresh (Don't reuse previous game tree in new iterations)
             CURR_MAX_DEPTH++;
-            MinimaxPlay play = minimax(simNode, CURR_MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, startTime);
+            MinimaxPlay play = minimax(simState, CURR_MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, startTime);
             if (!searchCutOff) bestPlay = play;
             if (Math.abs(play.score) >= 1000) winCutOff = true;
         }
@@ -62,60 +62,60 @@ public class Minimax extends AI {
     }
 
     // Minimax with pruning, move ordering and a detailed heuristic
-    public MinimaxPlay minimax(Node node, int depth, int alpha, int beta, long startTime) {
+    public MinimaxPlay minimax(State state, int depth, int alpha, int beta, long startTime) {
         Move bestMove = null;
-        int bestScore = (node.getState().getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        int bestScore = (state.getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int score;
         if (outOfTime(startTime)) searchCutOff = true;
-        if (Logic.gameOver(node.getState()) || depth <= 0 || searchCutOff)
-            return new MinimaxPlay(null, heuristic(node.getState()), depth);
+        if (Logic.gameOver(state) || depth <= 0 || searchCutOff)
+            return new MinimaxPlay(null, heuristic(state), depth);
         MinimaxPlay transpoPlay = null;
         if (useTranspo) {
-            transpoPlay = transTable.get(node.getHashCode());
+            transpoPlay = transTable.get(state.getHashCode());
             if (transpoPlay != null && (depth <= transpoPlay.depth || Math.abs(transpoPlay.score) >= 1000)) {
                 return transpoPlay;
             }
         }
-        if (moveOrdering && depth == CURR_MAX_DEPTH && prevBestNode != null) {
-            score = minimax(prevBestNode, depth - 1, alpha, beta, startTime).score;
-            if (node.getState().getTurn() == team) {
+        if (moveOrdering && depth == CURR_MAX_DEPTH && prevBestState != null) {
+            score = minimax(prevBestState, depth - 1, alpha, beta, startTime).score;
+            if (state.getTurn() == team) {
                 if (score > bestScore) {
                     bestScore = score;
-                    bestMove = prevBestNode.getState().getMove();
+                    bestMove = prevBestState.getMove();
                 }
                 alpha = Math.max(score, alpha);
             } else {
                 if (score < bestScore) {
                     bestScore = score;
-                    bestMove = prevBestNode.getState().getMove();
+                    bestMove = prevBestState.getMove();
                 }
                 beta = Math.min(score, beta);
             }
         }
-        for (Node child : node.getChildren()) {
-            if (moveOrdering && depth == CURR_MAX_DEPTH) if (child.equals(prevBestNode)) continue;
+        for (State child : state.getChildren()) {
+            if (moveOrdering && depth == CURR_MAX_DEPTH) if (child.equals(prevBestState)) continue;
             score = minimax(child, depth - 1, alpha, beta, startTime).score;
-            if (node.getState().getTurn() == team) {
+            if (state.getTurn() == team) {
                 if (score > bestScore) {
                     bestScore = score;
-                    bestMove = child.getState().getMove();
+                    bestMove = child.getMove();
                 }
                 alpha = Math.max(score, alpha);
             } else {
                 if (score < bestScore) {
                     bestScore = score;
-                    bestMove = child.getState().getMove();
+                    bestMove = child.getMove();
                 }
                 beta = Math.min(score, beta);
             }
             if (beta <= alpha) break;
         }
         if (moveOrdering && depth == CURR_MAX_DEPTH) {
-            prevBestNode = node.getNextNode(bestMove);
+            prevBestState = state.getNextState(bestMove);
         }
         if (useTranspo && !searchCutOff) {
             if (transpoPlay == null || depth > transpoPlay.depth) {
-                transTable.put(node.getHashCode(), new MinimaxPlay(bestMove, bestScore, depth));
+                transTable.put(state.getHashCode(), new MinimaxPlay(bestMove, bestScore, depth));
             }
         }
         return new MinimaxPlay(bestMove, bestScore, depth);
@@ -133,14 +133,14 @@ public class Minimax extends AI {
     // These variables are reset inbetween turns of the minimax
     private void resetVariables() {
         CURR_MAX_DEPTH = 0;
-        prevBestNode = null;
+        prevBestState = null;
         searchCutOff = false;
 
     }
 
     // Either returns 1000 or -1000 if terminal, or the material of a state, if intermediate.
     // The material is the objective value of a state
-    private int heuristic(State state) {
+    private int heuristic(kulibrat.game.State state) {
         int opponent = (team == PLAYER2) ? PLAYER2 : PLAYER1;
         if (Logic.gameOver(state)) {
             int winner = Logic.getWinner(state);

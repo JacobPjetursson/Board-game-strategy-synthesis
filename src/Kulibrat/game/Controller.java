@@ -14,10 +14,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import kulibrat.ai.AI;
+import kulibrat.ai.FFTFollower;
 import kulibrat.ai.MCTS.MCTS;
 import kulibrat.ai.Minimax.LookupTableMinimax;
 import kulibrat.ai.Minimax.Minimax;
-import kulibrat.ai.Minimax.Node;
 import kulibrat.ai.Minimax.Zobrist;
 import kulibrat.gui.*;
 import kulibrat.gui.board.BoardPiece;
@@ -56,7 +56,7 @@ public class Controller {
     private NavPane navPane;
     private BoardPiece selected;
     private ArrayList<Move> curHighLights;
-    private State state;
+    private kulibrat.game.State state;
     private PlayArea playArea;
     private Goal goalRed;
     private Goal goalBlack;
@@ -71,8 +71,7 @@ public class Controller {
     private Database database;
 
     public Controller(Stage primaryStage, int playerRedInstance, int playerBlackInstance,
-                      State state, int redTime, int blackTime, boolean overwriteDB) {
-        Zobrist.initialize(); // Generate random numbers for state configs
+                      kulibrat.game.State state, int redTime, int blackTime, boolean overwriteDB) {
         this.mode = setMode(playerRedInstance, playerBlackInstance);
         this.playerRedInstance = playerRedInstance;
         this.playerBlackInstance = playerBlackInstance;
@@ -88,7 +87,7 @@ public class Controller {
 
         this.logic = new Logic();
         this.database = new Database();
-        this.fftManager = new FFTManager(new Node(state), logic, database);
+        this.fftManager = new FFTManager(new State(state), logic, database);
 
         PlayPane playPane = new PlayPane(this);
         primaryStage.setScene(new Scene(playPane,
@@ -209,7 +208,7 @@ public class Controller {
         // edit fftManager button
         editFFTButton.setOnAction(event -> {
             Scene scene = primaryStage.getScene();
-            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager, this), Config.WIDTH, Config.HEIGHT));
+            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager, new GameBoardPane(this)), Config.WIDTH, Config.HEIGHT));
         });
 
         // interactive mode
@@ -262,7 +261,7 @@ public class Controller {
             } else if (playerRedInstance == MONTE_CARLO) {
                 aiRed = new MCTS(state, PLAYER1, redTime);
             } else if (playerRedInstance == FFT) {
-                aiRed = new FFT_Follower(PLAYER1, fftManager);
+                aiRed = new FFTFollower(PLAYER1, fftManager);
             }
         } else {
             if (playerBlackInstance == MINIMAX) {
@@ -275,7 +274,7 @@ public class Controller {
             } else if (playerBlackInstance == MONTE_CARLO) {
                 aiBlack = new MCTS(state, PLAYER2, blackTime);
             } else if (playerBlackInstance == FFT) {
-                aiBlack = new FFT_Follower(PLAYER2, fftManager);
+                aiBlack = new FFTFollower(PLAYER2, fftManager);
             }
         }
     }
@@ -453,7 +452,7 @@ public class Controller {
                 col, team, state);
         ArrayList<Move> bestPlays = null;
         if (highlight && helpHumanBox.isSelected()) {
-            bestPlays = Database.bestPlays(new Node(state));
+            bestPlays = Database.bestPlays(new State(state));
         }
         ArrayList<String> turnsToTerminalList = null;
         if (highlight && helpHumanBox.isSelected()) {
@@ -482,7 +481,7 @@ public class Controller {
 
     // Highlights the best pieces found above
     private void highlightBestPieces(boolean highlight) {
-        Node n = new Node(state);
+        State n = new State(state);
         ArrayList<Move> bestPlays = null;
         if (highlight) bestPlays = Database.bestPlays(n);
         BoardTile[][] tiles = playArea.getBoard().getTiles();
@@ -519,15 +518,15 @@ public class Controller {
     private ArrayList<String> getScores(ArrayList<Move> curHighLights) {
         ArrayList<String> turnsToTerminalList = new ArrayList<>();
         for (Move m : curHighLights) {
-            Node n = new Node(state).getNextNode(m);
-            if (Logic.gameOver(n.getState())) {
+            State s = new State(state).getNextState(m);
+            if (Logic.gameOver(s)) {
                 turnsToTerminalList.add("0");
-            } else turnsToTerminalList.add(Database.turnsToTerminal(state.getTurn(), n));
+            } else turnsToTerminalList.add(Database.turnsToTerminal(state.getTurn(), s));
         }
         return turnsToTerminalList;
     }
 
-    public State getState() {
+    public kulibrat.game.State getState() {
         return state;
     }
 

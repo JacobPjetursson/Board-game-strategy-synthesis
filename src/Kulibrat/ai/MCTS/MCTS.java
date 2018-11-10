@@ -60,8 +60,8 @@ public class MCTS extends AI {
                 if (useMinimax) {
                     // Shallow minimax search as rollout
                     minimax.setTeam(sim_node.getState().getTurn());
-                    kulibrat.ai.Minimax.Node node = new kulibrat.ai.Minimax.Node(sim_node.getState());
-                    Move move = minimax.minimax(node, minimaxDepth, Integer.MIN_VALUE,
+                    State state = new State(sim_node.getState());
+                    Move move = minimax.minimax(state, minimaxDepth, Integer.MIN_VALUE,
                             Integer.MAX_VALUE, System.currentTimeMillis()).move;
 
                     sim_node = sim_node.getNextNode(move);

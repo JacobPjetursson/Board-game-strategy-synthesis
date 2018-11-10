@@ -12,7 +12,7 @@ import static misc.Config.PLAYER2;
 
 public class Logic implements FFTLogic {
     // Outputs a list of legal moves from a state
-    static ArrayList<Move> legalMoves(int team, State state) {
+    public static ArrayList<Move> legalMoves(int team, State state) {
         ArrayList<Move> moves = new ArrayList<>();
         for (Point p : state.getPieces(team)) {
             moves.addAll(legalMovesFromPiece(p.y, p.x, team, state));

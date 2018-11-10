@@ -27,15 +27,15 @@ public class NewGamePane extends AnchorPane {
     private String human = "Human";
     private String lookup = "Lookup Table";
     private String fft = "Fast and Frugal Tree";
-    private TextField PLAYER2DelayField;
-    private TextField PLAYER1DelayField;
-    private HBox PLAYER2DelayBox;
+    private TextField crossDelayField;
+    private TextField circleDelayField;
+    private HBox crossDelayBox;
     private HBox PLAYER1DelayBox;
-    private ChoiceBox<String> playerPLAYER2Choices;
-    private ChoiceBox<String> playerPLAYER1Choices;
+    private ChoiceBox<String> crossChoices;
+    private ChoiceBox<String> circleChoices;
     private VBox finalBox;
-    private Label AIDelayLabelPLAYER2;
-    private Label AIDelayLabelPLAYER1;
+    private Label AIDelayLabelCross;
+    private Label AIDelayLabelCircle;
 
     NewGamePane() {
         setPrefSize(Config.WIDTH, Config.HEIGHT);
@@ -50,118 +50,118 @@ public class NewGamePane extends AnchorPane {
         AnchorPane.setRightAnchor(title, 0.0);
         AnchorPane.setLeftAnchor(title, 0.0);
 
-        playerPLAYER2Choices = new ChoiceBox<String>();
-        playerPLAYER2Choices.setValue(human);
-        playerPLAYER2Choices.setItems(FXCollections.observableArrayList(human, fft, lookup));
-        playerPLAYER2Choices.setMinWidth(choiceWidth);
-        playerPLAYER2Choices.setMaxWidth(choiceWidth);
-        playerPLAYER2Choices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (!playerPLAYER2Choices.getItems().get((Integer) newValue).equals(human)) {
-                if (!finalBox.getChildren().contains(PLAYER2DelayBox)) {
-                    finalBox.getChildren().add(1, PLAYER2DelayBox);
+        crossChoices = new ChoiceBox<String>();
+        crossChoices.setValue(human);
+        crossChoices.setItems(FXCollections.observableArrayList(human, fft, lookup));
+        crossChoices.setMinWidth(choiceWidth);
+        crossChoices.setMaxWidth(choiceWidth);
+        crossChoices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (!crossChoices.getItems().get((Integer) newValue).equals(human)) {
+                if (!finalBox.getChildren().contains(crossDelayBox)) {
+                    finalBox.getChildren().add(1, crossDelayBox);
                 }
             }
-            if (playerPLAYER2Choices.getItems().get((Integer) newValue).equals(fft) ||
-                    playerPLAYER2Choices.getItems().get((Integer) newValue).equals(lookup))
-                AIDelayLabelPLAYER2.setText("AI Move delay in ms");
+            if (crossChoices.getItems().get((Integer) newValue).equals(fft) ||
+                    crossChoices.getItems().get((Integer) newValue).equals(lookup))
+                AIDelayLabelCross.setText("AI Move delay in ms");
 
         });
 
-        Label playerPLAYER2Label = new Label("Player PLAYER2: ");
-        playerPLAYER2Label.setFont(Font.font("Verdana", 15));
-        playerPLAYER2Label.setPadding(new Insets(0, 10, 0, 0));
-        playerPLAYER2Label.setTextFill(Color.WHITE);
-        HBox playerPLAYER2 = new HBox(playerPLAYER2Label, playerPLAYER2Choices);
-        playerPLAYER2.setAlignment(Pos.CENTER);
+        Label crossLabel = new Label("Cross");
+        crossLabel.setFont(Font.font("Verdana", 15));
+        crossLabel.setPadding(new Insets(0, 10, 0, 0));
+        crossLabel.setTextFill(Color.WHITE);
+        HBox cross = new HBox(crossLabel, crossChoices);
+        cross.setAlignment(Pos.CENTER);
 
-        playerPLAYER1Choices = new ChoiceBox<String>();
-        playerPLAYER1Choices.setValue(human);
-        playerPLAYER1Choices.setItems(FXCollections.observableArrayList(human, fft, lookup));
-        playerPLAYER1Choices.setMinWidth(choiceWidth);
-        playerPLAYER1Choices.setMaxWidth(choiceWidth);
-        playerPLAYER1Choices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (!playerPLAYER1Choices.getItems().get((Integer) newValue).equals(human)) {
+        circleChoices = new ChoiceBox<String>();
+        circleChoices.setValue(human);
+        circleChoices.setItems(FXCollections.observableArrayList(human, fft, lookup));
+        circleChoices.setMinWidth(choiceWidth);
+        circleChoices.setMaxWidth(choiceWidth);
+        circleChoices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (!circleChoices.getItems().get((Integer) newValue).equals(human)) {
                 if (!finalBox.getChildren().contains(PLAYER1DelayBox)) {
-                    int index = finalBox.getChildren().contains(PLAYER2DelayBox) ? 3 : 2;
+                    int index = finalBox.getChildren().contains(crossDelayBox) ? 3 : 2;
                     finalBox.getChildren().add(index, PLAYER1DelayBox);
                 }
             }
-            if (playerPLAYER1Choices.getItems().get((Integer) newValue).equals(fft) ||
-                    playerPLAYER1Choices.getItems().get((Integer) newValue).equals(lookup))
-                AIDelayLabelPLAYER1.setText("AI Move delay in ms");
+            if (circleChoices.getItems().get((Integer) newValue).equals(fft) ||
+                    circleChoices.getItems().get((Integer) newValue).equals(lookup))
+                AIDelayLabelCircle.setText("AI Move delay in ms");
 
         });
 
-        Label playerPLAYER1Label = new Label("Player PLAYER1: ");
-        playerPLAYER1Label.setFont(Font.font("Verdana", 15));
-        playerPLAYER1Label.setPadding(new Insets(0, 10, 0, 0));
-        playerPLAYER1Label.setTextFill(Color.WHITE);
-        HBox playerPLAYER1 = new HBox(playerPLAYER1Label, playerPLAYER1Choices);
-        playerPLAYER1.setAlignment(Pos.CENTER);
+        Label circleLabel = new Label("Circle (first)");
+        circleLabel.setFont(Font.font("Verdana", 15));
+        circleLabel.setPadding(new Insets(0, 10, 0, 0));
+        circleLabel.setTextFill(Color.WHITE);
+        HBox circle = new HBox(circleLabel, circleChoices);
+        circle.setAlignment(Pos.CENTER);
 
-        PLAYER2DelayField = new TextField("1000");
-        PLAYER2DelayField.setMinWidth(textFieldWidth);
-        PLAYER2DelayField.setMaxWidth(textFieldWidth);
-        PLAYER2DelayField.textProperty().addListener((observable, oldValue, newValue) -> {
+        crossDelayField = new TextField("1000");
+        crossDelayField.setMinWidth(textFieldWidth);
+        crossDelayField.setMaxWidth(textFieldWidth);
+        crossDelayField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
-                PLAYER2DelayField.setText(newValue.replaceAll("[^\\d]", ""));
+                crossDelayField.setText(newValue.replaceAll("[^\\d]", ""));
             }
             if (newValue.isEmpty()) {
-                PLAYER2DelayField.setText(newValue.replaceAll("", "0"));
+                crossDelayField.setText(newValue.replaceAll("", "0"));
             }
         });
-        PLAYER2DelayField.setOnKeyPressed((KeyEvent event) -> {
+        crossDelayField.setOnKeyPressed((KeyEvent event) -> {
             if (event.getCode() == KeyCode.ESCAPE || event.getCode() == KeyCode.ENTER) {
                 this.requestFocus();
             }
         });
-        AIDelayLabelPLAYER2 = new Label();
-        AIDelayLabelPLAYER2.setFont(Font.font("Verdana", 15));
-        AIDelayLabelPLAYER2.setPadding(new Insets(0, 10, 0, 0));
-        AIDelayLabelPLAYER2.setTextFill(Color.WHITE);
-        AIDelayLabelPLAYER2.setAlignment(Pos.CENTER);
-        PLAYER2DelayBox = new HBox(AIDelayLabelPLAYER2, PLAYER2DelayField);
-        PLAYER2DelayBox.setAlignment(Pos.CENTER);
-        PLAYER1DelayField = new TextField("1000");
-        PLAYER1DelayField.setMinWidth(textFieldWidth);
-        PLAYER1DelayField.setMaxWidth(textFieldWidth);
-        PLAYER1DelayField.textProperty().addListener((observable, oldValue, newValue) -> {
+        AIDelayLabelCross = new Label();
+        AIDelayLabelCross.setFont(Font.font("Verdana", 15));
+        AIDelayLabelCross.setPadding(new Insets(0, 10, 0, 0));
+        AIDelayLabelCross.setTextFill(Color.WHITE);
+        AIDelayLabelCross.setAlignment(Pos.CENTER);
+        crossDelayBox = new HBox(AIDelayLabelCross, crossDelayField);
+        crossDelayBox.setAlignment(Pos.CENTER);
+        circleDelayField = new TextField("1000");
+        circleDelayField.setMinWidth(textFieldWidth);
+        circleDelayField.setMaxWidth(textFieldWidth);
+        circleDelayField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
-                PLAYER1DelayField.setText(newValue.replaceAll("[^\\d]", ""));
+                circleDelayField.setText(newValue.replaceAll("[^\\d]", ""));
             }
             if (newValue.isEmpty()) {
-                PLAYER1DelayField.setText(newValue.replaceAll("", "0"));
+                circleDelayField.setText(newValue.replaceAll("", "0"));
             }
         });
-        PLAYER1DelayField.setOnKeyPressed((KeyEvent event) -> {
+        circleDelayField.setOnKeyPressed((KeyEvent event) -> {
             if (event.getCode() == KeyCode.ESCAPE || event.getCode() == KeyCode.ENTER) {
                 this.requestFocus();
             }
         });
 
-        AIDelayLabelPLAYER1 = new Label();
-        AIDelayLabelPLAYER1.setFont(Font.font("Verdana", 15));
-        AIDelayLabelPLAYER1.setPadding(new Insets(0, 10, 0, 0));
-        AIDelayLabelPLAYER1.setTextFill(Color.WHITE);
-        AIDelayLabelPLAYER1.setAlignment(Pos.CENTER);
-        PLAYER1DelayBox = new HBox(AIDelayLabelPLAYER1, PLAYER1DelayField);
+        AIDelayLabelCircle = new Label();
+        AIDelayLabelCircle.setFont(Font.font("Verdana", 15));
+        AIDelayLabelCircle.setPadding(new Insets(0, 10, 0, 0));
+        AIDelayLabelCircle.setTextFill(Color.WHITE);
+        AIDelayLabelCircle.setAlignment(Pos.CENTER);
+        PLAYER1DelayBox = new HBox(AIDelayLabelCircle, circleDelayField);
         PLAYER1DelayBox.setAlignment(Pos.CENTER);
 
         Button startGame = new Button("Start Game");
         startGame.setMinWidth(Config.WIDTH / 4);
         startGame.setOnMouseClicked(event -> {
-            String PLAYER2Value = playerPLAYER2Choices.getValue();
-            String PLAYER1Value = playerPLAYER1Choices.getValue();
+            String crossValue = crossChoices.getValue();
+            String circleValue = circleChoices.getValue();
             Stage stage = (Stage) getScene().getWindow();
 
-            int playerBlackMode = (PLAYER2Value.equals(human)) ? Config.HUMAN :
-                    (PLAYER2Value.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
-            int playerRedMode = (PLAYER1Value.equals(human)) ? Config.HUMAN :
-                    (PLAYER1Value.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
-            new Controller(stage, playerRedMode,
-                    playerBlackMode, new State(),
-                    Integer.parseInt(PLAYER1DelayField.getText()),
-                    Integer.parseInt(PLAYER2DelayField.getText()));
+            int playerCrossMode = (crossValue.equals(human)) ? Config.HUMAN :
+                    (crossValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
+            int playerCircleMode = (circleValue.equals(human)) ? Config.HUMAN :
+                    (circleValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
+            new Controller(stage, playerCircleMode,
+                    playerCrossMode, new State(),
+                    Integer.parseInt(circleDelayField.getText()),
+                    Integer.parseInt(crossDelayField.getText()));
         });
 
         Button back = new Button("Back");
@@ -176,7 +176,7 @@ public class NewGamePane extends AnchorPane {
         btnBox.setAlignment(Pos.CENTER);
         btnBox.setSpacing(20);
 
-        finalBox = new VBox(playerPLAYER2, playerPLAYER1, btnBox);
+        finalBox = new VBox(cross, circle, btnBox);
         finalBox.setAlignment(Pos.CENTER);
         finalBox.setSpacing(30);
 

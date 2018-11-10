@@ -2,7 +2,7 @@ package fftlib;
 
 import fftlib.game.FFTDatabase;
 import fftlib.game.FFTLogic;
-import fftlib.game.FFTNode;
+import fftlib.game.FFTState;
 import misc.Config;
 
 import java.io.BufferedWriter;
@@ -19,12 +19,12 @@ public class FFTManager {
     public static FFTDatabase db;
     public static FFTLogic logic;
     static String path = Config.FFT_PATH;
-    static FFTNode initialFFTNode;
+    static FFTState initialFFTState;
     public FFT currFFT;
 
-    public FFTManager(FFTNode node, FFTLogic fftLogic, FFTDatabase fftDB) {
+    public FFTManager(FFTState state, FFTLogic fftLogic, FFTDatabase fftDB) {
         ffts = new ArrayList<>();
-        initialFFTNode = node;
+        initialFFTState = state;
         logic = fftLogic;
         db = fftDB;
         // Try loading ffts from file in working directory

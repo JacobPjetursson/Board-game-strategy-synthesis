@@ -1,5 +1,7 @@
 package kulibrat.game;
 
+import fftlib.Action;
+import fftlib.Clause;
 import fftlib.game.FFTMove;
 import misc.Config;
 

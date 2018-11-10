@@ -1,16 +1,17 @@
 package tictactoe.game;
 
 import fftlib.Clause;
+import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import misc.Config;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 
 import static misc.Config.PLAYER1;
+
 
 public class State implements FFTState {
     private int[][] board;
@@ -34,6 +35,48 @@ public class State implements FFTState {
         }
         turn = state.turn;
         move = state.move;
+    }
+
+    // Non-root state
+    private State(State parent, Move m) {
+        this(parent);
+        Logic.doTurn(m, this);
+        this.move = m;
+    }
+
+    @Override
+    public State getNextState(FFTMove move) {
+        return getNextState((Move) move);
+    }
+
+    public State getNextState(Move m) {
+        return new State(this, m);
+    }
+
+    public ArrayList<State> getChildren() {
+        ArrayList<State> children = new ArrayList<>();
+        for (Move m : getLegalMoves()) {
+            State child = new State(this, m);
+            children.add(child);
+        }
+        return children;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof State)) return false;
+        State state = (State) obj;
+        return this == state || turn == state.getTurn() &&
+                (Arrays.deepEquals(board, state.board));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(turn);
+        result += Arrays.deepHashCode(board);
+        //result += Arrays.deepHashCode(this.reflect().board);
+        return result;
+
     }
 
     public int[][] getBoard() {
@@ -79,80 +122,10 @@ public class State implements FFTState {
         this.turn = turn;
     }
 
-    // Get a list of pieces/points from this state
-    public ArrayList<Point> getPieces(int team) {
-        ArrayList<Point> entries = new ArrayList<>();
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                if (board[i][j] == team) {
-                    entries.add(new Point(j, i));
-                }
-            }
-        }
-        return entries;
-    }
-
-    // Get the next state based on the input move
-    public State getNextState(Move m) {
-        State state = new State(this);
-        Logic.doTurn(m, state);
-        state.move = m;
-        return state;
-    }
-
-    public ArrayList<State> getChildren() {
-        ArrayList<State> children = new ArrayList<>();
-        for (Move m : getLegalMoves()) {
-            State child = new State(this).getNextState(m);
-            children.add(child);
-        }
-        return children;
-    }
-
     // Creates and/or returns a list of new state objects which correspond to the children of the given state.
     public ArrayList<Move> getLegalMoves() {
         if (legalMoves != null) return legalMoves;
         legalMoves = Logic.legalMoves(turn, this);
         return legalMoves;
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof State)) return false;
-        State state = (State) obj;
-        return this == state || turn == state.getTurn() &&
-                (Arrays.deepEquals(board, state.board));
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Objects.hash(turn);
-        result += Arrays.deepHashCode(board);
-        //result += Arrays.deepHashCode(this.reflect().board);
-        return result;
-
-    }
-
-    public String print() {
-        String boardStr = "";
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board.length; j++) {
-                boardStr += board[i][j] + " ";
-            }
-            boardStr += "\n";
-        }
-        return boardStr;
-    }
-/*
-    private State reflect() {
-        State copy = new State(this);
-        for (int i = 0; i < copy.board.length; i++) {
-            for (int j = 0; j < copy.board[i].length; j++) {
-                copy.board[i][j] = board[i][board[i].length - 1 - j];
-            }
-        }
-        return copy;
-    }
-*/
-
 }

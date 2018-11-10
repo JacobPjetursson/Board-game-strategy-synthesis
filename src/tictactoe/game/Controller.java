@@ -14,12 +14,9 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import misc.Config;
 import tictactoe.ai.AI;
+import tictactoe.ai.FFTFollower;
 import tictactoe.ai.LookupTableMinimax;
-import tictactoe.ai.Node;
-import tictactoe.gui.EndGamePane;
-import tictactoe.gui.NavPane;
-import tictactoe.gui.PlayArea;
-import tictactoe.gui.PlayPane;
+import tictactoe.gui.*;
 import tictactoe.gui.board.BoardTile;
 import tictactoe.misc.Database;
 
@@ -46,18 +43,19 @@ public class Controller {
     private CheckBox interactiveFFTBox;
     private Thread aiThread;
     private NavPane navPane;
-    private State state;
+    private tictactoe.game.State state;
     private PlayArea playArea;
     private boolean endGamePopup;
     private ArrayList<StateAndMove> previousStates;
     private Window window;
     private FFTManager fftManager;
+    private FFT_Follower fftFollower;
     private boolean fftInteractiveMode;
     private boolean fftAllowInteraction;
     private ShowFFTPane shownFFT;
 
     public Controller(Stage primaryStage, int player1Instance, int player2Instance,
-                      State state, int player1Time, int player2Time) {
+                      tictactoe.game.State state, int player1Time, int player2Time) {
         this.mode = setMode(player1Instance, player2Instance);
         this.player1Instance = player1Instance;
         this.player2Instance = player2Instance;
@@ -69,7 +67,7 @@ public class Controller {
         this.endGamePopup = false;
         this.previousStates = new ArrayList<>();
 
-        this.fftManager = new FFTManager(new Node(state), new Logic(), new Database());
+        this.fftManager = new FFTManager(new State(state), new Logic(), new Database());
 
         PlayPane playPane = new PlayPane(this);
         primaryStage.setScene(new Scene(playPane,
@@ -118,7 +116,7 @@ public class Controller {
         // edit fftManager button
         editFFTButton.setOnAction(event -> {
             Scene scene = primaryStage.getScene();
-            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager, this), Config.WIDTH, Config.HEIGHT));
+            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager, new GameBoardPane(this)), Config.WIDTH, Config.HEIGHT));
         });
 
         // interactive mode
@@ -161,13 +159,13 @@ public class Controller {
             if (player1Instance == LOOKUP_TABLE) {
                 aiRed = new LookupTableMinimax(PLAYER1, state);
             } else if (player1Instance == FFT) {
-                aiRed = new FFT_Follower(PLAYER1, fftManager);
+                aiRed = new FFTFollower(PLAYER1, fftManager);
             }
         } else {
             if (player2Instance == LOOKUP_TABLE) {
                 aiBlack = new LookupTableMinimax(PLAYER2, state);
             } else if (player2Instance == FFT) {
-                aiBlack = new FFT_Follower(PLAYER2, fftManager);
+                aiBlack = new FFTFollower(PLAYER2, fftManager);
             }
         }
     }
@@ -310,7 +308,7 @@ public class Controller {
         }
     }
 
-    public State getState() {
+    public tictactoe.game.State getState() {
         return state;
     }
 

@@ -39,17 +39,17 @@ public class LookupTableMinimax extends AI {
     }
 
     // This function fetches the best move from the DB, if it exists
-    public Move makeMove(State state) {
+    public Move makeMove(kulibrat.game.State state) {
         String teamstr = (team == PLAYER2) ? "CROSS" : "CIRCLE";
         System.out.println("Finding best play for " + teamstr);
         if (state.getLegalMoves().size() == 1) {
             return state.getLegalMoves().get(0);
         }
         // table lookup
-        Node simNode = new Node(state);
+        State simState = new State(state);
         MinimaxPlay play;
         if (useDB) {
-            play = Database.queryPlay(simNode);
+            play = Database.queryPlay(simState);
         } else {
             play = iterativeDeepeningMinimax(state);
         }
@@ -67,18 +67,18 @@ public class LookupTableMinimax extends AI {
     }
 
     // Runs an iterative deepening minimax as the exhaustive brute-force for the lookupDB. The data is saved in the transpo table
-    private MinimaxPlay iterativeDeepeningMinimax(State state) {
+    private MinimaxPlay iterativeDeepeningMinimax(kulibrat.game.State state) {
         CURR_MAX_DEPTH = 0;
         boolean done = false;
         MinimaxPlay play = null;
         int doneCounter = 0;
         while (!done) {
-            Node simNode = new Node(state); // Start from fresh (Don't reuse previous game tree in new iterations)
+            State simState = new State(state); // Start from fresh (Don't reuse previous game tree in new iterations)
             int prevSize = lookupTable.size();
             int prevUnevaluatedNodes = unevaluatedNodes;
             unevaluatedNodes = 0;
             CURR_MAX_DEPTH += 1;
-            play = minimax(simNode, CURR_MAX_DEPTH);
+            play = minimax(simState, CURR_MAX_DEPTH);
             System.out.println("CURRENT MAX DEPTH: " + CURR_MAX_DEPTH + ", LOOKUP TABLE SIZE: " + lookupTable.size() + ", UNEVALUATED NODES: " + unevaluatedNodes);
             if (lookupTable.size() == prevSize && unevaluatedNodes == prevUnevaluatedNodes) {
                 System.out.println("State space explored, and unevaluated nodes unchanged between runs. I'm done");
@@ -98,38 +98,38 @@ public class LookupTableMinimax extends AI {
     }
 
     // Is called for every depth limit of the iterative deepening function. Classic minimax with no pruning
-    private MinimaxPlay minimax(Node node, int depth) {
+    private MinimaxPlay minimax(State state, int depth) {
         Move bestMove = null;
-        int bestScore = (node.getState().getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        int bestScore = (state.getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int score;
-        if (Logic.gameOver(node.getState()) || depth == 0) {
-            return new MinimaxPlay(bestMove, heuristic(node.getState()), depth);
+        if (Logic.gameOver(state) || depth == 0) {
+            return new MinimaxPlay(bestMove, heuristic(state), depth);
         }
-        MinimaxPlay transpoPlay = lookupTable.get(node.getHashCode());
+        MinimaxPlay transpoPlay = lookupTable.get(state.getHashCode());
         if (transpoPlay != null && depth <= transpoPlay.depth) {
             return transpoPlay;
         }
         boolean evaluated = true;
-        for (Node child : node.getChildren()) {
+        for (State child : state.getChildren()) {
             score = minimax(child, depth - 1).score;
             if (score > 1000) score--;
             else if (score < -1000) score++;
             else evaluated = false;
 
-            if (node.getState().getTurn() == team) {
+            if (state.getTurn() == team) {
                 if (score > bestScore) {
                     bestScore = score;
-                    bestMove = child.getState().getMove();
+                    bestMove = child.getMove();
                 }
             } else {
                 if (score < bestScore) {
                     bestScore = score;
-                    bestMove = child.getState().getMove();
+                    bestMove = child.getMove();
                 }
             }
         }
         if (transpoPlay == null || depth > transpoPlay.depth) {
-            lookupTable.put(node.getHashCode(),
+            lookupTable.put(state.getHashCode(),
                     new MinimaxPlay(bestMove, bestScore, depth));
         }
         if (!evaluated) unevaluatedNodes++;
@@ -137,7 +137,7 @@ public class LookupTableMinimax extends AI {
     }
 
     // Heuristic function which values red with 2000 for a win, and -2000 for a loss. All other nodes are 0
-    private int heuristic(State state) {
+    private int heuristic(kulibrat.game.State state) {
         int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
         if (Logic.gameOver(state)) {
             int winner = Logic.getWinner(state);
@@ -150,7 +150,7 @@ public class LookupTableMinimax extends AI {
     }
 
     // This function builds the lookup table from scratch
-    private void buildLookupTable(State state) {
+    private void buildLookupTable(kulibrat.game.State state) {
         Database.createLookupTable();
         long startTime = System.currentTimeMillis();
         iterativeDeepeningMinimax(state);

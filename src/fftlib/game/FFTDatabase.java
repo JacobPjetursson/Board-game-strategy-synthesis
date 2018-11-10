@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public interface FFTDatabase {
 
-    FFTMinimaxPlay queryPlay(FFTNode node);
+    FFTMinimaxPlay queryPlay(FFTState state);
 
-    ArrayList<? extends FFTMove> nonLosingPlays(FFTNode node);
+    ArrayList<? extends FFTMove> nonLosingPlays(FFTState state);
 }

@@ -27,7 +27,7 @@ public class Config {
     // GAMES
     public static final int KULIBRAT = 0;
     public static final int TICTACTOE = 1;
-    public static final int CURRENT_GAME = KULIBRAT;
+    public static int CURRENT_GAME;
 
     // BOARD CONFIG KULIBRAT
     public static final int bWidth = 3;

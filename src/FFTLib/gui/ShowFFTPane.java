@@ -28,6 +28,7 @@ public class ShowFFTPane extends BorderPane {
     private ListView<VBox> lw;
 
     public ShowFFTPane(FFTManager fftManager, FFTState state) {
+        this.state = state;
         this.fftManager = fftManager;
         Label title = new Label();
         if (fftManager.currFFT == null)

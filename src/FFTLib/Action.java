@@ -1,15 +1,13 @@
 package fftlib;
 
 import fftlib.game.FFTMove;
-import kulibrat.game.Move;
 import misc.Config;
-
 import java.util.ArrayList;
 
 public class Action {
-    protected ArrayList<Clause> addClauses;
+    public ArrayList<Clause> addClauses;
     protected boolean actionErr;
-    ArrayList<Clause> remClauses;
+    public ArrayList<Clause> remClauses;
 
     protected Action(ArrayList<String> clauses) {
         this.addClauses = new ArrayList<>();
@@ -34,8 +32,8 @@ public class Action {
             actionErr = true;
             return;
         }
-        // TODO - this is kulibrat specific
-        if (addClauses.size() > 1 || remClauses.size() > 1) {
+        if (Config.CURRENT_GAME == Config.KULIBRAT &&
+                (addClauses.size() > 1 || remClauses.size() > 1)) {
             System.err.println("Only moves with a single add clause and/or a single remove clause is allowed in this game");
             actionErr = true;
         }
@@ -46,24 +44,6 @@ public class Action {
         this.remClauses = new ArrayList<>(remClauses);
     }
 
-    // kulibrat specific
-    // TODO - support tic tac toe
-    public FFTMove getMove() {
-        int newRow = -1;
-        int newCol = -1;
-        int oldRow = -1;
-        int oldCol = -1;
-
-        for (Clause c : addClauses) {
-            newRow = c.row;
-            newCol = c.col;
-        }
-        for (Clause c : remClauses) {
-            oldRow = c.row;
-            oldCol = c.col;
-        }
-        return new Move(oldRow, oldCol, newRow, newCol, -1);
-    }
 
     // TODO - do for all
     public Action applySymmetry(int symmetry) {
@@ -90,6 +70,38 @@ public class Action {
         addClauseBoardToList(refH, rAddClauses, rRemClauses);
 
         return new Action(rAddClauses, rRemClauses);
+    }
+
+    // TODO - find a better solution for below
+    public FFTMove getMove() {
+        switch(Config.CURRENT_GAME) {
+            case Config.KULIBRAT:
+                int newRow = -1;
+                int newCol = -1;
+                int oldRow = -1;
+                int oldCol = -1;
+
+                for (Clause c : addClauses) {
+                    newRow = c.row;
+                    newCol = c.col;
+                }
+                for (Clause c : remClauses) {
+                    oldRow = c.row;
+                    oldCol = c.col;
+                }
+                return new kulibrat.game.Move(oldRow, oldCol, newRow, newCol, -1);
+
+            case Config.TICTACTOE:
+                int row = -1;
+                int col = -1;
+                for (Clause c : addClauses) {
+                    row = c.row;
+                    col = c.col;
+                }
+                return new tictactoe.game.Move(row, col, -1);
+        }
+        System.err.println("Current game not found in config list");
+        return null;
     }
 
     public int[][] makeClauseBoard(ArrayList<Clause> addClauses, ArrayList<Clause> remClauses) {

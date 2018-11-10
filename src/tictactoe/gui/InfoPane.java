@@ -16,21 +16,16 @@ import static misc.Config.*;
 
 
 public class InfoPane extends VBox {
-    private Circle turnCircle;
     private Label skippedTurn;
     private Label turnNumberLabel;
+    private Label turnLabel;
 
     public InfoPane(int mode) {
         setPrefSize(Config.WIDTH / 3, Config.HEIGHT);
         setSpacing(40);
         setAlignment(Pos.CENTER);
-        Label turnLabel = new Label("Turn: ");
+        turnLabel = new Label("Turn: Circle");
         turnLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
-        turnCircle = new Circle(15);
-        turnCircle.setFill(Color.RED);
-
-        HBox turn = new HBox(turnLabel, turnCircle);
-        turn.setAlignment(Pos.CENTER);
         turnNumberLabel = new Label("Turns Played: 0");
         turnNumberLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
 
@@ -41,7 +36,7 @@ public class InfoPane extends VBox {
 
         skippedTurn = new Label();
         skippedTurn.setFont(Font.font("Verdana", 15));
-        VBox turnBox = new VBox(turn, turnNumberLabel);
+        VBox turnBox = new VBox(turnLabel, turnNumberLabel);
         turnBox.setAlignment(Pos.CENTER);
         turnBox.setSpacing(15);
 
@@ -61,9 +56,9 @@ public class InfoPane extends VBox {
 
     private void updateTurn(State state) {
         if (state.getTurn() == PLAYER1) {
-            turnCircle.setFill(Color.RED);
+            turnLabel.setText("Turn: Circle");
         } else {
-            turnCircle.setFill(Color.BLACK);
+            turnLabel.setText("Turn: Cross");
         }
     }
 

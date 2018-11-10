@@ -12,4 +12,8 @@ public interface FFTState {
     int getTurn();
 
     ArrayList<? extends FFTMove> getLegalMoves();
+
+    ArrayList<? extends FFTState> getChildren();
+
+    FFTState getNextState(FFTMove move);
 }

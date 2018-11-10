@@ -211,6 +211,7 @@ public class NewGamePane extends AnchorPane {
                             (redValue.equals(mcts)) ? Config.MONTE_CARLO :
                                     (redValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
             Config.SCORELIMIT = scoreLimitChoices.getValue();
+
             new Controller(stage, playerRedMode,
                     playerBlackMode, new State(),
                     Integer.parseInt(redDelayField.getText()),
