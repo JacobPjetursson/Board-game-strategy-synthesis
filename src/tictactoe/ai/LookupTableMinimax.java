@@ -17,7 +17,7 @@ public class LookupTableMinimax implements AI {
     private HashMap<State, MinimaxPlay> lookupTable;
 
 
-    public LookupTableMinimax(int team, tictactoe.game.State state) {
+    public LookupTableMinimax(int team, State state) {
         this.team = team;
         lookupTable = new HashMap<>();
         iterativeDeepeningMinimax(state);
@@ -25,7 +25,7 @@ public class LookupTableMinimax implements AI {
     }
 
     // This function fetches the best move from lookuptable, if it exists
-    public Move makeMove(tictactoe.game.State state) {
+    public Move makeMove(State state) {
         State key = new State(state);
         MinimaxPlay play = lookupTable.get(key);
         Move move = play.move;
@@ -37,7 +37,7 @@ public class LookupTableMinimax implements AI {
     }
 
     // Runs an iterative deepening minimax as the exhaustive brute-force for the lookupDB. The data is saved in the transpo table
-    private MinimaxPlay iterativeDeepeningMinimax(tictactoe.game.State state) {
+    private MinimaxPlay iterativeDeepeningMinimax(State state) {
         CURR_MAX_DEPTH = 0;
         boolean done = false;
         MinimaxPlay play = null;
@@ -49,9 +49,9 @@ public class LookupTableMinimax implements AI {
             unevaluatedNodes = 0;
             CURR_MAX_DEPTH += 1;
             play = minimax(simState, CURR_MAX_DEPTH);
-            System.out.println("CURRENT MAX DEPTH: " + CURR_MAX_DEPTH + ", LOOKUP TABLE SIZE: " + lookupTable.size() + ", UNEVALUATED NODES: " + unevaluatedNodes);
+            //System.out.println("CURRENT MAX DEPTH: " + CURR_MAX_DEPTH + ", LOOKUP TABLE SIZE: " + lookupTable.size() + ", UNEVALUATED NODES: " + unevaluatedNodes);
             if (lookupTable.size() == prevSize && unevaluatedNodes == prevUnevaluatedNodes) {
-                System.out.println("State space explored, and unevaluated nodes unchanged between runs. I'm done");
+                //System.out.println("State space explored, and unevaluated nodes unchanged between runs. I'm done");
                 doneCounter++;
             } else
                 doneCounter = 0;
@@ -107,7 +107,7 @@ public class LookupTableMinimax implements AI {
     }
 
     // Heuristic function which values red with 2000 for a win, and -2000 for a loss. All other nodes are 0
-    private int heuristic(tictactoe.game.State state) {
+    private int heuristic(State state) {
         int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
         if (Logic.gameOver(state)) {
             int winner = Logic.getWinner(state);

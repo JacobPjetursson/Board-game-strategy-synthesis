@@ -29,7 +29,7 @@ public class FFTFailurePane extends BorderPane {
     private FFTManager fftManager;
     private ListView<VBox> lw;
 
-    public FFTFailurePane(Scene prevScene, FFTManager fftManager, FFTGameBoard fftGameBoard) {
+    public FFTFailurePane(Scene prevScene, FFTManager fftManager, FFTFailState fftFailState) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         this.fftManager = fftManager;
         Label title = new Label("This is the first encountered state where the FFT failed");
@@ -43,7 +43,7 @@ public class FFTFailurePane extends BorderPane {
         FFTStateAndMove ps = fftManager.currFFT.failingPoint;
         FFTState s = ps.getState();
         ArrayList<? extends FFTMove> nonLosingPlays = FFTManager.db.nonLosingPlays(s);
-        Node playBox = fftGameBoard.getGameBoard(ps, nonLosingPlays);
+        Node playBox = fftFailState.getFailState(ps, nonLosingPlays);
         setCenter(playBox);
 
         lw = new ListView<>();
@@ -59,7 +59,7 @@ public class FFTFailurePane extends BorderPane {
         bottomBox.setAlignment(Pos.CENTER);
         bottomBox.setPadding(new Insets(15));
 
-        Label arrowInfoLabel = new Label("Green arrows are non-losing moves, the blue arrow is the chosen move");
+        Label arrowInfoLabel = new Label("Green is for non-losing moves, blue is the chosen move");
         arrowInfoLabel.setFont(Font.font("Verdana", 15));
 
         String moveInfo;

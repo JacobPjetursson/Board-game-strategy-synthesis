@@ -77,7 +77,7 @@ public class ShowFFTPane extends BorderPane {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r.printRule());
                 rLabel.setFont(Font.font("Verdana", 10));
-                for (int symmetry : Config.SYMMETRIES) {
+                for (int symmetry : Config.getSymmetries()) {
                     if (!ruleApplied && r.applies(state, symmetry)) {
                         // TODO - messy code below
                         FFTMove move = r.action.getMove();

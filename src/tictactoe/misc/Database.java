@@ -19,7 +19,6 @@ import static misc.Config.PLAYER2;
 public class Database implements FFTDatabase {
     public static HashMap<State, MinimaxPlay> lookupTable;
 
-
     // Outputs a list of the best plays from a given node. Checks through the children of a node to find the ones
     // which have the least amount of turns to terminal for win, or most for loss.
     public static ArrayList<Move> bestPlays(State n) {
@@ -99,6 +98,11 @@ public class Database implements FFTDatabase {
                 return "" + (-2000 - score);
             }
         }
+    }
+
+    public boolean connectAndVerify() {
+        // There is no db
+        return true;
     }
 
     public static void fillLookupTable(HashMap<State, MinimaxPlay> lookup) {

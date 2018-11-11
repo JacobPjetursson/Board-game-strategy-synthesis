@@ -49,13 +49,12 @@ public class Controller {
     private ArrayList<StateAndMove> previousStates;
     private Window window;
     private FFTManager fftManager;
-    private FFT_Follower fftFollower;
     private boolean fftInteractiveMode;
     private boolean fftAllowInteraction;
     private ShowFFTPane shownFFT;
 
     public Controller(Stage primaryStage, int player1Instance, int player2Instance,
-                      tictactoe.game.State state, int player1Time, int player2Time) {
+                      State state, int player1Time, int player2Time) {
         this.mode = setMode(player1Instance, player2Instance);
         this.player1Instance = player1Instance;
         this.player2Instance = player2Instance;
@@ -66,6 +65,8 @@ public class Controller {
         this.primaryStage = primaryStage;
         this.endGamePopup = false;
         this.previousStates = new ArrayList<>();
+        // fills up the "database"
+        new LookupTableMinimax(PLAYER1, state);
 
         this.fftManager = new FFTManager(new State(state), new Logic(), new Database());
 
@@ -95,8 +96,10 @@ public class Controller {
             for (int j = 0; j < tiles[i].length; j++) {
                 BoardTile tile = tiles[i][j];
                 tile.setOnMouseClicked(event -> {
-                    if (tile.getHighlight()) {
-                        doHumanTurn(new Move(tile.getRow(), tile.getCol(), state.getTurn()));
+                    if (tile.isFree()) {
+                        tile.getChildren().clear();
+                        doHumanTurn(tile.getRow(), tile.getCol());
+                        tile.setFree(false);
                     }
                 });
             }
@@ -116,7 +119,7 @@ public class Controller {
         // edit fftManager button
         editFFTButton.setOnAction(event -> {
             Scene scene = primaryStage.getScene();
-            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager, new GameBoardPane(this)), Config.WIDTH, Config.HEIGHT));
+            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager, new FailStatePane(this)), Config.WIDTH, Config.HEIGHT));
         });
 
         // interactive mode
@@ -172,7 +175,8 @@ public class Controller {
 
     // Is called when a tile is pressed by the user. If vs. the AI, it calls the doAITurn after. This function also highlights
     // the best pieces for the opponent, if it is human vs human.
-    private void doHumanTurn(Move move) {
+    private void doHumanTurn(int row, int col) {
+        Move move = new Move(row, col, state.getTurn());
         previousStates.add(new StateAndMove(state, move, turnNo));
         state = state.getNextState(move);
         updatePostHumanTurn();
@@ -308,7 +312,7 @@ public class Controller {
         }
     }
 
-    public tictactoe.game.State getState() {
+    public State getState() {
         return state;
     }
 

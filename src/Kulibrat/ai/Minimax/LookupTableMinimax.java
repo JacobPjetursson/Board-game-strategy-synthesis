@@ -34,7 +34,7 @@ public class LookupTableMinimax extends AI {
             }
             this.team = team;
         } else if (useDB) {
-            Database.connectAndVerify();
+            Database.connectwithVerification();
         }
     }
 

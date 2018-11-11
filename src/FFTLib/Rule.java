@@ -22,7 +22,7 @@ public class Rule {
         this.action = getAction(actionStr);
         this.clauses = getClauses(clauseStr);
         // TODO - make this for all available symmetries
-        for (int symmetry : Config.SYMMETRIES) {
+        for (int symmetry : Config.getSymmetries()) {
             if (symmetry == Config.SYM_NONE)
                 symmetryClauses.add(new ClauseList(Config.SYM_NONE, clauses));
             else if (symmetry == Config.SYM_HREF)

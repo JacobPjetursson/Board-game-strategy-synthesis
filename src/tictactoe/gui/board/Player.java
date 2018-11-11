@@ -2,10 +2,12 @@ package tictactoe.gui.board;
 
 
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -21,7 +23,7 @@ public class Player extends VBox {
     private int type;
     private Label typeLabel;
 
-    public Player(int team, Controller cont, int tileWidth) {
+    public Player(int team, Controller cont, int tileWidth, boolean playMode) {
         this.team = team;
         type = cont.getPlayerInstance(team);
         setAlignment(Pos.CENTER);
@@ -29,15 +31,15 @@ public class Player extends VBox {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
 
 
-        URL urlRed = this.getClass().getClassLoader().getResource("playerIconRed.png");
-        URL urlBlack = this.getClass().getClassLoader().getResource("playerIconBlack.png");
-        Image img = (team == PLAYER1) ? new Image(urlRed.toExternalForm()) :
-                new Image(urlBlack.toExternalForm());
+        URL urlCircle = this.getClass().getClassLoader().getResource("circle.png");
+        URL urlCross = this.getClass().getClassLoader().getResource("cross.png");
+        Image img = (team == PLAYER1) ? new Image(urlCircle.toExternalForm()) :
+                new Image(urlCross.toExternalForm());
         ImageView imgView = new ImageView(img);
 
         imgView.setPreserveRatio(true);
-        imgView.setFitHeight(tileWidth);
-        imgView.setFitWidth(tileWidth);
+        imgView.setFitHeight(tileWidth/2);
+        imgView.setFitWidth(tileWidth/2);
         BorderPane imgPane = new BorderPane();
         imgPane.setCenter(imgView);
 
@@ -49,6 +51,14 @@ public class Player extends VBox {
         typeLabel = new Label();
         setTypeLabelText(type);
         typeLabel.setFont(Font.font("Verdana", tileWidth / 4));
+
+        ColumnConstraints column1 = new ColumnConstraints((tileWidth * 4) / 3);
+        for (int i = 0; i < 3; i++) {
+            gridPaneDisplay.getColumnConstraints().add(column1);
+        }
+        gridPaneDisplay.add(imgPane, 1, 0);
+        gridPaneDisplay.add(typeLabel, 2, 0);
+        if (playMode) getChildren().add(gridPaneDisplay);
     }
 
 

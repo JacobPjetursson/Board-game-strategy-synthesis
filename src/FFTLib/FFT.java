@@ -93,7 +93,7 @@ public class FFT {
     private FFTMove makeMove(FFTState state) {
         for (RuleGroup ruleGroup : ruleGroups) {
             for (Rule rule : ruleGroup.rules) {
-                for (int symmetry : Config.SYMMETRIES) {
+                for (int symmetry : Config.getSymmetries()) {
                     if (rule.applies(state, symmetry)) {
                         Action action = rule.action.applySymmetry(symmetry);
                         FFTMove move = action.getMove();

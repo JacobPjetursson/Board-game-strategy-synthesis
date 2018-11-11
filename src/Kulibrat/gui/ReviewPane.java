@@ -40,7 +40,7 @@ public class ReviewPane extends VBox {
     public ReviewPane(Stage primaryStage, Controller currCont) {
         try {
             if (Database.dbConnection == null || Database.dbConnection.isClosed()) {
-                Database.connectAndVerify();
+                Database.connectwithVerification();
                 connected = true;
             }
         } catch (SQLException e) {

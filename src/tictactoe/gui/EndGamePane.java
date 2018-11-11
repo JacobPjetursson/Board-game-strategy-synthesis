@@ -24,8 +24,9 @@ public class EndGamePane extends VBox {
         setAlignment(Pos.CENTER);
         setSpacing(20);
         Label label = new Label();
-        if (team == PLAYER1) label.setText("Congratulations player PLAYER1!");
-        else label.setText(("Congratulations player PLAYER2!"));
+        if (team == PLAYER1) label.setText("Congratulations to circle!");
+        else if (team == PLAYER2) label.setText(("Congratulations to cross!"));
+        else label.setText("It's a draw!");
 
         label.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
         getChildren().add(label);

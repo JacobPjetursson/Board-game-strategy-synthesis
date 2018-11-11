@@ -2,13 +2,12 @@ package kulibrat.gui;
 
 import fftlib.game.FFTMove;
 import fftlib.game.FFTStateAndMove;
-import fftlib.gui.FFTGameBoard;
+import fftlib.gui.FFTFailState;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import kulibrat.game.Controller;
 import kulibrat.game.Move;
 import kulibrat.game.State;
-import kulibrat.game.StateAndMove;
 import kulibrat.gui.board.Board;
 import kulibrat.gui.board.Goal;
 import kulibrat.gui.board.Player;
@@ -18,15 +17,15 @@ import java.util.ArrayList;
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
 
-public class GameBoardPane implements FFTGameBoard {
+public class FailStatePane implements FFTFailState {
 
     Controller cont;
 
-    public GameBoardPane (Controller cont) {
+    public FailStatePane(Controller cont) {
         this.cont = cont;
     }
 
-    public PlayBox getGameBoard(State s, Move move, ArrayList<Move> nonLosingPlays) {
+    public PlayBox getFailState(State s, Move move, ArrayList<Move> nonLosingPlays) {
         int tileW = 60;
         int pieceRad = 20;
         int goalH = 50;
@@ -48,7 +47,7 @@ public class GameBoardPane implements FFTGameBoard {
     }
 
     @Override
-    public Node getGameBoard(FFTStateAndMove ps, ArrayList<? extends FFTMove> nonLosingPlays) {
-        return getGameBoard((State) ps.getState(), (Move) ps.getMove(), (ArrayList<Move>) nonLosingPlays);
+    public Node getFailState(FFTStateAndMove ps, ArrayList<? extends FFTMove> nonLosingPlays) {
+        return getFailState((State) ps.getState(), (Move) ps.getMove(), (ArrayList<Move>) nonLosingPlays);
     }
 }

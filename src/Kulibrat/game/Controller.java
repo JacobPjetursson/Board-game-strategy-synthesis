@@ -18,7 +18,6 @@ import kulibrat.ai.FFTFollower;
 import kulibrat.ai.MCTS.MCTS;
 import kulibrat.ai.Minimax.LookupTableMinimax;
 import kulibrat.ai.Minimax.Minimax;
-import kulibrat.ai.Minimax.Zobrist;
 import kulibrat.gui.*;
 import kulibrat.gui.board.BoardPiece;
 import kulibrat.gui.board.BoardTile;
@@ -167,7 +166,7 @@ public class Controller {
         });
         // Review button
         reviewButton.setOnAction(event -> {
-            if (Database.connectAndVerify()) {
+            if (Database.connectwithVerification()) {
                 reviewGame();
             }
         });
@@ -191,7 +190,7 @@ public class Controller {
             helpHumanBox.setDisable(true);
             deselect();
             if (newValue) {
-                if (Database.connectAndVerify()) {
+                if (Database.connectwithVerification()) {
                     helpHumanBox.setSelected(true);
                     highlightBestPieces(true);
                 } else {
@@ -208,7 +207,7 @@ public class Controller {
         // edit fftManager button
         editFFTButton.setOnAction(event -> {
             Scene scene = primaryStage.getScene();
-            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager, new GameBoardPane(this)), Config.WIDTH, Config.HEIGHT));
+            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager, new FailStatePane(this)), Config.WIDTH, Config.HEIGHT));
         });
 
         // interactive mode

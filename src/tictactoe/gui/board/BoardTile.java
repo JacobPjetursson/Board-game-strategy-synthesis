@@ -1,81 +1,109 @@
 package tictactoe.gui.board;
 
 import javafx.geometry.Pos;
-import javafx.scene.control.Label;
+import javafx.scene.Group;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
+import tictactoe.game.Controller;
 
-import static misc.Config.PLAYER2;
+import static misc.Config.*;
 
 public class BoardTile extends StackPane {
     private int row;
     private int col;
-    private boolean highlight;
-    private boolean bestMove;
-    private boolean help;
-    private Label turnsToTerminalLabel;
+    private int tilesize;
+    private boolean playMode;
+    private Controller cont;
+    private Color gray = new Color(0.2, 0.2, 0.2, 1.0);
+    private boolean free;
 
-    public BoardTile(int row, int col, int tilesize) {
+    public BoardTile(int row, int col, int tilesize, Controller cont, boolean playMode) {
         this.row = row;
         this.col = col;
+        this.tilesize = tilesize;
+        this.playMode = playMode;
+        this.cont = cont;
+        this.free = true;
         setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         setAlignment(Pos.CENTER);
         setPrefSize(tilesize, tilesize);
         setStyle("-fx-background-color: rgb(255, 255, 255);");
-        turnsToTerminalLabel = new Label("");
-        turnsToTerminalLabel.setFont(Font.font("Verdana", 15));
-        turnsToTerminalLabel.setTextFill(Color.BLACK);
         setOnMouseEntered(me -> {
-            if (highlight && bestMove) {
-                setStyle("-fx-background-color: rgb(0, 225, 0);");
-            } else if (highlight) {
-                if (help) setStyle("-fx-background-color: rgb(255,0,0);");
-                else setStyle("-fx-background-color: rgb(255,200,0);");
+            if (isClickable() && getChildren().isEmpty()) {
+                addPiece(cont.getState().getTurn(), true);
             }
         });
 
         setOnMouseExited(me -> {
-            if (highlight && bestMove) {
-                setStyle("-fx-background-color: rgb(0, 150, 0);");
-            } else if (highlight) {
-                if (help) setStyle("-fx-background-color: rgb(150,0,0);");
-                else setStyle("-fx-background-color: rgb(200,150,0);");
+            if (isClickable() && free) {
+                removePiece();
             }
         });
     }
 
-    public boolean getHighlight() {
-        return highlight;
+    private boolean isClickable() {
+        return playMode && (cont.getPlayerInstance(cont.getState().getTurn()) == HUMAN ||
+                (cont.getPlayerInstance(cont.getState().getTurn()) == FFT && cont.getFFTAllowInteraction()));
     }
 
-    public void setHighlight(boolean highlight, boolean help, boolean bestMove, String turns) {
-        this.highlight = highlight;
-        this.bestMove = bestMove;
-        this.help = help;
-        if (highlight && bestMove) {
-            setStyle("-fx-background-color: rgb(0, 150, 0);");
-        } else if (highlight) {
-            if (help) setStyle("-fx-background-color: rgb(150,0,0);");
-            else setStyle("-fx-background-color: rgb(200,150,0);");
+    public void highlight(Color c, int team) {
+        if (c == Color.BLUE) {
+            setStyle("-fx-background-color: rgb(0, 0, 255);");
+            addPiece(team, false);
         } else {
-            setStyle("-fx-background-color: rgb(255, 255, 255);");
+            setStyle("-fx-background-color: rgb(0, 255, 0);");
         }
+    }
 
-        if (turns.isEmpty()) {
-            getChildren().remove(turnsToTerminalLabel);
-        } else {
-            turnsToTerminalLabel.setText(turns);
-            turnsToTerminalLabel.setTextFill(Color.BLACK);
-            getChildren().add(turnsToTerminalLabel);
-            if (getChildren().size() > 1) {
-                BoardPiece bp = (BoardPiece) getChildren().get(0);
-                if (bp.getTeam() == PLAYER2) {
-                    turnsToTerminalLabel.setTextFill(Color.WHITE);
-                }
-            }
+    public void addPiece(int team, boolean hover) {
+        // circle
+        if (team == PLAYER1) {
+            Circle c = new Circle();
+            System.out.println(tilesize);
+            c.setRadius(tilesize/2 - (tilesize/12));
+            c.setStrokeWidth(0);
+            if (hover)
+                c.setFill(gray);
+            else
+                c.setFill(Color.BLACK);
+            getChildren().add(c);
+        } else if (team == PLAYER2) {
+            drawCross(hover);
         }
+    }
+
+    public void drawCross(boolean hover) {
+        Group g = new Group();
+        Line vertical = new Line(-15, -15, 15, 15);
+        Line horizontal = new Line(-15, 15, 15, - 15);
+        vertical.setStrokeWidth(7);
+        vertical.setSmooth(true);
+        horizontal.setStrokeWidth(7);
+        horizontal.setSmooth(true);
+        if (hover) {
+            horizontal.setStroke(gray);
+            vertical.setStroke(gray);
+        } else {
+            horizontal.setStroke(Color.BLACK);
+            vertical.setStroke(Color.BLACK);
+        }
+        g.getChildren().addAll(horizontal, vertical);
+        getChildren().add(g);
+    }
+
+    public void removePiece() {
+        getChildren().clear();
+    }
+
+    public boolean isFree() {
+        return free;
+    }
+
+    public void setFree(boolean free) {
+        this.free = free;
     }
 
     public int getCol() {
@@ -84,12 +112,6 @@ public class BoardTile extends StackPane {
 
     public int getRow() {
         return row;
-    }
-
-    public BoardPiece getPiece() {
-        if (!getChildren().isEmpty())
-            return (BoardPiece) getChildren().get(0);
-        return null;
     }
 }
 

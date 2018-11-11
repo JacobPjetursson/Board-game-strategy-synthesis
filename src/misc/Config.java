@@ -21,9 +21,7 @@ public class Config {
     public static final int WIDTH = 800;
     public static final int HEIGHT = 650;
 
-
     // PREFERENCES / CUSTOMIZATION
-
     // GAMES
     public static final int KULIBRAT = 0;
     public static final int TICTACTOE = 1;
@@ -42,9 +40,15 @@ public class Config {
     public static final int SYM_VREF_ROT = 6;
     public static final int SYM_HVREF_ROT = 7;
     // MISC
-    public static final int[] SYMMETRIES = CURRENT_GAME == KULIBRAT ? new int[]{SYM_NONE, SYM_HREF} :
-            new int[]{SYM_NONE, SYM_HREF, SYM_VREF, SYM_HVREF, SYM_ROT, SYM_HREF_ROT, SYM_VREF_ROT, SYM_HVREF_ROT};
     public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";
-    public static final String FFT_PATH = "fft.txt";
     public static int SCORELIMIT;
+
+    public static String getFFTPath() {
+        return CURRENT_GAME == KULIBRAT ? "kulibratFFT.txt" : "tictactoeFFT.txt";
+    }
+
+    public static int[] getSymmetries() {
+        return CURRENT_GAME == KULIBRAT ? new int[]{SYM_NONE, SYM_HREF} :
+                new int[]{SYM_NONE, SYM_HREF, SYM_VREF, SYM_HVREF, SYM_ROT, SYM_HREF_ROT, SYM_VREF_ROT, SYM_HVREF_ROT};
+    }
 }

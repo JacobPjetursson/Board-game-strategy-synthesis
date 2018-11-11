@@ -23,9 +23,9 @@ public class PlayArea extends GridPane {
         setPadding(new Insets(10, 10, 10, 10));
         setAlignment(Pos.CENTER);
 
-        board = new Board(60, 20);
-        playerCross = new Player(PLAYER2, cont, 60);
-        playerCircle = new Player(PLAYER1, cont, 60);
+        board = new Board(60, true, cont);
+        playerCross = new Player(PLAYER2, cont, 60, true);
+        playerCircle = new Player(PLAYER1, cont, 60, true);
         info = new InfoPane(cont.getMode());
 
         ColumnConstraints column = new ColumnConstraints(WIDTH / 3);

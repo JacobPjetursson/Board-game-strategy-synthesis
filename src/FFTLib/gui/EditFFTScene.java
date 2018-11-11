@@ -20,7 +20,6 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import kulibrat.misc.Database;
 import misc.Config;
 
 import static misc.Config.WIDTH;
@@ -33,7 +32,7 @@ public class EditFFTScene extends VBox {
     private Button delBtn, renameBtn, newBtn, addNewRuleGroupBtn, verifyBtn;
     private ComboBox<String> changeBox;
 
-    public EditFFTScene(Stage primaryStage, Scene prevScene, FFTManager fftManager, FFTGameBoard gameBoard) {
+    public EditFFTScene(Stage primaryStage, Scene prevScene, FFTManager fftManager, FFTFailState failState) {
         setSpacing(15);
         setAlignment(Pos.CENTER);
         this.fftManager = fftManager;
@@ -145,8 +144,8 @@ public class EditFFTScene extends VBox {
         ChoiceBox<String> teamChoice = new ChoiceBox<>();
         teamChoice.setMinWidth(textFieldWidth);
         teamChoice.setMaxWidth(textFieldWidth);
-        teamChoice.setValue("Red");
-        teamChoice.setItems(FXCollections.observableArrayList("Red", "Black"));
+        teamChoice.setValue("Player 1");
+        teamChoice.setItems(FXCollections.observableArrayList("Player 1", "Player 2"));
 
         Label forLabel = new Label(" for: ");
         forLabel.setFont(Font.font("Verdana", 15));
@@ -163,14 +162,14 @@ public class EditFFTScene extends VBox {
         verifyBtn.setTooltip(new Tooltip("Checks if the current FFT is a winning strategy,\n" +
                 "or if given rules are part of winning strategy"));
         verifyBtn.setOnMouseClicked(event -> {
-            if (!Database.connectAndVerify())
+            if (!FFTManager.db.connectAndVerify())
                 return;
             int team = teamChoice.getSelectionModel().getSelectedIndex() + 1;
             boolean wholeFFT = verificationChoice.getSelectionModel().getSelectedIndex() == 0;
             boolean verified = fftManager.currFFT.verify(team, wholeFFT);
             if (!verified && fftManager.currFFT.failingPoint != null) {
                 Scene scene = primaryStage.getScene();
-                primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager, gameBoard), WIDTH, Config.HEIGHT));
+                primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager, failState), WIDTH, Config.HEIGHT));
             } else if (verified && !getChildren().contains(verifiedLabel)) {
                 getChildren().add(4, verifiedLabel);
 

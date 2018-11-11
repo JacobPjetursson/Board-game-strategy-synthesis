@@ -28,8 +28,12 @@ import static misc.Config.PLAYER2;
 public class Database implements FFTDatabase {
     public static Connection dbConnection;
 
+    public boolean connectAndVerify() {
+        return connectwithVerification();
+    }
+
     // Connects to the database. If the table in question is incomplete or missing, show a pane to allow creating the DB on the spot.
-    public static boolean connectAndVerify() {
+    public static boolean connectwithVerification() {
         System.out.println("Connecting to database. This might take some time");
         try {
             dbConnection = DriverManager.getConnection(

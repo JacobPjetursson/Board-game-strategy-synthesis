@@ -18,7 +18,7 @@ public class FFTManager {
     public static ArrayList<FFT> ffts;
     public static FFTDatabase db;
     public static FFTLogic logic;
-    static String path = Config.FFT_PATH;
+    static String path = Config.getFFTPath();
     static FFTState initialFFTState;
     public FFT currFFT;
 

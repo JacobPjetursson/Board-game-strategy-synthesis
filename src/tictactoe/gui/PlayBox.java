@@ -12,7 +12,8 @@ import tictactoe.game.State;
 import tictactoe.gui.board.Board;
 import tictactoe.gui.board.BoardTile;
 import tictactoe.gui.board.Player;
-import tictactoe.gui.menu.Arrow;
+
+import static misc.Config.PLAYER1;
 
 public class PlayBox extends Group {
     private Board board;
@@ -37,17 +38,10 @@ public class PlayBox extends Group {
         isRendered.setValue(true);
     }
 
-    public void addArrow(Move m, Color color) {
+    public void addHighlight(Move m, Color color) {
         isRendered.addListener((observable, oldValue, newValue) -> Platform.runLater(() -> {
-            double x, y;
-            Bounds b;
             BoardTile t = board.getTiles()[m.row][m.col];
-            b = board.localToParent(t.localToParent(t.getBoundsInLocal()));
-
-            x = (b.getMaxX() + b.getMinX()) / 2.0;
-            y = (b.getMaxY() + b.getMinY()) / 2.0;
-
-            getChildren().add(new Arrow(x, y, color));
+            t.highlight(color, m.team);
         }));
     }
 }
