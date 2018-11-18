@@ -62,7 +62,6 @@ public class BoardTile extends StackPane {
         // circle
         if (team == PLAYER1) {
             Circle c = new Circle();
-            System.out.println(tilesize);
             c.setRadius(tilesize/2 - (tilesize/12));
             c.setStrokeWidth(0);
             if (hover)

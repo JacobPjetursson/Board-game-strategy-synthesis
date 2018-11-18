@@ -29,8 +29,8 @@ public class State implements Serializable, FFTState {
 
     // Starting Root state
     public State() {
-        int rows = Config.bHeight;
-        int columns = Config.bWidth;
+        int rows = Config.kuliBHeight;
+        int columns = Config.kuliBWidth;
         board = new int[rows][columns];
         redScore = 0;
         blackScore = 0;

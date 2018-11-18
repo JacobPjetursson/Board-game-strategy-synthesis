@@ -31,8 +31,8 @@ public class PlayArea extends GridPane {
         board = new Board(60, 20, true);
         playerBlack = new Player(PLAYER2, cont, 60, 20, true);
         playerRed = new Player(PLAYER1, cont, 60, 20, true);
-        goalRed = new Goal(Config.bWidth * board.getTileSize(), 50);
-        goalBlack = new Goal(Config.bWidth * board.getTileSize(), 50);
+        goalRed = new Goal(Config.kuliBWidth * board.getTileSize(), 50);
+        goalBlack = new Goal(Config.kuliBWidth * board.getTileSize(), 50);
         info = new InfoPane(cont.getScoreLimit(), cont.getMode());
 
         ColumnConstraints column = new ColumnConstraints(WIDTH / 3);

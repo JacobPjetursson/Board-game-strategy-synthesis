@@ -21,8 +21,8 @@ public class State implements FFTState {
 
     // Starting state
     public State() {
-        int rows = Config.bHeight;
-        int columns = Config.bWidth;
+        int rows = Config.getBoardHeight();
+        int columns = Config.getBoardWidth();
         board = new int[rows][columns];
         turn = PLAYER1;
     }

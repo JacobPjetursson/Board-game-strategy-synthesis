@@ -27,9 +27,16 @@ public class Config {
     public static final int TICTACTOE = 1;
     public static int CURRENT_GAME;
 
-    // BOARD CONFIG KULIBRAT
-    public static final int bWidth = 3;
-    public static final int bHeight = 3;
+    // BOARD CONFIG
+    public static int getBoardWidth() {
+        return CURRENT_GAME == KULIBRAT ? kuliBWidth : 3;
+    }
+
+    public static int getBoardHeight() {
+        return CURRENT_GAME == KULIBRAT ? kuliBHeight : 3;
+    }
+    public static final int kuliBWidth = 3;
+    public static final int kuliBHeight = 3;
     // LEVEL OF SYMMETRIES
     public static final int SYM_NONE = 0;
     public static final int SYM_HREF = 1;

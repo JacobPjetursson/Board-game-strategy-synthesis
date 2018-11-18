@@ -45,15 +45,20 @@ public class Clause {
                 return;
             }
             // Parsing
-            String info = (name.replaceAll("[\\D]", ""));
-            if (info.length() < 2) {
+            String[] pos = name.split("_");
+            if (pos.length < 2) {
                 System.err.println("Failed to specify row and/or column for this clause");
                 clauseErr = true;
                 return;
             }
-            this.row = Integer.parseInt(info.substring(0, 1));
-            this.col = Integer.parseInt(info.substring(1, 2));
-            if (row >= Config.bHeight || col >= Config.bWidth) {
+            if (this.pieceOcc == PIECEOCC_NONE) {
+                this.row = Integer.parseInt(pos[0]);
+                this.col = Integer.parseInt(pos[1]);
+            } else {
+                this.row = Integer.parseInt(pos[1]);
+                this.col = Integer.parseInt(pos[2]);
+            }
+            if (row >= Config.getBoardHeight() || col >= Config.getBoardWidth()) {
                 System.err.println("row and/or column numbers are out of bounds w.r.t. the board size");
                 clauseErr = true;
                 return;

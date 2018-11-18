@@ -3,6 +3,7 @@ package fftlib;
 import fftlib.game.FFTMove;
 import misc.Config;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Action {
     public ArrayList<Clause> addClauses;
@@ -59,7 +60,7 @@ public class Action {
         ArrayList<Clause> rAddClauses = new ArrayList<>(addClauses);
         ArrayList<Clause> rRemClauses = new ArrayList<>(remClauses);
         int[][] cBoard = makeClauseBoard(rAddClauses, rRemClauses);
-        int[][] refH = new int[Config.bHeight][Config.bWidth];
+        int[][] refH = new int[Config.getBoardHeight()][Config.getBoardWidth()];
 
         // Reflect
         for (int i = 0; i < cBoard.length; i++) {
@@ -105,7 +106,7 @@ public class Action {
     }
 
     public int[][] makeClauseBoard(ArrayList<Clause> addClauses, ArrayList<Clause> remClauses) {
-        int[][] clauseBoard = new int[Config.bHeight][Config.bWidth];
+        int[][] clauseBoard = new int[Config.getBoardHeight()][Config.getBoardWidth()];
         // These clauses will be reflected/rotated
         ArrayList<Clause> addChangeClauses = new ArrayList<>();
         ArrayList<Clause> remChangeClauses = new ArrayList<>();
@@ -139,5 +140,20 @@ public class Action {
                     addClauses.add(new Clause(i, j, Clause.PIECEOCC_NONE, false));
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Action)) return false;
+
+        Action action = (Action) obj;
+        return this == action ||
+                (this.addClauses.equals(action.addClauses) && (this.remClauses.equals(action.remClauses)));
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = Objects.hash(addClauses, remClauses);
+        return 31 * hash;
     }
 }

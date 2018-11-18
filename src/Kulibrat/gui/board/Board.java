@@ -7,8 +7,8 @@ import kulibrat.game.State;
 import misc.Config;
 
 public class Board extends GridPane {
-    private static final int boardRows = Config.bHeight;
-    private static final int boardColumns = Config.bWidth;
+    private static final int boardRows = Config.kuliBHeight;
+    private static final int boardColumns = Config.kuliBWidth;
     private BoardTile[][] tiles;
     private int tilesize;
     private int pieceRadius;

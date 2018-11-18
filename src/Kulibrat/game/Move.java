@@ -1,7 +1,5 @@
 package kulibrat.game;
 
-import fftlib.Action;
-import fftlib.Clause;
 import fftlib.game.FFTMove;
 import misc.Config;
 
@@ -60,13 +58,13 @@ public class Move implements FFTMove {
     }
 
     public Move reflect() {
-        int[][] board = new int[Config.bWidth][Config.bHeight];
+        int[][] board = new int[Config.kuliBWidth][Config.kuliBHeight];
         if (oldCol != -1)
             board[oldRow][oldCol] = -team;
         if (newCol != -1)
             board[newRow][newCol] = team;
 
-        int[][] ref = new int[Config.bWidth][Config.bHeight];
+        int[][] ref = new int[Config.kuliBWidth][Config.kuliBHeight];
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 ref[i][j] = board[i][board.length - 1 - j];

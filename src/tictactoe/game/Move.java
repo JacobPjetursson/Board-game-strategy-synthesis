@@ -41,11 +41,11 @@ public class Move implements FFTMove {
     }
 
     public Move reflect() {
-        int[][] board = new int[Config.bWidth][Config.bHeight];
+        int[][] board = new int[Config.getBoardWidth()][Config.getBoardHeight()];
         if (col != -1)
             board[row][col] = team;
 
-        int[][] ref = new int[Config.bWidth][Config.bHeight];
+        int[][] ref = new int[Config.getBoardWidth()][Config.getBoardHeight()];
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 ref[i][j] = board[i][board.length - 1 - j];

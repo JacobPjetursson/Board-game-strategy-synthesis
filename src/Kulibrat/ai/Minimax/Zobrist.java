@@ -15,8 +15,8 @@ public class Zobrist {
         Random r = new Random();
         r.setSeed(0);
         // board keys
-        int rows = Config.bHeight;
-        int cols = Config.bWidth;
+        int rows = Config.kuliBHeight;
+        int cols = Config.kuliBWidth;
         int unique_pieces = 3;
         board = new long[rows][cols][unique_pieces];
         for (int i = 0; i < board.length; i++) {
