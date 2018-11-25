@@ -34,10 +34,12 @@ public class Clause {
         }
         this.boardPlacement = isBoardPlacement();
         if (this.boardPlacement) {
-            if (name.startsWith("P") || name.startsWith("p"))
+            if (name.startsWith("P") || name.startsWith("p")) {
                 this.pieceOcc = PIECEOCC_PLAYER;
-            else if (name.startsWith("E") || name.startsWith("e"))
+            }
+            else if (name.startsWith("E") || name.startsWith("e")) {
                 this.pieceOcc = PIECEOCC_ENEMY;
+            }
             else if (!Character.isDigit(name.charAt(0))) {
                 System.err.println("Board position clause must be specified with either:\n" +
                         "P (Player), E (Enemy), or '' (Irrelevant), followed by a row and column specification");

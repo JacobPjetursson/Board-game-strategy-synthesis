@@ -96,11 +96,20 @@ public class FFTFailurePane extends BorderPane {
                 Label rLabel = new Label((j + 1) + ": " + r.printRule());
                 rLabel.setFont(Font.font("Verdana", 10));
                 // TODO - below is hacky
-                int tempTeam = fftManager.currFFT.failingPoint.getMove().getTeam();
-                fftManager.currFFT.failingPoint.getMove().setTeam(-1);
-                if (r.action.getMove().equals(fftManager.currFFT.failingPoint.getMove()))
+                FFTMove failMove = fftManager.currFFT.failingPoint.getMove();
+                int tempTeam = failMove.getTeam();
+                failMove.setTeam(-1);
+                if (r.multiRule) {
+                    for (Rule rule : r.rules) {
+                        if (rule.action.getMove().equals(failMove)) {
+                            rLabel.setTextFill(Color.BLUE);
+                            break;
+                        }
+                    }
+                }
+                else if (r.action.getMove().equals(failMove))
                     rLabel.setTextFill(Color.BLUE);
-                fftManager.currFFT.failingPoint.getMove().setTeam(tempTeam);
+                failMove.setTeam(tempTeam);
                 rgVBox.getChildren().add(rLabel);
             }
             ruleGroups.add(rgVBox);

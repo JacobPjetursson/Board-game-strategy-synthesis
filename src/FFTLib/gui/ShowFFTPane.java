@@ -20,7 +20,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import misc.Config;
 
 public class ShowFFTPane extends BorderPane {
     FFTManager fftManager;
@@ -77,17 +76,10 @@ public class ShowFFTPane extends BorderPane {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r.printRule());
                 rLabel.setFont(Font.font("Verdana", 10));
-                for (int symmetry : Config.getSymmetries()) {
-                    if (!ruleApplied && r.applies(state, symmetry)) {
-                        // TODO - messy code below
-                        FFTMove move = r.action.getMove();
-                        move.setTeam(state.getTurn());
-                        if (FFTManager.logic.isLegalMove(state, move)) {
-                            rLabel.setTextFill(Color.BLUE);
-                            ruleApplied = true;
-                            break;
-                        }
-                    }
+                FFTMove move = r.apply(state);
+                if (!ruleApplied && move != null) {
+                    rLabel.setTextFill(Color.BLUE);
+                    ruleApplied = true;
                 }
 
                 rgVBox.getChildren().add(rLabel);

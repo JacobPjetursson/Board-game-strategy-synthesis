@@ -1,5 +1,6 @@
 package fftlib;
 
+import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import misc.Config;
 
@@ -15,19 +16,37 @@ public class Rule {
     public ArrayList<ClauseList> symmetryClauses;
     public ArrayList<Clause> clauses;
     public Action action;
+    public String clauseStr;
+    public String actionStr;
+
+    // If multirule, the rule class instead contains a list of rules
+    public boolean multiRule;
+    public HashSet<Rule> rules;
+    public boolean errors;
 
     // parsing constructor
     public Rule(String clauseStr, String actionStr) {
-        symmetryClauses = new ArrayList<>();
-        this.action = getAction(actionStr);
-        this.clauses = getClauses(clauseStr);
-        // TODO - make this for all available symmetries
-        for (int symmetry : Config.getSymmetries()) {
-            if (symmetry == Config.SYM_NONE)
-                symmetryClauses.add(new ClauseList(Config.SYM_NONE, clauses));
-            else if (symmetry == Config.SYM_HREF)
-                symmetryClauses.add(new ClauseList(Config.SYM_HREF, reflectH(clauses)));
+        this.multiRule = isMultiRule(clauseStr, actionStr);
+        if (multiRule) {
+            rules = new HashSet<>();
+            replaceWildcards(clauseStr, actionStr, rules);
+            this.clauseStr = clauseStr;
+            this.actionStr = actionStr;
+        } else {
+            symmetryClauses = new ArrayList<>();
+            this.action = getAction(actionStr);
+            this.clauses = getClauses(clauseStr);
+            this.clauseStr = getFormattedClauseStr();
+            this.actionStr = getFormattedActionStr();
+            // TODO - make this for all available symmetries
+            for (int symmetry : Config.getSymmetries()) {
+                if (symmetry == Config.SYM_NONE)
+                    symmetryClauses.add(new ClauseList(Config.SYM_NONE, clauses));
+                else if (symmetry == Config.SYM_HREF)
+                    symmetryClauses.add(new ClauseList(Config.SYM_HREF, reflectH(clauses)));
+            }
         }
+        errors = !isValidRuleFormat(this);
     }
 
     private static ArrayList<String> prepClauses(String clauseStr) {
@@ -42,15 +61,17 @@ public class Rule {
                     part = part.replace(sep, "");
                 }
             }
+            if (part.length() < 2)
+                continue;
             // Both E and P
             if ((part.charAt(0) == '!' && Character.isDigit(part.charAt(1)))) {
-                String newpart = "!E" + part.substring(1);
+                String newpart = "!E_" + part.substring(1);
                 clauseStrs.add(newpart);
-                newpart = "!P" + part.substring(1);
+                newpart = "!P_" + part.substring(1);
                 clauseStrs.add(newpart);
             } else if (Character.isDigit(part.charAt(0))) {
-                clauseStrs.add("E" + part);
-                clauseStrs.add("P" + part);
+                clauseStrs.add("E_" + part);
+                clauseStrs.add("P_" + part);
             } else
                 clauseStrs.add(part);
         }
@@ -87,7 +108,13 @@ public class Rule {
         return new Action(prepAction(actionStr));
     }
 
-    public static boolean isValidRuleFormat(Rule r) {
+    public boolean isValidRuleFormat(Rule r) {
+        if (r.multiRule) {
+            for (Rule rule : r.rules)
+                if (!isValidRuleFormat(rule))
+                    return false;
+            return true;
+        }
         if (r.clauses.isEmpty())
             return false;
         for (Clause c : r.clauses)
@@ -105,23 +132,38 @@ public class Rule {
         return true;
     }
 
-    public static HashSet<Rule> getMultipleRules(String clauseStr, String actionStr) {
-        HashSet<Rule> rules = new HashSet<>();
-        replaceWildcards(clauseStr, actionStr, rules);
-        return rules;
-    }
-
-    public static void replaceWildcards(String clauseStr, String actionStr, HashSet<Rule> rules) {
+    private static boolean isMultiRule(String clauseStr, String actionStr) {
         ArrayList<String> prepClauseStr = prepClauses(clauseStr);
         ArrayList<String> prepActionStr = prepAction(actionStr);
-        System.out.println("PREP CLAUSES");
-        for (String s : prepClauseStr)
-            System.out.println(s);
-        System.out.println();
-        System.out.println("PREP ACTIONS");
-        for (String s : prepActionStr)
-            System.out.println(s);
-        System.out.println();
+        for (String cStr : prepClauseStr) {
+            String[] pos = cStr.split("_");
+            if (pos.length < 2 || pos.length > 3)
+                return false;
+            // If P or E is prefixed, index is different
+            int idx = pos.length == 3 ? 1 : 0;
+            if (!Character.isDigit(pos[idx].charAt(0))) {
+                return true;
+            } if (!Character.isDigit(pos[idx + 1].charAt(0))) {
+                return true;
+            }
+        }
+        for (String aStr : prepActionStr) {
+            String[] pos = aStr.split("_");
+            if (pos.length < 2 || pos.length > 3)
+                return false;
+            // Char after + or -
+            if (!Character.isDigit(pos[0].charAt(1))) {
+                return true;
+            } if (!Character.isDigit(pos[1].charAt(0))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void replaceWildcards(String clauseStr, String actionStr, HashSet<Rule> rules) {
+        ArrayList<String> prepClauseStr = prepClauses(clauseStr);
+        ArrayList<String> prepActionStr = prepAction(actionStr);
         HashSet<String> wildCardsRow = new HashSet<>();
         HashSet<String> wildCardsCol = new HashSet<>();
         for (String cStr : prepClauseStr) {
@@ -168,10 +210,10 @@ public class Rule {
     }
 
     public String printRule() {
-        return "IF (" + getClauseStr() + ") THEN (" + getActionStr() + ")";
+        return "IF (" + this.clauseStr + ") THEN (" + this.actionStr + ")";
     }
 
-    String getClauseStr() {
+    private String getFormattedClauseStr() {
         String clauseMsg = "";
         for (Clause clause : clauses) {
             if (!clauseMsg.isEmpty())
@@ -181,44 +223,60 @@ public class Rule {
         return clauseMsg;
     }
 
-    String getActionStr() {
-        String clauseMsg = "";
+    private String getFormattedActionStr() {
+        String actionMsg = "";
         for (Clause clause : action.addClauses) {
-            if (!clauseMsg.isEmpty())
-                clauseMsg += " ∧ ";
-            clauseMsg += "+" + clause.name;
+            if (!actionMsg.isEmpty())
+                actionMsg += " ∧ ";
+            actionMsg += "+" + clause.name;
         }
         for (Clause clause : action.remClauses) {
-            if (!clauseMsg.isEmpty())
-                clauseMsg += " ∧ ";
-            clauseMsg += "-" + clause.name;
+            if (!actionMsg.isEmpty())
+                actionMsg += " ∧ ";
+            actionMsg += "-" + clause.name;
         }
-        return clauseMsg;
+        return actionMsg;
     }
-
-    public boolean applies(FFTState state, int symmetry) {
+    public FFTMove apply(FFTState state) {
+        if (multiRule) {
+            // If first rule applies, it doesn't matter if rest is incorrect, since it's a prioritized list
+            for (Rule rule : rules) {
+                FFTMove move = rule.apply(state);
+                if (move != null)
+                    return move;
+            }
+            return null;
+        }
         HashSet<Clause> stClauses = state.getClauses();
-        for (ClauseList clauseList : symmetryClauses) {
-            if (clauseList.symmetry != symmetry)
-                continue;
-            boolean match = true;
-            for (Clause c : clauseList.clauses) {
-                if (c.negation) {
-                    Clause temp = new Clause(c);
-                    temp.name = temp.name.replace("!", "");
-                    if (stClauses.contains(temp)) {
+        for (int symmetry : Config.getSymmetries()) {
+            for (ClauseList clauseList : symmetryClauses) {
+                if (clauseList.symmetry != symmetry)
+                    continue;
+
+                boolean match = true;
+                for (Clause c : clauseList.clauses) {
+                    if (c.negation) {
+                        Clause temp = new Clause(c);
+                        temp.name = temp.name.replace("!", "");
+                        if (stClauses.contains(temp)) {
+                            match = false;
+                            break;
+                        }
+                    } else if (!stClauses.contains(c)) {
                         match = false;
                         break;
                     }
-                } else if (!stClauses.contains(c)) {
-                    match = false;
-                    break;
+                }
+                if (match) {
+                    FFTMove move = action.applySymmetry(symmetry).getMove();
+                    move.setTeam(state.getTurn());
+                    if (FFTManager.logic.isLegalMove(state, move)) {
+                        return move;
+                    }
                 }
             }
-            if (match)
-                return true;
         }
-        return false;
+        return null;
     }
 
     private int[][] makeClauseBoard(ArrayList<Clause> clauses) {

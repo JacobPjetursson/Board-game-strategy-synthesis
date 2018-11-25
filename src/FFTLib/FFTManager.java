@@ -44,7 +44,7 @@ public class FFTManager {
                 for (RuleGroup rg : fft.ruleGroups) {
                     fft_file += "[" + rg.name + "]\n";
                     for (Rule r : rg.rules) {
-                        fft_file += r.getClauseStr() + " -> " + r.getActionStr() + "\n";
+                        fft_file += r.clauseStr + " -> " + r.actionStr + "\n";
                     }
                 }
             }

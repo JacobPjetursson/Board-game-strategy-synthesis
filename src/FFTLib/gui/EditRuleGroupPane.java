@@ -68,13 +68,12 @@ public class EditRuleGroupPane extends VBox {
         addRuleBtn.setOnMouseClicked(event -> {
             String clauseStr = ruleField.getText();
             String actionStr = actionField.getText();
-            for (Rule r : Rule.getMultipleRules(clauseStr, actionStr)) {
-                if (!Rule.isValidRuleFormat(r)) {
-                    //System.err.println("Incorrect rule format! Please check how-to for parsing rules");
-                    return;
-                }
-                rg_changes.rules.add(r);
+            Rule r = new Rule(clauseStr, actionStr);
+            if (r.errors) {
+                System.err.println("Incorrect rule format! Please check how-to for parsing rules");
+                return;
             }
+            rg_changes.rules.add(r);
             ruleField.clear();
             actionField.clear();
             showRules();

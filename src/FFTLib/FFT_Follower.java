@@ -18,16 +18,10 @@ public class FFT_Follower {
             return null;
         for (RuleGroup ruleGroup : fftManager.currFFT.ruleGroups) {
             for (Rule rule : ruleGroup.rules) {
-                for (int symmetry : Config.getSymmetries()) {
-                    if (rule.applies(state, symmetry)) {
-                        Action action = rule.action.applySymmetry(symmetry);
-                        FFTMove move = action.getMove();
-                        move.setTeam(state.getTurn());
-                        if (FFTManager.logic.isLegalMove(state, move)) {
-                            System.out.println("Applying rule: " + rule.printRule());
-                            return move;
-                        }
-                    }
+                FFTMove move = rule.apply(state);
+                if (move != null) {
+                    System.out.println("Applying rule: " + rule.printRule());
+                    return move;
                 }
             }
         }
