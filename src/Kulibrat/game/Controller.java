@@ -1,7 +1,6 @@
 package kulibrat.game;
 
 import fftlib.FFTManager;
-import fftlib.FFT_Follower;
 import fftlib.gui.EditFFTScene;
 import fftlib.gui.ShowFFTPane;
 import javafx.application.Platform;
@@ -42,7 +41,6 @@ public class Controller {
     private int turnNo;
     private AI aiRed;
     private AI aiBlack;
-    private FFT_Follower fftFollower;
     private Button startAIButton;
     private Button stopAIButton;
     private Button reviewButton;
@@ -66,8 +64,6 @@ public class Controller {
     private boolean fftInteractiveMode;
     private boolean fftAllowInteraction;
     private ShowFFTPane shownFFT;
-    private Logic logic;
-    private Database database;
 
     public Controller(Stage primaryStage, int playerRedInstance, int playerBlackInstance,
                       kulibrat.game.State state, int redTime, int blackTime, boolean overwriteDB) {
@@ -84,9 +80,8 @@ public class Controller {
         this.curHighLights = new ArrayList<>();
         this.previousStates = new ArrayList<>();
 
-        this.logic = new Logic();
-        this.database = new Database();
-        this.fftManager = new FFTManager(new State(state), logic, database);
+        this.fftManager = new FFTManager(new State(state), new Logic(), new Database(),
+                new FailStatePane(this), new InteractiveState(this));
 
         PlayPane playPane = new PlayPane(this);
         primaryStage.setScene(new Scene(playPane,
@@ -207,7 +202,7 @@ public class Controller {
         // edit fftManager button
         editFFTButton.setOnAction(event -> {
             Scene scene = primaryStage.getScene();
-            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager, new FailStatePane(this)), Config.WIDTH, Config.HEIGHT));
+            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager), Config.WIDTH, Config.HEIGHT));
         });
 
         // interactive mode
@@ -289,17 +284,23 @@ public class Controller {
             String skipped = (state.getTurn() == PLAYER1) ? "Black" : "Red";
             System.out.println("TEAM " + skipped + "'s turn has been skipped!");
             playArea.getInfoPane().displaySkippedTurn(skipped);
-            if (helpHumanBox.isSelected()) {
+            if (playerRedInstance == FFT && state.getTurn() == PLAYER1 ||
+                    playerBlackInstance == FFT && state.getTurn() == PLAYER2)
+                doAITurn();
+            else if (helpHumanBox.isSelected()) {
                 highlightBestPieces(true);
             }
             return;
         }
-        if ((playerRedInstance == FFT && state.getTurn() == PLAYER2) ||
-                (playerBlackInstance == FFT && state.getTurn() == PLAYER1)) {
+        // FFT vs. AI
+        if (mode == AI_VS_AI && ((playerRedInstance == FFT && state.getTurn() == PLAYER2) ||
+                (playerBlackInstance == FFT && state.getTurn() == PLAYER1))) {
             startAIButton.fire();
+        // Human vs. AI
         } else if ((playerBlackInstance != HUMAN && state.getTurn() == PLAYER2) ||
                 (playerRedInstance != HUMAN && state.getTurn() == PLAYER1)) {
             doAITurn();
+        // Human/FFT vs. human
         } else if (helpHumanBox.isSelected()) {
             highlightBestPieces(true);
         }

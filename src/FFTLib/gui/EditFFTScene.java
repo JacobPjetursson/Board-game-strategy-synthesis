@@ -32,7 +32,7 @@ public class EditFFTScene extends VBox {
     private Button delBtn, renameBtn, newBtn, addNewRuleGroupBtn, verifyBtn;
     private ComboBox<String> changeBox;
 
-    public EditFFTScene(Stage primaryStage, Scene prevScene, FFTManager fftManager, FFTFailState failState) {
+    public EditFFTScene(Stage primaryStage, Scene prevScene, FFTManager fftManager) {
         setSpacing(15);
         setAlignment(Pos.CENTER);
         this.fftManager = fftManager;
@@ -46,6 +46,7 @@ public class EditFFTScene extends VBox {
 
         VBox changeRenameBox = new VBox(5);
         changeRenameBox.setAlignment(Pos.CENTER);
+        changeRenameBox.setPadding(new Insets(0, 0, 0, 5));
         changeBox = new ComboBox<>();
         changeBox.setPromptText("Change FFT");
         changeBox.setMinWidth(100);
@@ -169,7 +170,7 @@ public class EditFFTScene extends VBox {
             boolean verified = fftManager.currFFT.verify(team, wholeFFT);
             if (!verified && fftManager.currFFT.failingPoint != null) {
                 Scene scene = primaryStage.getScene();
-                primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager, failState), WIDTH, Config.HEIGHT));
+                primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager), WIDTH, Config.HEIGHT));
             } else if (verified && !getChildren().contains(verifiedLabel)) {
                 getChildren().add(4, verifiedLabel);
 
@@ -179,6 +180,14 @@ public class EditFFTScene extends VBox {
         verifyBox.setAlignment(Pos.CENTER);
         verifyBox.setSpacing(10);
         verifyBox.getChildren().addAll(verifyBtn, teamChoice, forLabel, verificationChoice);
+
+        Button intEditBtn = new Button("Interactive Editing Mode");
+        intEditBtn.setAlignment(Pos.CENTER);
+        intEditBtn.setOnMouseClicked((event -> {
+            Scene scene = primaryStage.getScene();
+            primaryStage.setScene(new Scene(
+                    new EditFFTInteractive(scene, fftManager), WIDTH, Config.HEIGHT));
+        }));
 
 
         Button back = new Button("Back");
@@ -192,7 +201,7 @@ public class EditFFTScene extends VBox {
         bottomBox.getChildren().add(back);
 
         setVgrow(lw, Priority.ALWAYS);
-        getChildren().addAll(topPane, lw, ruleGroupBox, verifyBox, bottomBox);
+        getChildren().addAll(topPane, lw, ruleGroupBox, verifyBox, intEditBtn, bottomBox);
         update();
     }
 

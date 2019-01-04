@@ -29,7 +29,7 @@ public class FFTFailurePane extends BorderPane {
     private FFTManager fftManager;
     private ListView<VBox> lw;
 
-    public FFTFailurePane(Scene prevScene, FFTManager fftManager, FFTFailState fftFailState) {
+    public FFTFailurePane(Scene prevScene, FFTManager fftManager) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         this.fftManager = fftManager;
         Label title = new Label("This is the first encountered state where the FFT failed");
@@ -40,10 +40,7 @@ public class FFTFailurePane extends BorderPane {
         setTop(title);
         BorderPane.setAlignment(title, Pos.CENTER);
 
-        FFTStateAndMove ps = fftManager.currFFT.failingPoint;
-        FFTState s = ps.getState();
-        ArrayList<? extends FFTMove> nonLosingPlays = FFTManager.db.nonLosingPlays(s);
-        Node playBox = fftFailState.getFailState(ps, nonLosingPlays);
+        Node playBox = fftManager.getFailState();
         setCenter(playBox);
 
         lw = new ListView<>();

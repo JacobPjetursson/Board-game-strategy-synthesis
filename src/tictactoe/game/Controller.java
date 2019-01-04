@@ -1,7 +1,6 @@
 package tictactoe.game;
 
 import fftlib.FFTManager;
-import fftlib.FFT_Follower;
 import fftlib.gui.EditFFTScene;
 import fftlib.gui.ShowFFTPane;
 import javafx.application.Platform;
@@ -68,7 +67,7 @@ public class Controller {
         // fills up the "database"
         new LookupTableMinimax(PLAYER1, state);
 
-        this.fftManager = new FFTManager(new State(state), new Logic(), new Database());
+        this.fftManager = new FFTManager(new State(state), new Logic(), new Database(), new FailStatePane(this), new InteractiveState());
 
         PlayPane playPane = new PlayPane(this);
         primaryStage.setScene(new Scene(playPane,
@@ -119,7 +118,7 @@ public class Controller {
         // edit fftManager button
         editFFTButton.setOnAction(event -> {
             Scene scene = primaryStage.getScene();
-            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager, new FailStatePane(this)), Config.WIDTH, Config.HEIGHT));
+            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager), Config.WIDTH, Config.HEIGHT));
         });
 
         // interactive mode

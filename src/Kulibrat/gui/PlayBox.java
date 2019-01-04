@@ -5,7 +5,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.Label;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import kulibrat.game.Controller;
 import kulibrat.game.Move;
@@ -24,6 +25,7 @@ public class PlayBox extends Group {
     private Goal goalBlack;
     private Player playerRed;
     private Player playerBlack;
+    private VBox playBox;
     private SimpleBooleanProperty isRendered = new SimpleBooleanProperty();
 
     public PlayBox(Player playerBlack, Goal goalRed, Board board, Goal goalBlack, Player playerRed) {
@@ -37,6 +39,7 @@ public class PlayBox extends Group {
         this.playerRed = playerRed;
         vbox.getChildren().addAll(playerBlack, goalRed, board, goalBlack, playerRed);
         getChildren().add(vbox);
+        this.playBox = vbox;
         updateBounds();
     }
 
@@ -49,6 +52,19 @@ public class PlayBox extends Group {
     protected void layoutChildren() {
         super.layoutChildren();
         isRendered.setValue(true);
+    }
+
+    public void addScore(int scoreLimit, int player1Score, int player2Score) {
+        HBox infoBox = new HBox();
+        infoBox.setAlignment(Pos.CENTER);
+        infoBox.setSpacing(7);
+        infoBox.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        Label scoreLimitLabel = new Label("Score limit: " + scoreLimit);
+        Label p1ScoreLabel = new Label("Red points: " + player1Score);
+        Label p2ScoreLabel = new Label("Black points: " + player2Score);
+        infoBox.getChildren().addAll(scoreLimitLabel, p1ScoreLabel, p2ScoreLabel);
+        playBox.getChildren().add(0,infoBox);
     }
 
     public void addArrow(Move m, Color color) {

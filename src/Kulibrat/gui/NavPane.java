@@ -72,7 +72,7 @@ public class NavPane extends VBox {
         showFFTButton = new Button("Show FFT");
         buttons.add(showFFTButton);
 
-        editFFTButton = new Button("EditFFT");
+        editFFTButton = new Button("Edit FFT");
         buttons.add(editFFTButton);
 
         interactiveFFT = new CheckBox();

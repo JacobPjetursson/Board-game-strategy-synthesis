@@ -1,8 +1,9 @@
 package fftlib;
 
-import fftlib.game.FFTDatabase;
-import fftlib.game.FFTLogic;
-import fftlib.game.FFTState;
+import fftlib.game.*;
+import fftlib.gui.FFTFailState;
+import fftlib.gui.InteractiveFFTState;
+import javafx.scene.Node;
 import misc.Config;
 
 import java.io.BufferedWriter;
@@ -19,14 +20,21 @@ public class FFTManager {
     public static FFTDatabase db;
     public static FFTLogic logic;
     static String path = Config.getFFTPath();
-    static FFTState initialFFTState;
+    public static FFTState initialFFTState;
     public FFT currFFT;
+    public FFTFailState failState;
+    public InteractiveFFTState interactiveState;
 
-    public FFTManager(FFTState state, FFTLogic fftLogic, FFTDatabase fftDB) {
+    // Most game-related classes are processed here
+    public FFTManager(FFTState state, FFTLogic fftLogic, FFTDatabase fftDB,
+                      FFTFailState failState, InteractiveFFTState interactiveState) {
         ffts = new ArrayList<>();
         initialFFTState = state;
         logic = fftLogic;
         db = fftDB;
+        this.failState = failState;
+        this.interactiveState = interactiveState;
+
         // Try loading ffts from file in working directory
         load();
         if (!ffts.isEmpty())
@@ -117,6 +125,17 @@ public class FFTManager {
             currFFT = ffts.get(0);
         else
             currFFT = null;
+    }
+
+    public Node getFailState() {
+        FFTStateAndMove ps = currFFT.failingPoint;
+        FFTState s = ps.getState();
+        ArrayList<? extends FFTMove> nonLosingPlays = FFTManager.db.nonLosingPlays(s);
+        return failState.getFailState(ps, nonLosingPlays);
+    }
+
+    public Node getInteractiveState(FFTState fftState) {
+        return interactiveState.getInteractiveFFTState(fftState);
     }
 
 
