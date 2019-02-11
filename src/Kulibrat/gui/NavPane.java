@@ -28,6 +28,7 @@ public class NavPane extends VBox {
     private Button menuButton;
     private Button reviewButton;
     private Button editFFTButton;
+    private Button addRuleFFTButton;
     private HBox interactiveFFTBox;
     private CheckBox interactiveFFT;
     private Button showFFTButton;
@@ -40,7 +41,7 @@ public class NavPane extends VBox {
         setMinWidth(Config.WIDTH / 3);
         setAlignment(Pos.CENTER);
         setSpacing(40);
-        buttons = new ArrayList<Button>();
+        buttons = new ArrayList<>();
         restartButton = new Button("Restart Game");
         buttons.add(restartButton);
         restartButton.setOnMouseClicked(event -> restartGame(cont));
@@ -75,6 +76,9 @@ public class NavPane extends VBox {
         editFFTButton = new Button("Edit FFT");
         buttons.add(editFFTButton);
 
+        addRuleFFTButton = new Button("Add Rule to FFT");
+        buttons.add(addRuleFFTButton);
+
         interactiveFFT = new CheckBox();
         interactiveFFT.setSelected(true);
         Label interactiveLabel = new Label("Interactive FFT");
@@ -83,7 +87,7 @@ public class NavPane extends VBox {
         interactiveFFTBox = new HBox(interactiveFFT, interactiveLabel);
         interactiveFFTBox.setAlignment(Pos.CENTER);
 
-        FFTWidgets = new VBox(editFFTButton, interactiveFFTBox);
+        FFTWidgets = new VBox(showFFTButton, editFFTButton, addRuleFFTButton, interactiveFFTBox);
         FFTWidgets.setSpacing(10);
         FFTWidgets.setAlignment(Pos.CENTER);
 
@@ -134,12 +138,12 @@ public class NavPane extends VBox {
         getChildren().add(FFTWidgets);
     }
 
-    public void addShowFFTButton() {
-        getChildren().add(showFFTButton);
-    }
-
     public Button getEditFFTButton() {
         return editFFTButton;
+    }
+
+    public Button getAddRuleFFTButton() {
+        return addRuleFFTButton;
     }
 
     public CheckBox getInteractiveFFTBox() {

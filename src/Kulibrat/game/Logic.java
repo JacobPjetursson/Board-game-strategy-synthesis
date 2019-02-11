@@ -21,7 +21,7 @@ public class Logic implements FFTLogic {
     }
 
     // Outputs a list of legal moves from a single piece
-    static ArrayList<Move> legalMovesFromPiece(int oldRow, int oldCol, int team, State state) {
+    public static ArrayList<Move> legalMovesFromPiece(int oldRow, int oldCol, int team, State state) {
         ArrayList<Move> list = new ArrayList<>();
         int[][] board = state.getBoard();
         int maxRow = board.length - 1;

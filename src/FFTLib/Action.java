@@ -5,22 +5,28 @@ import misc.Config;
 import java.util.ArrayList;
 import java.util.Objects;
 
+
 public class Action {
-    public ArrayList<Clause> addClauses;
-    protected boolean actionErr;
-    public ArrayList<Clause> remClauses;
+    public Clause addClause;
+    public Clause remClause;
+    boolean actionErr;
 
-    protected Action(ArrayList<String> clauses) {
-        this.addClauses = new ArrayList<>();
-        this.remClauses = new ArrayList<>();
+    Action() {
+        this.addClause = new Clause();
+        this.remClause = new Clause();
+    }
 
-        for (String c : clauses) {
-            if (c.startsWith("+") && Character.isDigit(c.charAt(1))) {
-                c = c.substring(1);
-                addClauses.add(new Clause(c));
-            } else if (c.startsWith("-") && Character.isDigit(c.charAt(1))) {
-                c = c.substring(1);
-                remClauses.add(new Clause(c));
+    Action(ArrayList<String> literals) {
+        this.addClause = new Clause();
+        this.remClause = new Clause();
+
+        for (String l : literals) {
+            if (l.startsWith("+") && Character.isDigit(l.charAt(1))) {
+                l = l.substring(1);
+                addClause.add(new Literal(l));
+            } else if (l.startsWith("-") && Character.isDigit(l.charAt(1))) {
+                l = l.substring(1);
+                remClause.add(new Literal(l));
             } else {
                 System.err.println("Invalid action format! Should be plus or minus, followed by row and column specification");
                 actionErr = true;
@@ -28,26 +34,26 @@ public class Action {
             }
         }
 
-        if (addClauses.isEmpty() && remClauses.isEmpty()) {
+        if (addClause.isEmpty() && remClause.isEmpty()) {
             System.err.println("Action clause list was empty");
             actionErr = true;
             return;
         }
         if (Config.CURRENT_GAME == Config.KULIBRAT &&
-                (addClauses.size() > 1 || remClauses.size() > 1)) {
+                (addClause.size() > 1 || remClause.size() > 1)) {
             System.err.println("Only moves with a single add clause and/or a single remove clause is allowed in this game");
             actionErr = true;
         }
     }
 
-    protected Action(ArrayList<Clause> addClauses, ArrayList<Clause> remClauses) {
-        this.addClauses = new ArrayList<>(addClauses);
-        this.remClauses = new ArrayList<>(remClauses);
+    public Action(Clause addClause, Clause remClause) {
+        this.addClause = new Clause(addClause);
+        this.remClause = new Clause(remClause);
     }
 
 
     // TODO - do for all
-    public Action applySymmetry(int symmetry) {
+    Action applySymmetry(int symmetry) {
         switch (symmetry) {
             case Config.SYM_HREF:
                 return reflectH();
@@ -57,10 +63,10 @@ public class Action {
     }
 
     private Action reflectH() {
-        ArrayList<Clause> rAddClauses = new ArrayList<>(addClauses);
-        ArrayList<Clause> rRemClauses = new ArrayList<>(remClauses);
-        int[][] cBoard = makeClauseBoard(rAddClauses, rRemClauses);
-        int[][] refH = new int[Config.getBoardHeight()][Config.getBoardWidth()];
+        Clause rotAddClause = new Clause(addClause);
+        Clause rotRemClause = new Clause(remClause);
+        int[][] cBoard = makeClauseBoard(rotAddClause, rotRemClause);
+        int[][] refH = new int[FFTManager.gameBoardHeight][FFTManager.gameBoardWidth];
 
         // Reflect
         for (int i = 0; i < cBoard.length; i++) {
@@ -68,76 +74,63 @@ public class Action {
                 refH[i][j] = cBoard[i][cBoard[i].length - 1 - j];
             }
         }
-        addClauseBoardToList(refH, rAddClauses, rRemClauses);
+        addClauseBoardToList(refH, rotAddClause, rotRemClause);
 
-        return new Action(rAddClauses, rRemClauses);
+        return new Action(rotAddClause, rotRemClause);
     }
 
-    // TODO - find a better solution for below
     public FFTMove getMove() {
-        switch(Config.CURRENT_GAME) {
-            case Config.KULIBRAT:
-                int newRow = -1;
-                int newCol = -1;
-                int oldRow = -1;
-                int oldCol = -1;
-
-                for (Clause c : addClauses) {
-                    newRow = c.row;
-                    newCol = c.col;
-                }
-                for (Clause c : remClauses) {
-                    oldRow = c.row;
-                    oldCol = c.col;
-                }
-                return new kulibrat.game.Move(oldRow, oldCol, newRow, newCol, -1);
-
-            case Config.TICTACTOE:
-                int row = -1;
-                int col = -1;
-                for (Clause c : addClauses) {
-                    row = c.row;
-                    col = c.col;
-                }
-                return new tictactoe.game.Move(row, col, -1);
-        }
-        System.err.println("Current game not found in config list");
-        return null;
+        return FFTManager.actionToMove.apply(this);
     }
 
-    public int[][] makeClauseBoard(ArrayList<Clause> addClauses, ArrayList<Clause> remClauses) {
-        int[][] clauseBoard = new int[Config.getBoardHeight()][Config.getBoardWidth()];
-        // These clauses will be reflected/rotated
-        ArrayList<Clause> addChangeClauses = new ArrayList<>();
-        ArrayList<Clause> remChangeClauses = new ArrayList<>();
+    private int[][] makeClauseBoard(Clause addClause, Clause remClause) {
+        int[][] clauseBoard = new int[FFTManager.gameBoardHeight][FFTManager.gameBoardWidth];
+        // These literals will be reflected/rotated
+        ArrayList<Literal> addChangeLiterals = new ArrayList<>();
+        ArrayList<Literal> remChangeLiterals = new ArrayList<>();
 
-        for (Clause c : addClauses) {
-            if (c.row != -1) {
-                addChangeClauses.add(c);
-                clauseBoard[c.row][c.col] = c.pieceOcc;
+        for (Literal l : addClause.literals) {
+            if (l.row != -1) {
+                addChangeLiterals.add(l);
+                clauseBoard[l.row][l.col] = l.pieceOcc;
             }
         }
-        addClauses.removeAll(addChangeClauses);
-        for (Clause c : remClauses) {
-            if (c.row != -1) {
-                remChangeClauses.add(c);
-                clauseBoard[c.row][c.col] = -c.pieceOcc;
+        addClause.literals.removeAll(addChangeLiterals);
+        for (Literal l : remClause.literals) {
+            if (l.row != -1) {
+                remChangeLiterals.add(l);
+                clauseBoard[l.row][l.col] = -l.pieceOcc;
             }
         }
-        remClauses.removeAll(remChangeClauses);
+        remClause.literals.removeAll(remChangeLiterals);
 
         return clauseBoard;
     }
 
-    public void addClauseBoardToList(int[][] cb, ArrayList<Clause> addClauses, ArrayList<Clause> remClauses) {
+    String getFormattedString() {
+        String actionMsg = "";
+        for (Literal literal : addClause.literals) {
+            if (!actionMsg.isEmpty())
+                actionMsg += " ∧ ";
+            actionMsg += "+" + literal.name;
+        }
+        for (Literal literal : remClause.literals) {
+            if (!actionMsg.isEmpty())
+                actionMsg += " ∧ ";
+            actionMsg += "-" + literal.name;
+        }
+        return actionMsg;
+    }
+
+    private void addClauseBoardToList(int[][] cb, Clause addClause, Clause remClause) {
         // Add back to list
         for (int i = 0; i < cb.length; i++) {
             for (int j = 0; j < cb[i].length; j++) {
                 int val = cb[i][j];
-                if (val == -Clause.PIECEOCC_NONE)
-                    remClauses.add(new Clause(i, j, Clause.PIECEOCC_NONE, false));
-                else if (val == Clause.PIECEOCC_NONE)
-                    addClauses.add(new Clause(i, j, Clause.PIECEOCC_NONE, false));
+                if (val == -Literal.PIECEOCC_NONE)
+                    remClause.add(new Literal(i, j, Literal.PIECEOCC_NONE, false));
+                else if (val == Literal.PIECEOCC_NONE)
+                    addClause.add(new Literal(i, j, Literal.PIECEOCC_NONE, false));
             }
         }
     }
@@ -148,12 +141,12 @@ public class Action {
 
         Action action = (Action) obj;
         return this == action ||
-                (this.addClauses.equals(action.addClauses) && (this.remClauses.equals(action.remClauses)));
+                (this.addClause.equals(action.addClause) && (this.remClause.equals(action.remClause)));
     }
 
     @Override
     public int hashCode() {
-        int hash = Objects.hash(addClauses, remClauses);
+        int hash = Objects.hash(addClause, remClause);
         return 31 * hash;
     }
 }

@@ -1,6 +1,6 @@
 package tictactoe.game;
 
-import fftlib.Clause;
+import fftlib.Literal;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import misc.Config;
@@ -21,8 +21,8 @@ public class State implements FFTState {
 
     // Starting state
     public State() {
-        int rows = Config.getBoardHeight();
-        int columns = Config.getBoardWidth();
+        int rows = 3;
+        int columns = 3;
         board = new int[rows][columns];
         turn = PLAYER1;
     }
@@ -95,23 +95,23 @@ public class State implements FFTState {
         this.move = move;
     }
 
-    public HashSet<Clause> getClauses() {
-        HashSet<Clause> clauses = new HashSet<>();
+    public HashSet<Literal> getLiterals() {
+        HashSet<Literal> literals = new HashSet<>();
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 int pieceOcc = board[i][j];
                 if (pieceOcc > 0) {
                     if (turn == PLAYER1)
-                        clauses.add(new Clause(i, j, pieceOcc, false));
+                        literals.add(new Literal(i, j, pieceOcc, false));
                     else {
                         pieceOcc = (pieceOcc == 1) ? 2 : 1;
-                        clauses.add(new Clause(i, j, pieceOcc, false));
+                        literals.add(new Literal(i, j, pieceOcc, false));
                     }
                 }
             }
         }
-        return clauses;
+        return literals;
     }
 
     public int getTurn() {

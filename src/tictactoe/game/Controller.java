@@ -12,6 +12,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import misc.Config;
+import tictactoe.FFT.GameSpecifics;
 import tictactoe.ai.AI;
 import tictactoe.ai.FFTFollower;
 import tictactoe.ai.LookupTableMinimax;
@@ -67,7 +68,9 @@ public class Controller {
         // fills up the "database"
         new LookupTableMinimax(PLAYER1, state);
 
-        this.fftManager = new FFTManager(new State(state), new Logic(), new Database(), new FailStatePane(this), new InteractiveState());
+        GameSpecifics gameSpecifics = new GameSpecifics(this);
+
+        this.fftManager = new FFTManager(gameSpecifics);
 
         PlayPane playPane = new PlayPane(this);
         primaryStage.setScene(new Scene(playPane,

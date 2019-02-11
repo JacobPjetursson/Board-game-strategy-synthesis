@@ -4,7 +4,6 @@ import fftlib.game.*;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
-import misc.Config;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,26 +13,38 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+
 
 public class FFTManager {
     public static ArrayList<FFT> ffts;
     public static FFTDatabase db;
     public static FFTLogic logic;
-    static String path = Config.getFFTPath();
+    static int [] gameSymmetries;
+    static int gameBoardWidth, gameBoardHeight;
+    private static String path;
     public static FFTState initialFFTState;
     public FFT currFFT;
-    public FFTFailState failState;
-    public InteractiveFFTState interactiveState;
+    private static FFTFailState failState;
+    public static InteractiveFFTState interactiveState;
+    static Function<Action, FFTMove> actionToMove;
+    public static Function<Clause, FFTState> clauseToState;
 
     // Most game-related classes are processed here
-    public FFTManager(FFTState state, FFTLogic fftLogic, FFTDatabase fftDB,
-                      FFTFailState failState, InteractiveFFTState interactiveState) {
+    public FFTManager(FFTGameSpecifics gameSpecifics) {
         ffts = new ArrayList<>();
-        initialFFTState = state;
-        logic = fftLogic;
-        db = fftDB;
-        this.failState = failState;
-        this.interactiveState = interactiveState;
+        initialFFTState = gameSpecifics.getInitialState();
+        logic = gameSpecifics.getLogic();
+        db = gameSpecifics.getDatabase();
+        path = gameSpecifics.getFFTFilePath();
+        gameSymmetries = gameSpecifics.getSymmetries();
+        int[] dim = gameSpecifics.getBoardDim();
+        gameBoardHeight = dim[0];
+        gameBoardWidth = dim[1];
+        actionToMove = gameSpecifics::actionToMove;
+        clauseToState = gameSpecifics::clauseToState;
+        failState = gameSpecifics.getFailState();
+        interactiveState = gameSpecifics.getInteractiveState();
 
         // Try loading ffts from file in working directory
         load();
@@ -83,16 +94,16 @@ public class FFTManager {
                     }
                     // Rulegroup name
                     else if (line.startsWith("[")) {
-                        if (rg != null) {
+                        if (rg != null && fft != null) {
                             fft.ruleGroups.add(rg);
                         }
                         rg = new RuleGroup(line.substring(1, line.length() - 1));
                     } else {
                         String[] rule = line.split("->");
-                        String clausesStr = rule[0].trim();
+                        String clauseStr = rule[0].trim();
                         String actionStr = rule[1].trim();
                         if (rg != null) {
-                            rg.rules.add(new Rule(clausesStr, actionStr));
+                            rg.rules.add(new Rule(clauseStr, actionStr));
                         }
                     }
                 }
@@ -132,10 +143,6 @@ public class FFTManager {
         FFTState s = ps.getState();
         ArrayList<? extends FFTMove> nonLosingPlays = FFTManager.db.nonLosingPlays(s);
         return failState.getFailState(ps, nonLosingPlays);
-    }
-
-    public Node getInteractiveState(FFTState fftState) {
-        return interactiveState.getInteractiveFFTState(fftState);
     }
 
 

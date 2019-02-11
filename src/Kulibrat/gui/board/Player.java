@@ -23,15 +23,15 @@ public class Player extends VBox {
     private int team;
     private GridPane gridPaneBoard;
     private ArrayList<BoardPiece> pieces;
-    private boolean clickable;
+    private int clickMode;
     private int pieceRadius;
     private int type;
     private Label typeLabel;
     private Button swapBtn;
 
-    public Player(int team, Controller cont, int tileWidth, int pieceRadius, boolean clickable) {
+    public Player(int team, Controller cont, int tileWidth, int pieceRadius, int clickMode) {
         this.team = team;
-        this.clickable = clickable;
+        this.clickMode = clickMode;
         this.pieceRadius = pieceRadius;
         pieces = new ArrayList<>();
         type = cont.getPlayerInstance(team);
@@ -51,7 +51,7 @@ public class Player extends VBox {
             gridPaneBoard.getColumnConstraints().add(column);
         }
         for (int i = 0; i < amount_of_pieces; i++) {
-            BoardPiece bp = new BoardPiece(team, cont, pieceRadius, clickable);
+            BoardPiece bp = new BoardPiece(team, cont, pieceRadius, clickMode);
             pieces.add(bp);
             gridPaneBoard.add(pieceBox(bp), i, 0);
         }
@@ -86,8 +86,10 @@ public class Player extends VBox {
         gridPaneDisplay.add(imgPane, 1, 0);
         gridPaneDisplay.add(typeLabel, 2, 0);
         getChildren().add(gridPaneBoard);
-        if (clickable && team == PLAYER1) getChildren().add(1, gridPaneDisplay);
-        else if (clickable) getChildren().add(0, gridPaneDisplay);
+        if (clickMode == CLICK_DEFAULT) {
+            if (team == PLAYER1) getChildren().add(1, gridPaneDisplay);
+            else getChildren().add(0, gridPaneDisplay);
+        }
 
     }
 
@@ -113,7 +115,7 @@ public class Player extends VBox {
                     }
                 }
                 if (!occupied) {
-                    BoardPiece bp = new BoardPiece(team, cont, pieceRadius, clickable);
+                    BoardPiece bp = new BoardPiece(team, cont, pieceRadius, clickMode);
                     pieces.add(bp);
                     gridPaneBoard.add(pieceBox(bp), i, 0);
                     break;

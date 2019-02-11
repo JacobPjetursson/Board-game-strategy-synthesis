@@ -168,11 +168,19 @@ public class EditFFTScene extends VBox {
             int team = teamChoice.getSelectionModel().getSelectedIndex() + 1;
             boolean wholeFFT = verificationChoice.getSelectionModel().getSelectedIndex() == 0;
             boolean verified = fftManager.currFFT.verify(team, wholeFFT);
-            if (!verified && fftManager.currFFT.failingPoint != null) {
-                Scene scene = primaryStage.getScene();
-                primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager), WIDTH, Config.HEIGHT));
-            } else if (verified && !getChildren().contains(verifiedLabel)) {
-                getChildren().add(4, verifiedLabel);
+            if (!verified) {
+                if (fftManager.currFFT.failingPoint == null) {
+                    verifiedLabel.setText("Unable to win vs. perfect player");
+                    if (!getChildren().contains(verifiedLabel))
+                        getChildren().add(4, verifiedLabel);
+                } else {
+                    Scene scene = primaryStage.getScene();
+                    primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager), WIDTH, Config.HEIGHT));
+                }
+            } else {
+                verifiedLabel.setText("The FFT was successfully verified");
+                if (!getChildren().contains(verifiedLabel))
+                    getChildren().add(4, verifiedLabel);
 
             }
         });

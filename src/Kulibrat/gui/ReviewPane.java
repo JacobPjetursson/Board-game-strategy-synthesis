@@ -1,6 +1,7 @@
 package kulibrat.gui;
 
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -30,6 +31,7 @@ import kulibrat.misc.Database;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import static misc.Config.CLICK_DISABLED;
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
 
@@ -157,19 +159,18 @@ public class ReviewPane extends VBox {
     }
 
     private PlayBox getPlayBox(Controller cont, StateAndMove ps, ArrayList<Move> bestPlays) {
-        Board b = new Board(20, 7, false);
-        Player playerBlack = new Player(PLAYER2, cont, 20, 7, false);
-        Goal goalRed = new Goal(3 * b.getTileSize(), 17);
-        Goal goalBlack = new Goal(3 * b.getTileSize(), 17);
-        Player playerRed = new Player(PLAYER1, cont, 20, 7, false);
 
-        PlayBox pb = new PlayBox(playerBlack, goalRed, b, goalBlack, playerRed);
-        pb.update(cont, ps.getState());
-        pb.addArrow(ps.getMove(), Color.BLUE);
-        for (Move m : bestPlays) {
-            if (m.equals(ps.getMove())) continue;
-            pb.addArrow(m, Color.GREEN);
-        }
+        PlayBox pb = new PlayBox(20, CLICK_DISABLED, cont);
+        pb.update(ps.getState());
+
+        Platform.runLater(() -> {
+            pb.addArrow(ps.getMove(), Color.BLUE);
+            for (Move m : bestPlays) {
+                if (m.equals(ps.getMove())) continue;
+                pb.addArrow(m, Color.GREEN);
+            }
+        });
+
         return pb;
     }
 }

@@ -20,4 +20,8 @@ public class RuleGroup {
         this.rules = new ArrayList<>(copy.rules);
         this.name = copy.name;
     }
+
+    public void addRule(Rule r) {
+        rules.add(r);
+    }
 }

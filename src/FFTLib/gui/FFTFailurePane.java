@@ -4,8 +4,6 @@ import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
 import fftlib.game.FFTMove;
-import fftlib.game.FFTState;
-import fftlib.game.FFTStateAndMove;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -22,7 +20,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import java.util.ArrayList;
 
 
 public class FFTFailurePane extends BorderPane {
@@ -46,7 +43,7 @@ public class FFTFailurePane extends BorderPane {
         lw = new ListView<>();
         lw.setPickOnBounds(false);
         lw.setPrefWidth(350);
-        lw.setSelectionModel(new NoSelectionModel<VBox>());
+        lw.setSelectionModel(new NoSelectionModel<>());
         showRuleGroups();
         BorderPane.setMargin(lw, new Insets(15));
         setRight(lw);

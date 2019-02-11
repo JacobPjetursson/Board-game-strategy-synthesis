@@ -1,6 +1,7 @@
 package kulibrat.game;
 
 import fftlib.FFTManager;
+import fftlib.gui.EditFFTInteractive;
 import fftlib.gui.EditFFTScene;
 import fftlib.gui.ShowFFTPane;
 import javafx.application.Platform;
@@ -12,8 +13,10 @@ import javafx.scene.input.KeyCode;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import kulibrat.FFT.FFTFollower;
+import kulibrat.FFT.GameSpecifics;
+import kulibrat.FFT.InteractiveState;
 import kulibrat.ai.AI;
-import kulibrat.ai.FFTFollower;
 import kulibrat.ai.MCTS.MCTS;
 import kulibrat.ai.Minimax.LookupTableMinimax;
 import kulibrat.ai.Minimax.Minimax;
@@ -26,6 +29,7 @@ import kulibrat.misc.Database;
 import misc.Config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import static misc.Config.*;
@@ -45,6 +49,7 @@ public class Controller {
     private Button stopAIButton;
     private Button reviewButton;
     private Button editFFTButton;
+    private Button addRuleFFTButton;
     private Button showFFTButton;
     private CheckBox interactiveFFTBox;
     private Button[] swapButtons;
@@ -53,7 +58,7 @@ public class Controller {
     private NavPane navPane;
     private BoardPiece selected;
     private ArrayList<Move> curHighLights;
-    private kulibrat.game.State state;
+    private State state;
     private PlayArea playArea;
     private Goal goalRed;
     private Goal goalBlack;
@@ -64,6 +69,7 @@ public class Controller {
     private boolean fftInteractiveMode;
     private boolean fftAllowInteraction;
     private ShowFFTPane shownFFT;
+    private GameSpecifics gameSpecifics;
 
     public Controller(Stage primaryStage, int playerRedInstance, int playerBlackInstance,
                       kulibrat.game.State state, int redTime, int blackTime, boolean overwriteDB) {
@@ -80,8 +86,9 @@ public class Controller {
         this.curHighLights = new ArrayList<>();
         this.previousStates = new ArrayList<>();
 
-        this.fftManager = new FFTManager(new State(state), new Logic(), new Database(),
-                new FailStatePane(this), new InteractiveState(this));
+        // Prepare the FFT Stuff
+        gameSpecifics = new GameSpecifics(this);
+        this.fftManager = new FFTManager(gameSpecifics);
 
         PlayPane playPane = new PlayPane(this);
         primaryStage.setScene(new Scene(playPane,
@@ -100,9 +107,10 @@ public class Controller {
         reviewButton = navPane.getReviewButton();
         showFFTButton = navPane.getShowFFTButton();
         editFFTButton = navPane.getEditFFTButton();
+        addRuleFFTButton = navPane.getAddRuleFFTButton();
         interactiveFFTBox = navPane.getInteractiveFFTBox();
-        goalRed = playArea.getGoal(PLAYER1);
-        goalBlack = playArea.getGoal(PLAYER2);
+        goalRed = playArea.getPlayBox().getGoal(PLAYER1);
+        goalBlack = playArea.getPlayBox().getGoal(PLAYER2);
 
         showNavButtons();
 
@@ -110,8 +118,8 @@ public class Controller {
         // Swap player buttons
         swapButtons = new Button[2];
         Player[] players = new Player[2];
-        players[0] = playArea.getPlayer(PLAYER1);
-        players[1] = playArea.getPlayer(PLAYER2);
+        players[0] = playArea.getPlayBox().getPlayer(PLAYER1);
+        players[1] = playArea.getPlayBox().getPlayer(PLAYER2);
         swapButtons[0] = players[0].getSwapBtn();
         swapButtons[1] = players[1].getSwapBtn();
         for (int i = 0; i < swapButtons.length; i++) {
@@ -136,19 +144,7 @@ public class Controller {
                 deselect();
             }
         });
-        // Tiles
-        BoardTile[][] tiles = playArea.getBoard().getTiles();
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[i].length; j++) {
-                BoardTile tile = tiles[i][j];
-                tile.setOnMouseClicked(event -> {
-                    if (tile.getHighlight()) {
-                        BoardPiece piece = selected;
-                        doHumanTurn(new Move(piece.getRow(), piece.getCol(), tile.getRow(), tile.getCol(), piece.getTeam()));
-                    }
-                });
-            }
-        }
+
         startAIButton.setOnAction(event -> {
             startAI();
             stopAIButton.setDisable(false);
@@ -166,20 +162,6 @@ public class Controller {
             }
         });
 
-        // Goal Red
-        goalRed.setOnMouseClicked(event -> {
-            if (goalRed.getHighlight()) {
-                BoardPiece piece = selected;
-                doHumanTurn(new Move(piece.getRow(), piece.getCol(), -1, -1, piece.getTeam()));
-            }
-        });
-        // Goal Black
-        goalBlack.setOnMouseClicked(event -> {
-            if (goalBlack.getHighlight()) {
-                BoardPiece piece = selected;
-                doHumanTurn(new Move(piece.getRow(), piece.getCol(), -1, -1, piece.getTeam()));
-            }
-        });
         // help human checkbox
         helpHumanBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
             helpHumanBox.setDisable(true);
@@ -202,7 +184,15 @@ public class Controller {
         // edit fftManager button
         editFFTButton.setOnAction(event -> {
             Scene scene = primaryStage.getScene();
-            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager), Config.WIDTH, Config.HEIGHT));
+            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, this.fftManager), Config.WIDTH, Config.HEIGHT));
+        });
+
+        // add rule to FFT button
+        addRuleFFTButton.setOnAction(event -> {
+            Scene scene = primaryStage.getScene();
+            EditFFTInteractive interactive = new EditFFTInteractive(scene, this.fftManager);
+            primaryStage.setScene(new Scene(interactive, Config.WIDTH, Config.HEIGHT));
+            interactive.update(this.state);
         });
 
         // interactive mode
@@ -216,7 +206,7 @@ public class Controller {
         showFFTButton.setOnAction(event -> {
             deselect();
             Stage newStage = new Stage();
-            shownFFT = new ShowFFTPane(fftManager, state);
+            shownFFT = new ShowFFTPane(fftManager, this.state);
             newStage.setScene(new Scene(shownFFT, 450, 550));
             newStage.show();
             newStage.setOnCloseRequest(otherevent -> shownFFT = null);
@@ -239,8 +229,6 @@ public class Controller {
         if ((mode != AI_VS_AI || playerBlackInstance == FFT || playerRedInstance == FFT)) {
             if (!navPane.containsHelpBox())
                 navPane.addHelpHumanBox();
-            if (!navPane.containsShowFFTButton())
-                navPane.addShowFFTButton();
         }
         if ((playerBlackInstance == FFT || playerRedInstance == FFT) && !navPane.containsFFTWidgets())
             navPane.addFFTWidgets();
@@ -275,7 +263,7 @@ public class Controller {
 
     // Is called when a tile is pressed by the user. If vs. the AI, it calls the doAITurn after. This function also highlights
     // the best pieces for the opponent, if it is human vs human.
-    private void doHumanTurn(Move move) {
+    public void doHumanTurn(Move move) {
         previousStates.add(new StateAndMove(state, move, turnNo));
         state = state.getNextState(move);
         updatePostHumanTurn();
@@ -387,6 +375,8 @@ public class Controller {
             if (fftInteractiveMode) {
                 System.out.println("Defaulting to user interaction");
                 fftAllowInteraction = true;
+                if (helpHumanBox.isSelected())
+                    highlightBestPieces(true);
                 return;
             } else {
                 System.out.println("Defaulting to random move");
@@ -458,7 +448,7 @@ public class Controller {
         if (highlight && helpHumanBox.isSelected()) {
             turnsToTerminalList = getScores(curHighLights);
         }
-        BoardTile[][] tiles = playArea.getBoard().getTiles();
+        BoardTile[][] tiles = playArea.getPlayBox().getBoard().getTiles();
         for (int i = 0; i < curHighLights.size(); i++) {
             Move m = curHighLights.get(i);
             String turns = "";
@@ -484,7 +474,7 @@ public class Controller {
         State n = new State(state);
         ArrayList<Move> bestPlays = null;
         if (highlight) bestPlays = Database.bestPlays(n);
-        BoardTile[][] tiles = playArea.getBoard().getTiles();
+        BoardTile[][] tiles = playArea.getPlayBox().getBoard().getTiles();
 
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles[i].length; j++) {
@@ -499,7 +489,7 @@ public class Controller {
             }
         }
         int player = state.getTurn();
-        for (BoardPiece p : playArea.getPlayer(player).getPieces()) {
+        for (BoardPiece p : playArea.getPlayBox().getPlayer(player).getPieces()) {
             p.setBest(false);
             if (!highlight) continue;
             for (Move m : bestPlays) {
@@ -509,7 +499,7 @@ public class Controller {
             }
         }
         int opponent = (player == PLAYER1) ? PLAYER2 : PLAYER1;
-        for (BoardPiece p : playArea.getPlayer(opponent).getPieces()) {
+        for (BoardPiece p : playArea.getPlayBox().getPlayer(opponent).getPieces()) {
             p.setBest(false);
         }
     }
@@ -641,6 +631,10 @@ public class Controller {
 
     public boolean getFFTAllowInteraction() {
         return fftAllowInteraction;
+    }
+
+    public InteractiveState getInteractiveState() {
+        return gameSpecifics.interactiveState;
     }
 
 }

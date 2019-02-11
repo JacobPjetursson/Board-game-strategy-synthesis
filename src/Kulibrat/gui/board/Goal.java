@@ -5,14 +5,22 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import kulibrat.game.Controller;
+import kulibrat.game.Move;
+
+import static misc.Config.CLICK_INTERACTIVE;
 
 public class Goal extends StackPane {
     private boolean highlight;
     private boolean bestMove;
     private boolean help;
     private Label turnsToTerminalLabel;
+    private int clickMode;
+    private Controller cont;
 
-    public Goal(int prefWidth, int prefHeight) {
+    public Goal(int prefWidth, int prefHeight, int clickMode, Controller cont) {
+        this.clickMode = clickMode;
+        this.cont = cont;
         setAlignment(Pos.CENTER);
         setPrefSize(prefWidth, prefHeight);
         setMaxWidth(prefWidth);
@@ -39,11 +47,19 @@ public class Goal extends StackPane {
             }
         });
 
+        setOnMouseClicked(event -> {
+            if (highlight) {
+                if (clickMode == CLICK_INTERACTIVE) {
+                    cont.getInteractiveState().setArrowEndpoint(-1, -1);
+                } else {
+                    BoardPiece piece = cont.getSelected();
+                    cont.doHumanTurn(new Move(piece.getRow(), piece.getCol(), -1, -1, piece.getTeam()));
+                }
+            }
+        });
+
     }
 
-    public boolean getHighlight() {
-        return highlight;
-    }
 
     public void setHighlight(boolean highlight, boolean help, boolean bestMove, String turns) {
         this.highlight = highlight;

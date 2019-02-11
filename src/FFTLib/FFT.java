@@ -3,8 +3,6 @@ package fftlib;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import fftlib.game.FFTStateAndMove;
-import fftlib.gui.FFTFailState;
-import fftlib.gui.InteractiveFFTState;
 import misc.Config;
 
 import java.util.ArrayList;

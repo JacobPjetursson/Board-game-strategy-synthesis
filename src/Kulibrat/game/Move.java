@@ -20,6 +20,10 @@ public class Move implements FFTMove {
         this.team = team;
     }
 
+    public Move() {
+
+    }
+
     public Move(Move move) {
         this.oldRow = move.oldRow;
         this.oldCol = move.oldCol;

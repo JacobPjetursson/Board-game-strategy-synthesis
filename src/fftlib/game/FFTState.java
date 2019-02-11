@@ -1,13 +1,13 @@
 package fftlib.game;
 
-import fftlib.Clause;
+import fftlib.Literal;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
 public interface FFTState {
 
-    HashSet<Clause> getClauses();
+    HashSet<Literal> getLiterals();
 
     int getTurn();
 

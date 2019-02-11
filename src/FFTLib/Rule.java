@@ -4,20 +4,17 @@ import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import misc.Config;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.*;
 
 
 public class Rule {
-    public static final ArrayList<String> separators = new ArrayList<>(
+    private static final ArrayList<String> separators = new ArrayList<>(
             Arrays.asList("and", "And", "AND", "&", "&&", "∧", ","));
-    public ArrayList<ClauseList> symmetryClauses;
-    public ArrayList<Clause> clauses;
+    public ArrayList<Clause> symmetryClauses;
+    public Clause clause;
     public Action action;
-    public String clauseStr;
-    public String actionStr;
+    public String actionStr, clauseStr;
+
 
     // If multirule, the rule class instead contains a list of rules
     public boolean multiRule;
@@ -30,27 +27,57 @@ public class Rule {
         if (multiRule) {
             rules = new HashSet<>();
             replaceWildcards(clauseStr, actionStr, rules);
+            // TODO - format this shit
             this.clauseStr = clauseStr;
             this.actionStr = actionStr;
         } else {
-            symmetryClauses = new ArrayList<>();
             this.action = getAction(actionStr);
-            this.clauses = getClauses(clauseStr);
-            this.clauseStr = getFormattedClauseStr();
-            this.actionStr = getFormattedActionStr();
-            // TODO - make this for all available symmetries
-            for (int symmetry : Config.getSymmetries()) {
-                if (symmetry == Config.SYM_NONE)
-                    symmetryClauses.add(new ClauseList(Config.SYM_NONE, clauses));
-                else if (symmetry == Config.SYM_HREF)
-                    symmetryClauses.add(new ClauseList(Config.SYM_HREF, reflectH(clauses)));
-            }
+            this.clause = getClause(clauseStr);
+            this.symmetryClauses = getSymmetryClauses();
         }
         errors = !isValidRuleFormat(this);
     }
 
-    private static ArrayList<String> prepClauses(String clauseStr) {
-        ArrayList<String> clauseStrs = new ArrayList<>();
+    // Empty constructor to allow rule buildup
+    public Rule() {
+        this.clause = new Clause();
+        this.action = new Action();
+        clauseStr = "";
+        actionStr = "";
+    }
+
+    public void addLiteral(Literal l) {
+        if (!clause.literals.contains(l))
+            clause.add(l);
+        this.symmetryClauses = getSymmetryClauses();
+    }
+
+    public void removeLiteral(Literal l) {
+        this.clause.remove(l);
+        this.symmetryClauses = getSymmetryClauses();
+    }
+
+    public void removeLiterals(int row, int col) {
+        ArrayList<Literal> removeList = new ArrayList<>();
+        for (Literal l : clause.literals) {
+            if (l.row == row && l.col == col)
+                removeList.add(l);
+        }
+        clause.literals.removeAll(removeList);
+        this.symmetryClauses = getSymmetryClauses();
+    }
+
+    public void setAction(Action a) {
+        this.action = a;
+    }
+
+    public void setClause(Clause c) {
+        this.clause = c;
+        this.symmetryClauses = getSymmetryClauses();
+    }
+
+    private static ArrayList<String> prepClause(String clauseStr) {
+        ArrayList<String> clause = new ArrayList<>();
         String[] parts = clauseStr.split(" ");
         for (String part : parts) {
             if (separators.contains(part)) {
@@ -66,16 +93,16 @@ public class Rule {
             // Both E and P
             if ((part.charAt(0) == '!' && Character.isDigit(part.charAt(1)))) {
                 String newpart = "!E_" + part.substring(1);
-                clauseStrs.add(newpart);
+                clause.add(newpart);
                 newpart = "!P_" + part.substring(1);
-                clauseStrs.add(newpart);
+                clause.add(newpart);
             } else if (Character.isDigit(part.charAt(0))) {
-                clauseStrs.add("E_" + part);
-                clauseStrs.add("P_" + part);
+                clause.add("E_" + part);
+                clause.add("P_" + part);
             } else
-                clauseStrs.add(part);
+                clause.add(part);
         }
-        return clauseStrs;
+        return clause;
     }
 
     private static ArrayList<String> prepAction(String actionStr) {
@@ -95,48 +122,48 @@ public class Rule {
         return corrected_parts;
     }
 
-    private static ArrayList<Clause> getClauses(String clauseStr) {
-        ArrayList<Clause> clauses = new ArrayList<>();
-        for (String c : prepClauses(clauseStr)) {
-            clauses.add(new Clause(c));
+    private static Clause getClause(String clauseStr) {
+        ArrayList<Literal> literals = new ArrayList<>();
+        for (String c : prepClause(clauseStr)) {
+            Literal l = new Literal(c);
+            literals.add(new Literal(c));
         }
-
-        return clauses;
+       return new Clause(literals);
     }
 
     private static Action getAction(String actionStr) {
         return new Action(prepAction(actionStr));
     }
 
-    public boolean isValidRuleFormat(Rule r) {
+    public static boolean isValidRuleFormat(Rule r) {
         if (r.multiRule) {
             for (Rule rule : r.rules)
                 if (!isValidRuleFormat(rule))
                     return false;
             return true;
         }
-        if (r.clauses.isEmpty())
+        if (r.clause.isEmpty())
             return false;
-        for (Clause c : r.clauses)
-            if (c.clauseErr)
+        for (Literal l : r.clause.literals)
+            if (l.error)
                 return false;
         if (r.action.actionErr)
             return false;
-        for (Clause c : r.action.addClauses)
-            if (c.clauseErr)
+        for (Literal l : r.action.addClause.literals)
+            if (l.error)
                 return false;
-        for (Clause c : r.action.remClauses)
-            if (c.clauseErr)
+        for (Literal l : r.action.remClause.literals)
+            if (l.error)
                 return false;
 
         return true;
     }
 
     private static boolean isMultiRule(String clauseStr, String actionStr) {
-        ArrayList<String> prepClauseStr = prepClauses(clauseStr);
+        ArrayList<String> prepLiteralStr = prepClause(clauseStr);
         ArrayList<String> prepActionStr = prepAction(actionStr);
-        for (String cStr : prepClauseStr) {
-            String[] pos = cStr.split("_");
+        for (String lStr : prepLiteralStr) {
+            String[] pos = lStr.split("_");
             if (pos.length < 2 || pos.length > 3)
                 return false;
             // If P or E is prefixed, index is different
@@ -162,12 +189,12 @@ public class Rule {
     }
 
     private static void replaceWildcards(String clauseStr, String actionStr, HashSet<Rule> rules) {
-        ArrayList<String> prepClauseStr = prepClauses(clauseStr);
+        ArrayList<String> prepLiteralStr = prepClause(clauseStr);
         ArrayList<String> prepActionStr = prepAction(actionStr);
         HashSet<String> wildCardsRow = new HashSet<>();
         HashSet<String> wildCardsCol = new HashSet<>();
-        for (String cStr : prepClauseStr) {
-            String[] pos = cStr.split("_");
+        for (String lStr : prepLiteralStr) {
+            String[] pos = lStr.split("_");
             // If P or E is prefixed, index is different
             int idx = pos.length == 3 ? 1 : 0;
             if (!Character.isDigit(pos[idx].charAt(0))) {
@@ -191,7 +218,7 @@ public class Rule {
         }
 
         for (String wc : wildCardsRow) {
-            for (int i = 0; i < Config.getBoardHeight(); i++) {
+            for (int i = 0; i < FFTManager.gameBoardHeight; i++) {
                 String finalCStr = clauseStr.replace(wc, Integer.toString(i));
                 String finalAStr = actionStr.replace(wc, Integer.toString(i));
                 replaceWildcards(finalCStr, finalAStr, rules);
@@ -200,7 +227,7 @@ public class Rule {
         }
 
         for (String wc : wildCardsCol) {
-            for (int i = 0; i < Config.getBoardWidth(); i++) {
+            for (int i = 0; i < FFTManager.gameBoardWidth; i++) {
                 String finalCStr = clauseStr.replace(wc, Integer.toString(i));
                 String finalAStr = actionStr.replace(wc, Integer.toString(i));
                 replaceWildcards(finalCStr, finalAStr, rules);
@@ -210,33 +237,30 @@ public class Rule {
     }
 
     public String printRule() {
-        return "IF (" + this.clauseStr + ") THEN (" + this.actionStr + ")";
+        String cStr, aStr;
+        if (clause != null && action != null) {
+            cStr = clause.getFormattedString();
+            aStr = action.getFormattedString();
+        } else {
+            cStr = clauseStr;
+            aStr = actionStr;
+        }
+        return "IF (" + cStr + ") THEN (" + aStr + ")";
     }
 
-    private String getFormattedClauseStr() {
-        String clauseMsg = "";
-        for (Clause clause : clauses) {
-            if (!clauseMsg.isEmpty())
-                clauseMsg += " ∧ ";
-            clauseMsg += clause.name;
+    public ArrayList<Clause> getSymmetryClauses() {
+        ArrayList<Clause> symmetryClauses = new ArrayList<>();
+        // TODO - make this for all available symmetries
+        for (int symmetry : FFTManager.gameSymmetries) {
+            if (symmetry == Config.SYM_NONE)
+                symmetryClauses.add(new Clause(Config.SYM_NONE, clause));
+            else if (symmetry == Config.SYM_HREF)
+                symmetryClauses.add(new Clause(Config.SYM_HREF, reflectH(clause)));
         }
-        return clauseMsg;
+        return symmetryClauses;
     }
 
-    private String getFormattedActionStr() {
-        String actionMsg = "";
-        for (Clause clause : action.addClauses) {
-            if (!actionMsg.isEmpty())
-                actionMsg += " ∧ ";
-            actionMsg += "+" + clause.name;
-        }
-        for (Clause clause : action.remClauses) {
-            if (!actionMsg.isEmpty())
-                actionMsg += " ∧ ";
-            actionMsg += "-" + clause.name;
-        }
-        return actionMsg;
-    }
+
     public FFTMove apply(FFTState state) {
         if (multiRule) {
             // If first rule applies, it doesn't matter if rest is incorrect, since it's a prioritized list
@@ -247,22 +271,23 @@ public class Rule {
             }
             return null;
         }
-        HashSet<Clause> stClauses = state.getClauses();
-        for (int symmetry : Config.getSymmetries()) {
-            for (ClauseList clauseList : symmetryClauses) {
-                if (clauseList.symmetry != symmetry)
+        HashSet<Literal> stLiterals = state.getLiterals();
+
+        for (int symmetry : FFTManager.gameSymmetries) {
+            for (Clause clause : symmetryClauses) {
+                if (clause.symmetry != symmetry)
                     continue;
 
                 boolean match = true;
-                for (Clause c : clauseList.clauses) {
-                    if (c.negation) {
-                        Clause temp = new Clause(c);
+                for (Literal l : clause.literals) {
+                    if (l.negation) {
+                        Literal temp = new Literal(l);
                         temp.name = temp.name.replace("!", "");
-                        if (stClauses.contains(temp)) {
+                        if (stLiterals.contains(temp)) {
                             match = false;
                             break;
                         }
-                    } else if (!stClauses.contains(c)) {
+                    } else if (!stLiterals.contains(l)) {
                         match = false;
                         break;
                     }
@@ -279,41 +304,41 @@ public class Rule {
         return null;
     }
 
-    private int[][] makeClauseBoard(ArrayList<Clause> clauses) {
-        int[][] clauseBoard = new int[Config.getBoardHeight()][Config.getBoardWidth()];
-        // These clauses will be reflected/rotated
-        ArrayList<Clause> changeClauses = new ArrayList<>();
+    private int[][] makeClauseBoard(Clause clause) {
+        int[][] clauseBoard = new int[FFTManager.gameBoardHeight][FFTManager.gameBoardWidth];
+        // These literals will be reflected/rotated
+        ArrayList<Literal> changeLiterals = new ArrayList<>();
 
-        for (Clause c : clauses) {
-            if (c.boardPlacement && c.row != -1) {
-                changeClauses.add(c);
-                if (c.negation)
-                    clauseBoard[c.row][c.col] = -c.pieceOcc;
+        for (Literal l : clause.literals) {
+            if (l.boardPlacement && l.row != -1) {
+                changeLiterals.add(l);
+                if (l.negation)
+                    clauseBoard[l.row][l.col] = -l.pieceOcc;
                 else
-                    clauseBoard[c.row][c.col] = c.pieceOcc;
+                    clauseBoard[l.row][l.col] = l.pieceOcc;
             }
         }
-        clauses.removeAll(changeClauses);
+        clause.literals.removeAll(changeLiterals);
         return clauseBoard;
     }
 
-    private void addClauseBoardToList(int[][] cb, ArrayList<Clause> clauses) {
+    private void addClauseBoardToList(int[][] cb, Clause clause) {
         // Add back to list
         for (int i = 0; i < cb.length; i++) {
             for (int j = 0; j < cb[i].length; j++) {
                 int val = cb[i][j];
                 if (val < 0)
-                    clauses.add(new Clause(i, j, -val, true));
+                    clause.add(new Literal(i, j, -val, true));
                 else if (val > 0)
-                    clauses.add(new Clause(i, j, val, false));
+                    clause.add(new Literal(i, j, val, false));
             }
         }
     }
 
-    private ArrayList<Clause> reflectH(ArrayList<Clause> clauses) {
-        ArrayList<Clause> rClauses = new ArrayList<>(clauses);
-        int[][] cBoard = makeClauseBoard(rClauses);
-        int[][] refH = new int[Config.getBoardHeight()][Config.getBoardWidth()];
+    private Clause reflectH(Clause clause) {
+        Clause rotClause = new Clause(clause);
+        int[][] cBoard = makeClauseBoard(rotClause);
+        int[][] refH = new int[FFTManager.gameBoardHeight][FFTManager.gameBoardWidth];
 
         // Reflect
         for (int i = 0; i < cBoard.length; i++) {
@@ -322,8 +347,8 @@ public class Rule {
             }
         }
 
-        addClauseBoardToList(refH, rClauses);
-        return rClauses;
+        addClauseBoardToList(refH, rotClause);
+        return rotClause;
     }
 
     @Override
@@ -331,8 +356,13 @@ public class Rule {
         if (!(obj instanceof Rule)) return false;
 
         Rule rule = (Rule) obj;
-        return this == rule ||
-                (this.symmetryClauses.equals(rule.symmetryClauses) &&
+        if (this == rule)
+            return true;
+        if (this.multiRule != rule.multiRule)
+            return false;
+        if (this.multiRule)
+            return this.rules.equals(rule.rules);
+        return (this.symmetryClauses.equals(rule.symmetryClauses) &&
                         (this.action.equals(rule.action)));
     }
 
@@ -341,30 +371,4 @@ public class Rule {
         int hash = Objects.hash(this.symmetryClauses, this.action);
         return 31 * hash;
     }
-
-
-    protected class ClauseList {
-        ArrayList<Clause> clauses;
-        int symmetry;
-
-        public ClauseList(int symmetry, ArrayList<Clause> clauses) {
-            this.clauses = clauses;
-            this.symmetry = symmetry;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof ClauseList)) return false;
-
-            ClauseList list = (ClauseList) obj;
-            return this == list ||
-                    (this.clauses.equals(list.clauses));
-        }
-
-        @Override
-        public int hashCode() {
-            return 31 * Objects.hashCode(this.clauses);
-        }
-    }
-
 }

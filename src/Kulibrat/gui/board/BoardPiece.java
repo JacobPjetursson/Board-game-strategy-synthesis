@@ -1,5 +1,6 @@
 package kulibrat.gui.board;
 
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import kulibrat.game.Controller;
@@ -11,15 +12,17 @@ public class BoardPiece extends Circle {
     private Controller cont;
     private Color color;
     private Color green = new Color(0.2, 0.7, 0, 1);
+    private Color lightRed = new Color(1.0, 0.5, 0.5, 1.0);
+    private Color gray = new Color(0.3, 0.3, 0.3, 1.0);
     private boolean selected;
     private boolean best;
     private int team;
     private int row;
     private int col;
-    private boolean clickable;
+    private int clickMode;
 
-    BoardPiece(int team, Controller cont, int radius, boolean clickable) {
-        this.clickable = clickable;
+    BoardPiece(int team, Controller cont, int radius, int clickMode) {
+        this.clickMode = clickMode;
         this.cont = cont;
         this.team = team;
         this.row = -1;
@@ -29,21 +32,24 @@ public class BoardPiece extends Circle {
         setStrokeWidth(3.5);
         setColor(color, color);
 
+        setListeners();
+    }
+
+    private void setListeners() {
         setOnMouseEntered(me -> {
             if (!isControllable()) return;
-            if (team == PLAYER1 && !selected) {
-                Color lightRed = new Color(1.0, 0.5, 0.5, 1.0);
-                if (best) {
-                    setColor(lightRed, green);
-                } else {
-                    setColor(lightRed, lightRed);
+            if (!selected) {
+                if (team == PLAYER1) {
+                    if (best)
+                        setColor(lightRed, green);
+                    else
+                        setColor(lightRed, lightRed);
                 }
-            } else if (team == PLAYER2 && !selected) {
-                Color gray = new Color(0.3, 0.3, 0.3, 1.0);
-                if (best) {
-                    setColor(gray, green);
-                } else {
-                    setColor(gray, gray);
+                else {
+                    if (best)
+                        setColor(gray, green);
+                    else
+                        setColor(gray, gray);
                 }
             }
         });
@@ -57,21 +63,32 @@ public class BoardPiece extends Circle {
         });
 
         setOnMouseClicked(event -> {
-            if (!selected && isControllable()) select();
+            if (isControllable()) {
+                if (clickMode == CLICK_DEFAULT)
+                    select();
+                else if (clickMode == CLICK_INTERACTIVE) {
+                    select();
+                    event.consume();
+                }
+            }
         });
     }
 
-    public BoardPiece(int team, Controller cont, int row, int col, int radius, boolean clickable) {
-        this(team, cont, radius, clickable);
+    BoardPiece(int team, Controller cont, int row, int col, int radius, int clickMode) {
+        this(team, cont, radius, clickMode);
         this.row = row;
         this.col = col;
     }
 
     private void select() {
+        if (clickMode == CLICK_INTERACTIVE) {
+            cont.getInteractiveState().setSelected(this);
+        } else {
+            cont.setSelected(this);
+        }
         selected = true;
         setFill(color);
         setStroke(Color.BLUE);
-        cont.setSelected(this);
     }
 
     public void setBest(boolean best) {
@@ -84,8 +101,13 @@ public class BoardPiece extends Circle {
     }
 
     private boolean isControllable() {
-        return clickable && cont.getState().getTurn() == this.team &&
-                (cont.getPlayerInstance(team) == HUMAN || (cont.getPlayerInstance(team) == FFT && cont.getFFTAllowInteraction()));
+        if (clickMode == CLICK_INTERACTIVE) {
+            BoardTile bt = getTile();
+            return bt == null || !getTile().highlight;
+        }
+        return clickMode != CLICK_DISABLED && cont.getState().getTurn() == this.team &&
+                (cont.getPlayerInstance(team) == HUMAN || (cont.getPlayerInstance(team) == FFT &&
+                        cont.getFFTAllowInteraction()));
     }
 
     public int getCol() {
@@ -112,5 +134,12 @@ public class BoardPiece extends Circle {
         } else {
             setColor(color, color);
         }
+    }
+
+    private BoardTile getTile() {
+        Node n = getParent();
+        if (n instanceof BoardTile)
+            return (BoardTile) n;
+        else return null;
     }
 }

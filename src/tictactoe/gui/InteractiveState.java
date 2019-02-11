@@ -1,18 +1,34 @@
 package tictactoe.gui;
 
+import fftlib.Rule;
 import fftlib.game.FFTState;
 import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
-import tictactoe.game.State;
 
 public class InteractiveState implements InteractiveFFTState {
 
-    public PlayBox getInteractiveState(State s) {
+    @Override
+    public Node getInteractiveNode(FFTState fftState) {
         return null;
     }
 
     @Override
-    public Node getInteractiveFFTState(FFTState fftState) {
-        return getInteractiveState((State) fftState);
+    public Node getInteractiveNode(Rule r) {
+        return null;
+    }
+
+    @Override
+    public Rule getRule() {
+        return null;
+    }
+
+    @Override
+    public void setPerspective(int team) {
+
+    }
+
+    @Override
+    public void clear() {
+
     }
 }

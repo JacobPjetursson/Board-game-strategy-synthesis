@@ -3,128 +3,328 @@ package fftlib.gui;
 import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
+import fftlib.game.FFTState;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
+import javafx.scene.input.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import javafx.util.Callback;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
+
 public class EditFFTInteractive extends BorderPane {
-    FFTManager fftManager;
-    ListView<StackPane> lw;
-    Node playBox;
+    private FFTManager fftManager;
+    private ListView<RulePane> lw;
+    private InteractiveFFTState interactiveFFTState;
+    private Label ruleLabel;
+
+    private RadioButton p1Btn;
+    private RadioButton p2Btn;
+
+    private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
 
     public EditFFTInteractive(Scene prevScene, FFTManager fftManager) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         this.fftManager = fftManager;
+
+        VBox topBox = new VBox(5);
+        topBox.setAlignment(Pos.CENTER);
+
         Label title = new Label("Edit the FFT Interactively");
         title.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
         title.setAlignment(Pos.CENTER);
         title.setTextAlignment(TextAlignment.CENTER);
-        title.setMinHeight(65);
-        setTop(title);
-        BorderPane.setAlignment(title, Pos.CENTER);
+        topBox.getChildren().add(title);
 
-        playBox = fftManager.getInteractiveState(FFTManager.initialFFTState);
-        setCenter(playBox);
+        HBox ruleTitleBox = new HBox(2);
+        ruleTitleBox.setAlignment(Pos.CENTER);
+        Label ruleTitle = new Label("Rule: ");
+        ruleTitle.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
+        ruleTitle.setAlignment(Pos.CENTER);
+        ruleTitle.setTextAlignment(TextAlignment.CENTER);
+        ruleTitleBox.getChildren().add(ruleTitle);
+        ruleLabel = new Label();
+        ruleLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 14));
+        ruleLabel.setAlignment(Pos.CENTER);
+        ruleLabel.setTextAlignment(TextAlignment.CENTER);
+        ruleTitleBox.getChildren().add(ruleLabel);
+
+        topBox.getChildren().add(ruleTitleBox);
+
+        setTop(topBox);
+        topBox.setMinHeight(65);
+        BorderPane.setAlignment(topBox, Pos.CENTER);
+
+        interactiveFFTState = FFTManager.interactiveState;
 
         lw = new ListView<>();
         lw.setPickOnBounds(false);
         lw.setPrefWidth(350);
         showRuleGroups();
+        lw.setCellFactory(param -> new RuleCell());
         BorderPane.setMargin(lw, new Insets(15));
         setRight(lw);
-
 
         VBox bottomBox = new VBox(15);
         bottomBox.setAlignment(Pos.CENTER);
         bottomBox.setPadding(new Insets(15));
 
-        Label label1 = new Label("Press the rules to edit them.");
-        label1.setFont(Font.font("Verdana", 15));
+        Label label1 = new Label("Click the rules to edit them.");
+        label1.setFont(Font.font("Verdana", 13));
 
-        Label label2 = new Label("Press them again to go back to adding a new rule");
-        label2.setFont(Font.font("Verdana", 15));
+        Label label2 = new Label("Click the board tiles to edit their contents");
+        label2.setFont(Font.font("Verdana", 13));
+
+        Label label3 = new Label("Set rule perspective:");
+        label3.setFont(Font.font("Verdana", 13));
+
+        p1Btn = new RadioButton("Player 1");
+        p2Btn = new RadioButton("Player 2");
+        ToggleGroup toggleGrp = new ToggleGroup();
+        p1Btn.setToggleGroup(toggleGrp);
+        p2Btn.setToggleGroup(toggleGrp);
+        HBox perspectiveGrp = new HBox(10, label3, p1Btn, p2Btn);
+        perspectiveGrp.setAlignment(Pos.CENTER);
+        toggleGrp.selectedToggleProperty().addListener((observable, oldVal, newVal) -> {
+            RadioButton btn = (RadioButton) newVal;
+            if (btn.getText().equals("Player 1")) {
+                interactiveFFTState.setPerspective(PLAYER1);
+            } else {
+                interactiveFFTState.setPerspective(PLAYER2);
+            }
+
+        });
 
         Button back = new Button("Back");
         back.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
             stage.setScene(prevScene);
         });
-        BorderPane.setAlignment(back, Pos.CENTER_RIGHT);
-        bottomBox.getChildren().addAll(label1, label2, back);
+
+        Button addRuleBtn = new Button("Add rule");
+        addRuleBtn.setOnMouseClicked(event -> {
+            Rule r = interactiveFFTState.getRule();
+            if (!Rule.isValidRuleFormat(r)) {
+                return;
+            }
+            ArrayList<RuleGroup> ruleGroups = fftManager.currFFT.ruleGroups;
+            if (ruleGroups.isEmpty())
+                ruleGroups.add(new RuleGroup(""));
+
+            fftManager.currFFT.ruleGroups.get(ruleGroups.size() - 1).addRule(r);
+            showRuleGroups();
+        });
+
+        Button clearRuleBtn = new Button("Clear rule");
+        clearRuleBtn.setOnMouseClicked(event -> {
+            FFTManager.interactiveState.clear();
+            update(FFTManager.initialFFTState);
+        });
+        VBox infoBox = new VBox(15);
+        infoBox.setAlignment(Pos.CENTER);
+        infoBox.getChildren().addAll(label1, label2, perspectiveGrp);
+
+        VBox clearBox = new VBox(10, clearRuleBtn);
+        clearBox.setAlignment(Pos.CENTER);
+
+
+        HBox ruleBtnBox = new HBox(10, addRuleBtn, clearRuleBtn);
+        ruleBtnBox.setAlignment(Pos.CENTER);
+
+        VBox backBox = new VBox();
+        backBox.setAlignment(Pos.CENTER_RIGHT);
+        backBox.getChildren().add(back);
+
+        BorderPane bp = new BorderPane();
+        bp.setCenter(ruleBtnBox);
+        BorderPane.setMargin(ruleBtnBox, new Insets(0, 0, 0, 50));
+        bp.setRight(backBox);
+
+
+        bottomBox.getChildren().addAll(infoBox, bp);
         setBottom(bottomBox);
         BorderPane.setAlignment(bottomBox, Pos.CENTER);
 
+        setupRuleFetchTimer();
+        update(FFTManager.initialFFTState);
+
+    }
+
+    public void update(FFTState state) {
+        Node node = FFTManager.interactiveState.getInteractiveNode(state);
+        if (state.getTurn() == PLAYER1)
+            p1Btn.setSelected(true);
+        else
+            p2Btn.setSelected(true);
+        setCenter(node);
+    }
+
+    private void setupRuleFetchTimer() {
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.5), ev -> {
+            Rule r = interactiveFFTState.getRule();
+            if (r != null) {
+                ruleLabel.setText(r.printRule());
+            }
+        }));
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
     }
 
     private void showRuleGroups() {
-        ObservableList<StackPane> rules = FXCollections.observableArrayList();
-        ArrayList<Integer> rgIndices = new ArrayList<>();
-        int rgIdx = 0;
+        ObservableList<RulePane> rules = FXCollections.observableArrayList();
         for (int i = 0; i < fftManager.currFFT.ruleGroups.size(); i++) {
             // Rule group
             RuleGroup rg = fftManager.currFFT.ruleGroups.get(i);
-            Label rgLabel = new Label((i + 1) + ": " + rg.name);
-            rgLabel.setFont(Font.font("Verdana", 14));
-            StackPane rgPane = new StackPane();
-            rgPane.setAlignment(Pos.CENTER);
-            rgPane.getChildren().add(rgLabel);
-            rgIndices.add(rgIdx);
-            rules.add(rgPane);
-            rgIdx++;
+            rules.add(new RulePane(i));
             for (int j = 0; j < rg.rules.size(); j++) {
-                final int index = j;
-                StackPane rulePane = new StackPane();
-                Rule r = rg.rules.get(j);
-                Label rLabel = new Label((j + 1) + ": " + r.printRule());
-                rLabel.setFont(Font.font("Verdana", 10));
-                rulePane.getChildren().add(rLabel);
-                rules.add(rulePane);
-                rulePane.setOnMouseClicked(event -> {
-                    if (index == lw.getSelectionModel().getSelectedIndex()) {
-                        setCenter(playBox);
-                        lw.getSelectionModel().clearSelection();
-                    } else {
-                        r.
-                    }
-
-                });
-                rgIdx++;
+                rules.add(new RulePane(i, j));
             }
         }
         lw.setItems(rules);
 
-        // Disable rule group titles (unclickable)
-        lw.setCellFactory(new Callback<ListView<StackPane>, ListCell<StackPane>>() {
-            @Override
-            public ListCell<StackPane> call(ListView<StackPane> param) {
-                return new ListCell<StackPane>() {
-                    @Override
-                    protected void updateItem(StackPane item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (rgIndices.contains(getIndex()))
-                            setDisable(true);
-                        setGraphic(item);
-                    }
-                };
+    }
+
+    private class RulePane extends StackPane {
+        boolean isRuleGroup;
+        int rgIdx, rIdx;
+        Label label;
+
+        RulePane(int rgIdx) { // Rulegroup entry
+            super();
+            setAlignment(Pos.CENTER);
+            this.isRuleGroup = true;
+            this.rgIdx = rgIdx;
+
+            RuleGroup rg = fftManager.currFFT.ruleGroups.get(rgIdx);
+            this.label = new Label((rgIdx + 1) + ": " + rg.name);
+            label.setFont(Font.font("Verdana", 14));
+            getChildren().add(label);
+
+            setOnMousePressed(Event::consume);
+        }
+
+        RulePane(int rgIdx, int rIdx) { // rule entry
+            super();
+            this.isRuleGroup = false;
+            this.rgIdx = rgIdx;
+            this.rIdx = rIdx;
+
+            RuleGroup rg = fftManager.currFFT.ruleGroups.get(rgIdx);
+            setOnMouseClicked(event -> {
+                setCenter(interactiveFFTState.getInteractiveNode(rg.rules.get(rIdx)));
+            });
+            Rule r = rg.rules.get(rIdx);
+            this.label = new Label((rIdx + 1) + ": " + r.printRule());
+            label.setFont(Font.font("Verdana", 10));
+            getChildren().add(label);
+        }
+    }
+
+    private class RuleCell extends ListCell<RulePane> {
+
+        RuleCell() {
+            ListCell thisCell = this;
+
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            setAlignment(Pos.CENTER);
+
+            setOnDragDetected(event -> {
+                if (isEmpty() || getItem().isRuleGroup)
+                    return;
+                Integer index = getIndex();
+                Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent content = new ClipboardContent();
+                content.put(SERIALIZED_MIME_TYPE, index);
+                dragboard.setDragView(snapshot(null, null));
+                dragboard.setContent(content);
+                event.consume();
+            });
+
+            setOnDragOver(event -> {
+                if (event.getGestureSource() != thisCell &&
+                        event.getDragboard().hasContent(SERIALIZED_MIME_TYPE)) {
+                    event.acceptTransferModes(TransferMode.MOVE);
+                }
+
+                event.consume();
+            });
+
+            setOnDragEntered(event -> {
+                if (event.getGestureSource() != thisCell &&
+                        event.getDragboard().hasContent(SERIALIZED_MIME_TYPE)) {
+                    setOpacity(0.3);
+                }
+            });
+
+            setOnDragExited(event -> {
+                if (event.getGestureSource() != thisCell &&
+                        event.getDragboard().hasContent(SERIALIZED_MIME_TYPE)) {
+                    setOpacity(1);
+                }
+            });
+
+            setOnDragDropped(event -> {
+                Dragboard db = event.getDragboard();
+
+                if (db.hasContent(SERIALIZED_MIME_TYPE)) {
+                    int draggedIdx = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
+                    RulePane draggedPane = lw.getItems().remove(draggedIdx);
+                    int droppedIdx = isEmpty() ? lw.getItems().size() : getIndex();
+                    RulePane droppedPane = lw.getItems().get(droppedIdx - 1);
+
+
+                    RuleGroup rg_dragged = fftManager.currFFT.ruleGroups.get(draggedPane.rgIdx);
+                    Rule r_dragged = rg_dragged.rules.get(draggedPane.rIdx);
+                    RuleGroup rg_dropped = fftManager.currFFT.ruleGroups.get(droppedPane.rgIdx);
+
+                    rg_dragged.rules.remove(r_dragged);
+                    rg_dropped.rules.add(r_dragged);
+
+                    event.setDropCompleted(true);
+                    showRuleGroups();
+                    lw.getSelectionModel().select(droppedIdx);
+                }
+                event.consume();
+            });
+
+            setOnDragDone(DragEvent::consume);
+        }
+
+        @Override
+        protected void updateItem(RulePane item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setGraphic(null);
+            } else {
+                Label l = item.label;
+                if (item.isRuleGroup) {
+                    l.setTextFill(Color.GRAY);
+                } else {
+                    l.setTextFill(Color.BLACK);
+                }
+                setGraphic(item);
             }
-        });
+        }
     }
 }
 
