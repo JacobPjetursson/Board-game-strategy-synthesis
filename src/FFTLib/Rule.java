@@ -13,7 +13,7 @@ public class Rule {
     public ArrayList<Clause> symmetryClauses;
     public Clause clause;
     public Action action;
-    public String actionStr, clauseStr;
+    private String actionStr, clauseStr;
 
 
     // If multirule, the rule class instead contains a list of rules
@@ -248,7 +248,21 @@ public class Rule {
         return "IF (" + cStr + ") THEN (" + aStr + ")";
     }
 
-    public ArrayList<Clause> getSymmetryClauses() {
+    String getClauseStr() {
+        if (clause != null)
+            return clause.getFormattedString();
+        else
+            return clauseStr;
+    }
+
+    String getActionStr() {
+        if (action != null)
+            return action.getFormattedString();
+        else
+            return actionStr;
+    }
+
+    private ArrayList<Clause> getSymmetryClauses() {
         ArrayList<Clause> symmetryClauses = new ArrayList<>();
         // TODO - make this for all available symmetries
         for (int symmetry : FFTManager.gameSymmetries) {

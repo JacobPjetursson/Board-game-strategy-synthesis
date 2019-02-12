@@ -12,6 +12,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -22,15 +23,17 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import misc.Config;
 
+import static fftlib.FFTManager.SERIALIZED_MIME_TYPE;
 import static misc.Config.WIDTH;
 
 public class EditFFTScene extends VBox {
     private int textFieldWidth = 150;
-    private ListView<BorderPane> lw;
+    private ListView<RulePane> lw;
     private FFTManager fftManager;
     private Label title;
     private Button delBtn, renameBtn, newBtn, addNewRuleGroupBtn, verifyBtn;
     private ComboBox<String> changeBox;
+    private EditFFTScene thisScene = this;
 
     public EditFFTScene(Stage primaryStage, Scene prevScene, FFTManager fftManager) {
         setSpacing(15);
@@ -119,6 +122,7 @@ public class EditFFTScene extends VBox {
         // Existing rule groups
         lw = new ListView<>();
         lw.setPickOnBounds(false);
+        lw.setCellFactory(param -> new RuleCell());
 
         // New rule group
         Label newRuleGroupLabel = new Label("New rule group: ");
@@ -231,53 +235,55 @@ public class EditFFTScene extends VBox {
             fftStrs.add(fft.name);
         }
         changeBox.setItems(fftStrs);
+        showRuleGroups();
+        lw.getSelectionModel().selectLast();
+    }
+
+    private void showRuleGroups() {
         // ListView
-        ObservableList<BorderPane> ruleGroups = FXCollections.observableArrayList();
+        ObservableList<RulePane> ruleGroups = FXCollections.observableArrayList();
         for (int i = 0; i < fftManager.currFFT.ruleGroups.size(); i++) {
             // Rule group
-            final int index = i; // FUCKING JAVA CANCER
-            RuleGroup rg = fftManager.currFFT.ruleGroups.get(i);
-            VBox rgVBox = new VBox(10);
+            ruleGroups.add(new RulePane(i));
+        }
+        lw.setItems(ruleGroups);
+    }
+
+    public void removeRuleGroup(int index) {
+        lw.getItems().remove(index);
+        fftManager.currFFT.ruleGroups.remove(index);
+        update();
+        FFTManager.save();
+    }
+
+    private class RulePane extends BorderPane {
+
+        int idx;
+        VBox rgVBox;
+        VBox buttons;
+
+        RulePane(int idx) { // Rulegroup entry
+            super();
+            this.idx = idx;
+            RuleGroup rg = fftManager.currFFT.ruleGroups.get(idx);
+            rgVBox = new VBox(10);
             rgVBox.setAlignment(Pos.CENTER);
-            Label rgLabel = new Label((i + 1) + ": " + rg.name);
+
+            Label rgLabel = new Label((idx + 1) + ": " + rg.name);
             rgLabel.setFont(Font.font("Verdana", 16));
             rgVBox.getChildren().add(rgLabel);
+
             for (int j = 0; j < rg.rules.size(); j++) {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r.printRule());
                 rLabel.setFont(Font.font("Verdana", 10));
                 rgVBox.getChildren().add(rLabel);
             }
-            // up/down list buttons
-            int buttonSize = 150;
-            VBox upDownButtons = new VBox();
-            upDownButtons.setAlignment(Pos.CENTER);
-            Button upButton = new Button("▲");
-            Button downButton = new Button("▼");
-            upButton.setMinWidth(50);
-            downButton.setMinWidth(50);
-            upButton.setOnMouseClicked(event -> {
-                if (index == 0)
-                    return;
-                fftManager.currFFT.ruleGroups.remove(index);
-                fftManager.currFFT.ruleGroups.add(index - 1, rg);
-                FFTManager.save();
-                update();
-                lw.getSelectionModel().select(index - 1);
-            });
-            downButton.setOnMouseClicked(event -> {
-                if (index == fftManager.currFFT.ruleGroups.size() - 1)
-                    return;
-                fftManager.currFFT.ruleGroups.remove(index);
-                fftManager.currFFT.ruleGroups.add(index + 1, rg);
-                FFTManager.save();
-                update();
-                lw.getSelectionModel().select(index + 1);
-            });
 
             // Edit / Remove buttons
-            VBox editRemoveButtons = new VBox(10);
-            editRemoveButtons.setAlignment(Pos.CENTER);
+            int buttonSize = 150;
+            buttons = new VBox(10);
+            buttons.setAlignment(Pos.CENTER);
 
             Button editButton = new Button("Edit");
             editButton.setStyle("-fx-border-color: #000000; -fx-background-color: blue;");
@@ -285,7 +291,7 @@ public class EditFFTScene extends VBox {
             editButton.setOnMouseClicked(event -> {
                 Stage newStage = new Stage();
                 newStage.setScene(new Scene(
-                        new EditRuleGroupPane(rg, this), 700, 500));
+                        new EditRuleGroupPane(rg, thisScene), 700, 500));
                 newStage.initModality(Modality.APPLICATION_MODAL);
                 newStage.initOwner(getScene().getWindow());
                 newStage.setOnCloseRequest(Event::consume);
@@ -300,37 +306,98 @@ public class EditFFTScene extends VBox {
                 String labelText = "Are you sure you want to delete the rule group:\n" + rg.name;
                 Stage newStage = new Stage();
                 newStage.setScene(new Scene(
-                        new DeleteRGDialog(labelText, this, index), 500, 150));
+                        new DeleteRGDialog(labelText, thisScene, idx), 500, 150));
                 newStage.initModality(Modality.APPLICATION_MODAL);
                 newStage.initOwner(getScene().getWindow());
                 newStage.setOnCloseRequest(Event::consume);
                 newStage.show();
 
             });
-            editRemoveButtons.getChildren().addAll(editButton, removeButton);
-            upDownButtons.getChildren().addAll(upButton, downButton);
-            HBox allButtons = new HBox(editRemoveButtons, upDownButtons);
-            allButtons.setAlignment(Pos.CENTER);
-            allButtons.setSpacing(5);
-
-            BorderPane finalPane = new BorderPane();
-            finalPane.setCenter(rgVBox);
-            finalPane.setRight(allButtons);
-            ruleGroups.add(finalPane);
+            buttons.getChildren().addAll(editButton, removeButton);
+            setCenter(rgVBox);
+            setRight(buttons);
         }
-        lw.setItems(ruleGroups);
-        lw.getSelectionModel().selectLast();
     }
 
-    public void removeRuleGroup(int index) {
-        lw.getItems().remove(index);
-        fftManager.currFFT.ruleGroups.remove(index);
-        update();
-        FFTManager.save();
+    private class RuleCell extends ListCell<RulePane> {
+
+        RuleCell() {
+            ListCell thisCell = this;
+
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            setAlignment(Pos.CENTER);
+
+            setOnDragDetected(event -> {
+                if (isEmpty())
+                    return;
+                Integer index = getIndex();
+                Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent content = new ClipboardContent();
+                content.put(SERIALIZED_MIME_TYPE, index);
+                dragboard.setDragView(snapshot(null, null));
+                dragboard.setContent(content);
+                event.consume();
+            });
+
+            setOnDragOver(event -> {
+                if (event.getGestureSource() != thisCell &&
+                        event.getDragboard().hasContent(SERIALIZED_MIME_TYPE)) {
+                    event.acceptTransferModes(TransferMode.MOVE);
+                }
+
+                event.consume();
+            });
+
+            setOnDragEntered(event -> {
+                if (event.getGestureSource() != thisCell &&
+                        event.getDragboard().hasContent(SERIALIZED_MIME_TYPE)) {
+                    setOpacity(0.3);
+                }
+            });
+
+            setOnDragExited(event -> {
+                if (event.getGestureSource() != thisCell &&
+                        event.getDragboard().hasContent(SERIALIZED_MIME_TYPE)) {
+                    setOpacity(1);
+                }
+            });
+
+            setOnDragDropped(event -> {
+                Dragboard db = event.getDragboard();
+
+                if (db.hasContent(SERIALIZED_MIME_TYPE)) {
+                    int draggedIdx = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
+                    RulePane draggedPane = lw.getItems().remove(draggedIdx);
+                    int droppedIdx = isEmpty() ? lw.getItems().size() : getIndex();
+
+                    RuleGroup rg_dragged = fftManager.currFFT.ruleGroups.get(draggedPane.idx);
+                    fftManager.currFFT.ruleGroups.remove(rg_dragged);
+                    fftManager.currFFT.ruleGroups.add(droppedIdx, rg_dragged);
+
+                    event.setDropCompleted(true);
+                    FFTManager.save();
+                    showRuleGroups();
+                    lw.getSelectionModel().select(droppedIdx);
+                }
+                event.consume();
+            });
+
+            setOnDragDone(DragEvent::consume);
+        }
+
+        @Override
+        protected void updateItem(RulePane item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setGraphic(null);
+            } else {
+                setGraphic(item);
+            }
+        }
     }
 
     // Can be either rename or new fft
-    public class NameFFTPane extends RenamePane {
+    private class NameFFTPane extends RenamePane {
         private boolean rename;
 
         NameFFTPane(String labelText, boolean rename) {

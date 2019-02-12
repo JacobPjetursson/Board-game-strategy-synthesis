@@ -4,6 +4,7 @@ import fftlib.game.*;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
+import javafx.scene.input.DataFormat;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,6 +30,8 @@ public class FFTManager {
     public static InteractiveFFTState interactiveState;
     static Function<Action, FFTMove> actionToMove;
     public static Function<Clause, FFTState> clauseToState;
+
+    public static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
 
     // Most game-related classes are processed here
     public FFTManager(FFTGameSpecifics gameSpecifics) {
@@ -63,7 +66,7 @@ public class FFTManager {
                 for (RuleGroup rg : fft.ruleGroups) {
                     fft_file += "[" + rg.name + "]\n";
                     for (Rule r : rg.rules) {
-                        fft_file += r.clauseStr + " -> " + r.actionStr + "\n";
+                        fft_file += r.getClauseStr() + " -> " + r.getActionStr() + "\n";
                     }
                 }
             }

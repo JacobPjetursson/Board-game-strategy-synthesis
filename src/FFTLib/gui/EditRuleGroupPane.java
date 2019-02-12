@@ -9,10 +9,8 @@ import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.input.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -23,9 +21,11 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import static fftlib.FFTManager.SERIALIZED_MIME_TYPE;
+
 public class EditRuleGroupPane extends VBox {
     private int textFieldWidth = 150;
-    private ListView<BorderPane> lw;
+    private ListView<RulePane> lw;
     private RuleGroup rg;
     private RuleGroup rg_changes;
     private Label titleLabel;
@@ -43,6 +43,7 @@ public class EditRuleGroupPane extends VBox {
         // Existing rule groups
         lw = new ListView<>();
         lw.setPickOnBounds(false);
+        lw.setCellFactory(param -> new RuleCell());
         showRules();
 
         // New rule
@@ -115,7 +116,7 @@ public class EditRuleGroupPane extends VBox {
             newStage.setOnCloseRequest(Event::consume);
             newStage.show();
         });
-        // FIX ME AND MY SHITTY ALIGNING
+        // FIXME AND MY SHITTY ALIGNING
         titleBox.setPadding(new Insets(10, 10, 0, 10));
         titleBox.setCenter(titleLabel);
         titleBox.setRight(renameBtn);
@@ -125,55 +126,9 @@ public class EditRuleGroupPane extends VBox {
     }
 
     private void showRules() {
-        ObservableList<BorderPane> rules = FXCollections.observableArrayList();
+        ObservableList<RulePane> rules = FXCollections.observableArrayList();
         for (int i = 0; i < rg_changes.rules.size(); i++) {
-            final int index = i; // FUCKING JAVA CANCER
-            Rule r = rg_changes.rules.get(i);
-            Label rLabel = new Label((i + 1) + ": " + r.printRule());
-            rLabel.setFont(Font.font("Verdana", 11));
-
-            // up/down list buttons
-            int buttonSize = 100;
-            VBox upDownButtons = new VBox();
-            upDownButtons.setAlignment(Pos.CENTER);
-            Button upButton = new Button("▲");
-            Button downButton = new Button("▼");
-            upButton.setMinWidth(50);
-            downButton.setMinWidth(50);
-            upButton.setOnMouseClicked(event -> {
-                if (index == 0)
-                    return;
-                rg_changes.rules.remove(index);
-                rg_changes.rules.add(index - 1, r);
-                showRules();
-                lw.getSelectionModel().select(index - 1);
-            });
-            downButton.setOnMouseClicked(event -> {
-                if (index == rg_changes.rules.size() - 1)
-                    return;
-                rg_changes.rules.remove(index);
-                rg_changes.rules.add(index + 1, r);
-                showRules();
-                lw.getSelectionModel().select(index + 1);
-            });
-
-            // Edit / Remove buttons
-            VBox rgButtons = new VBox(10);
-            rgButtons.setAlignment(Pos.CENTER);
-            Button removeButton = new Button("Remove");
-            removeButton.setStyle("-fx-border-color: #000000; -fx-background-color: #ff0000;");
-            removeButton.setMinWidth(buttonSize);
-            removeButton.setOnMouseClicked(event -> removeRule(index));
-
-            BorderPane finalPane = new BorderPane();
-            upDownButtons.getChildren().addAll(upButton, downButton);
-            HBox allButtons = new HBox(removeButton, upDownButtons);
-            allButtons.setAlignment(Pos.CENTER);
-            allButtons.setSpacing(5);
-
-            finalPane.setCenter(rLabel);
-            finalPane.setRight(allButtons);
-            rules.add(finalPane);
+            rules.add(new RulePane(i));
         }
         lw.setItems(rules);
         lw.getSelectionModel().selectLast();
@@ -184,6 +139,105 @@ public class EditRuleGroupPane extends VBox {
         rg_changes.rules.remove(index);
         showRules();
         FFTManager.save();
+    }
+
+    private class RulePane extends BorderPane {
+
+        int idx;
+
+        RulePane(int idx) { // Rulegroup entry
+            super();
+            this.idx = idx;
+            Rule r = rg_changes.rules.get(idx);
+            Label rLabel = new Label((idx + 1) + ": " + r.printRule());
+            rLabel.setFont(Font.font("Verdana", 11));
+
+            // Remove button
+            VBox rgButtons = new VBox(10);
+            rgButtons.setAlignment(Pos.CENTER);
+            Button removeButton = new Button("Remove");
+            removeButton.setStyle("-fx-border-color: #000000; -fx-background-color: #ff0000;");
+            removeButton.setMinWidth(100);
+            removeButton.setOnMouseClicked(event -> removeRule(idx));
+
+            setCenter(rLabel);
+            setRight(removeButton);
+        }
+    }
+
+    private class RuleCell extends ListCell<RulePane> {
+
+        RuleCell() {
+            ListCell thisCell = this;
+
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            setAlignment(Pos.CENTER);
+
+            setOnDragDetected(event -> {
+                if (isEmpty())
+                    return;
+                Integer index = getIndex();
+                Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent content = new ClipboardContent();
+                content.put(SERIALIZED_MIME_TYPE, index);
+                dragboard.setDragView(snapshot(null, null));
+                dragboard.setContent(content);
+                event.consume();
+            });
+
+            setOnDragOver(event -> {
+                if (event.getGestureSource() != thisCell &&
+                        event.getDragboard().hasContent(SERIALIZED_MIME_TYPE)) {
+                    event.acceptTransferModes(TransferMode.MOVE);
+                }
+
+                event.consume();
+            });
+
+            setOnDragEntered(event -> {
+                if (event.getGestureSource() != thisCell &&
+                        event.getDragboard().hasContent(SERIALIZED_MIME_TYPE)) {
+                    setOpacity(0.3);
+                }
+            });
+
+            setOnDragExited(event -> {
+                if (event.getGestureSource() != thisCell &&
+                        event.getDragboard().hasContent(SERIALIZED_MIME_TYPE)) {
+                    setOpacity(1);
+                }
+            });
+
+            setOnDragDropped(event -> {
+                Dragboard db = event.getDragboard();
+
+                if (db.hasContent(SERIALIZED_MIME_TYPE)) {
+                    int draggedIdx = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
+                    RulePane draggedPane = lw.getItems().remove(draggedIdx);
+                    int droppedIdx = isEmpty() ? lw.getItems().size() : getIndex();
+
+                    Rule r_dragged = rg_changes.rules.get(draggedPane.idx);
+                    rg_changes.rules.remove(r_dragged);
+                    rg_changes.rules.add(droppedIdx, r_dragged);
+                    event.setDropCompleted(true);
+                    showRules();
+                    lw.getSelectionModel().select(droppedIdx);
+                }
+                event.consume();
+            });
+
+            setOnDragDone(DragEvent::consume);
+        }
+
+        @Override
+        protected void updateItem(RulePane item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setGraphic(null);
+            } else {
+                setGraphic(item);
+            }
+        }
     }
 
     public class RenameRGPane extends RenamePane {

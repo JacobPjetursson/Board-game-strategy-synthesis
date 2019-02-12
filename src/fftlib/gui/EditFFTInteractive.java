@@ -29,6 +29,7 @@ import javafx.util.Duration;
 
 import java.util.ArrayList;
 
+import static fftlib.FFTManager.SERIALIZED_MIME_TYPE;
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
 
@@ -40,8 +41,6 @@ public class EditFFTInteractive extends BorderPane {
 
     private RadioButton p1Btn;
     private RadioButton p2Btn;
-
-    private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
 
     public EditFFTInteractive(Scene prevScene, FFTManager fftManager) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
@@ -80,8 +79,8 @@ public class EditFFTInteractive extends BorderPane {
         lw = new ListView<>();
         lw.setPickOnBounds(false);
         lw.setPrefWidth(350);
-        showRuleGroups();
         lw.setCellFactory(param -> new RuleCell());
+        showRuleGroups();
         BorderPane.setMargin(lw, new Insets(15));
         setRight(lw);
 
@@ -288,21 +287,28 @@ public class EditFFTInteractive extends BorderPane {
 
                 if (db.hasContent(SERIALIZED_MIME_TYPE)) {
                     int draggedIdx = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
-                    RulePane draggedPane = lw.getItems().remove(draggedIdx);
-                    int droppedIdx = isEmpty() ? lw.getItems().size() : getIndex();
-                    RulePane droppedPane = lw.getItems().get(droppedIdx - 1);
+                    int droppedIdx = getIndex();
+                    int selectionIdx;
 
-
+                    RulePane draggedPane = lw.getItems().get(draggedIdx);
                     RuleGroup rg_dragged = fftManager.currFFT.ruleGroups.get(draggedPane.rgIdx);
                     Rule r_dragged = rg_dragged.rules.get(draggedPane.rIdx);
-                    RuleGroup rg_dropped = fftManager.currFFT.ruleGroups.get(droppedPane.rgIdx);
-
                     rg_dragged.rules.remove(r_dragged);
-                    rg_dropped.rules.add(r_dragged);
 
+                    if (isEmpty()) { // out-of-bounds
+                        RuleGroup rg_last = fftManager.currFFT.ruleGroups.get(fftManager.currFFT.ruleGroups.size() - 1);
+                        rg_last.rules.add(r_dragged);
+                        selectionIdx = lw.getItems().size() - 1;
+                    } else {
+                        RulePane droppedPane = lw.getItems().get(droppedIdx);
+                        RuleGroup rg_dropped = fftManager.currFFT.ruleGroups.get(droppedPane.rgIdx);
+                        rg_dropped.rules.add(droppedPane.rIdx, r_dragged);
+                        selectionIdx = droppedIdx;
+                    }
                     event.setDropCompleted(true);
+                    FFTManager.save();
                     showRuleGroups();
-                    lw.getSelectionModel().select(droppedIdx);
+                    lw.getSelectionModel().select(selectionIdx);
                 }
                 event.consume();
             });
@@ -327,4 +333,3 @@ public class EditFFTInteractive extends BorderPane {
         }
     }
 }
-
