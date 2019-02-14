@@ -40,7 +40,7 @@ public class FFTManager {
         logic = gameSpecifics.getLogic();
         db = gameSpecifics.getDatabase();
         path = gameSpecifics.getFFTFilePath();
-        gameSymmetries = gameSpecifics.getSymmetries();
+        gameSymmetries = gameSpecifics.getAllowedTransformations();
         int[] dim = gameSpecifics.getBoardDim();
         gameBoardHeight = dim[0];
         gameBoardWidth = dim[1];
@@ -60,17 +60,17 @@ public class FFTManager {
         BufferedWriter writer;
         try {
             writer = new BufferedWriter(new FileWriter(path));
-            String fft_file = "";
+            StringBuilder fft_file = new StringBuilder();
             for (FFT fft : ffts) {
-                fft_file += "{" + fft.name + "}\n";
+                fft_file.append("{").append(fft.name).append("}\n");
                 for (RuleGroup rg : fft.ruleGroups) {
-                    fft_file += "[" + rg.name + "]\n";
+                    fft_file.append("[").append(rg.name).append("]\n");
                     for (Rule r : rg.rules) {
-                        fft_file += r.getClauseStr() + " -> " + r.getActionStr() + "\n";
+                        fft_file.append(r.getClauseStr()).append(" -> ").append(r.getActionStr()).append("\n");
                     }
                 }
             }
-            writer.write(fft_file);
+            writer.write(fft_file.toString());
             writer.close();
 
         } catch (IOException e) {
@@ -105,9 +105,9 @@ public class FFTManager {
                         String[] rule = line.split("->");
                         String clauseStr = rule[0].trim();
                         String actionStr = rule[1].trim();
-                        if (rg != null) {
+                        if (rg != null)
                             rg.rules.add(new Rule(clauseStr, actionStr));
-                        }
+
                     }
                 }
                 // In case of at least 1 FFT

@@ -3,7 +3,6 @@ package kulibrat.FFT;
 import fftlib.Action;
 import fftlib.Clause;
 import fftlib.Literal;
-import fftlib.Rule;
 import fftlib.game.*;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
@@ -14,10 +13,8 @@ import kulibrat.game.State;
 import kulibrat.misc.Database;
 import misc.Config;
 
-import java.util.ArrayList;
-
 import static fftlib.Literal.PIECEOCC_ANY;
-import static misc.Config.*;
+import static fftlib.game.Transform.*;
 
 public class GameSpecifics implements FFTGameSpecifics {
     private Controller cont;
@@ -78,8 +75,8 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public int[] getSymmetries() {
-        return new int[]{SYM_NONE, SYM_HREF};
+    public int[] getAllowedTransformations() {
+        return new int[]{TRANS_HREF};
     }
 
     @Override

@@ -35,15 +35,7 @@ public class Config {
     // BOARD CONFIG
     public static final int kuliBWidth = 3;
     public static final int kuliBHeight = 3;
-    // LEVEL OF SYMMETRIES
-    public static final int SYM_NONE = 0;
-    public static final int SYM_HREF = 1;
-    public static final int SYM_VREF = 2;
-    public static final int SYM_HVREF = 3;
-    public static final int SYM_ROT = 4;
-    public static final int SYM_HREF_ROT = 5;
-    public static final int SYM_VREF_ROT = 6;
-    public static final int SYM_HVREF_ROT = 7;
+
     // MISC
     public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";
     public static int SCORELIMIT; // Set by player once (kulibrat)

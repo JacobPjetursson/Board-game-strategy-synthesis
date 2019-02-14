@@ -1,12 +1,13 @@
 {Winning Strategy 3x3 Red}
 [Win if possible]
-P_0_x -> -0_x
-P_1_x AND E_0_x -> -1_x
-E_0_x AND E_1_x AND P_2_x -> -2_x
+P(0, x) -> -P(0, x)
+P(1, x) AND E(0, x) -> -P(1, x)
+E(0, x) AND E(1, x) AND P(2, x) -> -P(2, x)
 [Attack]
-E_0_x AND P_1_x -> +0_x AND -1_x
+E(0, x) AND P(1, x) -> +P(0, x) AND -P(1, x)
 [Move]
-P_1_2 ∧ !E_0_1 ∧ !P_0_1 -> +0_1 ∧ -1_2
-P_2_1 ∧ !E_1_2 ∧ !P_1_2 ∧ !E_0_2 -> +1_2 ∧ -2_1
+P(1, 2) ∧ !E(0, 1) ∧ !P(0, 1) -> +P(0, 1) ∧ -P(1, 2)
+P(2, 1) ∧ !E(1, 2) ∧ !P(1, 2) ∧ !E(0, 2) -> +P(1, 2) ∧ -P(2, 1)
 [Place piece]
-!E_2_x AND !P_2_x AND !E_1_x -> +2_x
+!E(2, 1) ∧ !P(2, 1) ∧ !E(1, 1) -> +P(2, 1)
+!E(2, 0) ∧ !P(2, 0) ∧ !E(1, 0) -> +P(2, 0)

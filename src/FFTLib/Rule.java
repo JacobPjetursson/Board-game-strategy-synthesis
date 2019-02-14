@@ -2,15 +2,18 @@ package fftlib;
 
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
-import misc.Config;
+import fftlib.game.Transform;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Objects;
 
 
 public class Rule {
     private static final ArrayList<String> separators = new ArrayList<>(
-            Arrays.asList("and", "And", "AND", "&", "&&", "∧", ","));
-    public ArrayList<Clause> symmetryClauses;
+            Arrays.asList("and", "And", "AND", "&", "∧"));
+    private ArrayList<Clause> transformedClauses;
     public Clause clause;
     public Action action;
     private String actionStr, clauseStr;
@@ -33,7 +36,7 @@ public class Rule {
         } else {
             this.action = getAction(actionStr);
             this.clause = getClause(clauseStr);
-            this.symmetryClauses = getSymmetryClauses();
+            this.transformedClauses = getTransformedClauses();
         }
         errors = !isValidRuleFormat(this);
     }
@@ -49,12 +52,12 @@ public class Rule {
     public void addLiteral(Literal l) {
         if (!clause.literals.contains(l))
             clause.add(l);
-        this.symmetryClauses = getSymmetryClauses();
+        this.transformedClauses = getTransformedClauses();
     }
 
     public void removeLiteral(Literal l) {
         this.clause.remove(l);
-        this.symmetryClauses = getSymmetryClauses();
+        this.transformedClauses = getTransformedClauses();
     }
 
     public void removeLiterals(int row, int col) {
@@ -64,7 +67,7 @@ public class Rule {
                 removeList.add(l);
         }
         clause.literals.removeAll(removeList);
-        this.symmetryClauses = getSymmetryClauses();
+        this.transformedClauses = getTransformedClauses();
     }
 
     public void setAction(Action a) {
@@ -73,32 +76,31 @@ public class Rule {
 
     public void setClause(Clause c) {
         this.clause = c;
-        this.symmetryClauses = getSymmetryClauses();
+        this.transformedClauses = getTransformedClauses();
     }
 
     private static ArrayList<String> prepClause(String clauseStr) {
         ArrayList<String> clause = new ArrayList<>();
-        String[] parts = clauseStr.split(" ");
+        StringBuilder regex = new StringBuilder();
+        regex.append(separators.get(0));
+        for (int i = 1; i < separators.size(); i++)
+            regex.append("|").append(separators.get(i));
+
+        String[] parts = clauseStr.split(regex.toString());
         for (String part : parts) {
-            if (separators.contains(part)) {
-                continue;
-            }
-            for (String sep : separators) {
-                if (part.contains(sep)) {
-                    part = part.replace(sep, "");
-                }
-            }
             if (part.length() < 2)
                 continue;
-            // Both E and P
-            if ((part.charAt(0) == '!' && Character.isDigit(part.charAt(1)))) {
-                String newpart = "!E_" + part.substring(1);
+            part = part.trim();
+            // Both E and P (PIECEOCC_ANY)
+            // TODO - maybe replace with literal that allows both
+            if ((part.charAt(0) == '!' && part.substring(1, 4).equals("PE("))) {
+                String newpart = "!E(" + part.substring(4);
                 clause.add(newpart);
-                newpart = "!P_" + part.substring(1);
+                newpart = "!P(" + part.substring(4);
                 clause.add(newpart);
-            } else if (Character.isDigit(part.charAt(0))) {
-                clause.add("E_" + part);
-                clause.add("P_" + part);
+            } else if (part.substring(1, 4).equals("PE(")) {
+                clause.add("E(" + part.substring(4));
+                clause.add("P(" + part.substring(4));
             } else
                 clause.add(part);
         }
@@ -106,15 +108,17 @@ public class Rule {
     }
 
     private static ArrayList<String> prepAction(String actionStr) {
-        String[] parts = actionStr.split(" ");
+        StringBuilder regex = new StringBuilder();
+        regex.append(separators.get(0));
+        for (int i = 1; i < separators.size(); i++)
+            regex.append("|").append(separators.get(i));
+
+        String[] parts = actionStr.split(regex.toString());
         ArrayList<String> corrected_parts = new ArrayList<>();
         for (String part : parts) {
-            if (separators.contains(part))
+            if (part.length() < 2)
                 continue;
-            for (String sep : separators) {
-                if (part.contains(sep))
-                    part = part.replace(sep, "");
-            }
+            part = part.trim();
             corrected_parts.add(part);
 
         }
@@ -125,7 +129,6 @@ public class Rule {
     private static Clause getClause(String clauseStr) {
         ArrayList<Literal> literals = new ArrayList<>();
         for (String c : prepClause(clauseStr)) {
-            Literal l = new Literal(c);
             literals.add(new Literal(c));
         }
        return new Clause(literals);
@@ -163,27 +166,25 @@ public class Rule {
         ArrayList<String> prepLiteralStr = prepClause(clauseStr);
         ArrayList<String> prepActionStr = prepAction(actionStr);
         for (String lStr : prepLiteralStr) {
-            String[] pos = lStr.split("_");
-            if (pos.length < 2 || pos.length > 3)
+            String[] coords = Literal.getCoords(lStr);
+            if (coords == null)
                 return false;
-            // If P or E is prefixed, index is different
-            int idx = pos.length == 3 ? 1 : 0;
-            if (!Character.isDigit(pos[idx].charAt(0))) {
+
+            if (!Character.isDigit(coords[0].charAt(0)))
                 return true;
-            } if (!Character.isDigit(pos[idx + 1].charAt(0))) {
+            if (!Character.isDigit(coords[1].charAt(0)))
                 return true;
-            }
+
         }
         for (String aStr : prepActionStr) {
-            String[] pos = aStr.split("_");
-            if (pos.length < 2 || pos.length > 3)
+            String[] coords = Literal.getCoords(aStr);
+            if (coords == null)
                 return false;
-            // Char after + or -
-            if (!Character.isDigit(pos[0].charAt(1))) {
+
+            if (!Character.isDigit(coords[0].charAt(0)))
                 return true;
-            } if (!Character.isDigit(pos[1].charAt(0))) {
+            if (!Character.isDigit(coords[1].charAt(0)))
                 return true;
-            }
         }
         return false;
     }
@@ -194,23 +195,23 @@ public class Rule {
         HashSet<String> wildCardsRow = new HashSet<>();
         HashSet<String> wildCardsCol = new HashSet<>();
         for (String lStr : prepLiteralStr) {
-            String[] pos = lStr.split("_");
-            // If P or E is prefixed, index is different
-            int idx = pos.length == 3 ? 1 : 0;
-            if (!Character.isDigit(pos[idx].charAt(0))) {
-                wildCardsRow.add(pos[idx]);
-            } if (!Character.isDigit(pos[idx + 1].charAt(0))) {
-                wildCardsCol.add(pos[idx + 1]);
-            }
+            String[] coords = Literal.getCoords(lStr);
+            if (coords == null)
+                continue;
+            if (!Character.isDigit(coords[0].charAt(0)))
+                wildCardsRow.add(coords[0]);
+            if (!Character.isDigit(coords[1].charAt(0)))
+                wildCardsCol.add(coords[1]);
+
         }
         for (String aStr : prepActionStr) {
-            String[] pos = aStr.split("_");
-            // Char after + or -
-            if (!Character.isDigit(pos[0].charAt(1))) {
-                wildCardsRow.add(pos[0].substring(1));
-            } if (!Character.isDigit(pos[1].charAt(0))) {
-                wildCardsCol.add(pos[1]);
-            }
+            String[] coords = Literal.getCoords(aStr);
+            if (coords == null)
+                continue;
+            if (!Character.isDigit(coords[0].charAt(0)))
+                wildCardsRow.add(coords[0]);
+            if (!Character.isDigit(coords[1].charAt(0)))
+                wildCardsCol.add(coords[1]);
         }
         if (wildCardsCol.isEmpty() && wildCardsRow.isEmpty()) {
             rules.add(new Rule(clauseStr, actionStr));
@@ -223,7 +224,6 @@ public class Rule {
                 String finalAStr = actionStr.replace(wc, Integer.toString(i));
                 replaceWildcards(finalCStr, finalAStr, rules);
             }
-
         }
 
         for (String wc : wildCardsCol) {
@@ -232,7 +232,6 @@ public class Rule {
                 String finalAStr = actionStr.replace(wc, Integer.toString(i));
                 replaceWildcards(finalCStr, finalAStr, rules);
             }
-
         }
     }
 
@@ -245,7 +244,7 @@ public class Rule {
             cStr = clauseStr;
             aStr = actionStr;
         }
-        return "IF (" + cStr + ") THEN (" + aStr + ")";
+        return "IF " + cStr + " THEN " + aStr;
     }
 
     String getClauseStr() {
@@ -262,16 +261,15 @@ public class Rule {
             return actionStr;
     }
 
-    private ArrayList<Clause> getSymmetryClauses() {
-        ArrayList<Clause> symmetryClauses = new ArrayList<>();
-        // TODO - make this for all available symmetries
-        for (int symmetry : FFTManager.gameSymmetries) {
-            if (symmetry == Config.SYM_NONE)
-                symmetryClauses.add(new Clause(Config.SYM_NONE, clause));
-            else if (symmetry == Config.SYM_HREF)
-                symmetryClauses.add(new Clause(Config.SYM_HREF, reflectH(clause)));
-        }
-        return symmetryClauses;
+    private ArrayList<Clause> getTransformedClauses() {
+        ArrayList<Clause> transformedClauses = new ArrayList<>();
+        ArrayList<Literal> nonBoardPlacements = clause.extractNonBoardPlacements();
+        int[][] cBoard = clauseToBoard(clause);
+        HashSet<Transform.TransformedArray> tSet = Transform.applyAll(FFTManager.gameSymmetries, cBoard);
+        for (Transform.TransformedArray tArr : tSet)
+            transformedClauses.add(boardToClause(tArr, nonBoardPlacements));
+
+        return transformedClauses;
     }
 
 
@@ -286,83 +284,62 @@ public class Rule {
             return null;
         }
         HashSet<Literal> stLiterals = state.getLiterals();
-
-        for (int symmetry : FFTManager.gameSymmetries) {
-            for (Clause clause : symmetryClauses) {
-                if (clause.symmetry != symmetry)
-                    continue;
-
-                boolean match = true;
-                for (Literal l : clause.literals) {
-                    if (l.negation) {
-                        Literal temp = new Literal(l);
-                        temp.name = temp.name.replace("!", "");
-                        if (stLiterals.contains(temp)) {
-                            match = false;
-                            break;
-                        }
-                    } else if (!stLiterals.contains(l)) {
+        for (Clause clause : transformedClauses) {
+            boolean match = true;
+            for (Literal l : clause.literals) {
+                if (l.negation) {
+                    Literal temp = new Literal(l);
+                    temp.name = temp.name.replace("!", "");
+                    if (stLiterals.contains(temp)) {
                         match = false;
                         break;
                     }
+                } else if (!stLiterals.contains(l)) {
+                    match = false;
+                    break;
                 }
-                if (match) {
-                    FFTMove move = action.applySymmetry(symmetry).getMove();
-                    move.setTeam(state.getTurn());
-                    if (FFTManager.logic.isLegalMove(state, move)) {
-                        return move;
-                    }
+            }
+            if (match) {
+                Action a = action.transform(clause.transformations);
+                FFTMove move = a.getMove();
+                move.setTeam(state.getTurn());
+                if (FFTManager.logic.isLegalMove(state, move)) {
+                    return move;
                 }
             }
         }
         return null;
     }
 
-    private int[][] makeClauseBoard(Clause clause) {
+    // Returns a board with the literals on it, the value equals to the piece occ.
+    private int[][] clauseToBoard(Clause clause) {
         int[][] clauseBoard = new int[FFTManager.gameBoardHeight][FFTManager.gameBoardWidth];
-        // These literals will be reflected/rotated
-        ArrayList<Literal> changeLiterals = new ArrayList<>();
 
         for (Literal l : clause.literals) {
             if (l.boardPlacement && l.row != -1) {
-                changeLiterals.add(l);
                 if (l.negation)
                     clauseBoard[l.row][l.col] = -l.pieceOcc;
                 else
                     clauseBoard[l.row][l.col] = l.pieceOcc;
             }
         }
-        clause.literals.removeAll(changeLiterals);
         return clauseBoard;
     }
 
-    private void addClauseBoardToList(int[][] cb, Clause clause) {
-        // Add back to list
-        for (int i = 0; i < cb.length; i++) {
-            for (int j = 0; j < cb[i].length; j++) {
-                int val = cb[i][j];
+    // returns clause derives from transformed integer matrix and non-boardplacement literals
+    private Clause boardToClause(Transform.TransformedArray tArr, ArrayList<Literal> nonBoardPlacements) {
+        ArrayList<Literal> literals = new ArrayList<>();
+        for (int i = 0; i < tArr.board.length; i++) {
+            for (int j = 0; j < tArr.board[i].length; j++) {
+                int val = tArr.board[i][j];
                 if (val < 0)
-                    clause.add(new Literal(i, j, -val, true));
+                    literals.add(new Literal(i, j, -val, true));
                 else if (val > 0)
-                    clause.add(new Literal(i, j, val, false));
+                    literals.add(new Literal(i, j, val, false));
             }
         }
-    }
-
-    private Clause reflectH(Clause clause) {
-        Clause rotClause = new Clause(clause);
-        int[][] cBoard = makeClauseBoard(rotClause);
-        int[][] refH = new int[FFTManager.gameBoardHeight][FFTManager.gameBoardWidth];
-
-        // Reflect
-        for (int i = 0; i < cBoard.length; i++) {
-            for (int j = 0; j < cBoard[i].length; j++) {
-                refH[i][j] = cBoard[i][cBoard[i].length - 1 - j];
-            }
-        }
-
-        addClauseBoardToList(refH, rotClause);
-        return rotClause;
+        literals.addAll(nonBoardPlacements);
+        return new Clause(tArr.transformations, literals);
     }
 
     @Override
@@ -376,13 +353,13 @@ public class Rule {
             return false;
         if (this.multiRule)
             return this.rules.equals(rule.rules);
-        return (this.symmetryClauses.equals(rule.symmetryClauses) &&
+        return (this.transformedClauses.equals(rule.transformedClauses) &&
                         (this.action.equals(rule.action)));
     }
 
     @Override
     public int hashCode() {
-        int hash = Objects.hash(this.symmetryClauses, this.action);
+        int hash = Objects.hash(this.transformedClauses, this.action);
         return 31 * hash;
     }
 }

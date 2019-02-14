@@ -61,6 +61,12 @@ public class Move implements FFTMove {
         this.team = team;
     }
 
+    @Override
+    public String print() {
+        return String.format("OLDROW: %s, OLDCOL: %s, NEWROW: %s, NEWCOL: %s",
+                oldCol, oldRow, newCol, newRow);
+    }
+
     public Move reflect() {
         int[][] board = new int[Config.kuliBWidth][Config.kuliBHeight];
         if (oldCol != -1)
@@ -98,10 +104,5 @@ public class Move implements FFTMove {
             refMove.oldRow = -1;
         }
         return refMove;
-    }
-
-    public String print() {
-        return "A_" + team + ": (" + oldRow + "," + oldCol + ") "
-                + "-> " + "(" + newRow + "," + newCol + ")";
     }
 }

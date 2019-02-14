@@ -16,7 +16,7 @@ public interface FFTGameSpecifics {
 
     int[] getBoardDim(); // row, col
 
-    int[] getSymmetries();
+    int[] getAllowedTransformations();
 
     FFTState getInitialState();
 

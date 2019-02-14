@@ -14,8 +14,7 @@ import tictactoe.gui.FailStatePane;
 import tictactoe.gui.InteractiveState;
 import tictactoe.misc.Database;
 
-
-import static misc.Config.*;
+import static fftlib.game.Transform.*;
 
 
 public class GameSpecifics implements FFTGameSpecifics {
@@ -52,8 +51,8 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public int[] getSymmetries() {
-        return new int[]{SYM_NONE, SYM_HREF, SYM_VREF, SYM_HVREF, SYM_ROT, SYM_HREF_ROT, SYM_VREF_ROT, SYM_HVREF_ROT};
+    public int[] getAllowedTransformations() {
+        return new int[]{TRANS_HREF, TRANS_VREF, TRANS_ROT};
     }
 
     @Override

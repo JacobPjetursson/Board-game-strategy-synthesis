@@ -1,9 +1,13 @@
 package fftlib;
 
 import fftlib.game.FFTMove;
+import fftlib.game.Transform;
 import misc.Config;
+
 import java.util.ArrayList;
 import java.util.Objects;
+
+import static fftlib.Literal.PIECEOCC_PLAYER;
 
 
 public class Action {
@@ -20,15 +24,25 @@ public class Action {
         this.addClause = new Clause();
         this.remClause = new Clause();
 
-        for (String l : literals) {
-            if (l.startsWith("+") && Character.isDigit(l.charAt(1))) {
-                l = l.substring(1);
-                addClause.add(new Literal(l));
-            } else if (l.startsWith("-") && Character.isDigit(l.charAt(1))) {
-                l = l.substring(1);
-                remClause.add(new Literal(l));
+        for (String lStr : literals) {
+            if (lStr.startsWith("+")) {
+                lStr = lStr.substring(1);
+                Literal l = new Literal(lStr);
+                if (l.error) {
+                    actionErr = true;
+                    return;
+                }
+                addClause.add(l);
+            } else if (lStr.startsWith("-")) {
+                lStr = lStr.substring(1);
+                Literal l = new Literal(lStr);
+                if (l.error) {
+                    actionErr = true;
+                    return;
+                }
+                remClause.add(l);
             } else {
-                System.err.println("Invalid action format! Should be plus or minus, followed by row and column specification");
+                System.err.println("Invalid action format! Literal should be prefixed with plus (+) or minus (-)");
                 actionErr = true;
                 return;
             }
@@ -39,10 +53,19 @@ public class Action {
             actionErr = true;
             return;
         }
-        if (Config.CURRENT_GAME == Config.KULIBRAT &&
-                (addClause.size() > 1 || remClause.size() > 1)) {
-            System.err.println("Only moves with a single add clause and/or a single remove clause is allowed in this game");
-            actionErr = true;
+        if (Config.CURRENT_GAME == Config.KULIBRAT) {
+            if(addClause.size() > 1 || remClause.size() > 1) {
+                System.err.println("Only moves with a single add clause and/or a single remove clause is allowed in this game");
+                actionErr = true;
+                return;
+            }
+            for (Literal l : addClause.literals) {
+                if (l.pieceOcc != PIECEOCC_PLAYER) {
+                    System.err.println("It is only allowed to move the player's own pieces in this game, i.e. P(x, y)");
+                    actionErr = true;
+                    return;
+                }
+            }
         }
     }
 
@@ -51,88 +74,66 @@ public class Action {
         this.remClause = new Clause(remClause);
     }
 
-
-    // TODO - do for all
-    Action applySymmetry(int symmetry) {
-        switch (symmetry) {
-            case Config.SYM_HREF:
-                return reflectH();
-            default:
-                return this;
-        }
-    }
-
-    private Action reflectH() {
-        Clause rotAddClause = new Clause(addClause);
-        Clause rotRemClause = new Clause(remClause);
-        int[][] cBoard = makeClauseBoard(rotAddClause, rotRemClause);
-        int[][] refH = new int[FFTManager.gameBoardHeight][FFTManager.gameBoardWidth];
-
-        // Reflect
-        for (int i = 0; i < cBoard.length; i++) {
-            for (int j = 0; j < cBoard[i].length; j++) {
-                refH[i][j] = cBoard[i][cBoard[i].length - 1 - j];
-            }
-        }
-        addClauseBoardToList(refH, rotAddClause, rotRemClause);
-
-        return new Action(rotAddClause, rotRemClause);
+    Action transform(ArrayList<Integer> transformations) {
+        int[][] aBoard = actionToBoard();
+        int[][] tBoard = Transform.apply(transformations, aBoard);
+        return boardToAction(transformations, tBoard);
     }
 
     public FFTMove getMove() {
         return FFTManager.actionToMove.apply(this);
     }
 
-    private int[][] makeClauseBoard(Clause addClause, Clause remClause) {
+    // Takes as input copies of the addClause, remClause lists and removes all the literals that are board placements
+    // It returns a board with the literals on it, the value equals to the piece occ.
+    private int[][] actionToBoard() {
         int[][] clauseBoard = new int[FFTManager.gameBoardHeight][FFTManager.gameBoardWidth];
-        // These literals will be reflected/rotated
-        ArrayList<Literal> addChangeLiterals = new ArrayList<>();
-        ArrayList<Literal> remChangeLiterals = new ArrayList<>();
 
         for (Literal l : addClause.literals) {
-            if (l.row != -1) {
-                addChangeLiterals.add(l);
+            if (l.row != -1)
                 clauseBoard[l.row][l.col] = l.pieceOcc;
-            }
         }
-        addClause.literals.removeAll(addChangeLiterals);
         for (Literal l : remClause.literals) {
-            if (l.row != -1) {
-                remChangeLiterals.add(l);
+            if (l.row != -1)
                 clauseBoard[l.row][l.col] = -l.pieceOcc;
-            }
         }
-        remClause.literals.removeAll(remChangeLiterals);
 
         return clauseBoard;
     }
 
     String getFormattedString() {
-        String actionMsg = "";
+        StringBuilder actionMsg = new StringBuilder();
         for (Literal literal : addClause.literals) {
-            if (!actionMsg.isEmpty())
-                actionMsg += " ∧ ";
-            actionMsg += "+" + literal.name;
+            if (actionMsg.length() > 0)
+                actionMsg.append(" ∧ ");
+            actionMsg.append("+").append(literal.name);
         }
         for (Literal literal : remClause.literals) {
-            if (!actionMsg.isEmpty())
-                actionMsg += " ∧ ";
-            actionMsg += "-" + literal.name;
+            if (actionMsg.length() > 0)
+                actionMsg.append(" ∧ ");
+            actionMsg.append("-").append(literal.name);
         }
-        return actionMsg;
+        return actionMsg.toString();
     }
 
-    private void addClauseBoardToList(int[][] cb, Clause addClause, Clause remClause) {
+    // Takes empty addClause and remClause lists (except for constants),
+    // and fill them up with the rotated pieces from the cb array.
+    private Action boardToAction(ArrayList<Integer> transformations, int[][] cb) {
+        ArrayList<Literal> addLits = new ArrayList<>();
+        ArrayList<Literal> remLits = new ArrayList<>();
         // Add back to list
         for (int i = 0; i < cb.length; i++) {
             for (int j = 0; j < cb[i].length; j++) {
                 int val = cb[i][j];
-                if (val == -Literal.PIECEOCC_NONE)
-                    remClause.add(new Literal(i, j, Literal.PIECEOCC_NONE, false));
-                else if (val == Literal.PIECEOCC_NONE)
-                    addClause.add(new Literal(i, j, Literal.PIECEOCC_NONE, false));
+                if (val < 0)
+                    remLits.add(new Literal(i, j, val, false));
+                else if (val > 0)
+                    addLits.add(new Literal(i, j, val, false));
             }
         }
+        Clause addC = new Clause(transformations, addLits);
+        Clause remC = new Clause(transformations, remLits);
+        return new Action(addC, remC);
     }
 
     @Override

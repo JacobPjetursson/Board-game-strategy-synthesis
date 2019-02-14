@@ -1,13 +1,11 @@
 package fftlib;
 
-import misc.Config;
-
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class Clause {
     public ArrayList<Literal> literals;
-    int symmetry = Config.SYM_NONE;
+    ArrayList<Integer> transformations;
 
     public Clause() {
         this.literals = new ArrayList<>();
@@ -17,19 +15,19 @@ public class Clause {
         this.literals = literals;
     }
 
-    Clause(int symmetry, Clause clause) {
+    Clause(ArrayList<Integer> transformations, Clause clause) {
         this.literals = new ArrayList<>(clause.literals);
-        this.symmetry = symmetry;
+        this.transformations = transformations;
     }
 
     public Clause(Clause duplicate) {
         this.literals = new ArrayList<>(duplicate.literals);
-        this.symmetry = duplicate.symmetry;
+        this.transformations = new ArrayList<>(duplicate.transformations);
     }
 
-    Clause(int symmetry, ArrayList<Literal> literals) {
+    Clause(ArrayList<Integer> transformations, ArrayList<Literal> literals) {
         this.literals = literals;
-        this.symmetry = symmetry;
+        this.transformations = transformations;
     }
 
     public void add(Literal l) {
@@ -49,13 +47,22 @@ public class Clause {
     }
 
     String getFormattedString() {
-        String clauseMsg = "";
+        StringBuilder clauseMsg = new StringBuilder();
         for (Literal literal : literals) {
-            if (!clauseMsg.isEmpty())
-                clauseMsg += " ∧ ";
-            clauseMsg += literal.name;
+            if (clauseMsg.length() > 0)
+                clauseMsg.append(" ∧ ");
+            clauseMsg.append(literal.name);
         }
-        return clauseMsg;
+        return clauseMsg.toString();
+    }
+
+
+    ArrayList<Literal> extractNonBoardPlacements() {
+        ArrayList<Literal> nonBoardPlacements = new ArrayList<>();
+        for (Literal l : literals)
+            if (!l.boardPlacement)
+                nonBoardPlacements.add(l);
+        return nonBoardPlacements;
     }
 
     @Override
