@@ -9,47 +9,57 @@ import kulibrat.game.Controller;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
 import kulibrat.game.State;
-import kulibrat.gui.PlayBox;
+import kulibrat.gui.board.PlayBox.InteractivePlayBox;
+import kulibrat.gui.board.PlayBox.PlayBox;
 import kulibrat.gui.board.BoardPiece;
 import kulibrat.gui.board.BoardTile;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import static fftlib.Literal.PIECEOCC_ANY;
+import static fftlib.Literal.PIECEOCC_PLAYER;
+import static kulibrat.game.Logic.POS_NONBOARD;
 import static misc.Config.*;
 
 
 public class InteractiveState implements InteractiveFFTState {
-    private Controller cont;
-    private PlayBox pb;
+    private InteractivePlayBox pb;
     private BoardPiece selected;
     private ArrayList<Move> curHighLights;
-    private State state;
     private Rule rule;
     private Move move;
+    private int perspective;
+    private Controller cont;
+    private int tilesize;
 
     InteractiveState(Controller cont) {
-        this.cont = cont;
-        this.state = new State();
         this.rule = new Rule();
+        this.cont = cont;
+        this.tilesize = 60;
+        curHighLights = new ArrayList<>();
     }
 
     @Override
     public Node getInteractiveNode(FFTState fftState) {
         State s = (State) fftState;
-        Node node = makePlayBox(s);
-        this.state = new State(s);
-        updateRule(s);
+        this.perspective = s.getTurn();
+        this.rule = getRuleFromState(s);
 
-        return node;
+        this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
+        pb.update(s);
+        return pb;
     }
 
     // Assume correct and unambigious format
     public Node getInteractiveNode(Rule r) {
         this.rule = r;
-        this.state = (State) FFTManager.clauseToState.apply(r.clause);
-        return getInteractiveNode(state);
+        this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
+        if (r.multiRule) {
+            // TODO - how to handle multirule?
+        } else {
+            pb.update(r, perspective);
+        }
+        return pb;
     }
 
     @Override
@@ -58,58 +68,54 @@ public class InteractiveState implements InteractiveFFTState {
     }
 
     @Override
-    public void setPerspective(int team) {
+    public void setPerspective(int perspective) {
         deselect();
-        state.setTurn(team);
-        updateRule(state);
+        this.perspective = perspective;
+        pb.update(rule, perspective);
         pb.removeArrows();
     }
 
-    private Node makePlayBox(State s) {
-        int tilesize = 60;
-        PlayBox pb = new PlayBox(tilesize, CLICK_INTERACTIVE, cont);
-        this.pb = pb;
-
-        pb.update(s);
-        pb.addScore(s.getScoreLimit(), s.getScore(PLAYER1), s.getScore(PLAYER2), true);
-
-        return pb;
+    @Override
+    public int getPerspective() {
+        return perspective;
     }
 
-    private void updateRule(State s) {
+    // This is called when the add rule button is pressed from game screen
+    private Rule getRuleFromState(State s) {
+        Rule r = new Rule();
         HashSet<Literal> literals = s.getLiterals();
         ArrayList<Literal> literalList = new ArrayList<>(literals);
         // Remove scorelimit and points
         ArrayList<Literal> lits = new ArrayList<>();
-        for (Literal l : literalList) {
+        for (Literal l : literalList)
             if (l.boardPlacement)
                 lits.add(l);
-        }
-        this.rule.setClause(new Clause(lits));
+
+        r.setClause(new Clause(lits));
+        return r;
     }
 
     public void clear() {
         this.rule = new Rule();
-        this.state = new State();
     }
 
     private void highlightMoves(int row, int col, int team, boolean highlight) {
-        if (state.getTurn() != team)
-            return;
-        if (highlight) curHighLights = Logic.legalMovesFromPiece(row,
-                col, team, state);
         BoardTile[][] tiles = pb.getBoard().getTiles();
-        for (int i = 0; i < curHighLights.size(); i++) {
-            Move m = curHighLights.get(i);
 
-            if (m.newCol == -1 && m.newRow == -1) {
-                if (state.getTurn() == PLAYER1) {
+        if (this.perspective != team)
+            return;
+        if (highlight)
+            curHighLights = Logic.legalMovesFromPiece(row, col, team, Rule.clauseToBoard(rule.clause));
+        for (Move m : curHighLights) {
+            if (m.newCol == POS_NONBOARD && m.newRow == POS_NONBOARD) {
+                if (team == PLAYER1) {
                     pb.getGoal(PLAYER1).setHighlight(highlight, false, false, "");
                 } else {
                     pb.getGoal(PLAYER2).setHighlight(highlight, false, false, "");
                 }
             } else tiles[m.newRow][m.newCol].setHighlight(highlight, false, false, "");
         }
+
     }
 
     public void setSelected(BoardPiece piece) {
@@ -120,7 +126,7 @@ public class InteractiveState implements InteractiveFFTState {
         move = new Move();
         move.oldRow = piece.getRow();
         move.oldCol = piece.getCol();
-        move.team = piece.getTeam();
+        move.team = perspective;
     }
 
     private void deselect() {
@@ -131,16 +137,24 @@ public class InteractiveState implements InteractiveFFTState {
         }
     }
 
-    public void update(BoardTile bt) {
-        state.setBoardEntry(bt.getRow(), bt.getCol(), bt.getTeam());
+    public void updateFromTile(BoardTile bt) {
         rule.removeLiterals(bt.getRow(), bt.getCol());
         if (bt.isMandatory()) {
             Literal l;
-            if (bt.getTeam() == -1)
+            int tileTeam = bt.getTeam();
+
+            if (bt.getTeam() == PLAYER_ANY)
                 // Negated empty board = occupied board
-                l = new Literal(bt.getRow(), bt.getCol(), bt.getTeam(), !bt.isNegated());
-            else
-                l = new Literal(bt.getRow(), bt.getCol(), bt.getTeam(), bt.isNegated());
+                l = new Literal(bt.getRow(), bt.getCol(), tileTeam, !bt.isNegated());
+            else {
+                int tilePerspective;
+                if (perspective == PLAYER1)
+                    tilePerspective = tileTeam;
+                else
+                    tilePerspective = (tileTeam == PLAYER1) ? PLAYER2 : PLAYER1;
+
+                l = new Literal(bt.getRow(), bt.getCol(), tilePerspective, bt.isNegated());
+            }
 
             rule.addLiteral(l);
         }
@@ -152,16 +166,16 @@ public class InteractiveState implements InteractiveFFTState {
         pb.removeArrows();
         pb.addArrow(move, Color.BLUE);
         ArrayList<Literal> addLits = new ArrayList<>();
-        if (row != -1)
-            addLits.add(new Literal(row, col, PIECEOCC_ANY, false));
+        if (row != POS_NONBOARD)
+            addLits.add(new Literal(row, col, PIECEOCC_PLAYER, false));
         ArrayList<Literal> remLits = new ArrayList<>();
-        if (move.oldRow != -1)
-            remLits.add(new Literal(move.oldRow, move.oldCol, PIECEOCC_ANY, false));
+        if (move.oldRow != POS_NONBOARD)
+            remLits.add(new Literal(move.oldRow, move.oldCol, PIECEOCC_PLAYER, false));
         Clause addClause = new Clause(addLits);
         Clause remClause = new Clause(remLits);
         Action a = new Action(addClause, remClause);
         rule.setAction(a);
-        highlightMoves(move.oldRow, move.oldCol, move.team, false);
+        highlightMoves(move.oldRow, move.oldCol, perspective,false);
         deselect();
     }
 
@@ -169,13 +183,14 @@ public class InteractiveState implements InteractiveFFTState {
         return pb;
     }
 
-    public void setScoreLimit(int value, boolean use) {
+    public void setScoreLimit(int value, boolean mandatory) {
         // Check if exists
         Literal scoreLimit = null;
         for (Literal l : rule.clause.literals)
-            if (l.name.startsWith("SL"))
+            if (l.name.toUpperCase().startsWith("SL="))
                 scoreLimit = l;
-        if (use) {
+
+        if (mandatory) {
             String slString = "SL=" + value;
             if (scoreLimit != null)
                 scoreLimit.name = slString;
@@ -187,14 +202,15 @@ public class InteractiveState implements InteractiveFFTState {
         }
     }
 
-    public void setScore(int team, int value, boolean use) {
+    public void setScore(int team, int value, boolean mandatory) {
         // Check if exists
         Literal score = null;
         String prefix =(team == PLAYER1) ? "P1SCORE=" : "P2SCORE=";
         for (Literal l : rule.clause.literals)
-            if (l.name.startsWith(prefix))
+            if (l.name.toUpperCase().startsWith(prefix))
                 score = l;
-        if (use) {
+
+        if (mandatory) {
             String scoreStr = prefix + value;
             if (score != null)
                 score.name = scoreStr;

@@ -149,7 +149,7 @@ public class EditRuleGroupPane extends VBox {
             super();
             this.idx = idx;
             Rule r = rg_changes.rules.get(idx);
-            Label rLabel = new Label((idx + 1) + ": " + r.printRule());
+            Label rLabel = new Label((idx + 1) + ": " + r.print());
             rLabel.setFont(Font.font("Verdana", 11));
 
             // Remove button

@@ -29,9 +29,9 @@ import kulibrat.misc.Database;
 import misc.Config;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
+import static kulibrat.game.Logic.POS_NONBOARD;
 import static misc.Config.*;
 
 public class Controller {
@@ -319,7 +319,7 @@ public class Controller {
     // This function is called when two AI's are matched against each other. It can be interrupted by the user.
     // For the lookup table, a delay can be set
     private void startAI() {
-        // For the AI vs. AI mode. New thread is needed to update the gui while running the AI
+        // For the AI vs. AI mode. New thread is needed to updateRuleFromTile the gui while running the AI
         navPane.getRestartButton().setDisable(true);
         navPane.getMenuButton().setDisable(true);
         startAIButton.setDisable(true);
@@ -439,7 +439,7 @@ public class Controller {
     // Shows the red/green/yellow highlight on the tiles when a piece has been selected
     private void highlightMoves(int row, int col, int team, boolean highlight) {
         if (highlight) curHighLights = Logic.legalMovesFromPiece(row,
-                col, team, state);
+                col, team, state.getBoard());
         ArrayList<Move> bestPlays = null;
         if (highlight && helpHumanBox.isSelected()) {
             bestPlays = Database.bestPlays(new State(state));
@@ -459,7 +459,7 @@ public class Controller {
             if (bestPlays != null && bestPlays.contains(m)) {
                 bestMove = true;
             }
-            if (m.newCol == -1 && m.newRow == -1) {
+            if (m.newCol == POS_NONBOARD && m.newRow == POS_NONBOARD) {
                 if (team == PLAYER1) {
                     goalRed.setHighlight(highlight, helpHumanBox.isSelected(), bestMove, turns);
                 } else {

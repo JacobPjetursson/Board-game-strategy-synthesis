@@ -23,9 +23,7 @@ import kulibrat.game.Controller;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
 import kulibrat.game.StateAndMove;
-import kulibrat.gui.board.Board;
-import kulibrat.gui.board.Goal;
-import kulibrat.gui.board.Player;
+import kulibrat.gui.board.PlayBox.PlayBox;
 import kulibrat.misc.Database;
 
 import java.sql.SQLException;

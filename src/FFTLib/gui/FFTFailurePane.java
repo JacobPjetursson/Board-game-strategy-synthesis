@@ -4,6 +4,7 @@ import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
 import fftlib.game.FFTMove;
+import fftlib.game.FFTState;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -20,6 +21,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+
+import static misc.Config.PLAYER_ANY;
 
 
 public class FFTFailurePane extends BorderPane {
@@ -42,7 +45,7 @@ public class FFTFailurePane extends BorderPane {
 
         lw = new ListView<>();
         lw.setPickOnBounds(false);
-        lw.setPrefWidth(350);
+        lw.setPrefWidth(450);
         lw.setSelectionModel(new NoSelectionModel<>());
         showRuleGroups();
         BorderPane.setMargin(lw, new Insets(15));
@@ -53,7 +56,7 @@ public class FFTFailurePane extends BorderPane {
         bottomBox.setAlignment(Pos.CENTER);
         bottomBox.setPadding(new Insets(15));
 
-        Label arrowInfoLabel = new Label("Green is for non-losing moves, blue is the chosen move");
+        Label arrowInfoLabel = new Label("Green is the non-losing moves, blue is the chosen move");
         arrowInfoLabel.setFont(Font.font("Verdana", 15));
 
         String moveInfo;
@@ -77,6 +80,7 @@ public class FFTFailurePane extends BorderPane {
 
     private void showRuleGroups() {
         ObservableList<VBox> ruleGroups = FXCollections.observableArrayList();
+        boolean ruleApplied = false;
         for (int i = 0; i < fftManager.currFFT.ruleGroups.size(); i++) {
             // Rule group
             RuleGroup rg = fftManager.currFFT.ruleGroups.get(i);
@@ -87,22 +91,39 @@ public class FFTFailurePane extends BorderPane {
             rgVBox.getChildren().add(rgLabel);
             for (int j = 0; j < rg.rules.size(); j++) {
                 Rule r = rg.rules.get(j);
-                Label rLabel = new Label((j + 1) + ": " + r.printRule());
+                Label rLabel = new Label((j + 1) + ": " + r.print());
                 rLabel.setFont(Font.font("Verdana", 10));
                 // TODO - below is hacky
                 FFTMove failMove = fftManager.currFFT.failingPoint.getMove();
+                FFTState failState = fftManager.currFFT.failingPoint.getState();
                 int tempTeam = failMove.getTeam();
-                failMove.setTeam(-1);
-                if (r.multiRule) {
-                    for (Rule rule : r.rules) {
-                        if (rule.action.getMove().equals(failMove)) {
-                            rLabel.setTextFill(Color.BLUE);
-                            break;
+                failMove.setTeam(PLAYER_ANY);
+                if (!ruleApplied) {
+                    if (r.multiRule) {
+                        for (Rule rule : r.rules) {
+                            FFTMove ruleMove = rule.apply(failState);
+                            if (ruleMove == null)
+                                continue;
+                            ruleMove.setTeam(PLAYER_ANY);
+                            if (ruleMove.equals(failMove)) {
+                                rLabel.setTextFill(Color.BLUE);
+                                ruleApplied = true;
+                                break;
+                            }
                         }
+                    } else {
+                        FFTMove ruleMove = r.apply(failState);
+                        if (ruleMove != null) {
+                            ruleMove.setTeam(PLAYER_ANY);
+                            if (ruleMove.equals(failMove)) {
+                                rLabel.setTextFill(Color.BLUE);
+                                ruleApplied = true;
+                            }
+
+                        }
+
                     }
                 }
-                else if (r.action.getMove().equals(failMove))
-                    rLabel.setTextFill(Color.BLUE);
                 failMove.setTeam(tempTeam);
                 rgVBox.getChildren().add(rLabel);
             }

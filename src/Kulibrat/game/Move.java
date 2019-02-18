@@ -5,6 +5,8 @@ import misc.Config;
 
 import java.util.Objects;
 
+import static kulibrat.game.Logic.POS_NONBOARD;
+
 public class Move implements FFTMove {
     public int oldRow;
     public int oldCol;
@@ -64,14 +66,14 @@ public class Move implements FFTMove {
     @Override
     public String print() {
         return String.format("OLDROW: %s, OLDCOL: %s, NEWROW: %s, NEWCOL: %s",
-                oldCol, oldRow, newCol, newRow);
+                oldRow, oldCol, newRow, newCol);
     }
 
     public Move reflect() {
         int[][] board = new int[Config.kuliBWidth][Config.kuliBHeight];
-        if (oldCol != -1)
+        if (oldCol != POS_NONBOARD)
             board[oldRow][oldCol] = -team;
-        if (newCol != -1)
+        if (newCol != POS_NONBOARD)
             board[newRow][newCol] = team;
 
         int[][] ref = new int[Config.kuliBWidth][Config.kuliBHeight];
@@ -97,11 +99,11 @@ public class Move implements FFTMove {
             }
         }
         if (!newSet) {
-            refMove.newRow = -1;
-            refMove.newCol = -1;
+            refMove.newRow = POS_NONBOARD;
+            refMove.newCol = POS_NONBOARD;
         } else if (!oldSet) {
-            refMove.oldCol = -1;
-            refMove.oldRow = -1;
+            refMove.oldCol = POS_NONBOARD;
+            refMove.oldRow = POS_NONBOARD;
         }
         return refMove;
     }

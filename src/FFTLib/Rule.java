@@ -9,6 +9,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 
+import static fftlib.Literal.PIECEOCC_ANY;
+import static fftlib.Literal.PIECEOCC_ENEMY;
+import static fftlib.Literal.PIECEOCC_PLAYER;
+
 
 public class Rule {
     private static final ArrayList<String> separators = new ArrayList<>(
@@ -67,15 +71,34 @@ public class Rule {
                 removeList.add(l);
         }
         clause.literals.removeAll(removeList);
+        removeList.clear();
+        for (Literal l : action.addClause.literals) {
+            if (l.row == row && l.col == col)
+                removeList.add(l);
+        }
+        action.addClause.literals.removeAll(removeList);
+        removeList.clear();
+        for (Literal l : action.remClause.literals) {
+            if (l.row == row && l.col == col)
+                removeList.add(l);
+        }
+        action.remClause.literals.removeAll(removeList);
+
         this.transformedClauses = getTransformedClauses();
     }
 
     public void setAction(Action a) {
-        this.action = a;
+        if (a == null)
+            this.action = new Action();
+        else
+            this.action = a;
     }
 
     public void setClause(Clause c) {
-        this.clause = c;
+        if (c == null)
+            this.clause = new Clause();
+        else
+            this.clause = c;
         this.transformedClauses = getTransformedClauses();
     }
 
@@ -91,18 +114,7 @@ public class Rule {
             if (part.length() < 2)
                 continue;
             part = part.trim();
-            // Both E and P (PIECEOCC_ANY)
-            // TODO - maybe replace with literal that allows both
-            if ((part.charAt(0) == '!' && part.substring(1, 4).equals("PE("))) {
-                String newpart = "!E(" + part.substring(4);
-                clause.add(newpart);
-                newpart = "!P(" + part.substring(4);
-                clause.add(newpart);
-            } else if (part.substring(1, 4).equals("PE(")) {
-                clause.add("E(" + part.substring(4));
-                clause.add("P(" + part.substring(4));
-            } else
-                clause.add(part);
+            clause.add(part);
         }
         return clause;
     }
@@ -145,11 +157,11 @@ public class Rule {
                     return false;
             return true;
         }
-        if (r.clause.isEmpty())
-            return false;
         for (Literal l : r.clause.literals)
             if (l.error)
                 return false;
+        if (r.action.addClause.isEmpty() && r.action.remClause.isEmpty())
+            return false;
         if (r.action.actionErr)
             return false;
         for (Literal l : r.action.addClause.literals)
@@ -235,7 +247,7 @@ public class Rule {
         }
     }
 
-    public String printRule() {
+    public String print() {
         String cStr, aStr;
         if (clause != null && action != null) {
             cStr = clause.getFormattedString();
@@ -244,7 +256,7 @@ public class Rule {
             cStr = clauseStr;
             aStr = actionStr;
         }
-        return "IF " + cStr + " THEN " + aStr;
+        return "IF [" + cStr + "] THEN [" + aStr + "]";
     }
 
     String getClauseStr() {
@@ -287,22 +299,28 @@ public class Rule {
         for (Clause clause : transformedClauses) {
             boolean match = true;
             for (Literal l : clause.literals) {
-                if (l.negation) {
+                if (l.pieceOcc == PIECEOCC_ANY) {
                     Literal temp = new Literal(l);
-                    temp.name = temp.name.replace("!", "");
-                    if (stLiterals.contains(temp)) {
-                        match = false;
+                    temp.pieceOcc = PIECEOCC_PLAYER;
+                    temp.format();
+                    match = matchLiteral(temp, stLiterals);
+                    if (!match)
                         break;
-                    }
-                } else if (!stLiterals.contains(l)) {
-                    match = false;
-                    break;
+
+                    temp.pieceOcc = PIECEOCC_ENEMY;
+                    temp.format();
+                    match = matchLiteral(temp, stLiterals);
+                } else {
+                    match = matchLiteral(l, stLiterals);
                 }
+                if (!match)
+                    break;
+
             }
             if (match) {
                 Action a = action.transform(clause.transformations);
-                FFTMove move = a.getMove();
-                move.setTeam(state.getTurn());
+                FFTMove move = a.getMove(state.getTurn());
+
                 if (FFTManager.logic.isLegalMove(state, move)) {
                     return move;
                 }
@@ -311,12 +329,25 @@ public class Rule {
         return null;
     }
 
+    private boolean matchLiteral(Literal l, HashSet<Literal> stLiterals) {
+        if (l.negation) {
+            Literal temp = new Literal(l);
+            temp.negation = false;
+            temp.format();
+            return !stLiterals.contains(temp);
+
+        } else
+            return stLiterals.contains(l);
+    }
+
     // Returns a board with the literals on it, the value equals to the piece occ.
-    private int[][] clauseToBoard(Clause clause) {
-        int[][] clauseBoard = new int[FFTManager.gameBoardHeight][FFTManager.gameBoardWidth];
+    public static int[][] clauseToBoard(Clause clause) {
+        int height = FFTManager.gameBoardHeight;
+        int width = FFTManager.gameBoardWidth;
+        int[][] clauseBoard = new int[height][width];
 
         for (Literal l : clause.literals) {
-            if (l.boardPlacement && l.row != -1) {
+            if (l.boardPlacement && l.row >= 0 && l.col >= 0 && l.row <= height-1 && l.col <= width-1) {
                 if (l.negation)
                     clauseBoard[l.row][l.col] = -l.pieceOcc;
                 else
@@ -327,7 +358,7 @@ public class Rule {
     }
 
     // returns clause derives from transformed integer matrix and non-boardplacement literals
-    private Clause boardToClause(Transform.TransformedArray tArr, ArrayList<Literal> nonBoardPlacements) {
+    private static Clause boardToClause(Transform.TransformedArray tArr, ArrayList<Literal> nonBoardPlacements) {
         ArrayList<Literal> literals = new ArrayList<>();
         for (int i = 0; i < tArr.board.length; i++) {
             for (int j = 0; j < tArr.board[i].length; j++) {

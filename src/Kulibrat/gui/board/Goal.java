@@ -8,6 +8,7 @@ import javafx.scene.text.Font;
 import kulibrat.game.Controller;
 import kulibrat.game.Move;
 
+import static kulibrat.game.Logic.POS_NONBOARD;
 import static misc.Config.CLICK_INTERACTIVE;
 
 public class Goal extends StackPane {
@@ -50,10 +51,10 @@ public class Goal extends StackPane {
         setOnMouseClicked(event -> {
             if (highlight) {
                 if (clickMode == CLICK_INTERACTIVE) {
-                    cont.getInteractiveState().setArrowEndpoint(-1, -1);
+                    cont.getInteractiveState().setArrowEndpoint(POS_NONBOARD, POS_NONBOARD);
                 } else {
                     BoardPiece piece = cont.getSelected();
-                    cont.doHumanTurn(new Move(piece.getRow(), piece.getCol(), -1, -1, piece.getTeam()));
+                    cont.doHumanTurn(new Move(piece.getRow(), piece.getCol(), POS_NONBOARD, POS_NONBOARD, piece.getTeam()));
                 }
             }
         });

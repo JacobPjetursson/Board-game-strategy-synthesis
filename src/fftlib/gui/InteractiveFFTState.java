@@ -14,5 +14,7 @@ public interface InteractiveFFTState {
 
     void setPerspective(int team);
 
+    int getPerspective();
+
     void clear();
 }

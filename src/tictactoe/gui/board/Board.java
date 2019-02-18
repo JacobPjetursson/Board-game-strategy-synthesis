@@ -10,14 +10,15 @@ public class Board extends GridPane {
     private static final int boardColumns = 3;
     private BoardTile[][] tiles;
     private int tilesize;
+    private int clickMode;
 
-    public Board(int tilesize, boolean playMode, Controller cont) {
-        this.tilesize = tilesize;
+    public Board(int tilesize, int clickMode, Controller cont) {
+        this.clickMode = clickMode;
         setAlignment(Pos.CENTER);
         tiles = new BoardTile[boardRows][boardColumns];
         for (int i = 0; i < boardRows; i++) {
             for (int j = 0; j < boardColumns; j++) {
-                BoardTile bt = new BoardTile(i, j, tilesize, cont, playMode);
+                BoardTile bt = new BoardTile(i, j, tilesize, clickMode, cont);
                 add(bt, j, i);
                 tiles[i][j] = bt;
             }
@@ -28,10 +29,6 @@ public class Board extends GridPane {
         return tiles;
     }
 
-    public int getTileSize() {
-        return tilesize;
-    }
-
     public void update(State state) {
         int[][] stateBoard = state.getBoard();
         for (int i = 0; i < tiles.length; i++) {
@@ -39,9 +36,10 @@ public class Board extends GridPane {
                 BoardTile tile = tiles[i][j];
                 int stateTile = stateBoard[i][j];
                 // new piece added
-                if (tile.getChildren().isEmpty() && stateTile != 0) {
-                    tile.addPiece(stateTile, false);
+                if (tile.getPiece() == null && stateTile != 0) {
+                    tile.addPiece(stateTile);
                 }
+                tile.update();
             }
         }
     }

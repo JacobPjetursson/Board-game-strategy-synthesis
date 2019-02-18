@@ -8,9 +8,7 @@ import fftlib.gui.InteractiveFFTState;
 
 public interface FFTGameSpecifics {
 
-    FFTMove actionToMove(Action a);
-
-    FFTState clauseToState(Clause c);
+    FFTMove actionToMove(Action a, int team);
 
     String getFFTFilePath();
 

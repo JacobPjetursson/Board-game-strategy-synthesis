@@ -9,10 +9,8 @@ import javafx.scene.paint.Color;
 import kulibrat.game.Controller;
 import kulibrat.game.Move;
 import kulibrat.game.State;
-import kulibrat.gui.PlayBox;
-import kulibrat.gui.board.Board;
-import kulibrat.gui.board.Goal;
-import kulibrat.gui.board.Player;
+import kulibrat.gui.board.PlayBox.PlayBox;
+import kulibrat.gui.board.PlayBox.StaticPlayBox;
 
 import java.util.ArrayList;
 
@@ -30,7 +28,7 @@ public class FailStatePane implements FFTFailState {
 
     private PlayBox getFailState(State s, Move move, ArrayList<Move> nonLosingPlays) {
         int tilesize = 60;
-        PlayBox pb = new PlayBox(tilesize, CLICK_DISABLED, cont);
+        StaticPlayBox pb = new StaticPlayBox(tilesize, CLICK_DISABLED, cont);
         pb.update(s);
         Platform.runLater(() -> {
             pb.addArrow(move, Color.BLUE);
@@ -40,7 +38,6 @@ public class FailStatePane implements FFTFailState {
                 pb.addArrow(m, Color.GREEN);
             }
         });
-        pb.addScore(s.getScoreLimit(), s.getScore(PLAYER1), s.getScore(PLAYER2), false);
         return pb;
     }
 

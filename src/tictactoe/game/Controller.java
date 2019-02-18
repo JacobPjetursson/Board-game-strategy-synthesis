@@ -1,6 +1,7 @@
 package tictactoe.game;
 
 import fftlib.FFTManager;
+import fftlib.gui.EditFFTInteractive;
 import fftlib.gui.EditFFTScene;
 import fftlib.gui.ShowFFTPane;
 import javafx.application.Platform;
@@ -13,12 +14,15 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import misc.Config;
 import tictactoe.FFT.GameSpecifics;
+import tictactoe.FFT.InteractiveState;
 import tictactoe.ai.AI;
 import tictactoe.ai.FFTFollower;
 import tictactoe.ai.LookupTableMinimax;
-import tictactoe.gui.*;
+import tictactoe.gui.EndGamePane;
+import tictactoe.gui.NavPane;
+import tictactoe.gui.PlayArea;
+import tictactoe.gui.PlayPane;
 import tictactoe.gui.board.BoardTile;
-import tictactoe.misc.Database;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -40,6 +44,7 @@ public class Controller {
     private Button stopAIButton;
     private Button editFFTButton;
     private Button showFFTButton;
+    private Button addRuleFFTButton;
     private CheckBox interactiveFFTBox;
     private Thread aiThread;
     private NavPane navPane;
@@ -52,6 +57,7 @@ public class Controller {
     private boolean fftInteractiveMode;
     private boolean fftAllowInteraction;
     private ShowFFTPane shownFFT;
+    private GameSpecifics gameSpecifics;
 
     public Controller(Stage primaryStage, int player1Instance, int player2Instance,
                       State state, int player1Time, int player2Time) {
@@ -68,8 +74,7 @@ public class Controller {
         // fills up the "database"
         new LookupTableMinimax(PLAYER1, state);
 
-        GameSpecifics gameSpecifics = new GameSpecifics(this);
-
+        gameSpecifics = new GameSpecifics(this);
         this.fftManager = new FFTManager(gameSpecifics);
 
         PlayPane playPane = new PlayPane(this);
@@ -87,25 +92,13 @@ public class Controller {
         stopAIButton = navPane.getStopAIButton();
         showFFTButton = navPane.getShowFFTButton();
         editFFTButton = navPane.getEditFFTButton();
+        addRuleFFTButton = navPane.getAddRuleFFTButton();
         interactiveFFTBox = navPane.getInteractiveFFTBox();
 
         showNavButtons();
 
         // Set event handlers for gui elements
-        // Tiles
-        BoardTile[][] tiles = playArea.getBoard().getTiles();
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[i].length; j++) {
-                BoardTile tile = tiles[i][j];
-                tile.setOnMouseClicked(event -> {
-                    if (tile.isFree()) {
-                        tile.getChildren().clear();
-                        doHumanTurn(tile.getRow(), tile.getCol());
-                        tile.setFree(false);
-                    }
-                });
-            }
-        }
+
         startAIButton.setOnAction(event -> {
             startAI();
             stopAIButton.setDisable(false);
@@ -122,6 +115,14 @@ public class Controller {
         editFFTButton.setOnAction(event -> {
             Scene scene = primaryStage.getScene();
             primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager), Config.WIDTH, Config.HEIGHT));
+        });
+
+        // add rule to FFT button
+        addRuleFFTButton.setOnAction(event -> {
+            Scene scene = primaryStage.getScene();
+            EditFFTInteractive interactive = new EditFFTInteractive(scene, this.fftManager);
+            primaryStage.setScene(new Scene(interactive, Config.WIDTH, Config.HEIGHT));
+            interactive.update(this.state);
         });
 
         // interactive mode
@@ -151,10 +152,6 @@ public class Controller {
         navPane.removeWidgets();
         if (mode == AI_VS_AI && !navPane.containsAIWidgets())
             navPane.addAIWidgets();
-        if ((mode != AI_VS_AI || player2Instance == FFT || player1Instance == FFT)) {
-            if (!navPane.containsShowFFTButton())
-                navPane.addShowFFTButton();
-        }
         if ((player2Instance == FFT || player1Instance == FFT) && !navPane.containsFFTWidgets())
             navPane.addFFTWidgets();
     }
@@ -177,7 +174,7 @@ public class Controller {
 
     // Is called when a tile is pressed by the user. If vs. the AI, it calls the doAITurn after. This function also highlights
     // the best pieces for the opponent, if it is human vs human.
-    private void doHumanTurn(int row, int col) {
+    public void doHumanTurn(int row, int col) {
         Move move = new Move(row, col, state.getTurn());
         previousStates.add(new StateAndMove(state, move, turnNo));
         state = state.getNextState(move);
@@ -187,10 +184,14 @@ public class Controller {
             String skipped = (state.getTurn() == PLAYER1) ? "Black" : "Red";
             System.out.println("TEAM " + skipped + "'s turn has been skipped!");
             playArea.getInfoPane().displaySkippedTurn(skipped);
+            if (player1Instance == FFT && state.getTurn() == PLAYER1 ||
+                    player2Instance == FFT && state.getTurn() == PLAYER2)
+                doAITurn();
             return;
         }
-        if ((player1Instance == FFT && state.getTurn() == PLAYER2) ||
-                (player2Instance == FFT && state.getTurn() == PLAYER1)) {
+        // FFT stuff
+        if (mode == AI_VS_AI && ((player1Instance == FFT && state.getTurn() == PLAYER2) ||
+                (player2Instance == FFT && state.getTurn() == PLAYER1))) {
             startAIButton.fire();
         } else if ((player2Instance != HUMAN && state.getTurn() == PLAYER2) ||
                 (player1Instance != HUMAN && state.getTurn() == PLAYER1)) {
@@ -218,7 +219,7 @@ public class Controller {
     // This function is called when two AI's are matched against each other. It can be interrupted by the user.
     // For the lookup table, a delay can be set
     private void startAI() {
-        // For the AI vs. AI mode. New thread is needed to update the gui while running the AI
+        // For the AI vs. AI mode. New thread is needed to updateRuleFromTile the gui while running the AI
         navPane.getRestartButton().setDisable(true);
         navPane.getMenuButton().setDisable(true);
         startAIButton.setDisable(true);
@@ -397,6 +398,10 @@ public class Controller {
 
     public boolean getFFTAllowInteraction() {
         return fftAllowInteraction;
+    }
+
+    public InteractiveState getInteractiveState() {
+        return gameSpecifics.interactiveState;
     }
 
 }

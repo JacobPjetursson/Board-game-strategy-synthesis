@@ -42,20 +42,12 @@ public class Board extends GridPane {
                 BoardPiece piece = tile.getPiece();
                 int stateTile = stateBoard[i][j];
                 // moved to tile
-                if (piece == null && stateTile != 0) {
-                    tile.getChildren().add(new BoardPiece(stateTile, cont, i, j, pieceRadius, clickMode));
+                if (stateTile != 0) {
+                    tile.addPiece(stateTile, clickMode);
                 }
                 // moved from tile
-                else if (piece != null && stateTile == 0) {
-                    tile.getChildren().remove(piece);
-                }
-                // moved to tile already occupied
-                else if (piece != null) {
-                    if (piece.getTeam() != stateTile) {
-                        tile.getChildren().remove(piece);
-                        tile.getChildren().add(new BoardPiece(stateTile, cont, i, j, pieceRadius, clickMode));
-                    }
-                }
+                else
+                    tile.removePiece();
 
                 tile.update();
             }

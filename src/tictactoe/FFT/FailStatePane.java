@@ -1,18 +1,22 @@
-package tictactoe.gui;
+package tictactoe.FFT;
 
 import fftlib.game.FFTMove;
 import fftlib.game.FFTStateAndMove;
 import fftlib.gui.FFTFailState;
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import tictactoe.game.Controller;
 import tictactoe.game.Move;
 import tictactoe.game.State;
+import tictactoe.gui.PlayBox;
 import tictactoe.gui.board.Board;
+import tictactoe.gui.board.BoardTile;
 import tictactoe.gui.board.Player;
 
 import java.util.ArrayList;
 
+import static misc.Config.CLICK_DISABLED;
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
 
@@ -20,24 +24,23 @@ public class FailStatePane implements FFTFailState {
 
     Controller cont;
 
-    public FailStatePane(Controller cont) {
+    FailStatePane(Controller cont) {
         this.cont = cont;
     }
 
-    public PlayBox getFailStatePane(State s, Move move, ArrayList<Move> nonLosingPlays) {
-        int tileW = 60;
-        Board b = new Board(tileW, false, cont);
-        Player playerBlack = new Player(PLAYER2, cont, tileW, false);
-        Player playerRed = new Player(PLAYER1, cont, tileW, false);
-
-        PlayBox pb = new PlayBox(playerBlack, b, playerRed);
+    private PlayBox getFailStatePane(State s, Move move, ArrayList<Move> nonLosingPlays) {
+        int tilesize = 60;
+        PlayBox pb = new PlayBox(tilesize, CLICK_DISABLED, cont);
         pb.update(s);
-        pb.addHighlight(move, Color.BLUE);
-        for (Move m : nonLosingPlays) {
-            if (m.equals(move))
-                continue;
-            pb.addHighlight(m, Color.GREEN);
-        }
+        Platform.runLater(() -> {
+            pb.addHighlight(move.row, move.col, BoardTile.blueStr);
+            pb.addPiece(move);
+            for (Move m : nonLosingPlays) {
+                if (m.equals(move))
+                    continue;
+                pb.addHighlight(m.row, m.col, BoardTile.greenStr);
+            }
+        });
         return pb;
     }
 

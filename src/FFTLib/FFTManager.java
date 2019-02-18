@@ -14,7 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 
 public class FFTManager {
@@ -28,8 +28,7 @@ public class FFTManager {
     public FFT currFFT;
     private static FFTFailState failState;
     public static InteractiveFFTState interactiveState;
-    static Function<Action, FFTMove> actionToMove;
-    public static Function<Clause, FFTState> clauseToState;
+    static BiFunction<Action, Integer, FFTMove> actionToMove;
 
     public static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
 
@@ -45,7 +44,6 @@ public class FFTManager {
         gameBoardHeight = dim[0];
         gameBoardWidth = dim[1];
         actionToMove = gameSpecifics::actionToMove;
-        clauseToState = gameSpecifics::clauseToState;
         failState = gameSpecifics.getFailState();
         interactiveState = gameSpecifics.getInteractiveState();
 

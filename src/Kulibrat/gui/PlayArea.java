@@ -5,6 +5,7 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import kulibrat.game.Controller;
+import kulibrat.gui.board.PlayBox.PlayBox;
 import kulibrat.gui.info.InfoPane;
 
 import static misc.Config.CLICK_DEFAULT;

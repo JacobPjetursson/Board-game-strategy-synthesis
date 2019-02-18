@@ -11,39 +11,40 @@ import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
 
 public class Logic implements FFTLogic {
+    public static final int POS_NONBOARD = -1;
+
     // Outputs a list of legal moves from a state
-    public static ArrayList<Move> legalMoves(int team, State state) {
+    static ArrayList<Move> legalMoves(int team, State state) {
         ArrayList<Move> moves = new ArrayList<>();
         for (Point p : state.getPieces(team)) {
-            moves.addAll(legalMovesFromPiece(p.y, p.x, team, state));
+            moves.addAll(legalMovesFromPiece(p.y, p.x, team, state.getBoard()));
         }
         return moves;
     }
 
     // Outputs a list of legal moves from a single piece
-    public static ArrayList<Move> legalMovesFromPiece(int oldRow, int oldCol, int team, State state) {
+    public static ArrayList<Move> legalMovesFromPiece(int oldRow, int oldCol, int team, int[][] board) {
         ArrayList<Move> list = new ArrayList<>();
-        int[][] board = state.getBoard();
         int maxRow = board.length - 1;
         int maxCol = board[0].length - 1;
 
         if (team == PLAYER1) {
             // INITIAL MOVE
-            if (oldRow == -1 && oldCol == -1) {
+            if (oldRow == POS_NONBOARD && oldCol == POS_NONBOARD) {
                 for (int i = 0; i < maxCol + 1; i++) {
                     if (board[maxRow][i] == 0) {
                         list.add(new Move(oldRow, oldCol, maxRow, i, team));
                     }
                 }
-                // POINT GAINED (Adds (-1,-1) in list)
+                // POINT GAINED
             } else if (oldRow == 0) {
-                list.add(new Move(oldRow, oldCol, -1, -1, team));
+                list.add(new Move(oldRow, oldCol, POS_NONBOARD, POS_NONBOARD, team));
             } else {
                 // DIAGONAL MOVE
-                if (oldCol + 1 <= maxCol && board[oldRow - 1][oldCol + 1] == 0) {
+                if (oldCol + 1 <= maxCol && board[oldRow - 1][oldCol + 1] <= 0) {
                     list.add(new Move(oldRow, oldCol, oldRow - 1, oldCol + 1, team));
                 }
-                if (oldCol - 1 >= 0 && board[oldRow - 1][oldCol - 1] == 0) {
+                if (oldCol - 1 >= 0 && board[oldRow - 1][oldCol - 1] <= 0) {
                     list.add(new Move(oldRow, oldCol, oldRow - 1, oldCol - 1, team));
                 }
                 // ATTACK MOVE
@@ -55,10 +56,10 @@ public class Logic implements FFTLogic {
                 while (board[oldRow - jump][oldCol] == PLAYER2) {
                     jump++;
                     if (oldRow - jump < 0) {
-                        list.add(new Move(oldRow, oldCol, -1, -1, team));
+                        list.add(new Move(oldRow, oldCol, POS_NONBOARD, POS_NONBOARD, team));
                         break;
                     }
-                    if (board[oldRow - jump][oldCol] == 0) {
+                    if (board[oldRow - jump][oldCol] <= 0) {
                         list.add(new Move(oldRow, oldCol, oldRow - jump, oldCol, team));
                         break;
                     }
@@ -66,21 +67,21 @@ public class Logic implements FFTLogic {
             }
         } else {
             // INITIAL MOVE
-            if (oldRow == -1 && oldCol == -1) {
+            if (oldRow == POS_NONBOARD && oldCol == POS_NONBOARD) {
                 for (int i = 0; i < maxCol + 1; i++) {
                     if (board[0][i] == 0) {
                         list.add(new Move(oldRow, oldCol, 0, i, team));
                     }
                 }
-                // POINT GAINED (Adds (-1,-1) in list)
+                // POINT GAINED
             } else if (oldRow == maxRow) {
-                list.add(new Move(oldRow, oldCol, -1, -1, team));
+                list.add(new Move(oldRow, oldCol, POS_NONBOARD, POS_NONBOARD, team));
             } else {
                 // DIAGONAL MOVE
-                if (oldCol + 1 <= maxCol && board[oldRow + 1][oldCol + 1] == 0) {
+                if (oldCol + 1 <= maxCol && board[oldRow + 1][oldCol + 1] <= 0) {
                     list.add(new Move(oldRow, oldCol, oldRow + 1, oldCol + 1, team));
                 }
-                if (oldCol - 1 >= 0 && board[oldRow + 1][oldCol - 1] == 0) {
+                if (oldCol - 1 >= 0 && board[oldRow + 1][oldCol - 1] <= 0) {
                     list.add(new Move(oldRow, oldCol, oldRow + 1, oldCol - 1, team));
                 }
                 // ATTACK MOVE
@@ -92,10 +93,10 @@ public class Logic implements FFTLogic {
                 while (board[oldRow + jump][oldCol] == PLAYER1) {
                     jump++;
                     if (oldRow + jump > maxRow) {
-                        list.add(new Move(oldRow, oldCol, -1, -1, team));
+                        list.add(new Move(oldRow, oldCol, POS_NONBOARD, POS_NONBOARD, team));
                         break;
                     }
-                    if (board[oldRow + jump][oldCol] == 0) {
+                    if (board[oldRow + jump][oldCol] <= 0) {
                         list.add(new Move(oldRow, oldCol, oldRow + jump, oldCol, team));
                         break;
                     }
@@ -114,7 +115,7 @@ public class Logic implements FFTLogic {
             return;
         }
         // Set new entry to team value (RED or BLACK)
-        if (m.newCol == -1 && m.newRow == -1) {
+        if (m.newCol == POS_NONBOARD && m.newRow == POS_NONBOARD) {
             state.addPoint(m.team);
         } else {
             if (state.getBoard()[m.newRow][m.newCol] == PLAYER1) {
@@ -125,7 +126,7 @@ public class Logic implements FFTLogic {
             state.setBoardEntry(m.newRow, m.newCol, m.team);
         }
         // Set old to 0, or decrement unplaced
-        if (m.oldRow == -1 && m.oldCol == -1) {
+        if (m.oldRow == POS_NONBOARD && m.oldCol == POS_NONBOARD) {
             state.removeUnPlaced(m.team);
         } else {
             state.setBoardEntry(m.oldRow, m.oldCol, 0);

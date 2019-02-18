@@ -2,8 +2,10 @@ package misc;
 
 public class Config {
     // TEAMS
+    public static final int PLAYER_NONE = 0;
     public static final int PLAYER1 = 1;
     public static final int PLAYER2 = 2;
+    public static final int PLAYER_ANY = 3;
 
     // PLAYER INSTANCES
     public static final int HUMAN = 1;

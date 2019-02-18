@@ -9,10 +9,12 @@ public class Clause {
 
     public Clause() {
         this.literals = new ArrayList<>();
+        this.transformations = new ArrayList<>();
     }
 
     public Clause(ArrayList<Literal> literals) {
         this.literals = literals;
+        this.transformations = new ArrayList<>();
     }
 
     Clause(ArrayList<Integer> transformations, Clause clause) {
@@ -57,7 +59,7 @@ public class Clause {
     }
 
 
-    ArrayList<Literal> extractNonBoardPlacements() {
+    public ArrayList<Literal> extractNonBoardPlacements() {
         ArrayList<Literal> nonBoardPlacements = new ArrayList<>();
         for (Literal l : literals)
             if (!l.boardPlacement)

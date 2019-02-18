@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class Literal {
     static final int PIECEOCC_NONE = -1;
-    static final int PIECEOCC_PLAYER = 1;
-    private static final int PIECEOCC_ENEMY = 2;
+    public static final int PIECEOCC_PLAYER = 1;
+    public static final int PIECEOCC_ENEMY = 2;
     public static final int PIECEOCC_ANY = 3;
     public int row = -1;
     public int col = -1;
@@ -26,7 +26,7 @@ public class Literal {
         this.pieceOcc = pieceOcc;
         this.boardPlacement = true;
         this.negation = negation;
-        formatClause();
+        format();
     }
 
     public Literal(String name) {
@@ -65,7 +65,7 @@ public class Literal {
                 return;
             }
             // Ensure same format
-            formatClause();
+            format();
         }
     }
 
@@ -82,11 +82,11 @@ public class Literal {
     private static boolean isBoardPlacement(String name) {
         if (name.startsWith("!"))
             name = name.substring(1);
-        if (name.toLowerCase().startsWith("e") ||
+        if (name.toLowerCase().startsWith("pe"))
+            name = name.substring(2);
+        else if (name.toLowerCase().startsWith("e") ||
                 name.toLowerCase().startsWith("p"))
             name = name.substring(1);
-        else if (name.toLowerCase().startsWith("pe"))
-            name = name.substring(2);
         else
             return false;
 
@@ -113,7 +113,7 @@ public class Literal {
         return coords;
     }
 
-    private void formatClause() {
+    public void format() {
         // Check for + and - in case of action
         this.name = "";
         if (negation)

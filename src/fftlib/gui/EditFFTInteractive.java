@@ -78,7 +78,7 @@ public class EditFFTInteractive extends BorderPane {
 
         lw = new ListView<>();
         lw.setPickOnBounds(false);
-        lw.setPrefWidth(350);
+        lw.setPrefWidth(400);
         lw.setCellFactory(param -> new RuleCell());
         showRuleGroups();
         BorderPane.setMargin(lw, new Insets(15));
@@ -104,15 +104,13 @@ public class EditFFTInteractive extends BorderPane {
         p2Btn.setToggleGroup(toggleGrp);
         HBox perspectiveGrp = new HBox(10, label3, p1Btn, p2Btn);
         perspectiveGrp.setAlignment(Pos.CENTER);
-        toggleGrp.selectedToggleProperty().addListener((observable, oldVal, newVal) -> {
-            RadioButton btn = (RadioButton) newVal;
-            if (btn.getText().equals("Player 1")) {
-                interactiveFFTState.setPerspective(PLAYER1);
-            } else {
-                interactiveFFTState.setPerspective(PLAYER2);
-            }
-
+        p1Btn.setOnMouseClicked(event -> {
+            interactiveFFTState.setPerspective(PLAYER1);
         });
+        p2Btn.setOnMouseClicked(event -> {
+            interactiveFFTState.setPerspective(PLAYER2);
+        });
+
 
         Button back = new Button("Back");
         back.setOnMouseClicked(event -> {
@@ -182,7 +180,7 @@ public class EditFFTInteractive extends BorderPane {
         Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.5), ev -> {
             Rule r = interactiveFFTState.getRule();
             if (r != null) {
-                ruleLabel.setText(r.printRule());
+                ruleLabel.setText(r.print());
             }
         }));
         timeline.setCycleCount(Animation.INDEFINITE);
@@ -233,7 +231,7 @@ public class EditFFTInteractive extends BorderPane {
                 setCenter(interactiveFFTState.getInteractiveNode(rg.rules.get(rIdx)));
             });
             Rule r = rg.rules.get(rIdx);
-            this.label = new Label((rIdx + 1) + ": " + r.printRule());
+            this.label = new Label((rIdx + 1) + ": " + r.print());
             label.setFont(Font.font("Verdana", 10));
             getChildren().add(label);
         }

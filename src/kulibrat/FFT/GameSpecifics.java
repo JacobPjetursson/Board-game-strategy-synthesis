@@ -1,7 +1,6 @@
 package kulibrat.FFT;
 
 import fftlib.Action;
-import fftlib.Clause;
 import fftlib.Literal;
 import fftlib.game.*;
 import fftlib.gui.FFTFailState;
@@ -13,8 +12,8 @@ import kulibrat.game.State;
 import kulibrat.misc.Database;
 import misc.Config;
 
-import static fftlib.Literal.PIECEOCC_ANY;
-import static fftlib.game.Transform.*;
+import static fftlib.game.Transform.TRANS_HREF;
+import static kulibrat.game.Logic.POS_NONBOARD;
 
 public class GameSpecifics implements FFTGameSpecifics {
     private Controller cont;
@@ -26,11 +25,11 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public FFTMove actionToMove(Action a) {
-        int newRow = -1;
-        int newCol = -1;
-        int oldRow = -1;
-        int oldCol = -1;
+    public FFTMove actionToMove(Action a, int team) {
+        int newRow = POS_NONBOARD;
+        int newCol = POS_NONBOARD;
+        int oldRow = POS_NONBOARD;
+        int oldCol = POS_NONBOARD;
 
         for (Literal l : a.addClause.literals) {
             newRow = l.row;
@@ -40,30 +39,40 @@ public class GameSpecifics implements FFTGameSpecifics {
             oldRow = l.row;
             oldCol = l.col;
         }
-        return new Move(oldRow, oldCol, newRow, newCol, -1);
+        return new Move(oldRow, oldCol, newRow, newCol, team);
     }
-
+/*
     @Override
     public FFTState clauseToState(Clause c) {
         State s = new State();
 
         for (Literal l : c.literals) {
             if (!l.boardPlacement) {
-                String[] slSplit = l.name.toLowerCase().split("sl=");
+                String[] slSplit = l.name.toUpperCase().split("SL=");
                 if (slSplit.length > 1) {
                     int sl = Integer.parseInt(slSplit[1]);
                     s.setScoreLimit(sl);
                 }
+                String[] p1PointSplit = l.name.toUpperCase().split("P1SCORE=");
+                if (p1PointSplit.length > 1) {
+                    int p1Point = Integer.parseInt(p1PointSplit[1]);
+                    s.setScore(PLAYER1, p1Point);
+                }
+                String[] p2PointSplit = l.name.toUpperCase().split("P2SCORE=");
+                if (p2PointSplit.length > 1) {
+                    int p2Point = Integer.parseInt(p2PointSplit[1]);
+                    s.setScore(PLAYER2, p2Point);
+                }
             }
             else if (l.pieceOcc == PIECEOCC_ANY) {
-                // TODO - Can be either of players
+                // TODO - Can be either of players. This can not occur atm
             } else {
                 s.setBoardEntry(l.row, l.col, l.pieceOcc);
             }
         }
         return s;
     }
-
+*/
     @Override
     public String getFFTFilePath() {
         return "kulibratFFT.txt";

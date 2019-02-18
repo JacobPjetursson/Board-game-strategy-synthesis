@@ -29,24 +29,24 @@ public class Player extends VBox {
     private Label typeLabel;
     private Button swapBtn;
 
-    public Player(int team, Controller cont, int tileWidth, int pieceRadius, int clickMode) {
+    public Player(int team, Controller cont, int tileSize, int pieceRadius, int clickMode) {
         this.team = team;
         this.clickMode = clickMode;
         this.pieceRadius = pieceRadius;
         pieces = new ArrayList<>();
         type = cont.getPlayerInstance(team);
         setAlignment(Pos.CENTER);
-        setSpacing(tileWidth / 6);
+        setSpacing(tileSize / 6);
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         int amount_of_pieces = 4;
         gridPaneBoard = new GridPane();
         gridPaneBoard.setAlignment(Pos.CENTER);
-        gridPaneBoard.setPrefSize(tileWidth * 4, tileWidth);
-        gridPaneBoard.setMaxWidth(tileWidth * 4);
+        gridPaneBoard.setPrefSize(tileSize * 4, tileSize);
+        gridPaneBoard.setMaxWidth(tileSize * 4);
         gridPaneBoard.setBorder(new Border(new BorderStroke(getColor(),
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 
-        ColumnConstraints column = new ColumnConstraints(tileWidth);
+        ColumnConstraints column = new ColumnConstraints(tileSize);
         for (int i = 0; i < 4; i++) {
             gridPaneBoard.getColumnConstraints().add(column);
         }
@@ -62,23 +62,23 @@ public class Player extends VBox {
         ImageView imgView = new ImageView(img);
 
         imgView.setPreserveRatio(true);
-        imgView.setFitHeight(tileWidth);
-        imgView.setFitWidth(tileWidth);
+        imgView.setFitHeight(tileSize);
+        imgView.setFitWidth(tileSize);
         BorderPane imgPane = new BorderPane();
         imgPane.setCenter(imgView);
 
         GridPane gridPaneDisplay = new GridPane();
         gridPaneDisplay.setAlignment(Pos.CENTER);
-        gridPaneDisplay.setPrefSize((tileWidth * 4) / 3, tileWidth);
-        gridPaneDisplay.setMaxWidth((tileWidth * 4) / 3);
+        gridPaneDisplay.setPrefSize((tileSize * 4) / 3, tileSize);
+        gridPaneDisplay.setMaxWidth((tileSize * 4) / 3);
 
         typeLabel = new Label();
         setTypeLabelText(type);
-        typeLabel.setFont(Font.font("Verdana", tileWidth / 4));
+        typeLabel.setFont(Font.font("Verdana", tileSize / 4));
 
         // swap player button
         swapBtn = new Button("Swap");
-        ColumnConstraints column1 = new ColumnConstraints((tileWidth * 4) / 3);
+        ColumnConstraints column1 = new ColumnConstraints((tileSize * 4) / 3);
         for (int i = 0; i < 3; i++) {
             gridPaneDisplay.getColumnConstraints().add(column1);
         }

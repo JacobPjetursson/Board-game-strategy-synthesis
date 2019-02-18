@@ -74,7 +74,6 @@ public class State implements FFTState {
     public int hashCode() {
         int result = Objects.hash(turn);
         result += Arrays.deepHashCode(board);
-        //result += Arrays.deepHashCode(this.reflect().board);
         return result;
 
     }

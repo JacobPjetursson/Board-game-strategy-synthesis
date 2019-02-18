@@ -1,6 +1,5 @@
 package kulibrat.game;
 
-import fftlib.Clause;
 import fftlib.Literal;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import static kulibrat.game.Logic.POS_NONBOARD;
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
 
@@ -131,11 +131,11 @@ public class State implements Serializable, FFTState {
         return board;
     }
 
-    public void setBoardEntry(int row, int col, int team) {
+    void setBoardEntry(int row, int col, int team) {
         board[row][col] = team;
     }
 
-    public void addPoint(int team) {
+    void addPoint(int team) {
         if (team == PLAYER1) {
             redScore++;
             unplacedRed++;
@@ -165,16 +165,12 @@ public class State implements Serializable, FFTState {
         return scoreLimit;
     }
 
-    public void setScoreLimit(int scoreLimit) {
-        this.scoreLimit = scoreLimit;
-    }
-
-    public void addUnPlaced(int team) {
+    void addUnPlaced(int team) {
         if (team == PLAYER1) unplacedRed++;
         else unplacedBlack++;
     }
 
-    public void removeUnPlaced(int team) {
+    void removeUnPlaced(int team) {
         if (team == PLAYER1) unplacedRed--;
         else unplacedBlack--;
     }
@@ -185,7 +181,7 @@ public class State implements Serializable, FFTState {
     }
 
     // Get a list of pieces/points from this state
-    public ArrayList<Point> getPieces(int team) {
+    ArrayList<Point> getPieces(int team) {
         ArrayList<Point> entries = new ArrayList<>();
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
@@ -195,13 +191,20 @@ public class State implements Serializable, FFTState {
             }
         }
         if (getUnplaced(team) > 0) {
-            entries.add(new Point(-1, -1));
+            entries.add(new Point(POS_NONBOARD, POS_NONBOARD));
         }
         return entries;
     }
 
     public int getScore(int team) {
         return (team == PLAYER1) ? redScore : blackScore;
+    }
+
+    public void setScore(int team, int score) {
+        if (team == PLAYER1)
+            redScore = score;
+        else if (team == PLAYER2)
+            blackScore = score;
     }
 
     public ArrayList<State> getChildren() {

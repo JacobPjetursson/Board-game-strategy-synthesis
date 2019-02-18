@@ -2,7 +2,6 @@ package tictactoe.gui.board;
 
 
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -23,7 +22,7 @@ public class Player extends VBox {
     private int type;
     private Label typeLabel;
 
-    public Player(int team, Controller cont, int tileWidth, boolean playMode) {
+    public Player(int team, Controller cont, int tileWidth, int clickMode) {
         this.team = team;
         type = cont.getPlayerInstance(team);
         setAlignment(Pos.CENTER);
@@ -58,7 +57,7 @@ public class Player extends VBox {
         }
         gridPaneDisplay.add(imgPane, 1, 0);
         gridPaneDisplay.add(typeLabel, 2, 0);
-        if (playMode) getChildren().add(gridPaneDisplay);
+        if (clickMode == CLICK_DEFAULT) getChildren().add(gridPaneDisplay);
     }
 
 
@@ -66,7 +65,7 @@ public class Player extends VBox {
         return team;
     }
 
-    public void setTypeLabelText(int type) {
+    private void setTypeLabelText(int type) {
         typeLabel.setText((type == HUMAN) ? "Human" : (type == MINIMAX) ? "Minimax" :
                 (type == LOOKUP_TABLE) ? "Lookup\n Table" :
                         (type == MONTE_CARLO) ? "MCTS" : "FFT");

@@ -5,6 +5,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import kulibrat.game.Controller;
 
+import static kulibrat.game.Logic.POS_NONBOARD;
 import static misc.Config.*;
 
 
@@ -25,8 +26,8 @@ public class BoardPiece extends Circle {
         this.clickMode = clickMode;
         this.cont = cont;
         this.team = team;
-        this.row = -1;
-        this.col = -1;
+        this.row = POS_NONBOARD;
+        this.col = POS_NONBOARD;
         this.color = (team == PLAYER1) ? Color.RED : Color.BLACK;
         setRadius(radius);
         setStrokeWidth(3.5);
@@ -98,6 +99,10 @@ public class BoardPiece extends Circle {
         } else {
             setColor(color, color);
         }
+    }
+
+    void setClickMode(int clickMode) {
+        this.clickMode = clickMode;
     }
 
     private boolean isControllable() {

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import static fftlib.Literal.PIECEOCC_PLAYER;
+import static kulibrat.game.Logic.POS_NONBOARD;
 
 
 public class Action {
@@ -80,8 +81,8 @@ public class Action {
         return boardToAction(transformations, tBoard);
     }
 
-    public FFTMove getMove() {
-        return FFTManager.actionToMove.apply(this);
+    public FFTMove getMove(int team) {
+        return FFTManager.actionToMove.apply(this, team);
     }
 
     // Takes as input copies of the addClause, remClause lists and removes all the literals that are board placements
@@ -90,11 +91,11 @@ public class Action {
         int[][] clauseBoard = new int[FFTManager.gameBoardHeight][FFTManager.gameBoardWidth];
 
         for (Literal l : addClause.literals) {
-            if (l.row != -1)
+            if (l.row != POS_NONBOARD)
                 clauseBoard[l.row][l.col] = l.pieceOcc;
         }
         for (Literal l : remClause.literals) {
-            if (l.row != -1)
+            if (l.row != POS_NONBOARD)
                 clauseBoard[l.row][l.col] = -l.pieceOcc;
         }
 

@@ -30,7 +30,7 @@ public class NewGamePane extends AnchorPane {
     private TextField crossDelayField;
     private TextField circleDelayField;
     private HBox crossDelayBox;
-    private HBox PLAYER1DelayBox;
+    private HBox circleDelayBox;
     private ChoiceBox<String> crossChoices;
     private ChoiceBox<String> circleChoices;
     private VBox finalBox;
@@ -61,9 +61,9 @@ public class NewGamePane extends AnchorPane {
                     finalBox.getChildren().add(1, crossDelayBox);
                 }
             }
-            if (crossChoices.getItems().get((Integer) newValue).equals(fft) ||
-                    crossChoices.getItems().get((Integer) newValue).equals(lookup))
-                AIDelayLabelCross.setText("AI Move delay in ms");
+            else {
+                finalBox.getChildren().remove(crossDelayBox);
+            }
 
         });
 
@@ -81,14 +81,14 @@ public class NewGamePane extends AnchorPane {
         circleChoices.setMaxWidth(choiceWidth);
         circleChoices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
             if (!circleChoices.getItems().get((Integer) newValue).equals(human)) {
-                if (!finalBox.getChildren().contains(PLAYER1DelayBox)) {
+                if (!finalBox.getChildren().contains(circleDelayBox)) {
                     int index = finalBox.getChildren().contains(crossDelayBox) ? 3 : 2;
-                    finalBox.getChildren().add(index, PLAYER1DelayBox);
+                    finalBox.getChildren().add(index, circleDelayBox);
                 }
             }
-            if (circleChoices.getItems().get((Integer) newValue).equals(fft) ||
-                    circleChoices.getItems().get((Integer) newValue).equals(lookup))
-                AIDelayLabelCircle.setText("AI Move delay in ms");
+            else {
+                finalBox.getChildren().remove(circleDelayBox);
+            }
 
         });
 
@@ -120,6 +120,7 @@ public class NewGamePane extends AnchorPane {
         AIDelayLabelCross.setPadding(new Insets(0, 10, 0, 0));
         AIDelayLabelCross.setTextFill(Color.WHITE);
         AIDelayLabelCross.setAlignment(Pos.CENTER);
+        AIDelayLabelCross.setText("AI Move delay in ms");
         crossDelayBox = new HBox(AIDelayLabelCross, crossDelayField);
         crossDelayBox.setAlignment(Pos.CENTER);
         circleDelayField = new TextField("1000");
@@ -144,8 +145,9 @@ public class NewGamePane extends AnchorPane {
         AIDelayLabelCircle.setPadding(new Insets(0, 10, 0, 0));
         AIDelayLabelCircle.setTextFill(Color.WHITE);
         AIDelayLabelCircle.setAlignment(Pos.CENTER);
-        PLAYER1DelayBox = new HBox(AIDelayLabelCircle, circleDelayField);
-        PLAYER1DelayBox.setAlignment(Pos.CENTER);
+        AIDelayLabelCircle.setText("AI Move delay in ms");
+        circleDelayBox = new HBox(AIDelayLabelCircle, circleDelayField);
+        circleDelayBox.setAlignment(Pos.CENTER);
 
         Button startGame = new Button("Start Game");
         startGame.setMinWidth(Config.WIDTH / 4);

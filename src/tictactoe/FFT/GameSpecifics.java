@@ -10,8 +10,6 @@ import tictactoe.game.Controller;
 import tictactoe.game.Logic;
 import tictactoe.game.Move;
 import tictactoe.game.State;
-import tictactoe.gui.FailStatePane;
-import tictactoe.gui.InteractiveState;
 import tictactoe.misc.Database;
 
 import static fftlib.game.Transform.*;
@@ -19,27 +17,35 @@ import static fftlib.game.Transform.*;
 
 public class GameSpecifics implements FFTGameSpecifics {
     private Controller cont;
+    public InteractiveState interactiveState;
 
     public GameSpecifics(Controller cont) {
         this.cont = cont;
+        this.interactiveState = new InteractiveState(cont);
     }
 
     @Override
-    public FFTMove actionToMove(Action a) {
+    public FFTMove actionToMove(Action a, int team) {
         int row = -1;
         int col = -1;
         for (Literal l : a.addClause.literals) {
             row = l.row;
             col = l.col;
         }
-        return new Move(row, col, -1);
+        return new Move(row, col, team);
     }
-
+/*
     @Override
     public FFTState clauseToState(Clause c) {
-        return null;
-    }
+        State s = new State();
 
+        for (Literal l : c.literals)
+            if (l.boardPlacement)
+                s.setBoardEntry(l.row, l.col, l.pieceOcc);
+
+        return s;
+    }
+*/
     @Override
     public String getFFTFilePath() {
         return "tictactoeFFT.txt";
@@ -77,6 +83,6 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public InteractiveFFTState getInteractiveState() {
-        return new InteractiveState();
+        return interactiveState;
     }
 }
