@@ -19,15 +19,15 @@ public class StateAndMove {
         this.random = random;
     }
 
-    public int getTurnNo() {
-        return turnNo;
-    }
-
     public Move getMove() {
         return move;
     }
 
     public State getState() {
         return state;
+    }
+
+    public int getTurnNo() {
+        return turnNo;
     }
 }

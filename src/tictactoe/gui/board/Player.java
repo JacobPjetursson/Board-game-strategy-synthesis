@@ -32,8 +32,8 @@ public class Player extends VBox {
 
         URL urlCircle = this.getClass().getClassLoader().getResource("circle.png");
         URL urlCross = this.getClass().getClassLoader().getResource("cross.png");
-        Image img = (team == PLAYER1) ? new Image(urlCircle.toExternalForm()) :
-                new Image(urlCross.toExternalForm());
+        Image img = (team == PLAYER1) ? new Image(urlCross.toExternalForm()) :
+                new Image(urlCircle.toExternalForm());
         ImageView imgView = new ImageView(img);
 
         imgView.setPreserveRatio(true);

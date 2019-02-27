@@ -21,11 +21,12 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     public GameSpecifics(Controller cont) {
         this.cont = cont;
-        this.interactiveState = new InteractiveState(cont);
     }
 
     @Override
     public FFTMove actionToMove(Action a, int team) {
+        if (a == null || (a.addClause.isEmpty() && a.remClause.isEmpty()))
+            return null;
         int row = -1;
         int col = -1;
         for (Literal l : a.addClause.literals) {
@@ -83,6 +84,8 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public InteractiveFFTState getInteractiveState() {
+        if (interactiveState == null)
+            interactiveState = new InteractiveState(cont);
         return interactiveState;
     }
 }

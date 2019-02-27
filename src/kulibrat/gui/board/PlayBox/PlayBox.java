@@ -1,5 +1,6 @@
 package kulibrat.gui.board.PlayBox;
 
+import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -88,7 +89,8 @@ public class PlayBox extends Group {
                 b = playerBlack.localToParent(playerBlack.getBoundsInLocal());
         } else {
             BoardTile t = board.getTiles()[m.oldRow][m.oldCol];
-            b = board.localToParent(t.localToParent(t.getBoundsInLocal()));
+            Bounds localBounds = new BoundingBox(0, 0, 0, t.tilesize, t.tilesize, 0);
+            b = board.localToParent(t.localToParent(localBounds));
         }
         startX = (b.getMaxX() + b.getMinX()) / 2.0;
         startY = (b.getMaxY() + b.getMinY()) / 2.0;

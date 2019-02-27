@@ -1,9 +1,15 @@
 package tictactoe.game;
 
+import fftlib.Action;
+import fftlib.Clause;
+import fftlib.Literal;
 import fftlib.game.FFTMove;
-import misc.Config;
 
+import java.util.ArrayList;
 import java.util.Objects;
+
+import static fftlib.Literal.PIECEOCC_PLAYER;
+import static misc.Config.PLAYER_NONE;
 
 public class Move implements FFTMove {
     public int row;
@@ -20,6 +26,12 @@ public class Move implements FFTMove {
         this.row = move.row;
         this.col = move.col;
         this.team = move.team;
+    }
+
+    public Move() {
+        row = -1;
+        col = -1;
+        team = PLAYER_NONE;
     }
 
     public Move(int team) {
@@ -40,37 +52,19 @@ public class Move implements FFTMove {
         return Objects.hash(row, col, team);
     }
 
-    public Move reflect() {
-        int[][] board = new int[3][3];
-        if (col != -1)
-            board[row][col] = team;
-
-        int[][] ref = new int[3][3];
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                ref[i][j] = board[i][board.length - 1 - j];
-            }
-        }
-        Move refMove = new Move(team);
-        boolean newSet = false;
-        for (int i = 0; i < ref.length; i++) {
-            for (int j = 0; j < ref[i].length; j++) {
-                if (ref[i][j] == team) {
-                    refMove.row = i;
-                    refMove.col = j;
-                    newSet = true;
-                }
-            }
-        }
-        if (!newSet) {
-            refMove.row = -1;
-            refMove.col = -1;
-        }
-        return refMove;
-    }
-
     public int getTeam() {
         return team;
+    }
+
+    @Override
+    public Action getAction() {
+        ArrayList<Literal> addLits = new ArrayList<>();
+        addLits.add(new Literal(row, col, PIECEOCC_PLAYER, false));
+        ArrayList<Literal> remLits = new ArrayList<>();
+
+        Clause addClause = new Clause(addLits);
+        Clause remClause = new Clause(remLits);
+        return new Action(addClause, remClause);
     }
 
     public void setTeam(int team) {
@@ -78,6 +72,6 @@ public class Move implements FFTMove {
     }
 
     public String print() {
-        return "A_" + team + ": " + "(" + row + "," + col + ")";
+        return "ROW: " + row + " COL: " + col;
     }
 }

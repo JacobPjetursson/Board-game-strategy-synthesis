@@ -27,10 +27,12 @@ public class BoardTile extends StackPane {
     private int col;
     private int tilesize;
     private int clickMode;
+    private Node hoverNode = null;
     private boolean negated; // used for fft
     private boolean mandatory; // used for fft
     private boolean isAction; // used for fft
     private Stage tileOptionsStage;
+    private Label turnsToTerminalLabel;
     public TileOptionsPane tileOptionsPane;
 
     private Controller cont;
@@ -47,7 +49,7 @@ public class BoardTile extends StackPane {
     public BoardTile(int row, int col, int tilesize, int clickMode, Controller cont) {
         this.row = row;
         this.col = col;
-        this.team = -1;
+        this.team = PLAYER_ANY;
         this.tilesize = tilesize;
         this.clickMode = clickMode;
         this.cont = cont;
@@ -56,8 +58,11 @@ public class BoardTile extends StackPane {
         setAlignment(Pos.CENTER);
         setPrefSize(tilesize, tilesize);
         setStyle("-fx-background-color: rgb(255, 255, 255);");
+        turnsToTerminalLabel = new Label("");
+        turnsToTerminalLabel.setFont(Font.font("Verdana", 15));
+        turnsToTerminalLabel.setTextFill(Color.BLACK);
         setOnMouseEntered(me -> {
-            if (isClickable() && getChildren().isEmpty()) {
+            if (isClickable() && hoverNode == null && piece == null) {
                 addHover(cont.getState().getTurn());
             }
         });
@@ -80,7 +85,6 @@ public class BoardTile extends StackPane {
             }
         });
 
-
         if (clickMode == CLICK_INTERACTIVE) {
             tileOptionsPane = new TileOptionsPane(this);
             tileOptionsStage = new Stage();
@@ -101,17 +105,47 @@ public class BoardTile extends StackPane {
                 (cont.getPlayerInstance(cont.getState().getTurn()) == FFT && cont.getFFTAllowInteraction()));
     }
 
+    public void setBest(boolean best) {
+        if (best) {
+            highlight(greenStr);
+        } else {
+            highlight(whiteStr);
+        }
+    }
+
+    public void setTurnsToTerminal(String turns) {
+        if (turns.isEmpty()) {
+            getChildren().remove(turnsToTerminalLabel);
+        } else {
+            turnsToTerminalLabel.setText(turns);
+            turnsToTerminalLabel.setTextFill(Color.BLACK);
+            getChildren().add(turnsToTerminalLabel);
+        }
+    }
+
     public void highlight(String color) {
         setStyle(color);
     }
 
+    public void removeHighlight() {
+        setStyle(whiteStr);
+
+        if (clickMode == CLICK_INTERACTIVE) {
+            this.tileOptionsPane.actionCheckBox.setSelected(false);
+            isAction = false;
+        }
+    }
+
     public void addPiece(int team) {
+        removePiece();
         Node n;
         if (team == PLAYER1) {
-            n = getCircle(false);
-        } else {
             n = getCross(false);
+        } else if (team == PLAYER2) {
+            n = getCircle(false);
         }
+        else
+            return;
         getChildren().add(n);
         this.team = team;
         this.piece = n;
@@ -120,10 +154,11 @@ public class BoardTile extends StackPane {
     private void addHover(int team) {
         Node n;
         if (team == PLAYER1) {
-            n = getCircle(true);
-        } else {
             n = getCross(true);
+        } else {
+            n = getCircle(true);
         }
+        hoverNode = n;
         getChildren().add(n);
     }
 
@@ -137,11 +172,30 @@ public class BoardTile extends StackPane {
 
     private Group getCross(boolean hover) {
         Group g = new Group();
-        Line vertical = new Line(-15, -15, 15, 15);
-        Line horizontal = new Line(-15, 15, 15, - 15);
-        vertical.setStrokeWidth(7);
+        Line vertical = new Line(-(tilesize/4), -(tilesize/4), tilesize/4, tilesize/4);
+        Line horizontal = new Line(-(tilesize/4), tilesize/4, tilesize/4, -(tilesize/4));
+        vertical.setStrokeWidth(tilesize/9);
         vertical.setSmooth(true);
-        horizontal.setStrokeWidth(7);
+        horizontal.setStrokeWidth(tilesize/9);
+        horizontal.setSmooth(true);
+        if (hover) {
+            horizontal.setStroke(gray);
+            vertical.setStroke(gray);
+        } else {
+            horizontal.setStroke(Color.BLACK);
+            vertical.setStroke(Color.BLACK);
+        }
+        g.getChildren().addAll(horizontal, vertical);
+        return g;
+    }
+
+    private Group getCross(boolean hover, int lineLength) {
+        Group g = new Group();
+        Line vertical = new Line(-lineLength, -lineLength, lineLength, lineLength);
+        Line horizontal = new Line(-lineLength, lineLength, lineLength, - lineLength);
+        vertical.setStrokeWidth(lineLength / 2);
+        vertical.setSmooth(true);
+        horizontal.setStrokeWidth(lineLength / 2);
         horizontal.setSmooth(true);
         if (hover) {
             horizontal.setStroke(gray);
@@ -162,6 +216,12 @@ public class BoardTile extends StackPane {
             c.setFill(gray);
         else
             c.setFill(Color.BLACK);
+        return c;
+    }
+
+    private Circle getCircle(boolean hover, int radius) {
+        Circle c = getCircle(hover);
+        c.setRadius(radius);
         return c;
     }
 
@@ -193,11 +253,14 @@ public class BoardTile extends StackPane {
             getChildren().remove(piece);
         }
         piece = null;
-        team = -1;
+        team = PLAYER_ANY;
     }
 
     private void removeHover() {
-        getChildren().clear();
+        if (hoverNode != null)
+            getChildren().remove(hoverNode);
+        hoverNode = null;
+
     }
 
     public Node getPiece() {
@@ -220,23 +283,21 @@ public class BoardTile extends StackPane {
         if (clickMode == CLICK_INTERACTIVE)
             setMandatory(piece != null);
     }
-
+/*
     public void setAction(boolean isAction) {
+        if (this.isAction == isAction)
+            return;
         this.isAction = isAction;
         tileOptionsPane.actionCheckBox.setSelected(isAction);
         removePiece();
 
         if (isAction) {
             setMandatory(true);
-            highlight(blueStr);
             int team = cont.getInteractiveState().getPerspective();
             addPiece(team);
-            cont.getInteractiveState().setActionTile(this);
-        } else {
-            highlight(whiteStr);
         }
     }
-
+*/
     public void setMandatory(boolean mandatory) {
         this.mandatory = mandatory;
         tileOptionsPane.mandatoryCheckBox.setSelected(mandatory);
@@ -244,7 +305,6 @@ public class BoardTile extends StackPane {
         if (!mandatory) {
             negated = false;
             setStyle(whiteStr);
-            setAction(false);
             removePiece();
             drawRedCross();
         } else {
@@ -252,8 +312,16 @@ public class BoardTile extends StackPane {
         }
     }
 
-    public boolean isAction() {
-        return isAction;
+    public void setNegated(boolean negated) {
+        this.negated = negated;
+
+        if (negated) {
+            setStyle(grayStr);
+            setMandatory(true);
+        } else {
+            setStyle(whiteStr);
+        }
+
     }
 
     public class TileOptionsPane extends BorderPane {
@@ -292,18 +360,17 @@ public class BoardTile extends StackPane {
             actionLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
             actionCheckBox = new CheckBox();
             actionCheckBox.pressedProperty().addListener((observable, oldValue, newValue) -> {
-                boolean action = !isAction;
-                BoardTile actionTile = cont.getInteractiveState().getActionTile();
-                if (actionTile != null) {
-                    actionTile.setMandatory(false);
-                    cont.getInteractiveState().setActionTile(null);
-
-                }
-                if (action) {
+                isAction = !isAction;
+                actionCheckBox.setSelected(isAction);
+                if (isAction) {
+                    removePiece();
+                    setNegated(false);
+                    cont.getInteractiveState().setActionFromTile(bt);
                     setMandatory(true);
-                    setAction(true);
+                } else {
+                    cont.getInteractiveState().removeAction();
+                    setMandatory(false);
                 }
-                cont.getInteractiveState().updateRuleFromTile(bt);
 
                 close();
             });
@@ -342,51 +409,46 @@ public class BoardTile extends StackPane {
             interactiveGrid.getColumnConstraints().addAll(cc1, cc2);
             interactiveGrid.getRowConstraints().addAll(rc1, rc2);
 
-            Node circle = getCircle(false);
-            Node cross = getCross(false);
+            Node cross = getCross(false, 40);
+            Node circle = getCircle(false, 40);
             StackPane bpPane1 = new StackPane();
             StackPane bpPane2 = new StackPane();
             bpPane1.setAlignment(Pos.CENTER);
             bpPane2.setAlignment(Pos.CENTER);
-            bpPane1.getChildren().add(circle);
-            bpPane2.getChildren().add(cross);
+            bpPane1.getChildren().add(cross);
+            bpPane2.getChildren().add(circle);
 
             bpPane1.setOnMouseClicked(event -> {
-                bt.removePiece();
+                setMandatory(true);
                 bt.addPiece(PLAYER1);
                 close();
-                setMandatory(true);
                 cont.getInteractiveState().updateRuleFromTile(bt);
             });
 
             bpPane2.setOnMouseClicked(event -> {
-                bt.removePiece();
+                setMandatory(true);
                 bt.addPiece(PLAYER2);
                 close();
-                setMandatory(true);
                 cont.getInteractiveState().updateRuleFromTile(bt);
             });
 
             VBox paneGray = new VBox();
             paneGray.setStyle(grayStr);
             paneGray.setOnMouseClicked(event -> {
-                negated = true;
-                bt.setStyle(grayStr);
+                setNegated(true);
                 close();
-                setMandatory(true);
                 cont.getInteractiveState().updateRuleFromTile(bt);
             });
 
             VBox paneWhite = new VBox();
             paneWhite.setStyle(whiteStr);
             paneWhite.setOnMouseClicked(event -> {
-                negated = false;
-                bt.setStyle(whiteStr);
-                bt.removePiece();
-                close();
-                highlight(whiteStr);
+                setNegated(false);
+                setMandatory(true);
+                removePiece();
                 cont.getInteractiveState().updateRuleFromTile(bt);
 
+                close();
             });
 
             interactiveGrid.add(bpPane1, 0, 0);

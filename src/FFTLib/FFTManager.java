@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -64,7 +65,7 @@ public class FFTManager {
                 for (RuleGroup rg : fft.ruleGroups) {
                     fft_file.append("[").append(rg.name).append("]\n");
                     for (Rule r : rg.rules) {
-                        fft_file.append(r.getClauseStr()).append(" -> ").append(r.getActionStr()).append("\n");
+                        fft_file.append(r.getPreconStr()).append(" -> ").append(r.getActionStr()).append("\n");
                     }
                 }
             }

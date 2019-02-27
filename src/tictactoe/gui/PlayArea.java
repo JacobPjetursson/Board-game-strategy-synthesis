@@ -2,11 +2,11 @@ package tictactoe.gui;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import tictactoe.game.Controller;
 import tictactoe.gui.board.Board;
+import tictactoe.gui.board.PlayBox.PlayBox;
 import tictactoe.gui.board.Player;
 
 import static misc.Config.*;
@@ -14,9 +14,6 @@ import static misc.Config.*;
 
 public class PlayArea extends GridPane {
 
-    private Player playerCross;
-    private Player playerCircle;
-    private Board board;
     private InfoPane info;
     private PlayBox playBox;
 
@@ -48,3 +45,4 @@ public class PlayArea extends GridPane {
         return playBox;
     }
 }
+

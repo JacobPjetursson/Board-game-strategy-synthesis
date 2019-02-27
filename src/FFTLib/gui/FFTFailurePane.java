@@ -21,6 +21,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import misc.Config;
 
 import static misc.Config.PLAYER_ANY;
 
@@ -52,12 +53,12 @@ public class FFTFailurePane extends BorderPane {
         setRight(lw);
 
 
-        VBox bottomBox = new VBox(15);
+        VBox bottomBox = new VBox(8);
         bottomBox.setAlignment(Pos.CENTER);
         bottomBox.setPadding(new Insets(15));
 
-        Label arrowInfoLabel = new Label("Green is the non-losing moves, blue is the chosen move");
-        arrowInfoLabel.setFont(Font.font("Verdana", 15));
+        Label colorInfoLabel = new Label("Green stands for the winning/non-losing moves, blue is the chosen move");
+        colorInfoLabel.setFont(Font.font("Verdana", 13));
 
         String moveInfo;
         if (fftManager.currFFT.failingPoint.random)
@@ -65,15 +66,28 @@ public class FFTFailurePane extends BorderPane {
         else
             moveInfo = "The FFT applied to the above state, but the move it chose was a losing move";
         Label moveInfoLabel = new Label(moveInfo);
-        moveInfoLabel.setFont(Font.font("Verdana", 15));
+        moveInfoLabel.setFont(Font.font("Verdana", 13));
 
         Button back = new Button("Back");
         back.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
             stage.setScene(prevScene);
         });
+
+        Button addRuleInteractiveBtn = new Button("Add state to FFT");
+
+        // add rule to FFT button
+        addRuleInteractiveBtn.setOnAction(event -> {
+            Stage stage = (Stage) getScene().getWindow();
+            FFTState state = fftManager.currFFT.failingPoint.getState();
+            FFTMove move = fftManager.currFFT.failingPoint.getMove();
+            EditFFTInteractive interactive = new EditFFTInteractive(prevScene, this.fftManager);
+            stage.setScene(new Scene(interactive, Config.WIDTH, Config.HEIGHT));
+            interactive.update(state, move);
+        });
+
         BorderPane.setAlignment(back, Pos.CENTER_RIGHT);
-        bottomBox.getChildren().addAll(arrowInfoLabel, moveInfoLabel, back);
+        bottomBox.getChildren().addAll(colorInfoLabel, moveInfoLabel, addRuleInteractiveBtn, back);
         setBottom(bottomBox);
         BorderPane.setAlignment(bottomBox, Pos.CENTER);
     }

@@ -20,7 +20,6 @@ import javafx.stage.Stage;
 import kulibrat.game.Controller;
 import kulibrat.game.Move;
 
-import static fftlib.Literal.PIECEOCC_ANY;
 import static misc.Config.*;
 
 public class BoardTile extends StackPane {
@@ -37,7 +36,7 @@ public class BoardTile extends StackPane {
     private TileOptionsPane tileOptionsPane;
     private Group redCross;
     int clickMode;
-    int tilesize;
+    public int tilesize;
 
     private String white = "-fx-background-color: rgb(255, 255, 255);";
     private String gray = "-fx-background-color: rgb(150,150,150);";
@@ -118,7 +117,7 @@ public class BoardTile extends StackPane {
             if (help) setStyle("-fx-background-color: rgb(150,0,0);");
             else setStyle("-fx-background-color: rgb(200,150,0);");
         } else {
-            setStyle(white);
+            setStyle(negated ? gray : white);
         }
 
         if (turns.isEmpty()) {
@@ -210,10 +209,16 @@ public class BoardTile extends StackPane {
     }
 
     void removePiece() {
-        getChildren().remove(getPiece());
+        BoardPiece piece = getPiece();
+        if (piece != null)
+            getChildren().remove(piece);
     }
 
     public void addPiece(int team, int clickMode) {
+        BoardPiece piece = getPiece();
+        if (piece != null && piece.getTeam() == team)
+            return;
+
         removePiece();
         BoardPiece bp = new BoardPiece(team, cont, row, col, tilesize/3, clickMode);
         getChildren().add(bp);
@@ -228,7 +233,6 @@ public class BoardTile extends StackPane {
             this.setStyle(white);
             removePiece();
             drawRedCross();
-            cont.getInteractiveState().getPlayBox().removeArrows();
         } else {
             removeRedCross();
         }
@@ -258,7 +262,7 @@ public class BoardTile extends StackPane {
             mandatoryCheckBox = new CheckBox();
             mandatoryCheckBox.pressedProperty().addListener((observableValue, oldValue, newValue) -> {
                 setMandatory(!mandatory);
-                cont.getInteractiveState().updateFromTile(bt);
+                cont.getInteractiveState().updateRuleFromTile(bt);
                 close();
             });
             HBox mandatoryHBox = new HBox(5, mandatoryLabel, mandatoryCheckBox);
@@ -305,32 +309,26 @@ public class BoardTile extends StackPane {
             bpPane2.getChildren().add(bp2);
 
             bpPane1.setOnMouseClicked(event -> {
-                BoardPiece piece = getPiece();
-                if (piece != null) {
-                    bt.getChildren().remove(piece);
-                }
-                addPiece(PLAYER1, clickMode);
+                removePiece();
+                addPiece(PLAYER1, bt.isNegated() ? CLICK_DISABLED : CLICK_INTERACTIVE);
                 close();
                 setMandatory(true);
-                cont.getInteractiveState().updateFromTile(bt);
+                cont.getInteractiveState().updateRuleFromTile(bt);
             });
 
             bpPane2.setOnMouseClicked(event -> {
-                BoardPiece piece = getPiece();
-                if (piece != null) {
-                    bt.getChildren().remove(piece);
-                }
-                addPiece(PLAYER2, clickMode);
+                removePiece();
+                addPiece(PLAYER2, bt.isNegated() ? CLICK_DISABLED : CLICK_INTERACTIVE);
                 close();
                 setMandatory(true);
-                cont.getInteractiveState().updateFromTile(bt);
+                cont.getInteractiveState().updateRuleFromTile(bt);
             });
 
             VBox paneGray = new VBox();
             paneGray.setStyle(gray);
             paneGray.setOnMouseClicked(event -> {
                 setNegated(true);
-                cont.getInteractiveState().updateFromTile(bt);
+                cont.getInteractiveState().updateRuleFromTile(bt);
                 close();
             });
 
@@ -339,9 +337,9 @@ public class BoardTile extends StackPane {
             paneWhite.setOnMouseClicked(event -> {
                 setNegated(false);
                 removePiece();
+                setMandatory(true);
                 close();
-                cont.getInteractiveState().getPlayBox().removeArrows();
-                cont.getInteractiveState().updateFromTile(bt);
+                cont.getInteractiveState().updateRuleFromTile(bt);
 
             });
 

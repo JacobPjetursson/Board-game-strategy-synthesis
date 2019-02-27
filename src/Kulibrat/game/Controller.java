@@ -29,6 +29,7 @@ import kulibrat.misc.Database;
 import misc.Config;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 
 import static kulibrat.game.Logic.POS_NONBOARD;
@@ -51,7 +52,7 @@ public class Controller {
     private Button editFFTButton;
     private Button addRuleFFTButton;
     private Button showFFTButton;
-    private CheckBox interactiveFFTBox;
+    private CheckBox automaticFFTBox;
     private Button[] swapButtons;
     private CheckBox helpHumanBox;
     private Thread aiThread;
@@ -66,8 +67,8 @@ public class Controller {
     private ArrayList<StateAndMove> previousStates;
     private Window window;
     private FFTManager fftManager;
-    private boolean fftInteractiveMode;
-    private boolean fftAllowInteraction;
+    private boolean fftAutomaticMode;
+    private boolean fftUserInteraction;
     private ShowFFTPane shownFFT;
     private GameSpecifics gameSpecifics;
 
@@ -108,7 +109,7 @@ public class Controller {
         showFFTButton = navPane.getShowFFTButton();
         editFFTButton = navPane.getEditFFTButton();
         addRuleFFTButton = navPane.getAddRuleFFTButton();
-        interactiveFFTBox = navPane.getInteractiveFFTBox();
+        automaticFFTBox = navPane.getAutomaticFFTBox();
         goalRed = playArea.getPlayBox().getGoal(PLAYER1);
         goalBlack = playArea.getPlayBox().getGoal(PLAYER2);
 
@@ -195,11 +196,11 @@ public class Controller {
             interactive.update(this.state);
         });
 
-        // interactive mode
-        fftInteractiveMode = true;
-        interactiveFFTBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
+        // automatic mode
+        fftAutomaticMode = false;
+        automaticFFTBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
             deselect();
-            fftInteractiveMode = newValue;
+            fftAutomaticMode = newValue;
         });
 
         // Show FFT button
@@ -330,14 +331,14 @@ public class Controller {
             try {
                 while (!Logic.gameOver(state)) {
                     doAITurn();
-                    if (fftAllowInteraction) {
+                    if (fftUserInteraction) {
                         stopAIButton.fire();
                     }
                     if (playerRedInstance == LOOKUP_TABLE && playerBlackInstance == LOOKUP_TABLE) {
                         Thread.sleep(redTime);
-                    } else if (state.getTurn() == PLAYER1 && playerRedInstance == FFT && !fftAllowInteraction)
+                    } else if (state.getTurn() == PLAYER1 && playerRedInstance == FFT && !fftUserInteraction)
                         Thread.sleep(redTime);
-                    else if (state.getTurn() == PLAYER2 && playerBlackInstance == FFT && !fftAllowInteraction)
+                    else if (state.getTurn() == PLAYER2 && playerBlackInstance == FFT && !fftUserInteraction)
                         Thread.sleep(blackTime);
                     else {
                         Thread.sleep(0); // To allow thread interruption
@@ -358,7 +359,7 @@ public class Controller {
 
     // The AI makes its turn, and the GUI is updated while doing so
     private void doAITurn() {
-        fftAllowInteraction = false;
+        fftUserInteraction = false;
         boolean makeDefaultMove = false;
         int turn = state.getTurn();
         Move move;
@@ -372,15 +373,16 @@ public class Controller {
                 makeDefaultMove = true;
         }
         if (makeDefaultMove) {
-            if (fftInteractiveMode) {
+            if (fftAutomaticMode) {
+                System.out.println("Defaulting to random move");
+                move = getDefaultFFTMove();
+
+            } else {
                 System.out.println("Defaulting to user interaction");
-                fftAllowInteraction = true;
+                fftUserInteraction = true;
                 if (helpHumanBox.isSelected())
                     highlightBestPieces(true);
                 return;
-            } else {
-                System.out.println("Defaulting to random move");
-                move = getDefaultFFTMove();
             }
         }
         state = state.getNextState(move);
@@ -440,7 +442,7 @@ public class Controller {
     private void highlightMoves(int row, int col, int team, boolean highlight) {
         if (highlight) curHighLights = Logic.legalMovesFromPiece(row,
                 col, team, state.getBoard());
-        ArrayList<Move> bestPlays = null;
+        HashSet<Move> bestPlays = null;
         if (highlight && helpHumanBox.isSelected()) {
             bestPlays = Database.bestPlays(new State(state));
         }
@@ -472,19 +474,22 @@ public class Controller {
     // Highlights the best pieces found above
     private void highlightBestPieces(boolean highlight) {
         State n = new State(state);
-        ArrayList<Move> bestPlays = null;
+        HashSet<Move> bestPlays = null;
         if (highlight) bestPlays = Database.bestPlays(n);
         BoardTile[][] tiles = playArea.getPlayBox().getBoard().getTiles();
 
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[i].length; j++) {
-                BoardPiece p = tiles[i][j].getPiece();
-                if (p != null) p.setBest(false);
-                if (!highlight) continue;
+        for (BoardTile[] tile : tiles) {
+            for (BoardTile aTile : tile) {
+                BoardPiece p = aTile.getPiece();
+                if (p == null)
+                    continue;
+                p.setBest(false);
+                if (!highlight)
+                    continue;
+
                 for (Move m : bestPlays) {
-                    if (p != null && m.oldCol == p.getCol() && m.oldRow == p.getRow()) {
+                    if (m.oldCol == p.getCol() && m.oldRow == p.getRow())
                         p.setBest(true);
-                    }
                 }
             }
         }
@@ -516,7 +521,7 @@ public class Controller {
         return turnsToTerminalList;
     }
 
-    public kulibrat.game.State getState() {
+    public State getState() {
         return state;
     }
 
@@ -630,7 +635,7 @@ public class Controller {
     }
 
     public boolean getFFTAllowInteraction() {
-        return fftAllowInteraction;
+        return fftUserInteraction;
     }
 
     public InteractiveState getInteractiveState() {

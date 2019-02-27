@@ -82,7 +82,7 @@ public class State implements FFTState {
         return board;
     }
 
-    public void setBoardEntry(int row, int col, int team) {
+    void setBoardEntry(int row, int col, int team) {
         board[row][col] = team;
     }
 

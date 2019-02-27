@@ -1,9 +1,10 @@
 package fftlib;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Objects;
 
-public class Clause {
+public class Clause{
     public ArrayList<Literal> literals;
     ArrayList<Integer> transformations;
 
@@ -17,19 +18,18 @@ public class Clause {
         this.transformations = new ArrayList<>();
     }
 
-    Clause(ArrayList<Integer> transformations, Clause clause) {
-        this.literals = new ArrayList<>(clause.literals);
-        this.transformations = transformations;
-    }
-
     public Clause(Clause duplicate) {
-        this.literals = new ArrayList<>(duplicate.literals);
+        this.literals = new ArrayList<>();
+        for (Literal l : duplicate.literals) {
+            Literal copy = new Literal(l);
+            literals.add(copy);
+        }
         this.transformations = new ArrayList<>(duplicate.transformations);
     }
 
     Clause(ArrayList<Integer> transformations, ArrayList<Literal> literals) {
-        this.literals = literals;
         this.transformations = transformations;
+        this.literals = literals;
     }
 
     public void add(Literal l) {

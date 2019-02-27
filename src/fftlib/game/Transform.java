@@ -3,6 +3,7 @@ package fftlib.game;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 
 public class Transform {
 
@@ -34,12 +35,15 @@ public class Transform {
             TransformedArray arr = (TransformedArray) obj;
             if (this == arr)
                 return true;
-            return Arrays.deepEquals(this.board, arr.board);
+            return Arrays.deepEquals(this.board, arr.board) && this.transformations.equals(arr.transformations);
         }
 
         @Override
         public int hashCode() {
-            return 31 * Arrays.deepHashCode(this.board);
+            int hash = 0;
+            hash += Arrays.deepHashCode(this.board);
+            hash += this.transformations.hashCode();
+            return 31 * hash;
         }
     }
 
@@ -101,7 +105,7 @@ public class Transform {
         return tSet;
     }
 
-    private static int[][] copyArray(int[][] arr) {
+    public static int[][] copyArray(int[][] arr) {
         int[][] copy = new int[arr.length][arr[0].length];
         for (int i = 0; i < arr.length; i++) {
             copy[i] = Arrays.copyOf(arr[i], arr[i].length);

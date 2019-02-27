@@ -17,10 +17,10 @@ import static fftlib.Literal.PIECEOCC_PLAYER;
 public class Rule {
     private static final ArrayList<String> separators = new ArrayList<>(
             Arrays.asList("and", "And", "AND", "&", "∧"));
-    private ArrayList<Clause> transformedClauses;
-    public Clause clause;
+    private ArrayList<Clause> transformedPrecons;
+    public Clause preconditions;
     public Action action;
-    private String actionStr, clauseStr;
+    private String actionStr, preconStr;
 
 
     // If multirule, the rule class instead contains a list of rules
@@ -29,48 +29,65 @@ public class Rule {
     public boolean errors;
 
     // parsing constructor
-    public Rule(String clauseStr, String actionStr) {
-        this.multiRule = isMultiRule(clauseStr, actionStr);
+    public Rule(String preconStr, String actionStr) {
+        this.multiRule = isMultiRule(preconStr, actionStr);
         if (multiRule) {
             rules = new HashSet<>();
-            replaceWildcards(clauseStr, actionStr, rules);
+            replaceWildcards(preconStr, actionStr, rules);
             // TODO - format this shit
-            this.clauseStr = clauseStr;
+            this.preconStr = preconStr;
             this.actionStr = actionStr;
         } else {
             this.action = getAction(actionStr);
-            this.clause = getClause(clauseStr);
-            this.transformedClauses = getTransformedClauses();
+            this.preconditions = getPreconditions(preconStr);
+            this.transformedPrecons = getTransformedPreconditions();
         }
         errors = !isValidRuleFormat(this);
     }
 
     // Empty constructor to allow rule buildup
     public Rule() {
-        this.clause = new Clause();
+        this.preconditions = new Clause();
         this.action = new Action();
-        clauseStr = "";
+        this.transformedPrecons = getTransformedPreconditions();
+        preconStr = "";
         actionStr = "";
     }
 
-    public void addLiteral(Literal l) {
-        if (!clause.literals.contains(l))
-            clause.add(l);
-        this.transformedClauses = getTransformedClauses();
+    // Duplicate constructor
+    public Rule(Rule duplicate) {
+        this.multiRule = duplicate.multiRule;
+        if (multiRule) {
+            rules = new HashSet<>(duplicate.rules);
+            this.preconStr = duplicate.preconStr;
+            this.actionStr = duplicate.actionStr;
+        } else {
+            this.action = new Action(duplicate.action);
+            this.preconditions = new Clause(duplicate.preconditions);
+            this.transformedPrecons = getTransformedPreconditions();
+        }
+        this.errors = duplicate.errors;
+
     }
 
-    public void removeLiteral(Literal l) {
-        this.clause.remove(l);
-        this.transformedClauses = getTransformedClauses();
+    public void addPrecondition(Literal l) {
+        if (!preconditions.literals.contains(l))
+            preconditions.add(l);
+        this.transformedPrecons = getTransformedPreconditions();
+    }
+
+    public void removePrecondition(Literal l) {
+        this.preconditions.remove(l);
+        this.transformedPrecons = getTransformedPreconditions();
     }
 
     public void removeLiterals(int row, int col) {
         ArrayList<Literal> removeList = new ArrayList<>();
-        for (Literal l : clause.literals) {
+        for (Literal l : preconditions.literals) {
             if (l.row == row && l.col == col)
                 removeList.add(l);
         }
-        clause.literals.removeAll(removeList);
+        preconditions.literals.removeAll(removeList);
         removeList.clear();
         for (Literal l : action.addClause.literals) {
             if (l.row == row && l.col == col)
@@ -84,7 +101,7 @@ public class Rule {
         }
         action.remClause.literals.removeAll(removeList);
 
-        this.transformedClauses = getTransformedClauses();
+        this.transformedPrecons = getTransformedPreconditions();
     }
 
     public void setAction(Action a) {
@@ -94,29 +111,29 @@ public class Rule {
             this.action = a;
     }
 
-    public void setClause(Clause c) {
+    public void setPreconditions(Clause c) {
         if (c == null)
-            this.clause = new Clause();
+            this.preconditions = new Clause();
         else
-            this.clause = c;
-        this.transformedClauses = getTransformedClauses();
+            this.preconditions = c;
+        this.transformedPrecons = getTransformedPreconditions();
     }
 
-    private static ArrayList<String> prepClause(String clauseStr) {
-        ArrayList<String> clause = new ArrayList<>();
+    private static ArrayList<String> prepPreconditions(String preconStr) {
+        ArrayList<String> precons = new ArrayList<>();
         StringBuilder regex = new StringBuilder();
         regex.append(separators.get(0));
         for (int i = 1; i < separators.size(); i++)
             regex.append("|").append(separators.get(i));
 
-        String[] parts = clauseStr.split(regex.toString());
+        String[] parts = preconStr.split(regex.toString());
         for (String part : parts) {
             if (part.length() < 2)
                 continue;
             part = part.trim();
-            clause.add(part);
+            precons.add(part);
         }
-        return clause;
+        return precons;
     }
 
     private static ArrayList<String> prepAction(String actionStr) {
@@ -138,9 +155,9 @@ public class Rule {
         return corrected_parts;
     }
 
-    private static Clause getClause(String clauseStr) {
+    private static Clause getPreconditions(String clauseStr) {
         ArrayList<Literal> literals = new ArrayList<>();
-        for (String c : prepClause(clauseStr)) {
+        for (String c : prepPreconditions(clauseStr)) {
             literals.add(new Literal(c));
         }
        return new Clause(literals);
@@ -157,7 +174,7 @@ public class Rule {
                     return false;
             return true;
         }
-        for (Literal l : r.clause.literals)
+        for (Literal l : r.preconditions.literals)
             if (l.error)
                 return false;
         if (r.action.addClause.isEmpty() && r.action.remClause.isEmpty())
@@ -174,8 +191,8 @@ public class Rule {
         return true;
     }
 
-    private static boolean isMultiRule(String clauseStr, String actionStr) {
-        ArrayList<String> prepLiteralStr = prepClause(clauseStr);
+    private static boolean isMultiRule(String preconStr, String actionStr) {
+        ArrayList<String> prepLiteralStr = prepPreconditions(preconStr);
         ArrayList<String> prepActionStr = prepAction(actionStr);
         for (String lStr : prepLiteralStr) {
             String[] coords = Literal.getCoords(lStr);
@@ -201,8 +218,8 @@ public class Rule {
         return false;
     }
 
-    private static void replaceWildcards(String clauseStr, String actionStr, HashSet<Rule> rules) {
-        ArrayList<String> prepLiteralStr = prepClause(clauseStr);
+    private static void replaceWildcards(String preconStr, String actionStr, HashSet<Rule> rules) {
+        ArrayList<String> prepLiteralStr = prepPreconditions(preconStr);
         ArrayList<String> prepActionStr = prepAction(actionStr);
         HashSet<String> wildCardsRow = new HashSet<>();
         HashSet<String> wildCardsCol = new HashSet<>();
@@ -226,13 +243,13 @@ public class Rule {
                 wildCardsCol.add(coords[1]);
         }
         if (wildCardsCol.isEmpty() && wildCardsRow.isEmpty()) {
-            rules.add(new Rule(clauseStr, actionStr));
+            rules.add(new Rule(preconStr, actionStr));
             return;
         }
 
         for (String wc : wildCardsRow) {
             for (int i = 0; i < FFTManager.gameBoardHeight; i++) {
-                String finalCStr = clauseStr.replace(wc, Integer.toString(i));
+                String finalCStr = preconStr.replace(wc, Integer.toString(i));
                 String finalAStr = actionStr.replace(wc, Integer.toString(i));
                 replaceWildcards(finalCStr, finalAStr, rules);
             }
@@ -240,7 +257,7 @@ public class Rule {
 
         for (String wc : wildCardsCol) {
             for (int i = 0; i < FFTManager.gameBoardWidth; i++) {
-                String finalCStr = clauseStr.replace(wc, Integer.toString(i));
+                String finalCStr = preconStr.replace(wc, Integer.toString(i));
                 String finalAStr = actionStr.replace(wc, Integer.toString(i));
                 replaceWildcards(finalCStr, finalAStr, rules);
             }
@@ -249,21 +266,21 @@ public class Rule {
 
     public String print() {
         String cStr, aStr;
-        if (clause != null && action != null) {
-            cStr = clause.getFormattedString();
+        if (preconditions != null && action != null) {
+            cStr = preconditions.getFormattedString();
             aStr = action.getFormattedString();
         } else {
-            cStr = clauseStr;
+            cStr = preconStr;
             aStr = actionStr;
         }
         return "IF [" + cStr + "] THEN [" + aStr + "]";
     }
 
-    String getClauseStr() {
-        if (clause != null)
-            return clause.getFormattedString();
+    String getPreconStr() {
+        if (preconditions != null)
+            return preconditions.getFormattedString();
         else
-            return clauseStr;
+            return preconStr;
     }
 
     String getActionStr() {
@@ -273,15 +290,15 @@ public class Rule {
             return actionStr;
     }
 
-    private ArrayList<Clause> getTransformedClauses() {
-        ArrayList<Clause> transformedClauses = new ArrayList<>();
-        ArrayList<Literal> nonBoardPlacements = clause.extractNonBoardPlacements();
-        int[][] cBoard = clauseToBoard(clause);
+    private ArrayList<Clause> getTransformedPreconditions() {
+        ArrayList<Clause> transformedPrecons = new ArrayList<>();
+        ArrayList<Literal> nonBoardPlacements = preconditions.extractNonBoardPlacements();
+        int[][] cBoard = preconsToBoard(preconditions);
         HashSet<Transform.TransformedArray> tSet = Transform.applyAll(FFTManager.gameSymmetries, cBoard);
         for (Transform.TransformedArray tArr : tSet)
-            transformedClauses.add(boardToClause(tArr, nonBoardPlacements));
+            transformedPrecons.add(boardToPrecons(tArr, nonBoardPlacements));
 
-        return transformedClauses;
+        return transformedPrecons;
     }
 
 
@@ -296,7 +313,7 @@ public class Rule {
             return null;
         }
         HashSet<Literal> stLiterals = state.getLiterals();
-        for (Clause clause : transformedClauses) {
+        for (Clause clause : transformedPrecons) {
             boolean match = true;
             for (Literal l : clause.literals) {
                 if (l.pieceOcc == PIECEOCC_ANY) {
@@ -320,7 +337,6 @@ public class Rule {
             if (match) {
                 Action a = action.transform(clause.transformations);
                 FFTMove move = a.getMove(state.getTurn());
-
                 if (FFTManager.logic.isLegalMove(state, move)) {
                     return move;
                 }
@@ -341,24 +357,24 @@ public class Rule {
     }
 
     // Returns a board with the literals on it, the value equals to the piece occ.
-    public static int[][] clauseToBoard(Clause clause) {
+    public static int[][] preconsToBoard(Clause clause) {
         int height = FFTManager.gameBoardHeight;
         int width = FFTManager.gameBoardWidth;
-        int[][] clauseBoard = new int[height][width];
+        int[][] preconBoard = new int[height][width];
 
         for (Literal l : clause.literals) {
             if (l.boardPlacement && l.row >= 0 && l.col >= 0 && l.row <= height-1 && l.col <= width-1) {
                 if (l.negation)
-                    clauseBoard[l.row][l.col] = -l.pieceOcc;
+                    preconBoard[l.row][l.col] = -l.pieceOcc;
                 else
-                    clauseBoard[l.row][l.col] = l.pieceOcc;
+                    preconBoard[l.row][l.col] = l.pieceOcc;
             }
         }
-        return clauseBoard;
+        return preconBoard;
     }
 
-    // returns clause derives from transformed integer matrix and non-boardplacement literals
-    private static Clause boardToClause(Transform.TransformedArray tArr, ArrayList<Literal> nonBoardPlacements) {
+    // returns preconditions derives from transformed integer matrix and non-boardplacement literals
+    private static Clause boardToPrecons(Transform.TransformedArray tArr, ArrayList<Literal> nonBoardPlacements) {
         ArrayList<Literal> literals = new ArrayList<>();
         for (int i = 0; i < tArr.board.length; i++) {
             for (int j = 0; j < tArr.board[i].length; j++) {
@@ -384,13 +400,13 @@ public class Rule {
             return false;
         if (this.multiRule)
             return this.rules.equals(rule.rules);
-        return (this.transformedClauses.equals(rule.transformedClauses) &&
+        return (this.transformedPrecons.equals(rule.transformedPrecons) &&
                         (this.action.equals(rule.action)));
     }
 
     @Override
     public int hashCode() {
-        int hash = Objects.hash(this.transformedClauses, this.action);
+        int hash = Objects.hash(this.transformedPrecons, this.action);
         return 31 * hash;
     }
 }

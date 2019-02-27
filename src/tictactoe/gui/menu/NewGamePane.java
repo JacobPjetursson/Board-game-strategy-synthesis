@@ -67,7 +67,7 @@ public class NewGamePane extends AnchorPane {
 
         });
 
-        Label crossLabel = new Label("Cross");
+        Label crossLabel = new Label("Cross (first)");
         crossLabel.setFont(Font.font("Verdana", 15));
         crossLabel.setPadding(new Insets(0, 10, 0, 0));
         crossLabel.setTextFill(Color.WHITE);
@@ -92,7 +92,7 @@ public class NewGamePane extends AnchorPane {
 
         });
 
-        Label circleLabel = new Label("Circle (first)");
+        Label circleLabel = new Label("Circle");
         circleLabel.setFont(Font.font("Verdana", 15));
         circleLabel.setPadding(new Insets(0, 10, 0, 0));
         circleLabel.setTextFill(Color.WHITE);
@@ -160,10 +160,10 @@ public class NewGamePane extends AnchorPane {
                     (crossValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
             int playerCircleMode = (circleValue.equals(human)) ? Config.HUMAN :
                     (circleValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
-            new Controller(stage, playerCircleMode,
-                    playerCrossMode, new State(),
-                    Integer.parseInt(circleDelayField.getText()),
-                    Integer.parseInt(crossDelayField.getText()));
+            new Controller(stage, playerCrossMode,
+                    playerCircleMode, new State(),
+                    Integer.parseInt(crossDelayField.getText()),
+                    Integer.parseInt(circleDelayField.getText()));
         });
 
         Button back = new Button("Back");

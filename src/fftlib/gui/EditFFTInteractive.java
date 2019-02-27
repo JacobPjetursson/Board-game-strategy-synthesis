@@ -3,6 +3,7 @@ package fftlib.gui;
 import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
+import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -42,6 +43,7 @@ public class EditFFTInteractive extends BorderPane {
     private RadioButton p1Btn;
     private RadioButton p2Btn;
 
+    private int[] selectedIndices; // rgIdx, rIdx
     public EditFFTInteractive(Scene prevScene, FFTManager fftManager) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         this.fftManager = fftManager;
@@ -88,7 +90,7 @@ public class EditFFTInteractive extends BorderPane {
         bottomBox.setAlignment(Pos.CENTER);
         bottomBox.setPadding(new Insets(15));
 
-        Label label1 = new Label("Click the rules to edit them.");
+        Label label1 = new Label("Click the rules to show them on the board");
         label1.setFont(Font.font("Verdana", 13));
 
         Label label2 = new Label("Click the board tiles to edit their contents");
@@ -104,12 +106,8 @@ public class EditFFTInteractive extends BorderPane {
         p2Btn.setToggleGroup(toggleGrp);
         HBox perspectiveGrp = new HBox(10, label3, p1Btn, p2Btn);
         perspectiveGrp.setAlignment(Pos.CENTER);
-        p1Btn.setOnMouseClicked(event -> {
-            interactiveFFTState.setPerspective(PLAYER1);
-        });
-        p2Btn.setOnMouseClicked(event -> {
-            interactiveFFTState.setPerspective(PLAYER2);
-        });
+        p1Btn.setOnMouseClicked(event -> interactiveFFTState.setPerspective(PLAYER1));
+        p2Btn.setOnMouseClicked(event -> interactiveFFTState.setPerspective(PLAYER2));
 
 
         Button back = new Button("Back");
@@ -119,6 +117,7 @@ public class EditFFTInteractive extends BorderPane {
         });
 
         Button addRuleBtn = new Button("Add rule");
+        addRuleBtn.setStyle("-fx-border-color: #000000; -fx-background-color: #00dd00;");
         addRuleBtn.setOnMouseClicked(event -> {
             Rule r = interactiveFFTState.getRule();
             if (!Rule.isValidRuleFormat(r)) {
@@ -127,13 +126,29 @@ public class EditFFTInteractive extends BorderPane {
             ArrayList<RuleGroup> ruleGroups = fftManager.currFFT.ruleGroups;
             if (ruleGroups.isEmpty())
                 ruleGroups.add(new RuleGroup(""));
-
-            fftManager.currFFT.ruleGroups.get(ruleGroups.size() - 1).addRule(r);
+            Rule copy = new Rule(r);
+            fftManager.currFFT.ruleGroups.get(ruleGroups.size() - 1).addRule(copy);
             showRuleGroups();
+            FFTManager.save();
+        });
+
+        Button deleteRuleBtn = new Button("Delete rule");
+        deleteRuleBtn.setStyle("-fx-border-color: #000000; -fx-background-color: #ff0000;");
+        deleteRuleBtn.setOnMouseClicked(event -> {
+            if (selectedIndices == null) {
+                System.err.println("Please select a rule and try again");
+                return;
+            }
+            int rgIdx = selectedIndices[0];
+            int rIdx = selectedIndices[1];
+            fftManager.currFFT.ruleGroups.get(rgIdx).rules.remove(rIdx);
+            showRuleGroups();
+            FFTManager.save();
         });
 
         Button clearRuleBtn = new Button("Clear rule");
         clearRuleBtn.setOnMouseClicked(event -> {
+            selectedIndices = null;
             FFTManager.interactiveState.clear();
             update(FFTManager.initialFFTState);
         });
@@ -145,7 +160,7 @@ public class EditFFTInteractive extends BorderPane {
         clearBox.setAlignment(Pos.CENTER);
 
 
-        HBox ruleBtnBox = new HBox(10, addRuleBtn, clearRuleBtn);
+        HBox ruleBtnBox = new HBox(10, addRuleBtn, deleteRuleBtn, clearRuleBtn);
         ruleBtnBox.setAlignment(Pos.CENTER);
 
         VBox backBox = new VBox();
@@ -176,18 +191,23 @@ public class EditFFTInteractive extends BorderPane {
         setCenter(node);
     }
 
+    public void update(FFTState state, FFTMove move) {
+        update(state);
+        FFTManager.interactiveState.setAction(move.getAction());
+    }
+
     private void setupRuleFetchTimer() {
         Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.5), ev -> {
             Rule r = interactiveFFTState.getRule();
-            if (r != null) {
+            if (r != null)
                 ruleLabel.setText(r.print());
-            }
         }));
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
     }
 
     private void showRuleGroups() {
+        selectedIndices = null;
         ObservableList<RulePane> rules = FXCollections.observableArrayList();
         for (int i = 0; i < fftManager.currFFT.ruleGroups.size(); i++) {
             // Rule group
@@ -229,6 +249,7 @@ public class EditFFTInteractive extends BorderPane {
             RuleGroup rg = fftManager.currFFT.ruleGroups.get(rgIdx);
             setOnMouseClicked(event -> {
                 setCenter(interactiveFFTState.getInteractiveNode(rg.rules.get(rIdx)));
+                selectedIndices = new int[]{rgIdx, rIdx};
             });
             Rule r = rg.rules.get(rIdx);
             this.label = new Label((rIdx + 1) + ": " + r.print());
@@ -286,7 +307,7 @@ public class EditFFTInteractive extends BorderPane {
                 if (db.hasContent(SERIALIZED_MIME_TYPE)) {
                     int draggedIdx = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
                     int droppedIdx = getIndex();
-                    int selectionIdx;
+                    int selectionIdx, rgSelectionIdx, rSelectionIdx;
 
                     RulePane draggedPane = lw.getItems().get(draggedIdx);
                     RuleGroup rg_dragged = fftManager.currFFT.ruleGroups.get(draggedPane.rgIdx);
@@ -297,16 +318,23 @@ public class EditFFTInteractive extends BorderPane {
                         RuleGroup rg_last = fftManager.currFFT.ruleGroups.get(fftManager.currFFT.ruleGroups.size() - 1);
                         rg_last.rules.add(r_dragged);
                         selectionIdx = lw.getItems().size() - 1;
+
+                        rgSelectionIdx = fftManager.currFFT.ruleGroups.size() - 1;
+                        rSelectionIdx = rg_last.rules.size() - 1;
                     } else {
                         RulePane droppedPane = lw.getItems().get(droppedIdx);
                         RuleGroup rg_dropped = fftManager.currFFT.ruleGroups.get(droppedPane.rgIdx);
                         rg_dropped.rules.add(droppedPane.rIdx, r_dragged);
                         selectionIdx = droppedIdx;
+
+                        rgSelectionIdx = droppedPane.rgIdx;
+                        rSelectionIdx = droppedPane.rIdx;
                     }
                     event.setDropCompleted(true);
-                    FFTManager.save();
                     showRuleGroups();
+                    FFTManager.save();
                     lw.getSelectionModel().select(selectionIdx);
+                    selectedIndices = new int[]{rgSelectionIdx, rSelectionIdx};
                 }
                 event.consume();
             });

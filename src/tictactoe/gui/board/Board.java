@@ -9,11 +9,8 @@ public class Board extends GridPane {
     private static final int boardRows = 3;
     private static final int boardColumns = 3;
     private BoardTile[][] tiles;
-    private int tilesize;
-    private int clickMode;
 
     public Board(int tilesize, int clickMode, Controller cont) {
-        this.clickMode = clickMode;
         setAlignment(Pos.CENTER);
         tiles = new BoardTile[boardRows][boardColumns];
         for (int i = 0; i < boardRows; i++) {

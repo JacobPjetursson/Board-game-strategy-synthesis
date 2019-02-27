@@ -29,8 +29,8 @@ public class NavPane extends VBox {
     private Button reviewButton;
     private Button editFFTButton;
     private Button addRuleFFTButton;
-    private HBox interactiveFFTBox;
-    private CheckBox interactiveFFT;
+    private HBox automaticFFTBox;
+    private CheckBox automaticFFT;
     private Button showFFTButton;
     private VBox FFTWidgets;
     private CheckBox helpHuman;
@@ -76,18 +76,18 @@ public class NavPane extends VBox {
         editFFTButton = new Button("Edit FFT");
         buttons.add(editFFTButton);
 
-        addRuleFFTButton = new Button("Add Rule to FFT");
+        addRuleFFTButton = new Button("Add state to FFT");
         buttons.add(addRuleFFTButton);
 
-        interactiveFFT = new CheckBox();
-        interactiveFFT.setSelected(true);
-        Label interactiveLabel = new Label("Interactive FFT");
-        interactiveLabel.setFont(Font.font("Verdana", 14));
-        interactiveLabel.setPadding(new Insets(0, 0, 0, 5));
-        interactiveFFTBox = new HBox(interactiveFFT, interactiveLabel);
-        interactiveFFTBox.setAlignment(Pos.CENTER);
+        automaticFFT = new CheckBox();
+        automaticFFT.setSelected(false);
+        Label automaticLabel = new Label("Automatic FFT");
+        automaticLabel.setFont(Font.font("Verdana", 14));
+        automaticLabel.setPadding(new Insets(0, 0, 0, 5));
+        automaticFFTBox = new HBox(automaticFFT, automaticLabel);
+        automaticFFTBox.setAlignment(Pos.CENTER);
 
-        FFTWidgets = new VBox(showFFTButton, editFFTButton, addRuleFFTButton, interactiveFFTBox);
+        FFTWidgets = new VBox(showFFTButton, editFFTButton, addRuleFFTButton, automaticFFTBox);
         FFTWidgets.setSpacing(10);
         FFTWidgets.setAlignment(Pos.CENTER);
 
@@ -146,8 +146,8 @@ public class NavPane extends VBox {
         return addRuleFFTButton;
     }
 
-    public CheckBox getInteractiveFFTBox() {
-        return interactiveFFT;
+    public CheckBox getAutomaticFFTBox() {
+        return automaticFFT;
     }
 
     public Button getStartAIButton() {

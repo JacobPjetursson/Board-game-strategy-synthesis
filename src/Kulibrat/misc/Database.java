@@ -19,6 +19,7 @@ import misc.Config;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import static misc.Config.PLAYER1;
@@ -90,8 +91,8 @@ public class Database implements FFTDatabase {
 
     // Outputs a list of the best plays from a given node. Checks through the children of a node to find the ones
     // which have the least amount of turns to terminal for win, or most for loss.
-    public static ArrayList<Move> bestPlays(State n) {
-        ArrayList<Move> bestPlays = new ArrayList<>();
+    public static HashSet<Move> bestPlays(State n) {
+        HashSet<Move> bestPlays = new HashSet<>();
         MinimaxPlay bestPlay = queryPlay(n);
         int bestScore = 0;
         if (!Logic.gameOver(n.getNextState(bestPlay.move))) {
@@ -99,7 +100,7 @@ public class Database implements FFTDatabase {
         }
         for (State child : n.getChildren()) {
             Move m = child.getMove();
-            kulibrat.game.State state = n.getNextState(m);
+            State state = n.getNextState(m);
             if (Logic.gameOver(state)) {
                 if (Logic.getWinner(state) == m.team) bestPlays.add(m);
             } else if (queryPlay(child).score == bestScore) {

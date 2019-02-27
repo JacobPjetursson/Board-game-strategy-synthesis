@@ -12,7 +12,7 @@ import static misc.Config.PLAYER2;
 
 public class Logic implements FFTLogic {
 
-    public static ArrayList<Move> legalMoves(int team, State state) {
+    static ArrayList<Move> legalMoves(int team, State state) {
         ArrayList<Move> list = new ArrayList<>();
         int[][] board = state.getBoard();
         for (int i = 0; i < board.length; i++) {
@@ -56,11 +56,6 @@ public class Logic implements FFTLogic {
         return draw;
     }
 
-    private static void passTurn(State state) {
-        if (state.getTurn() == PLAYER1) state.setTurn(PLAYER2);
-        else state.setTurn(PLAYER1);
-    }
-
     public static int getWinner(State state) {
         int[][] board = state.getBoard();
         for (int team = 1; team < 3; team++) {
@@ -85,12 +80,7 @@ public class Logic implements FFTLogic {
         return 0;
     }
 
-    // This is called when checking for game over, and checks if no agents can move
-    private static boolean locked(State state) {
-        return legalMoves(PLAYER1, state).isEmpty() && legalMoves(PLAYER2, state).isEmpty();
-    }
-
-    public static boolean isLegalMove(State state, Move move) {
+    private static boolean isLegalMove(State state, Move move) {
         return legalMoves(move.team, state).contains(move);
     }
 

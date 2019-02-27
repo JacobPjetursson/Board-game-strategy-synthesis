@@ -69,16 +69,22 @@ public class InteractivePlayBox extends PlayBox {
         // FFT listeners
         scoreLimitBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
             mandatoryScoreLimit = newValue;
+            if (scoreLimitField.getText().equals(""))
+                scoreLimitField.setText("0");
             cont.getInteractiveState().setScoreLimit(
                     Integer.parseInt(scoreLimitField.getText()), mandatoryScoreLimit);
         });
         p1ScoreBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
             mandatoryScoreP1 = newValue;
+            if (p1ScoreField.getText().equals(""))
+                p1ScoreField.setText("0");
             cont.getInteractiveState().setScore(
                     PLAYER1, Integer.parseInt(p1ScoreField.getText()), mandatoryScoreP1);
         });
         p2ScoreBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
             mandatoryScoreP2 = newValue;
+            if (p2ScoreField.getText().equals(""))
+                p2ScoreField.setText("0");
             cont.getInteractiveState().setScore(
                     PLAYER2, Integer.parseInt(p2ScoreField.getText()), mandatoryScoreP2);
         });
@@ -117,6 +123,7 @@ public class InteractivePlayBox extends PlayBox {
         });
 
         playBox.getChildren().add(0,infoBox);
+        updateBounds();
     }
 
     public void update(State s) {
@@ -146,16 +153,17 @@ public class InteractivePlayBox extends PlayBox {
 
 
     public void update(Rule r, int perspective) {
-        ArrayList<Literal> nonBoardLits = r.clause.extractNonBoardPlacements();
-        int[][] clauseBoard = Rule.clauseToBoard(r.clause);
+        ArrayList<Literal> nonBoardLits = r.preconditions.extractNonBoardPlacements();
+        int[][] preconBoard = Rule.preconsToBoard(r.preconditions);
         Move m = (Move) r.action.getMove(perspective);
+
 
         int enemy = (perspective == PLAYER1) ? PLAYER2 : PLAYER1;
         BoardTile[][] tiles = board.getTiles();
 
-        for (int i = 0; i < clauseBoard.length; i++) {
-            for (int j = 0; j < clauseBoard[i].length; j++) {
-                int occ = clauseBoard[i][j];
+        for (int i = 0; i < preconBoard.length; i++) {
+            for (int j = 0; j < preconBoard[i].length; j++) {
+                int occ = preconBoard[i][j];
                 BoardTile tile = tiles[i][j];
                 tile.setMandatory(occ != 0);
                 if (Math.abs(occ) == PIECEOCC_PLAYER)
@@ -189,9 +197,10 @@ public class InteractivePlayBox extends PlayBox {
                 p2ScoreBox.setSelected(true);
             }
         }
-        removeArrows();
-        Platform.runLater(() -> addArrow(m, Color.BLUE));
-
-
+        Platform.runLater(() -> {
+            removeArrows();
+            if (m != null)
+                addArrow(m, Color.BLUE);
+        });
     }
 }

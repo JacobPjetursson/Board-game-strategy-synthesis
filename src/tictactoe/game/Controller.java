@@ -18,11 +18,9 @@ import tictactoe.FFT.InteractiveState;
 import tictactoe.ai.AI;
 import tictactoe.ai.FFTFollower;
 import tictactoe.ai.LookupTableMinimax;
-import tictactoe.gui.EndGamePane;
-import tictactoe.gui.NavPane;
-import tictactoe.gui.PlayArea;
-import tictactoe.gui.PlayPane;
+import tictactoe.gui.*;
 import tictactoe.gui.board.BoardTile;
+import tictactoe.misc.Database;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -38,14 +36,15 @@ public class Controller {
     private int player1Time;
     private int player2Time;
     private int turnNo;
-    private AI aiRed;
-    private AI aiBlack;
+    private AI aiCross;
+    private AI aiCircle;
     private Button startAIButton;
     private Button stopAIButton;
     private Button editFFTButton;
     private Button showFFTButton;
+    private Button reviewButton;
     private Button addRuleFFTButton;
-    private CheckBox interactiveFFTBox;
+    private CheckBox automaticFFTBox;
     private Thread aiThread;
     private NavPane navPane;
     private tictactoe.game.State state;
@@ -54,10 +53,11 @@ public class Controller {
     private ArrayList<StateAndMove> previousStates;
     private Window window;
     private FFTManager fftManager;
-    private boolean fftInteractiveMode;
-    private boolean fftAllowInteraction;
+    private boolean fftAutomaticMode;
+    private boolean fftUserInteraction;
     private ShowFFTPane shownFFT;
     private GameSpecifics gameSpecifics;
+    private CheckBox helpHumanBox;
 
     public Controller(Stage primaryStage, int player1Instance, int player2Instance,
                       State state, int player1Time, int player2Time) {
@@ -93,7 +93,9 @@ public class Controller {
         showFFTButton = navPane.getShowFFTButton();
         editFFTButton = navPane.getEditFFTButton();
         addRuleFFTButton = navPane.getAddRuleFFTButton();
-        interactiveFFTBox = navPane.getInteractiveFFTBox();
+        reviewButton = navPane.getReviewButton();
+        automaticFFTBox = navPane.getAutomaticFFTBox();
+        helpHumanBox = navPane.getHelpHumanBox();
 
         showNavButtons();
 
@@ -110,6 +112,21 @@ public class Controller {
             stopAIButton.setDisable(true);
         });
 
+        // help human checkbox
+        helpHumanBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
+            helpHumanBox.setDisable(true);
+            if (newValue) {
+                helpHumanBox.setSelected(true);
+                highlightHelp(true);
+            } else {
+                helpHumanBox.setSelected(false);
+                highlightHelp(false);
+            }
+            helpHumanBox.setDisable(false);
+        });
+        // Review button
+        reviewButton.setOnAction(event -> reviewGame());
+
         // FFTManager LISTENERS
         // edit fftManager button
         editFFTButton.setOnAction(event -> {
@@ -125,10 +142,10 @@ public class Controller {
             interactive.update(this.state);
         });
 
-        // interactive mode
-        fftInteractiveMode = true;
-        interactiveFFTBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
-            fftInteractiveMode = newValue;
+        // automatic mode
+        fftAutomaticMode = false;
+        automaticFFTBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
+            fftAutomaticMode = newValue;
         });
 
         // Show FFT button
@@ -152,22 +169,29 @@ public class Controller {
         navPane.removeWidgets();
         if (mode == AI_VS_AI && !navPane.containsAIWidgets())
             navPane.addAIWidgets();
+        if (mode == HUMAN_VS_AI && !navPane.containsReviewButton())
+            navPane.addReviewButton();
+        if ((mode != AI_VS_AI || player1Instance == FFT || player2Instance == FFT)) {
+            if (!navPane.containsHelpBox())
+                navPane.addHelpHumanBox();
+        }
         if ((player2Instance == FFT || player1Instance == FFT) && !navPane.containsFFTWidgets())
             navPane.addFFTWidgets();
+
     }
 
     private void instantiateAI(int team) {
         if (team == PLAYER1) {
             if (player1Instance == LOOKUP_TABLE) {
-                aiRed = new LookupTableMinimax(PLAYER1, state);
+                aiCross = new LookupTableMinimax(PLAYER1, state);
             } else if (player1Instance == FFT) {
-                aiRed = new FFTFollower(PLAYER1, fftManager);
+                aiCross = new FFTFollower(PLAYER1, fftManager);
             }
         } else {
             if (player2Instance == LOOKUP_TABLE) {
-                aiBlack = new LookupTableMinimax(PLAYER2, state);
+                aiCircle = new LookupTableMinimax(PLAYER2, state);
             } else if (player2Instance == FFT) {
-                aiBlack = new FFTFollower(PLAYER2, fftManager);
+                aiCircle = new FFTFollower(PLAYER2, fftManager);
             }
         }
     }
@@ -181,21 +205,29 @@ public class Controller {
         updatePostHumanTurn();
         if (Logic.gameOver(state)) return;
         if (state.getTurn() == move.team) {
-            String skipped = (state.getTurn() == PLAYER1) ? "Black" : "Red";
-            System.out.println("TEAM " + skipped + "'s turn has been skipped!");
+            String skipped = (state.getTurn() == PLAYER1) ? "Circle" : "Cross";
+            System.out.println(skipped + "'s turn has been skipped!");
             playArea.getInfoPane().displaySkippedTurn(skipped);
             if (player1Instance == FFT && state.getTurn() == PLAYER1 ||
                     player2Instance == FFT && state.getTurn() == PLAYER2)
                 doAITurn();
+            else if (helpHumanBox.isSelected()) {
+                highlightHelp(true);
+            }
             return;
         }
-        // FFT stuff
+        // FFT vs AI
         if (mode == AI_VS_AI && ((player1Instance == FFT && state.getTurn() == PLAYER2) ||
                 (player2Instance == FFT && state.getTurn() == PLAYER1))) {
             startAIButton.fire();
+        // Human vs. AI
         } else if ((player2Instance != HUMAN && state.getTurn() == PLAYER2) ||
                 (player1Instance != HUMAN && state.getTurn() == PLAYER1)) {
             doAITurn();
+        }
+        // Human/FFT vs. Human
+        else if (helpHumanBox.isSelected()) {
+            highlightHelp(true);
         }
     }
 
@@ -228,14 +260,14 @@ public class Controller {
             try {
                 while (!Logic.gameOver(state)) {
                     doAITurn();
-                    if (fftAllowInteraction) {
+                    if (fftUserInteraction) {
                         stopAIButton.fire();
                     }
                     if (player1Instance == LOOKUP_TABLE && player2Instance == LOOKUP_TABLE) {
                         Thread.sleep(player1Time);
-                    } else if (state.getTurn() == PLAYER1 && player1Instance == FFT && !fftAllowInteraction)
+                    } else if (state.getTurn() == PLAYER1 && player1Instance == FFT && !fftUserInteraction)
                         Thread.sleep(player1Time);
-                    else if (state.getTurn() == PLAYER2 && player2Instance == FFT && !fftAllowInteraction)
+                    else if (state.getTurn() == PLAYER2 && player2Instance == FFT && !fftUserInteraction)
                         Thread.sleep(player2Time);
                     else {
                         Thread.sleep(0); // To allow thread interruption
@@ -254,27 +286,29 @@ public class Controller {
 
     // The AI makes its turn, and the GUI is updated while doing so
     private void doAITurn() {
-        fftAllowInteraction = false;
+        fftUserInteraction = false;
         boolean makeDefaultMove = false;
         int turn = state.getTurn();
         Move move;
-        if (aiRed != null && turn == PLAYER1) {
-            move = aiRed.makeMove(state);
+        if (aiCross != null && turn == PLAYER1) {
+            move = aiCross.makeMove(state);
             if (player1Instance == FFT && move == null)
                 makeDefaultMove = true;
         } else {
-            move = aiBlack.makeMove(state);
+            move = aiCircle.makeMove(state);
             if (player2Instance == FFT && move == null)
                 makeDefaultMove = true;
         }
         if (makeDefaultMove) {
-            if (fftInteractiveMode) {
-                System.out.println("Defaulting to user interaction");
-                fftAllowInteraction = true;
-                return;
-            } else {
+            if (fftAutomaticMode) {
                 System.out.println("Defaulting to random move");
                 move = getDefaultFFTMove();
+            } else {
+                System.out.println("Defaulting to user interaction");
+                fftUserInteraction = true;
+                if (helpHumanBox.isSelected())
+                    highlightHelp(true);
+                return;
             }
         }
         state = state.getNextState(move);
@@ -282,12 +316,63 @@ public class Controller {
         if (Logic.gameOver(state)) return;
         if (mode == HUMAN_VS_AI) {
             if (turn == state.getTurn()) {
-                String skipped = (turn == PLAYER1) ? "Black" : "Red";
-                System.out.println("TEAM " + skipped + "'s turn has been skipped!");
+                String skipped = (turn == PLAYER1) ? "Circle" : "Cross";
+                System.out.println(skipped + "'s turn has been skipped!");
                 playArea.getInfoPane().displaySkippedTurn(skipped);
                 doAITurn();
+            } else if (helpHumanBox.isSelected()) {
+                highlightHelp(true);
+            }
+        } else if (((state.getTurn() == PLAYER1 && player1Instance == FFT) ||
+                (state.getTurn() == PLAYER2 && player2Instance == FFT)) &&
+                helpHumanBox.isSelected()) {
+            highlightHelp(true);
+        }
+    }
+
+    private void highlightHelp(boolean highlight) {
+        State n = new State(state);
+        ArrayList<Move> bestPlays = null;
+        if (highlight)
+            bestPlays = Database.bestPlays(n);
+        BoardTile[][] tiles = playArea.getPlayBox().getBoard().getTiles();
+
+        for (BoardTile[] tile : tiles) {
+            for (BoardTile aTile : tile) {
+                aTile.setBest(false);
+                aTile.setTurnsToTerminal("");
+                if (!highlight)
+                    continue;
+                for (Move m : bestPlays) {
+                    if (m.col == aTile.getCol() && m.row == aTile.getRow())
+                        aTile.setBest(true);
+                }
             }
         }
+
+        // Turns to terminal
+        ArrayList<Move> moves = Logic.legalMoves(state.getTurn(), state);
+        ArrayList<String> turnsToTerminalList = getScores(moves);
+
+        for (int i = 0; i < moves.size(); i++) {
+            Move m = moves.get(i);
+            String turns = "";
+            if (highlight) {
+                turns = turnsToTerminalList.get(i);
+            }
+            tiles[m.row][m.col].setTurnsToTerminal(turns);
+        }
+    }
+
+    private ArrayList<String> getScores(ArrayList<Move> moves) {
+        ArrayList<String> turnsToTerminalList = new ArrayList<>();
+        for (Move m : moves) {
+            State s = new State(state).getNextState(m);
+            if (Logic.gameOver(s)) {
+                turnsToTerminalList.add("0");
+            } else turnsToTerminalList.add(Database.turnsToTerminal(state.getTurn(), s));
+        }
+        return turnsToTerminalList;
     }
 
     private Move getDefaultFFTMove() {
@@ -327,29 +412,21 @@ public class Controller {
         }
     }
 
-    public void setPlayerInstance(int team, int playerInstance) {
-        if (team == PLAYER1) {
-            player1Instance = playerInstance;
-        } else {
-            player2Instance = playerInstance;
-        }
-        int oldMode = mode;
-        this.mode = setMode(player1Instance, player2Instance);
-        instantiateAI(team);
-        if (state.getTurn() == team && playerInstance != HUMAN && mode != AI_VS_AI) {
-            doAITurn();
-        } else if (state.getTurn() != team && oldMode == AI_VS_AI && mode != AI_VS_AI) {
-            doAITurn();
-        }
-        showNavButtons();
-        playArea.update(this);
+    // Opens the review pane
+    private void reviewGame() {
+        Stage newStage = new Stage();
+        newStage.setScene(new Scene(new ReviewPane(primaryStage, this), 325, Config.HEIGHT - 50));
+        newStage.initModality(Modality.APPLICATION_MODAL);
+        newStage.initOwner(window);
+        newStage.setOnCloseRequest(Event::consume);
+        newStage.show();
     }
 
-    // Sets the mode based on the red and black player types
-    private int setMode(int playerRedInstance, int playerBlackInstance) {
-        if (playerRedInstance == HUMAN && playerBlackInstance == HUMAN) {
+    // Sets the mode based on player types
+    private int setMode(int player1Instance, int player2Instance) {
+        if (player1Instance == HUMAN && player2Instance == HUMAN) {
             return HUMAN_VS_HUMAN;
-        } else if (playerRedInstance != HUMAN ^ playerBlackInstance != HUMAN) {
+        } else if (player1Instance != HUMAN ^ player2Instance != HUMAN) {
             return HUMAN_VS_AI;
         } else {
             return AI_VS_AI;
@@ -372,16 +449,12 @@ public class Controller {
         if (team == PLAYER1) return player1Time;
         else return player2Time;
     }
-
-    public void setPlayerCalcTime(int team, int time) {
-        if (team == PLAYER1)
-            player1Time = time;
-        else
-            player2Time = time;
+    public Window getWindow() {
+        return window;
     }
 
-    public PlayArea getPlayArea() {
-        return playArea;
+    public boolean getFFTAllowInteraction() {
+        return fftUserInteraction;
     }
 
     public ArrayList<StateAndMove> getPreviousStates() {
@@ -392,16 +465,12 @@ public class Controller {
         this.previousStates = stateAndMoves;
     }
 
-    public Window getWindow() {
-        return window;
-    }
-
-    public boolean getFFTAllowInteraction() {
-        return fftAllowInteraction;
-    }
-
     public InteractiveState getInteractiveState() {
         return gameSpecifics.interactiveState;
+    }
+
+    public PlayArea getPlayArea() {
+        return playArea;
     }
 
 }

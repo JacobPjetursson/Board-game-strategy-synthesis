@@ -1,10 +1,15 @@
 package kulibrat.game;
 
+import fftlib.Action;
+import fftlib.Clause;
+import fftlib.Literal;
 import fftlib.game.FFTMove;
 import misc.Config;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
+import static fftlib.Literal.PIECEOCC_PLAYER;
 import static kulibrat.game.Logic.POS_NONBOARD;
 
 public class Move implements FFTMove {
@@ -61,6 +66,19 @@ public class Move implements FFTMove {
 
     public void setTeam(int team) {
         this.team = team;
+    }
+
+    @Override
+    public Action getAction() {
+        ArrayList<Literal> addLits = new ArrayList<>();
+        if (newRow != POS_NONBOARD)
+            addLits.add(new Literal(newRow, newCol, PIECEOCC_PLAYER, false));
+        ArrayList<Literal> remLits = new ArrayList<>();
+        if (oldRow != POS_NONBOARD)
+            remLits.add(new Literal(oldRow, oldCol, PIECEOCC_PLAYER, false));
+        Clause addClause = new Clause(addLits);
+        Clause remClause = new Clause(remLits);
+        return new Action(addClause, remClause);
     }
 
     @Override

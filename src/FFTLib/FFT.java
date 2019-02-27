@@ -20,7 +20,6 @@ public class FFT {
         ruleGroups = new ArrayList<>();
     }
 
-
     public void addRuleGroup(RuleGroup ruleGroup) {
         ruleGroups.add(ruleGroup);
         FFTManager.save();
@@ -75,6 +74,7 @@ public class FFT {
                         }
                     }
                 } else if (!nonLosingPlays.contains(move)) {
+                    System.out.println(nonLosingPlays);
                     System.out.println("FFT applied, but its move lost you the game");
                     failingPoint = new FFTStateAndMove(state, move, false);
                     return false;

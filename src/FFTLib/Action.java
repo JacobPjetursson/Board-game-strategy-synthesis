@@ -14,11 +14,17 @@ import static kulibrat.game.Logic.POS_NONBOARD;
 public class Action {
     public Clause addClause;
     public Clause remClause;
-    boolean actionErr;
+    public boolean actionErr;
 
-    Action() {
+    public Action() {
         this.addClause = new Clause();
         this.remClause = new Clause();
+    }
+
+    public Action(Action duplicate) {
+        this.addClause = new Clause(duplicate.addClause);
+        this.remClause = new Clause(duplicate.remClause);
+        this.actionErr = duplicate.actionErr;
     }
 
     Action(ArrayList<String> literals) {
@@ -50,13 +56,13 @@ public class Action {
         }
 
         if (addClause.isEmpty() && remClause.isEmpty()) {
-            System.err.println("Action clause list was empty");
+            System.err.println("No action was specified");
             actionErr = true;
             return;
         }
         if (Config.CURRENT_GAME == Config.KULIBRAT) {
             if(addClause.size() > 1 || remClause.size() > 1) {
-                System.err.println("Only moves with a single add clause and/or a single remove clause is allowed in this game");
+                System.err.println("Only moves with a single add literal and/or a single remove literal is allowed in this game");
                 actionErr = true;
                 return;
             }

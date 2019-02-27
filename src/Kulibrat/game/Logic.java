@@ -6,6 +6,7 @@ import fftlib.game.FFTState;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
@@ -32,7 +33,7 @@ public class Logic implements FFTLogic {
             // INITIAL MOVE
             if (oldRow == POS_NONBOARD && oldCol == POS_NONBOARD) {
                 for (int i = 0; i < maxCol + 1; i++) {
-                    if (board[maxRow][i] == 0) {
+                    if (board[maxRow][i] <= 0) {
                         list.add(new Move(oldRow, oldCol, maxRow, i, team));
                     }
                 }
@@ -69,7 +70,7 @@ public class Logic implements FFTLogic {
             // INITIAL MOVE
             if (oldRow == POS_NONBOARD && oldCol == POS_NONBOARD) {
                 for (int i = 0; i < maxCol + 1; i++) {
-                    if (board[0][i] == 0) {
+                    if (board[0][i] <= 0) {
                         list.add(new Move(oldRow, oldCol, 0, i, team));
                     }
                 }
@@ -90,6 +91,7 @@ public class Logic implements FFTLogic {
                 }
                 // JUMP MOVE
                 int jump = 1;
+
                 while (board[oldRow + jump][oldCol] == PLAYER1) {
                     jump++;
                     if (oldRow + jump > maxRow) {

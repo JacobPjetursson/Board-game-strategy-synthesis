@@ -24,8 +24,8 @@ public class Board extends GridPane {
         for (int i = 0; i < boardRows; i++) {
             for (int j = 0; j < boardColumns; j++) {
                 BoardTile bt = new BoardTile(i, j, tilesize, clickMode, cont);
-                add(bt, j, i);
                 tiles[i][j] = bt;
+                add(bt, j, i);
             }
         }
     }
@@ -39,7 +39,6 @@ public class Board extends GridPane {
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles[i].length; j++) {
                 BoardTile tile = tiles[i][j];
-                BoardPiece piece = tile.getPiece();
                 int stateTile = stateBoard[i][j];
                 // moved to tile
                 if (stateTile != 0) {

@@ -24,7 +24,7 @@ public class InfoPane extends VBox {
         setPrefSize(Config.WIDTH / 3, Config.HEIGHT);
         setSpacing(40);
         setAlignment(Pos.CENTER);
-        turnLabel = new Label("Turn: Circle");
+        turnLabel = new Label("Turn: Cross");
         turnLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
         turnNumberLabel = new Label("Turns Played: 0");
         turnNumberLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
@@ -56,9 +56,9 @@ public class InfoPane extends VBox {
 
     private void updateTurn(State state) {
         if (state.getTurn() == PLAYER1) {
-            turnLabel.setText("Turn: Circle");
-        } else {
             turnLabel.setText("Turn: Cross");
+        } else {
+            turnLabel.setText("Turn: Circle");
         }
     }
 

@@ -107,6 +107,8 @@ public class BoardPiece extends Circle {
 
     private boolean isControllable() {
         if (clickMode == CLICK_INTERACTIVE) {
+            if (this.team != cont.getInteractiveState().getPerspective())
+                return false;
             BoardTile bt = getTile();
             return bt == null || !getTile().highlight;
         }

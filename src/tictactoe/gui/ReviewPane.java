@@ -1,4 +1,4 @@
-package kulibrat.gui;
+package tictactoe.gui;
 
 
 import javafx.application.Platform;
@@ -18,35 +18,20 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import kulibrat.game.State;
-import kulibrat.game.Controller;
-import kulibrat.game.Logic;
-import kulibrat.game.Move;
-import kulibrat.game.StateAndMove;
-import kulibrat.gui.board.PlayBox.PlayBox;
-import kulibrat.misc.Database;
+import tictactoe.game.*;
+import tictactoe.gui.board.PlayBox.PlayBox;
+import tictactoe.misc.Database;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 
-import static misc.Config.CLICK_DISABLED;
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Config.*;
+import static tictactoe.gui.board.BoardTile.blueStr;
+import static tictactoe.gui.board.BoardTile.greenStr;
 
 public class ReviewPane extends VBox {
     private ListView<HBox> lw;
-    private boolean connected;
 
     public ReviewPane(Stage primaryStage, Controller currCont) {
-        try {
-            if (Database.dbConnection == null || Database.dbConnection.isClosed()) {
-                Database.connectwithVerification();
-                connected = true;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
         HBox bottomBox = new HBox(10);
         VBox.setMargin(bottomBox, new Insets(10));
         bottomBox.setAlignment(Pos.BOTTOM_RIGHT);
@@ -59,13 +44,7 @@ public class ReviewPane extends VBox {
         cancel.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
-            if (connected) {
-                try {
-                    Database.dbConnection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+
             if (Logic.gameOver(currCont.getState())) {
                 Stage newStage = new Stage();
                 newStage.setScene(new Scene(new EndGamePane(primaryStage, Logic.getWinner(currCont.getState()),
@@ -86,16 +65,15 @@ public class ReviewPane extends VBox {
             vBox.setAlignment(Pos.CENTER);
             vBox.setFillWidth(true);
             State n = new State(ps.getState());
-            HashSet<Move> bestPlays = Database.bestPlays(n);
+            ArrayList<Move> bestPlays = Database.bestPlays(n);
             PlayBox playBox = getPlayBox(currCont, ps, bestPlays);
             Label turnL = new Label("Turns Played: " + (ps.getTurnNo()));
             turnL.setFont(Font.font("Verdana", 14));
             turnL.setAlignment(Pos.TOP_CENTER);
             vBox.getChildren().add(turnL);
 
-            String moveStr = String.format("Move from state (row, col):\n" +
-                            "         (%d, %d) -> (%d, %d)",
-                    ps.getMove().oldRow + 1, ps.getMove().oldCol + 1, ps.getMove().newRow + 1, ps.getMove().newCol + 1);
+            String moveStr = String.format("Add piece at (row, col):\n" +
+                            "         (%d, %d)", ps.getMove().row + 1, ps.getMove().col + 1);
             Label moveL = new Label(moveStr);
             vBox.getChildren().add(moveL);
 
@@ -118,7 +96,7 @@ public class ReviewPane extends VBox {
                 scoreStr = Database.turnsToTerminal(currCont.getState().getTurn(), nextState);
             }
             int score;
-            if (scoreStr.equals("∞")) score = 0;
+            if (scoreStr.equals("DRAW")) score = 0;
             else score = Integer.parseInt(scoreStr);
             Label turnsToTerminal = new Label("Turns to " + ((score >= 0) ?
                     "win " : "loss ") + "\nafter move: " + scoreStr);
@@ -140,7 +118,8 @@ public class ReviewPane extends VBox {
             StateAndMove selected = currCont.getPreviousStates().get(index);
             Controller selectedCont = new Controller(primaryStage, currCont.getPlayerInstance(PLAYER1),
                     currCont.getPlayerInstance(PLAYER2), selected.getState(),
-                    currCont.getTime(PLAYER1), currCont.getTime(PLAYER2), false);
+                    currCont.getTime(PLAYER1), currCont.getTime(PLAYER2));
+
             selectedCont.setTurnNo(selected.getTurnNo());
             selectedCont.getPlayArea().update(selectedCont);
 
@@ -157,16 +136,17 @@ public class ReviewPane extends VBox {
         getChildren().addAll(lw, bottomBox);
     }
 
-    private PlayBox getPlayBox(Controller cont, StateAndMove ps, HashSet<Move> bestPlays) {
+    private PlayBox getPlayBox(Controller cont, StateAndMove ps, ArrayList<Move> bestPlays) {
 
         PlayBox pb = new PlayBox(20, CLICK_DISABLED, cont);
         pb.update(ps.getState());
 
         Platform.runLater(() -> {
-            pb.addArrow(ps.getMove(), Color.BLUE);
+            pb.addHighlight(ps.getMove().row, ps.getMove().col, blueStr);
             for (Move m : bestPlays) {
-                if (m.equals(ps.getMove())) continue;
-                pb.addArrow(m, Color.GREEN);
+                if (m.equals(ps.getMove()))
+                    continue;
+                pb.addHighlight(m.row, m.col, greenStr);
             }
         });
 

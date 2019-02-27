@@ -15,7 +15,7 @@ public class Literal {
     boolean negation;
     boolean error;
 
-    private static String errorMsg = "Board position clause must be specified with either:\n" +
+    private static String errorMsg = "Board position preconditions must be specified with either:\n" +
             "P(x, y), E(x, y) or PE(x, y) where P = Player, E = Enemy, and PE indicates the team is irrelevant.\n" +
             "'x' and 'y' can either be constant board positions or variables";
 

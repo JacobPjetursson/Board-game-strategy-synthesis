@@ -28,17 +28,20 @@ public class NavPane extends VBox {
     private Button menuButton;
     private Button editFFTButton;
     private Button addRuleFFTButton;
-    private HBox interactiveFFTBox;
-    private CheckBox interactiveFFT;
+    private HBox automaticFFTBox;
+    private CheckBox automaticFFT;
     private Button showFFTButton;
     private VBox FFTWidgets;
     private VBox AIWidgets;
+    private CheckBox helpHuman;
+    private HBox helpHumanBox;
+    private Button reviewButton;
 
     NavPane(Controller cont) {
         setMinWidth(Config.WIDTH / 3);
         setAlignment(Pos.CENTER);
         setSpacing(40);
-        buttons = new ArrayList<Button>();
+        buttons = new ArrayList<>();
         restartButton = new Button("Restart Game");
         buttons.add(restartButton);
         restartButton.setOnMouseClicked(event -> restartGame(cont));
@@ -49,9 +52,19 @@ public class NavPane extends VBox {
         stopAIButton = new Button("Stop AI vs. AI");
         buttons.add(stopAIButton);
 
+        reviewButton = new Button("Review Game");
+        buttons.add(reviewButton);
+
         AIWidgets = new VBox(startAIButton, stopAIButton);
         AIWidgets.setSpacing(10);
         AIWidgets.setAlignment(Pos.CENTER);
+
+        helpHuman = new CheckBox();
+        Label helpHumanLabel = new Label("Show perfect move");
+        helpHumanLabel.setFont(Font.font("Verdana", 14));
+        helpHumanLabel.setPadding(new Insets(0, 0, 0, 5));
+        helpHumanBox = new HBox(helpHuman, helpHumanLabel);
+        helpHumanBox.setAlignment(Pos.CENTER);
 
         menuButton = new Button("Menu");
         buttons.add(menuButton);
@@ -63,18 +76,18 @@ public class NavPane extends VBox {
         editFFTButton = new Button("Edit FFT");
         buttons.add(editFFTButton);
 
-        addRuleFFTButton = new Button("Add Rule to FFT");
+        addRuleFFTButton = new Button("Add state to FFT");
         buttons.add(addRuleFFTButton);
 
-        interactiveFFT = new CheckBox();
-        interactiveFFT.setSelected(true);
-        Label interactiveLabel = new Label("Interactive FFT");
-        interactiveLabel.setFont(Font.font("Verdana", 14));
-        interactiveLabel.setPadding(new Insets(0, 0, 0, 5));
-        interactiveFFTBox = new HBox(interactiveFFT, interactiveLabel);
-        interactiveFFTBox.setAlignment(Pos.CENTER);
+        automaticFFT = new CheckBox();
+        automaticFFT.setSelected(false);
+        Label automaticLabel = new Label("Automatic FFT");
+        automaticLabel.setFont(Font.font("Verdana", 14));
+        automaticLabel.setPadding(new Insets(0, 0, 0, 5));
+        automaticFFTBox = new HBox(automaticFFT, automaticLabel);
+        automaticFFTBox.setAlignment(Pos.CENTER);
 
-        FFTWidgets = new VBox(showFFTButton, editFFTButton, addRuleFFTButton, interactiveFFTBox);
+        FFTWidgets = new VBox(showFFTButton, editFFTButton, addRuleFFTButton, automaticFFTBox);
         FFTWidgets.setSpacing(10);
         FFTWidgets.setAlignment(Pos.CENTER);
 
@@ -108,16 +121,22 @@ public class NavPane extends VBox {
 
 
     public void removeWidgets() {
+        getChildren().remove(helpHumanBox);
         getChildren().remove(AIWidgets);
         getChildren().remove(FFTWidgets);
+        getChildren().remove(reviewButton);
     }
 
     public void addFFTWidgets() {
         getChildren().add(FFTWidgets);
     }
 
-    public void addShowFFTButton() {
-        getChildren().add(showFFTButton);
+    public void addReviewButton() {
+        getChildren().add(reviewButton);
+    }
+
+    public void addHelpHumanBox() {
+        getChildren().add(helpHumanBox);
     }
 
     public Button getEditFFTButton() {
@@ -128,8 +147,8 @@ public class NavPane extends VBox {
         return addRuleFFTButton;
     }
 
-    public CheckBox getInteractiveFFTBox() {
-        return interactiveFFT;
+    public CheckBox getAutomaticFFTBox() {
+        return automaticFFT;
     }
 
     public Button getStartAIButton() {
@@ -142,6 +161,14 @@ public class NavPane extends VBox {
 
     public Button getRestartButton() {
         return restartButton;
+    }
+
+    public CheckBox getHelpHumanBox() {
+        return helpHuman;
+    }
+
+    public Button getReviewButton() {
+        return reviewButton;
     }
 
     public Button getMenuButton() {
@@ -160,7 +187,11 @@ public class NavPane extends VBox {
         return getChildren().contains(AIWidgets);
     }
 
-    public boolean containsShowFFTButton() {
-        return getChildren().contains(showFFTButton);
+    public boolean containsHelpBox() {
+        return getChildren().contains(helpHumanBox);
+    }
+
+    public boolean containsReviewButton() {
+        return getChildren().contains(reviewButton);
     }
 }

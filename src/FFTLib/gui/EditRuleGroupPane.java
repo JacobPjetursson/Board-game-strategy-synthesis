@@ -134,7 +134,7 @@ public class EditRuleGroupPane extends VBox {
         lw.getSelectionModel().selectLast();
     }
 
-    private void removeRule(int index) {
+    private void deleteRule(int index) {
         lw.getItems().remove(index);
         rg_changes.rules.remove(index);
         showRules();
@@ -155,13 +155,13 @@ public class EditRuleGroupPane extends VBox {
             // Remove button
             VBox rgButtons = new VBox(10);
             rgButtons.setAlignment(Pos.CENTER);
-            Button removeButton = new Button("Remove");
-            removeButton.setStyle("-fx-border-color: #000000; -fx-background-color: #ff0000;");
-            removeButton.setMinWidth(100);
-            removeButton.setOnMouseClicked(event -> removeRule(idx));
+            Button deleteButton = new Button("Delete");
+            deleteButton.setStyle("-fx-border-color: #000000; -fx-background-color: #ff0000;");
+            deleteButton.setMinWidth(100);
+            deleteButton.setOnMouseClicked(event -> deleteRule(idx));
 
             setCenter(rLabel);
-            setRight(removeButton);
+            setRight(deleteButton);
         }
     }
 
