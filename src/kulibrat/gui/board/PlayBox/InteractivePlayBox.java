@@ -197,10 +197,9 @@ public class InteractivePlayBox extends PlayBox {
                 p2ScoreBox.setSelected(true);
             }
         }
-        Platform.runLater(() -> {
-            removeArrows();
-            if (m != null)
-                addArrow(m, Color.BLUE);
-        });
+        removeArrows();
+        if (m != null)
+            addArrow(m, Color.BLUE);
+
     }
 }

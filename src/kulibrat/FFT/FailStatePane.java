@@ -30,14 +30,14 @@ public class FailStatePane implements FFTFailState {
         int tilesize = 60;
         StaticPlayBox pb = new StaticPlayBox(tilesize, CLICK_DISABLED, cont);
         pb.update(s);
-        Platform.runLater(() -> {
-            pb.addArrow(move, Color.BLUE);
-            for (Move m : nonLosingPlays) {
-                if (m.equals(move))
-                    continue;
-                pb.addArrow(m, Color.GREEN);
-            }
-        });
+
+        pb.addArrow(move, Color.BLUE);
+        for (Move m : nonLosingPlays) {
+            if (m.equals(move))
+                continue;
+            pb.addArrow(m, Color.GREEN);
+        }
+
         return pb;
     }
 

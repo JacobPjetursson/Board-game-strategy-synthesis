@@ -1,5 +1,7 @@
 package kulibrat.gui.board.PlayBox;
 
+import javafx.application.Platform;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
@@ -30,6 +32,7 @@ public class PlayBox extends Group {
     VBox playBox;
     Controller cont;
     int clickMode;
+    private SimpleBooleanProperty isRendered = new SimpleBooleanProperty();
     private ArrayList<Arrow> arrows;
 
     public PlayBox(int tilesize, int clickMode, Controller cont) {
@@ -61,6 +64,7 @@ public class PlayBox extends Group {
 
     protected void layoutChildren() {
         super.layoutChildren();
+        isRendered.setValue(true);
     }
 
     public Board getBoard() {
@@ -80,6 +84,15 @@ public class PlayBox extends Group {
     }
 
     public void addArrow(Move m, Color color) {
+        if (!isRendered.getValue())
+            isRendered.addListener((observable, oldValue, newValue) -> Platform.runLater(() -> {
+                addArrowLater(m, color);
+            }));
+        else
+            addArrowLater(m, color);
+    }
+
+    private void addArrowLater(Move m, Color color) {
         double startX, startY, endX, endY;
         Bounds b;
         if (m.oldCol == POS_NONBOARD) {

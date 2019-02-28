@@ -162,13 +162,12 @@ public class ReviewPane extends VBox {
         PlayBox pb = new PlayBox(20, CLICK_DISABLED, cont);
         pb.update(ps.getState());
 
-        Platform.runLater(() -> {
-            pb.addArrow(ps.getMove(), Color.BLUE);
-            for (Move m : bestPlays) {
-                if (m.equals(ps.getMove())) continue;
-                pb.addArrow(m, Color.GREEN);
-            }
-        });
+        pb.addArrow(ps.getMove(), Color.BLUE);
+        for (Move m : bestPlays) {
+            if (m.equals(ps.getMove())) continue;
+            pb.addArrow(m, Color.GREEN);
+        }
+
 
         return pb;
     }
