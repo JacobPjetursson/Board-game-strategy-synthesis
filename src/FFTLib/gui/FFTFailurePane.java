@@ -33,8 +33,8 @@ public class FFTFailurePane extends BorderPane {
     public FFTFailurePane(Scene prevScene, FFTManager fftManager) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         this.fftManager = fftManager;
-        Label title = new Label("This is the first encountered state where the FFT failed");
-        title.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        Label title = new Label("This is the first state where the FFT failed");
+        title.setFont(Font.font("Verdana", FontWeight.BOLD, 28));
         title.setAlignment(Pos.CENTER);
         title.setTextAlignment(TextAlignment.CENTER);
         title.setMinHeight(65);
@@ -46,7 +46,7 @@ public class FFTFailurePane extends BorderPane {
 
         lw = new ListView<>();
         lw.setPickOnBounds(false);
-        lw.setPrefWidth(450);
+        lw.setPrefWidth(520);
         lw.setSelectionModel(new NoSelectionModel<>());
         showRuleGroups();
         BorderPane.setMargin(lw, new Insets(15));
@@ -58,7 +58,7 @@ public class FFTFailurePane extends BorderPane {
         bottomBox.setPadding(new Insets(15));
 
         Label colorInfoLabel = new Label("Green stands for the winning/non-losing moves, blue is the chosen move");
-        colorInfoLabel.setFont(Font.font("Verdana", 13));
+        colorInfoLabel.setFont(Font.font("Verdana", 16));
 
         String moveInfo;
         if (fftManager.currFFT.failingPoint.random)
@@ -66,15 +66,17 @@ public class FFTFailurePane extends BorderPane {
         else
             moveInfo = "The FFT applied to the above state, but the move it chose was a losing move";
         Label moveInfoLabel = new Label(moveInfo);
-        moveInfoLabel.setFont(Font.font("Verdana", 13));
+        moveInfoLabel.setFont(Font.font("Verdana", 16));
 
         Button back = new Button("Back");
+        back.setFont(Font.font("Verdana", 16));
         back.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
             stage.setScene(prevScene);
         });
 
         Button addRuleInteractiveBtn = new Button("Add state to FFT");
+        addRuleInteractiveBtn.setFont(Font.font("Verdana", 16));
 
         // add rule to FFT button
         addRuleInteractiveBtn.setOnAction(event -> {
@@ -101,12 +103,12 @@ public class FFTFailurePane extends BorderPane {
             VBox rgVBox = new VBox(10);
             rgVBox.setAlignment(Pos.CENTER);
             Label rgLabel = new Label((i + 1) + ": " + rg.name);
-            rgLabel.setFont(Font.font("Verdana", 16));
+            rgLabel.setFont(Font.font("Verdana", 18));
             rgVBox.getChildren().add(rgLabel);
             for (int j = 0; j < rg.rules.size(); j++) {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r.print());
-                rLabel.setFont(Font.font("Verdana", 10));
+                rLabel.setFont(Font.font("Verdana", 13));
                 // TODO - below is hacky
                 FFTMove failMove = fftManager.currFFT.failingPoint.getMove();
                 FFTState failState = fftManager.currFFT.failingPoint.getState();

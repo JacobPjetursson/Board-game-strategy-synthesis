@@ -123,6 +123,10 @@ public class State implements FFTState {
         return literals;
     }
 
+    public String print() {
+        return Arrays.deepToString(board);
+    }
+
     public int getTurn() {
         return turn;
     }

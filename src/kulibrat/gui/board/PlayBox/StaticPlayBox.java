@@ -31,13 +31,13 @@ public class StaticPlayBox extends PlayBox {
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 
         scoreLimitLabel = new Label("Score limit: ");
-        scoreLimitLabel.setFont(Font.font("Verdana", 10));
+        scoreLimitLabel.setFont(Font.font("Verdana", tilesize/5));
 
         p1ScoreLabel = new Label("Red points: ");
-        p1ScoreLabel.setFont(Font.font("Verdana", 10));
+        p1ScoreLabel.setFont(Font.font("Verdana", tilesize/5));
 
         p2ScoreLabel = new Label("Black points: ");
-        p2ScoreLabel.setFont(Font.font("Verdana", 10));
+        p2ScoreLabel.setFont(Font.font("Verdana", tilesize/5));
 
         infoBox.getChildren().addAll(scoreLimitLabel, p1ScoreLabel, p2ScoreLabel);
 

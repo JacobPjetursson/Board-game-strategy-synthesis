@@ -34,7 +34,7 @@ public class InteractiveState implements InteractiveFFTState {
     InteractiveState(Controller cont) {
         this.cont = cont;
         this.rule = new Rule();
-        this.tilesize = 60;
+        this.tilesize = 90;
     }
     @Override
     public Node getInteractiveNode(FFTState fftState) {

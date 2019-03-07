@@ -60,7 +60,7 @@ public class BoardTile extends StackPane {
         setPrefSize(tilesize, tilesize);
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         turnsToTerminalLabel = new Label("");
-        turnsToTerminalLabel.setFont(Font.font("Verdana", 15));
+        turnsToTerminalLabel.setFont(Font.font("Verdana", tilesize/4));
         turnsToTerminalLabel.setTextFill(Color.BLACK);
         setOnMouseEntered(me -> {
             if (isClickable() && hoverNode == null && piece == null) {
@@ -89,7 +89,7 @@ public class BoardTile extends StackPane {
         if (clickMode == CLICK_INTERACTIVE) {
             tileOptionsPane = new TileOptionsPane(this);
             tileOptionsStage = new Stage();
-            tileOptionsStage.setScene(new Scene(tileOptionsPane, 400, 400));
+            tileOptionsStage.setScene(new Scene(tileOptionsPane, 600, 600));
             tileOptionsStage.initModality(Modality.APPLICATION_MODAL);
             tileOptionsStage.initOwner(cont.getWindow());
         }
@@ -241,8 +241,8 @@ public class BoardTile extends StackPane {
         if (redCross != null)
             return;
         redCross = new Group();
-        Line vertical = new Line(-20, -20, 20, 20);
-        Line horizontal = new Line(-20, 20, 20, - 20);
+        Line vertical = new Line(-(tilesize/3), -(tilesize/3), tilesize/3, tilesize/3);
+        Line horizontal = new Line(-(tilesize/3), tilesize/3, tilesize/3, -(tilesize/3));
         vertical.setStrokeWidth(1);
         vertical.setSmooth(true);
         horizontal.setStrokeWidth(1);
@@ -354,8 +354,9 @@ public class BoardTile extends StackPane {
 
             // Mandatory box
             Label mandatoryLabel = new Label("Use this tile in the rule?");
-            mandatoryLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
+            mandatoryLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
             mandatoryCheckBox = new CheckBox();
+            mandatoryCheckBox.setPrefSize(22, 22);
             mandatoryCheckBox.pressedProperty().addListener((observableValue, oldValue, newValue) -> {
                 setMandatory(!mandatory);
                 cont.getInteractiveState().updateRuleFromTile(bt);
@@ -367,8 +368,9 @@ public class BoardTile extends StackPane {
 
             // Action box
             Label actionLabel = new Label("Mark this tile as your action?");
-            actionLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
+            actionLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
             actionCheckBox = new CheckBox();
+            actionCheckBox.setPrefSize(22, 22);
             actionCheckBox.pressedProperty().addListener((observable, oldValue, newValue) -> {
                 isAction = !isAction;
                 setAction(isAction);
@@ -386,9 +388,10 @@ public class BoardTile extends StackPane {
             // Information
             Label infoLabel = new Label("The grey tile negates what is on the tile.\n" +
                     "The while tile clears the selection.");
-            infoLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
+            infoLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
             infoLabel.setTextAlignment(TextAlignment.CENTER);
             bottomPane.getChildren().add(infoLabel);
+            bottomPane.setPadding(new Insets(0, 0, 20, 0));
             return bottomPane;
         }
 
@@ -413,8 +416,8 @@ public class BoardTile extends StackPane {
             interactiveGrid.getColumnConstraints().addAll(cc1, cc2);
             interactiveGrid.getRowConstraints().addAll(rc1, rc2);
 
-            Node cross = getCross(false, 40);
-            Node circle = getCircle(false, 40);
+            Node cross = getCross(false, 80);
+            Node circle = getCircle(false, 80);
             StackPane bpPane1 = new StackPane();
             StackPane bpPane2 = new StackPane();
             bpPane1.setAlignment(Pos.CENTER);

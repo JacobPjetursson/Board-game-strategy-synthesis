@@ -18,4 +18,6 @@ public interface FFTState {
     ArrayList<? extends FFTState> getChildren();
 
     FFTState getNextState(FFTMove move);
+
+    String print();
 }

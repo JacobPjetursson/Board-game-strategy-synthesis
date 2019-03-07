@@ -197,8 +197,9 @@ public class EditFFTInteractive extends BorderPane {
     }
 
     private void addInteractiveNode(Node node) {
-        setLeft(node);
-        BorderPane.setMargin(node, new Insets(0, 0, 0, 50));
+        setCenter(node);
+        BorderPane.setMargin(node, new Insets(0, 0, 0, 0));
+        BorderPane.setAlignment(node, Pos.CENTER);
     }
 
     public void update(FFTState state, FFTMove move) {

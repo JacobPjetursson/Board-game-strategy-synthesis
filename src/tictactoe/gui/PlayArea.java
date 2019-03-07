@@ -27,7 +27,7 @@ public class PlayArea extends GridPane {
         for (int i = 0; i < 2; i++)
             getColumnConstraints().add(column);
 
-        playBox = new PlayBox(60, CLICK_DEFAULT, cont);
+        playBox = new PlayBox(90, CLICK_DEFAULT, cont);
         add(playBox, 0, 0);
         add(info, 1, 0);
     }

@@ -276,6 +276,10 @@ public class State implements Serializable, FFTState {
         return literals;
     }
 
+    public String print() {
+        return Arrays.deepToString(board);
+    }
+
 
     // Returns the material of a state, which is the value of the state based on various heuristics.
     // It checks the current turn, and outputs a positive number if it is good, or negative if bad

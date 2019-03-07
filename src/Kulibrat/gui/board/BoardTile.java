@@ -57,7 +57,7 @@ public class BoardTile extends StackPane {
         setMaxWidth(tilesize);
         setStyle(white);
         turnsToTerminalLabel = new Label("");
-        turnsToTerminalLabel.setFont(Font.font("Verdana", 15));
+        turnsToTerminalLabel.setFont(Font.font("Verdana", tilesize/4));
         turnsToTerminalLabel.setTextFill(Color.BLACK);
         setOnMouseEntered(me -> {
             if (highlight && bestMove) {
@@ -139,8 +139,8 @@ public class BoardTile extends StackPane {
         if (redCross != null)
             return;
         redCross = new Group();
-        Line vertical = new Line(-20, -20, 20, 20);
-        Line horizontal = new Line(-20, 20, 20, - 20);
+        Line vertical = new Line(-(tilesize/3), -(tilesize/3), tilesize/3, tilesize/3);
+        Line horizontal = new Line(-(tilesize/3), tilesize/3, tilesize/3, - (tilesize/3));
         vertical.setStrokeWidth(1);
         vertical.setSmooth(true);
         horizontal.setStrokeWidth(1);
@@ -260,7 +260,7 @@ public class BoardTile extends StackPane {
             Label mandatoryLabel = new Label("Use this tile in the rule?");
             mandatoryLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
             mandatoryCheckBox = new CheckBox();
-            mandatoryCheckBox.setPrefSize(18, 18);
+            mandatoryCheckBox.setPrefSize(22, 22);
             mandatoryCheckBox.pressedProperty().addListener((observableValue, oldValue, newValue) -> {
                 setMandatory(!mandatory);
                 cont.getInteractiveState().updateRuleFromTile(bt);
