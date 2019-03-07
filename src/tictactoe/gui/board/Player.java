@@ -49,7 +49,7 @@ public class Player extends VBox {
 
         typeLabel = new Label();
         setTypeLabelText(type);
-        typeLabel.setFont(Font.font("Verdana", tileWidth / 4));
+        typeLabel.setFont(Font.font("Verdana", tileWidth / 3));
 
         ColumnConstraints column1 = new ColumnConstraints((tileWidth * 4) / 3);
         for (int i = 0; i < 3; i++) {

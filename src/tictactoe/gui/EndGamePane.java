@@ -28,7 +28,7 @@ public class EndGamePane extends VBox {
         else if (team == PLAYER2) label.setText(("Congratulations to Circle!"));
         else label.setText("It's a draw!");
 
-        label.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
+        label.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
         getChildren().add(label);
 
         HBox hBox = new HBox();

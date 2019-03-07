@@ -14,16 +14,17 @@ public class PlayPane extends GridPane {
         setup();
         playArea = new PlayArea(cont);
         navPane = new NavPane(cont);
-        add(playArea, 1, 0);
         add(navPane, 0, 0);
+        add(playArea, 1, 0);
     }
 
     private void setup() {
         setAlignment(Pos.CENTER);
         setPrefSize(Config.WIDTH, Config.HEIGHT);
+        setMaxWidth(Config.WIDTH);
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         ColumnConstraints column = new ColumnConstraints(Config.WIDTH / 3);
-        ColumnConstraints column1 = new ColumnConstraints(Config.WIDTH * 2 / 3);
+        ColumnConstraints column1 = new ColumnConstraints((Config.WIDTH * 2) / 3);
         getColumnConstraints().add(column);
         getColumnConstraints().add(column1);
     }

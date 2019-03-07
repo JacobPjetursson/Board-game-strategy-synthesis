@@ -23,29 +23,30 @@ public class InfoPane extends VBox {
 
     public InfoPane(int scoreLimit, int mode) {
         setPrefSize(Config.WIDTH / 3, Config.HEIGHT);
+        setMaxWidth(Config.WIDTH / 3);
         setSpacing(40);
         setAlignment(Pos.CENTER);
         scoreBoard = new ScoreBoard();
         Label turnLabel = new Label("Turn: ");
-        turnLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
+        turnLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 22));
         turnCircle = new Circle(15);
         turnCircle.setFill(Color.RED);
 
         HBox turn = new HBox(turnLabel, turnCircle);
         turn.setAlignment(Pos.CENTER);
         turnNumberLabel = new Label("Turns Played: 0");
-        turnNumberLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
+        turnNumberLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 22));
 
         Label scoreLimitLabel = new Label("Score limit: " + scoreLimit);
-        scoreLimitLabel.setFont(Font.font("Verdana", 15));
+        scoreLimitLabel.setFont(Font.font("Verdana", 22));
 
         String modeText = (mode == HUMAN_VS_HUMAN) ? "Human vs. Human" :
                 (mode == HUMAN_VS_AI) ? "Human vs. AI" : "AI vs. AI";
         Label modeLabel = new Label("Mode: " + modeText);
-        modeLabel.setFont(Font.font("Verdana", 15));
+        modeLabel.setFont(Font.font("Verdana", 22));
 
         skippedTurn = new Label();
-        skippedTurn.setFont(Font.font("Verdana", 15));
+        skippedTurn.setFont(Font.font("Verdana", 22));
         VBox turnBox = new VBox(turn, turnNumberLabel);
         turnBox.setAlignment(Pos.CENTER);
         turnBox.setSpacing(15);

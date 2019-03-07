@@ -25,17 +25,17 @@ public class InfoPane extends VBox {
         setSpacing(40);
         setAlignment(Pos.CENTER);
         turnLabel = new Label("Turn: Cross");
-        turnLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
+        turnLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 22));
         turnNumberLabel = new Label("Turns Played: 0");
-        turnNumberLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
+        turnNumberLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 22));
 
         String modeText = (mode == HUMAN_VS_HUMAN) ? "Human vs. Human" :
                 (mode == HUMAN_VS_AI) ? "Human vs. AI" : "AI vs. AI";
         Label modeLabel = new Label("Mode: " + modeText);
-        modeLabel.setFont(Font.font("Verdana", 15));
+        modeLabel.setFont(Font.font("Verdana", 22));
 
         skippedTurn = new Label();
-        skippedTurn.setFont(Font.font("Verdana", 15));
+        skippedTurn.setFont(Font.font("Verdana", 22));
         VBox turnBox = new VBox(turnLabel, turnNumberLabel);
         turnBox.setAlignment(Pos.CENTER);
         turnBox.setSpacing(15);

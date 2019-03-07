@@ -17,10 +17,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -31,6 +28,8 @@ import javafx.util.Duration;
 import java.util.ArrayList;
 
 import static fftlib.FFTManager.SERIALIZED_MIME_TYPE;
+import static fftlib.FFTManager.greenBtnStyle;
+import static fftlib.FFTManager.redBtnStyle;
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
 
@@ -65,7 +64,7 @@ public class EditFFTInteractive extends BorderPane {
         ruleTitle.setTextAlignment(TextAlignment.CENTER);
         ruleTitleBox.getChildren().add(ruleTitle);
         ruleLabel = new Label();
-        ruleLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 14));
+        ruleLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 16));
         ruleLabel.setAlignment(Pos.CENTER);
         ruleLabel.setTextAlignment(TextAlignment.CENTER);
         ruleTitleBox.getChildren().add(ruleLabel);
@@ -80,7 +79,7 @@ public class EditFFTInteractive extends BorderPane {
 
         lw = new ListView<>();
         lw.setPickOnBounds(false);
-        lw.setPrefWidth(400);
+        lw.setPrefWidth(520);
         lw.setCellFactory(param -> new RuleCell());
         showRuleGroups();
         BorderPane.setMargin(lw, new Insets(15));
@@ -91,16 +90,18 @@ public class EditFFTInteractive extends BorderPane {
         bottomBox.setPadding(new Insets(15));
 
         Label label1 = new Label("Click the rules to show them on the board");
-        label1.setFont(Font.font("Verdana", 13));
+        label1.setFont(Font.font("Verdana", 16));
 
         Label label2 = new Label("Click the board tiles to edit their contents");
-        label2.setFont(Font.font("Verdana", 13));
+        label2.setFont(Font.font("Verdana", 16));
 
         Label label3 = new Label("Set rule perspective:");
-        label3.setFont(Font.font("Verdana", 13));
+        label3.setFont(Font.font("Verdana", 16));
 
         p1Btn = new RadioButton("Player 1");
+        p1Btn.setFont(Font.font("Verdana", 16));
         p2Btn = new RadioButton("Player 2");
+        p2Btn.setFont(Font.font("Verdana", 16));
         ToggleGroup toggleGrp = new ToggleGroup();
         p1Btn.setToggleGroup(toggleGrp);
         p2Btn.setToggleGroup(toggleGrp);
@@ -111,13 +112,15 @@ public class EditFFTInteractive extends BorderPane {
 
 
         Button back = new Button("Back");
+        back.setFont(Font.font("Verdana", 16));
         back.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
             stage.setScene(prevScene);
         });
 
         Button addRuleBtn = new Button("Add rule");
-        addRuleBtn.setStyle("-fx-border-color: #000000; -fx-background-color: #00dd00;");
+        addRuleBtn.setStyle(greenBtnStyle);
+        addRuleBtn.setFont(Font.font("Verdana", 16));
         addRuleBtn.setOnMouseClicked(event -> {
             Rule r = interactiveFFTState.getRule();
             if (!Rule.isValidRuleFormat(r)) {
@@ -133,7 +136,8 @@ public class EditFFTInteractive extends BorderPane {
         });
 
         Button deleteRuleBtn = new Button("Delete rule");
-        deleteRuleBtn.setStyle("-fx-border-color: #000000; -fx-background-color: #ff0000;");
+        deleteRuleBtn.setStyle(redBtnStyle);
+        deleteRuleBtn.setFont(Font.font("Verdana", 16));
         deleteRuleBtn.setOnMouseClicked(event -> {
             if (selectedIndices == null) {
                 System.err.println("Please select a rule and try again");
@@ -147,12 +151,13 @@ public class EditFFTInteractive extends BorderPane {
         });
 
         Button clearRuleBtn = new Button("Clear rule");
+        clearRuleBtn.setFont(Font.font("Verdana", 16));
         clearRuleBtn.setOnMouseClicked(event -> {
             selectedIndices = null;
             FFTManager.interactiveState.clear();
             update(FFTManager.initialFFTState);
         });
-        VBox infoBox = new VBox(15);
+        VBox infoBox = new VBox(7);
         infoBox.setAlignment(Pos.CENTER);
         infoBox.getChildren().addAll(label1, label2, perspectiveGrp);
 
@@ -188,7 +193,12 @@ public class EditFFTInteractive extends BorderPane {
             p1Btn.setSelected(true);
         else
             p2Btn.setSelected(true);
-        setCenter(node);
+        addInteractiveNode(node);
+    }
+
+    private void addInteractiveNode(Node node) {
+        setLeft(node);
+        BorderPane.setMargin(node, new Insets(0, 0, 0, 50));
     }
 
     public void update(FFTState state, FFTMove move) {
@@ -234,7 +244,7 @@ public class EditFFTInteractive extends BorderPane {
 
             RuleGroup rg = fftManager.currFFT.ruleGroups.get(rgIdx);
             this.label = new Label((rgIdx + 1) + ": " + rg.name);
-            label.setFont(Font.font("Verdana", 14));
+            label.setFont(Font.font("Verdana", 18));
             getChildren().add(label);
 
             setOnMousePressed(Event::consume);
@@ -248,12 +258,12 @@ public class EditFFTInteractive extends BorderPane {
 
             RuleGroup rg = fftManager.currFFT.ruleGroups.get(rgIdx);
             setOnMouseClicked(event -> {
-                setCenter(interactiveFFTState.getInteractiveNode(rg.rules.get(rIdx)));
+                addInteractiveNode(interactiveFFTState.getInteractiveNode(rg.rules.get(rIdx)));
                 selectedIndices = new int[]{rgIdx, rIdx};
             });
             Rule r = rg.rules.get(rIdx);
             this.label = new Label((rIdx + 1) + ": " + r.print());
-            label.setFont(Font.font("Verdana", 10));
+            label.setFont(Font.font("Verdana", 13));
             getChildren().add(label);
         }
     }

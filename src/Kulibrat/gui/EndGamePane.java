@@ -23,38 +23,41 @@ public class EndGamePane extends VBox {
 
     public EndGamePane(Stage primaryStage, int team, Controller cont) {
         setAlignment(Pos.CENTER);
-        setSpacing(20);
+        setSpacing(10);
         Label label = new Label();
         if (team == PLAYER1) label.setText("Congratulations player Red!");
         else label.setText(("Congratulations player Black!"));
 
-        label.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
+        label.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
         getChildren().add(label);
 
         HBox hBox = new HBox();
         hBox.setAlignment(Pos.CENTER);
         hBox.setSpacing(40);
         Button menuBtn = new Button("Menu");
+        menuBtn.setFont(Font.font("Verdana", 16));
         menuBtn.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
             primaryStage.setScene(new Scene(new MenuPane(),
                     Config.WIDTH, Config.HEIGHT));
         });
-        menuBtn.setPrefWidth(110);
+        menuBtn.setPrefWidth(150);
         hBox.getChildren().add(menuBtn);
         Button restartGameBtn = new Button("Restart Game");
+        restartGameBtn.setFont(Font.font("Verdana", 16));
         restartGameBtn.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
             new Controller(primaryStage, cont.getPlayerInstance(PLAYER1),
                     cont.getPlayerInstance(PLAYER2), new State(), cont.getTime(PLAYER1), cont.getTime(PLAYER2), cont.getOverwriteDB());
         });
-        restartGameBtn.setPrefWidth(110);
+        restartGameBtn.setPrefWidth(150);
         hBox.getChildren().add(restartGameBtn);
         getChildren().add(hBox);
 
         Button reviewGameBtn = new Button("Review Game");
+        reviewGameBtn.setFont(Font.font("Verdana", 16));
         reviewGameBtn.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
@@ -66,7 +69,7 @@ public class EndGamePane extends VBox {
             newStage.show();
 
         });
-        reviewGameBtn.setPrefWidth(120);
+        reviewGameBtn.setPrefWidth(180);
         if (cont.getMode() == HUMAN_VS_AI)
             getChildren().add(reviewGameBtn);
     }

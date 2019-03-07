@@ -20,7 +20,7 @@ import misc.Config;
 
 
 public class NewGamePane extends AnchorPane {
-    private int choiceWidth = Config.WIDTH / 4;
+    private int choiceWidth = Config.WIDTH / 3;
     private int textFieldWidth = choiceWidth - 125;
     private String human = "Human";
     private String mcts = "Monte Carlo Tree Search";
@@ -44,18 +44,19 @@ public class NewGamePane extends AnchorPane {
         setStyle("-fx-background-color: black;");
 
         Label title = new Label("Game Options");
-        title.setFont(Font.font("Verdana", FontWeight.BOLD, 30));
+        title.setFont(Font.font("Verdana", FontWeight.BOLD, 40));
         title.setTextFill(Color.WHITE);
         title.setAlignment(Pos.CENTER);
-        AnchorPane.setTopAnchor(title, 40.0);
+        AnchorPane.setTopAnchor(title, -10.0);
         AnchorPane.setRightAnchor(title, 0.0);
         AnchorPane.setLeftAnchor(title, 0.0);
 
-        playerBlackChoices = new ChoiceBox<String>();
+        playerBlackChoices = new ChoiceBox<>();
         playerBlackChoices.setValue(human);
         playerBlackChoices.setItems(FXCollections.observableArrayList(human, mcts, minimax, fft, lookup));
         playerBlackChoices.setMinWidth(choiceWidth);
         playerBlackChoices.setMaxWidth(choiceWidth);
+        playerBlackChoices.setStyle("-fx-font: 20px \"Verdana\";");
         playerBlackChoices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
             if (!playerBlackChoices.getItems().get((Integer) newValue).equals(human)) {
                 if (!finalBox.getChildren().contains(blackDelayBox)) {
@@ -84,17 +85,18 @@ public class NewGamePane extends AnchorPane {
         });
 
         Label playerBlackLabel = new Label("Player Black: ");
-        playerBlackLabel.setFont(Font.font("Verdana", 15));
+        playerBlackLabel.setFont(Font.font("Verdana", 20));
         playerBlackLabel.setPadding(new Insets(0, 10, 0, 0));
         playerBlackLabel.setTextFill(Color.WHITE);
         HBox playerBlack = new HBox(playerBlackLabel, playerBlackChoices);
         playerBlack.setAlignment(Pos.CENTER);
 
-        playerRedChoices = new ChoiceBox<String>();
+        playerRedChoices = new ChoiceBox<>();
         playerRedChoices.setValue(human);
         playerRedChoices.setItems(FXCollections.observableArrayList(human, mcts, minimax, fft, lookup));
         playerRedChoices.setMinWidth(choiceWidth);
         playerRedChoices.setMaxWidth(choiceWidth);
+        playerRedChoices.setStyle("-fx-font: 20px \"Verdana\";");
         playerRedChoices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
             if (!playerRedChoices.getItems().get((Integer) newValue).equals(human)) {
                 if (!finalBox.getChildren().contains(redDelayBox)) {
@@ -124,7 +126,7 @@ public class NewGamePane extends AnchorPane {
         });
 
         Label playerRedLabel = new Label("Player Red: ");
-        playerRedLabel.setFont(Font.font("Verdana", 15));
+        playerRedLabel.setFont(Font.font("Verdana", 20));
         playerRedLabel.setPadding(new Insets(0, 10, 0, 0));
         playerRedLabel.setTextFill(Color.WHITE);
         HBox playerRed = new HBox(playerRedLabel, playerRedChoices);
@@ -135,9 +137,10 @@ public class NewGamePane extends AnchorPane {
         scoreLimitChoices.setItems(FXCollections.observableArrayList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
         scoreLimitChoices.setMinWidth(choiceWidth);
         scoreLimitChoices.setMaxWidth(choiceWidth);
+        scoreLimitChoices.setStyle("-fx-font: 20px \"Verdana\";");
 
         Label scoreLimitLabel = new Label("Score limit: ");
-        scoreLimitLabel.setFont(Font.font("Verdana", 15));
+        scoreLimitLabel.setFont(Font.font("Verdana", 20));
         scoreLimitLabel.setPadding(new Insets(0, 10, 0, 0));
         scoreLimitLabel.setTextFill(Color.WHITE);
         HBox scoreLimitBox = new HBox(scoreLimitLabel, scoreLimitChoices);
@@ -146,6 +149,7 @@ public class NewGamePane extends AnchorPane {
         blackDelayField = new TextField("1000");
         blackDelayField.setMinWidth(textFieldWidth);
         blackDelayField.setMaxWidth(textFieldWidth);
+        blackDelayField.setStyle("-fx-font: 20px \"Verdana\";");
         blackDelayField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
                 blackDelayField.setText(newValue.replaceAll("[^\\d]", ""));
@@ -160,7 +164,7 @@ public class NewGamePane extends AnchorPane {
             }
         });
         AIDelayLabelBlack = new Label();
-        AIDelayLabelBlack.setFont(Font.font("Verdana", 15));
+        AIDelayLabelBlack.setFont(Font.font("Verdana", 20));
         AIDelayLabelBlack.setPadding(new Insets(0, 10, 0, 0));
         AIDelayLabelBlack.setTextFill(Color.WHITE);
         AIDelayLabelBlack.setAlignment(Pos.CENTER);
@@ -169,6 +173,7 @@ public class NewGamePane extends AnchorPane {
         redDelayField = new TextField("1000");
         redDelayField.setMinWidth(textFieldWidth);
         redDelayField.setMaxWidth(textFieldWidth);
+        redDelayField.setStyle("-fx-font: 20px \"Verdana\";");
         redDelayField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
                 redDelayField.setText(newValue.replaceAll("[^\\d]", ""));
@@ -184,7 +189,7 @@ public class NewGamePane extends AnchorPane {
         });
 
         AIDelayLabelRed = new Label();
-        AIDelayLabelRed.setFont(Font.font("Verdana", 15));
+        AIDelayLabelRed.setFont(Font.font("Verdana", 20));
         AIDelayLabelRed.setPadding(new Insets(0, 10, 0, 0));
         AIDelayLabelRed.setTextFill(Color.WHITE);
         AIDelayLabelRed.setAlignment(Pos.CENTER);
@@ -192,10 +197,11 @@ public class NewGamePane extends AnchorPane {
         redDelayBox.setAlignment(Pos.CENTER);
 
         overwriteDB = new CheckBox("Overwrite Database\n (Takes a lot of time)");
-        overwriteDB.setFont(Font.font("Verdana", 15));
+        overwriteDB.setFont(Font.font("Verdana", 20));
         overwriteDB.setTextFill(Color.WHITE);
 
         Button startGame = new Button("Start Game");
+        startGame.setFont(Font.font("Verdana", 20));
         startGame.setMinWidth(Config.WIDTH / 4);
         startGame.setOnMouseClicked(event -> {
             String blackValue = playerBlackChoices.getValue();
@@ -219,6 +225,7 @@ public class NewGamePane extends AnchorPane {
         });
 
         Button back = new Button("Back");
+        back.setFont(Font.font("Verdana", 20));
         back.setMinWidth(Config.WIDTH / 6);
         back.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
@@ -228,11 +235,11 @@ public class NewGamePane extends AnchorPane {
 
         HBox btnBox = new HBox(startGame, back);
         btnBox.setAlignment(Pos.CENTER);
-        btnBox.setSpacing(20);
+        btnBox.setSpacing(30);
 
         finalBox = new VBox(playerBlack, playerRed, scoreLimitBox, btnBox);
         finalBox.setAlignment(Pos.CENTER);
-        finalBox.setSpacing(30);
+        finalBox.setSpacing(40);
 
         AnchorPane.setTopAnchor(finalBox, 0.0);
         AnchorPane.setRightAnchor(finalBox, 0.0);

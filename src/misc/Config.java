@@ -20,7 +20,7 @@ public class Config {
     public static final int AI_VS_AI = 3;
 
     // WINDOW DIMENSIONS
-    public static final int WIDTH = 800;
+    public static final int WIDTH = 999;
     public static final int HEIGHT = 650;
 
     // MISC STATIC VARIABLES
@@ -41,5 +41,5 @@ public class Config {
     // MISC
     public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";
     public static int SCORELIMIT; // Set by player once (kulibrat)
-    public static boolean FFT_OVERWRITE = true;
+    public static boolean FFT_OVERWRITE = false;
 }

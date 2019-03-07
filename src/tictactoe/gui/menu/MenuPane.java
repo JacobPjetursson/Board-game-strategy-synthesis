@@ -29,10 +29,10 @@ public class MenuPane extends AnchorPane {
         buttons = new ArrayList<>();
 
         Label title = new Label("TicTacToe");
-        title.setFont(Font.font("Verdana", FontWeight.BOLD, 30));
+        title.setFont(Font.font("Verdana", FontWeight.BOLD, 50));
         title.setTextFill(Color.WHITE);
         title.setAlignment(Pos.CENTER);
-        AnchorPane.setTopAnchor(title, 40.0);
+        AnchorPane.setTopAnchor(title, 0.0);
         AnchorPane.setRightAnchor(title, 0.0);
         AnchorPane.setLeftAnchor(title, 0.0);
 
@@ -52,10 +52,11 @@ public class MenuPane extends AnchorPane {
         exit.setOnMouseClicked(event -> System.exit(0));
         for (Button button : buttons) {
             button.setMinWidth(Config.WIDTH / 4);
+            button.setFont(Font.font("Verdana", 20));
         }
         VBox box = new VBox(newGame, continueGame, exit);
         box.setAlignment(Pos.CENTER);
-        box.setSpacing(30);
+        box.setSpacing(40);
         AnchorPane.setTopAnchor(box, 0.0);
         AnchorPane.setRightAnchor(box, 0.0);
         AnchorPane.setLeftAnchor(box, 0.0);

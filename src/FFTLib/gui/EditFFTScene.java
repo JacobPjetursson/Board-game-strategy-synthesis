@@ -4,6 +4,8 @@ import fftlib.FFT;
 import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,9 +23,15 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import misc.Config;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import static fftlib.FFTManager.SERIALIZED_MIME_TYPE;
+import static fftlib.FFTManager.blueBtnStyle;
+import static fftlib.FFTManager.redBtnStyle;
 import static misc.Config.WIDTH;
 
 public class EditFFTScene extends VBox {
@@ -38,21 +46,24 @@ public class EditFFTScene extends VBox {
     public EditFFTScene(Stage primaryStage, Scene prevScene, FFTManager fftManager) {
         setSpacing(15);
         setAlignment(Pos.CENTER);
+
         this.fftManager = fftManager;
         title = new Label();
-        title.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        title.setFont(Font.font("Verdana", FontWeight.BOLD, 24));
         title.setAlignment(Pos.CENTER);
         title.setTextAlignment(TextAlignment.CENTER);
         title.setMinHeight(65);
         HBox labelBox = new HBox(title);
         labelBox.setAlignment(Pos.CENTER);
 
-        VBox changeRenameBox = new VBox(5);
+        VBox changeRenameBox = new VBox();
         changeRenameBox.setAlignment(Pos.CENTER);
         changeRenameBox.setPadding(new Insets(0, 0, 0, 5));
         changeBox = new ComboBox<>();
         changeBox.setPromptText("Change FFT");
-        changeBox.setMinWidth(100);
+        changeBox.setStyle("-fx-font: 16px \"Verdana\";");
+        changeBox.setMinWidth(180);
+        changeBox.setMaxWidth(180);
         // set items
         changeBox.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
             // In case of clear selection
@@ -65,7 +76,9 @@ public class EditFFTScene extends VBox {
         changeRenameBox.getChildren().add(changeBox);
 
         renameBtn = new Button("Rename FFT");
-        renameBtn.setMinWidth(100);
+        renameBtn.setMinWidth(180);
+        renameBtn.setMaxWidth(180);
+        renameBtn.setFont(Font.font("Verdana", 16));
         renameBtn.setOnAction(event -> {
             Stage newStage = new Stage();
             newStage.setScene(new Scene(
@@ -77,11 +90,12 @@ public class EditFFTScene extends VBox {
         });
         changeRenameBox.getChildren().add(renameBtn);
 
-        VBox delNewBox = new VBox(5);
+        VBox delNewBox = new VBox();
         delNewBox.setAlignment(Pos.CENTER);
         delBtn = new Button("Delete FFT");
-        delBtn.setMinWidth(100);
-        delBtn.setStyle("-fx-border-color: #000000; -fx-background-color: #ff0000;");
+        delBtn.setMinWidth(150);
+        delBtn.setFont(Font.font("Verdana", 16));
+        delBtn.setStyle(redBtnStyle);
         delBtn.setOnAction(event -> {
             Stage newStage = new Stage();
             String labelText = "Are you sure you want to delete the FFT:\n" +
@@ -94,8 +108,9 @@ public class EditFFTScene extends VBox {
         delNewBox.getChildren().add(delBtn);
 
         newBtn = new Button("New FFT");
-        newBtn.setMinWidth(100);
-        newBtn.setStyle("-fx-border-color: #000000; -fx-background-color: blue;");
+        newBtn.setMinWidth(150);
+        newBtn.setStyle(blueBtnStyle);
+        newBtn.setFont(Font.font("Verdana", 16));
         newBtn.setOnAction(event -> {
             Stage newStage = new Stage();
             newStage.setScene(new Scene(
@@ -126,14 +141,13 @@ public class EditFFTScene extends VBox {
 
         // New rule group
         Label newRuleGroupLabel = new Label("New rule group: ");
-        newRuleGroupLabel.setFont(Font.font("Verdana", 15));
+        newRuleGroupLabel.setFont(Font.font("Verdana", 16));
         TextField newRuleGroupField = new TextField();
         newRuleGroupField.setMinWidth(textFieldWidth);
         newRuleGroupField.setMaxWidth(textFieldWidth);
 
-        Text text = new Text("Add");
-        text.setFill(Color.WHITE);
         addNewRuleGroupBtn = new Button("Add");
+        addNewRuleGroupBtn.setFont(Font.font("Verdana", 16));
         addNewRuleGroupBtn.setOnMouseClicked(event -> {
             RuleGroup rg = new RuleGroup(newRuleGroupField.getText());
             fftManager.currFFT.addRuleGroup(rg);
@@ -150,20 +164,20 @@ public class EditFFTScene extends VBox {
         teamChoice.setMinWidth(textFieldWidth);
         teamChoice.setMaxWidth(textFieldWidth);
         teamChoice.setValue("Player 1");
+        teamChoice.setStyle("-fx-font: 16px \"Verdana\";");
         teamChoice.setItems(FXCollections.observableArrayList("Player 1", "Player 2"));
 
         Label forLabel = new Label(" for: ");
-        forLabel.setFont(Font.font("Verdana", 15));
+        forLabel.setFont(Font.font("Verdana", 16));
         ChoiceBox<String> verificationChoice = new ChoiceBox<>();
         verificationChoice.setMinWidth(textFieldWidth);
         verificationChoice.setMaxWidth(textFieldWidth);
         verificationChoice.setValue("Whole FFT");
+        verificationChoice.setStyle("-fx-font: 16px \"Verdana\";");
         verificationChoice.setItems(FXCollections.observableArrayList("Whole FFT", "Existing Rules"));
 
-        Label verifiedLabel = new Label("The FFT was successfully verified");
-        verifiedLabel.setFont(Font.font("Verdana", 15));
-
         verifyBtn = new Button("Verify FFT");
+        verifyBtn.setFont(Font.font("Verdana", 16));
         verifyBtn.setTooltip(new Tooltip("Checks if the current FFT is a winning strategy,\n" +
                 "or if given rules are part of winning strategy"));
         verifyBtn.setOnMouseClicked(event -> {
@@ -174,17 +188,28 @@ public class EditFFTScene extends VBox {
             boolean verified = fftManager.currFFT.verify(team, wholeFFT);
             if (!verified) {
                 if (fftManager.currFFT.failingPoint == null) {
-                    verifiedLabel.setText("Unable to win vs. perfect player");
-                    if (!getChildren().contains(verifiedLabel))
-                        getChildren().add(4, verifiedLabel);
+                    Label verifiedLabel = new Label("Unable to win vs. perfect player");
+                    verifiedLabel.setFont(Font.font("Verdana", 16));
+                    getChildren().add(4, verifiedLabel);
+
+                    Timeline timeline = new Timeline(new KeyFrame(
+                            Duration.millis(2500),
+                            ae -> getChildren().remove(verifiedLabel)));
+                    timeline.play();
                 } else {
                     Scene scene = primaryStage.getScene();
                     primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager), WIDTH, Config.HEIGHT));
                 }
             } else {
-                verifiedLabel.setText("The FFT was successfully verified");
-                if (!getChildren().contains(verifiedLabel))
-                    getChildren().add(4, verifiedLabel);
+                Label verifiedLabel = new Label("The FFT was successfully verified");
+                verifiedLabel.setFont(Font.font("Verdana", 16));
+                getChildren().add(4, verifiedLabel);
+
+                Timeline timeline = new Timeline(new KeyFrame(
+                        Duration.millis(2500),
+                        ae -> getChildren().remove(verifiedLabel)));
+                timeline.play();
+
 
             }
         });
@@ -194,15 +219,18 @@ public class EditFFTScene extends VBox {
         verifyBox.getChildren().addAll(verifyBtn, teamChoice, forLabel, verificationChoice);
 
         Button intEditBtn = new Button("Interactive Editing Mode");
+        intEditBtn.setFont(Font.font("Verdana", 16));
         intEditBtn.setAlignment(Pos.CENTER);
         intEditBtn.setOnMouseClicked((event -> {
             Scene scene = primaryStage.getScene();
+
             primaryStage.setScene(new Scene(
                     new EditFFTInteractive(scene, fftManager), WIDTH, Config.HEIGHT));
         }));
 
 
         Button back = new Button("Back");
+        back.setFont(Font.font("Verdana", 16));
         back.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
             stage.setScene(prevScene);
@@ -270,24 +298,25 @@ public class EditFFTScene extends VBox {
             rgVBox.setAlignment(Pos.CENTER);
 
             Label rgLabel = new Label((idx + 1) + ": " + rg.name);
-            rgLabel.setFont(Font.font("Verdana", 16));
+            rgLabel.setFont(Font.font("Verdana", 18));
             rgVBox.getChildren().add(rgLabel);
 
             for (int j = 0; j < rg.rules.size(); j++) {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r.print());
-                rLabel.setFont(Font.font("Verdana", 10));
+                rLabel.setFont(Font.font("Verdana", 13));
                 rgVBox.getChildren().add(rLabel);
             }
 
             // Edit / Remove buttons
             int buttonSize = 150;
-            buttons = new VBox(10);
+            buttons = new VBox();
             buttons.setAlignment(Pos.CENTER);
 
             Button editButton = new Button("Edit");
-            editButton.setStyle("-fx-border-color: #000000; -fx-background-color: blue;");
+            editButton.setStyle(blueBtnStyle);
             editButton.setMinWidth(buttonSize);
+            editButton.setFont(Font.font("Verdana", 16));
             editButton.setOnMouseClicked(event -> {
                 Stage newStage = new Stage();
                 newStage.setScene(new Scene(
@@ -299,7 +328,8 @@ public class EditFFTScene extends VBox {
             });
 
             Button removeButton = new Button("Remove");
-            removeButton.setStyle("-fx-border-color: #000000; -fx-background-color: #ff0000;");
+            removeButton.setStyle(redBtnStyle);
+            removeButton.setFont(Font.font("Verdana", 16));
             removeButton.setMinWidth(buttonSize);
             removeButton.setOnMouseClicked(event -> {
                 // Confirmation (Pretty big delete after all)

@@ -22,6 +22,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import static fftlib.FFTManager.SERIALIZED_MIME_TYPE;
+import static fftlib.FFTManager.redBtnStyle;
 
 public class EditRuleGroupPane extends VBox {
     private int textFieldWidth = 150;
@@ -156,7 +157,7 @@ public class EditRuleGroupPane extends VBox {
             VBox rgButtons = new VBox(10);
             rgButtons.setAlignment(Pos.CENTER);
             Button deleteButton = new Button("Delete");
-            deleteButton.setStyle("-fx-border-color: #000000; -fx-background-color: #ff0000;");
+            deleteButton.setStyle(redBtnStyle);
             deleteButton.setMinWidth(100);
             deleteButton.setOnMouseClicked(event -> deleteRule(idx));
 

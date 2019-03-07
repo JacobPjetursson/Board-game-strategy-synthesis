@@ -22,7 +22,7 @@ import tictactoe.game.Controller;
 import tictactoe.game.State;
 
 public class NewGamePane extends AnchorPane {
-    private int choiceWidth = Config.WIDTH / 4;
+    private int choiceWidth = Config.WIDTH / 3;
     private int textFieldWidth = choiceWidth - 125;
     private String human = "Human";
     private String lookup = "Lookup Table";
@@ -43,10 +43,10 @@ public class NewGamePane extends AnchorPane {
         setStyle("-fx-background-color: black;");
 
         Label title = new Label("Game Options");
-        title.setFont(Font.font("Verdana", FontWeight.BOLD, 30));
+        title.setFont(Font.font("Verdana", FontWeight.BOLD, 40));
         title.setTextFill(Color.WHITE);
         title.setAlignment(Pos.CENTER);
-        AnchorPane.setTopAnchor(title, 40.0);
+        AnchorPane.setTopAnchor(title, -10.0);
         AnchorPane.setRightAnchor(title, 0.0);
         AnchorPane.setLeftAnchor(title, 0.0);
 
@@ -55,6 +55,7 @@ public class NewGamePane extends AnchorPane {
         crossChoices.setItems(FXCollections.observableArrayList(human, fft, lookup));
         crossChoices.setMinWidth(choiceWidth);
         crossChoices.setMaxWidth(choiceWidth);
+        crossChoices.setStyle("-fx-font: 20px \"Verdana\";");
         crossChoices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
             if (!crossChoices.getItems().get((Integer) newValue).equals(human)) {
                 if (!finalBox.getChildren().contains(crossDelayBox)) {
@@ -68,14 +69,15 @@ public class NewGamePane extends AnchorPane {
         });
 
         Label crossLabel = new Label("Cross (first)");
-        crossLabel.setFont(Font.font("Verdana", 15));
+        crossLabel.setFont(Font.font("Verdana", 20));
         crossLabel.setPadding(new Insets(0, 10, 0, 0));
         crossLabel.setTextFill(Color.WHITE);
         HBox cross = new HBox(crossLabel, crossChoices);
         cross.setAlignment(Pos.CENTER);
 
-        circleChoices = new ChoiceBox<String>();
+        circleChoices = new ChoiceBox<>();
         circleChoices.setValue(human);
+        circleChoices.setStyle("-fx-font: 20px \"Verdana\";");
         circleChoices.setItems(FXCollections.observableArrayList(human, fft, lookup));
         circleChoices.setMinWidth(choiceWidth);
         circleChoices.setMaxWidth(choiceWidth);
@@ -93,7 +95,7 @@ public class NewGamePane extends AnchorPane {
         });
 
         Label circleLabel = new Label("Circle");
-        circleLabel.setFont(Font.font("Verdana", 15));
+        circleLabel.setFont(Font.font("Verdana", 20));
         circleLabel.setPadding(new Insets(0, 10, 0, 0));
         circleLabel.setTextFill(Color.WHITE);
         HBox circle = new HBox(circleLabel, circleChoices);
@@ -102,6 +104,7 @@ public class NewGamePane extends AnchorPane {
         crossDelayField = new TextField("1000");
         crossDelayField.setMinWidth(textFieldWidth);
         crossDelayField.setMaxWidth(textFieldWidth);
+        crossDelayField.setStyle("-fx-font: 20px \"Verdana\";");
         crossDelayField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
                 crossDelayField.setText(newValue.replaceAll("[^\\d]", ""));
@@ -116,7 +119,7 @@ public class NewGamePane extends AnchorPane {
             }
         });
         AIDelayLabelCross = new Label();
-        AIDelayLabelCross.setFont(Font.font("Verdana", 15));
+        AIDelayLabelCross.setFont(Font.font("Verdana", 20));
         AIDelayLabelCross.setPadding(new Insets(0, 10, 0, 0));
         AIDelayLabelCross.setTextFill(Color.WHITE);
         AIDelayLabelCross.setAlignment(Pos.CENTER);
@@ -126,6 +129,7 @@ public class NewGamePane extends AnchorPane {
         circleDelayField = new TextField("1000");
         circleDelayField.setMinWidth(textFieldWidth);
         circleDelayField.setMaxWidth(textFieldWidth);
+        circleDelayField.setStyle("-fx-font: 20px \"Verdana\";");
         circleDelayField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
                 circleDelayField.setText(newValue.replaceAll("[^\\d]", ""));
@@ -141,7 +145,7 @@ public class NewGamePane extends AnchorPane {
         });
 
         AIDelayLabelCircle = new Label();
-        AIDelayLabelCircle.setFont(Font.font("Verdana", 15));
+        AIDelayLabelCircle.setFont(Font.font("Verdana", 20));
         AIDelayLabelCircle.setPadding(new Insets(0, 10, 0, 0));
         AIDelayLabelCircle.setTextFill(Color.WHITE);
         AIDelayLabelCircle.setAlignment(Pos.CENTER);
@@ -151,6 +155,7 @@ public class NewGamePane extends AnchorPane {
 
         Button startGame = new Button("Start Game");
         startGame.setMinWidth(Config.WIDTH / 4);
+        startGame.setFont(Font.font("Verdana", 20));
         startGame.setOnMouseClicked(event -> {
             String crossValue = crossChoices.getValue();
             String circleValue = circleChoices.getValue();
@@ -167,6 +172,7 @@ public class NewGamePane extends AnchorPane {
         });
 
         Button back = new Button("Back");
+        back.setFont(Font.font("Verdana", 20));
         back.setMinWidth(Config.WIDTH / 6);
         back.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
@@ -176,11 +182,11 @@ public class NewGamePane extends AnchorPane {
 
         HBox btnBox = new HBox(startGame, back);
         btnBox.setAlignment(Pos.CENTER);
-        btnBox.setSpacing(20);
+        btnBox.setSpacing(30);
 
         finalBox = new VBox(cross, circle, btnBox);
         finalBox.setAlignment(Pos.CENTER);
-        finalBox.setSpacing(30);
+        finalBox.setSpacing(40);
 
         AnchorPane.setTopAnchor(finalBox, 0.0);
         AnchorPane.setRightAnchor(finalBox, 0.0);

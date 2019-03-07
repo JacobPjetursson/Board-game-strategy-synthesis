@@ -22,7 +22,6 @@ public class PlayArea extends GridPane {
         setAlignment(Pos.CENTER);
 
         info = new InfoPane(cont.getScoreLimit(), cont.getMode());
-
         ColumnConstraints column = new ColumnConstraints(WIDTH / 3);
         for (int i = 0; i < 2; i++)
             getColumnConstraints().add(column);

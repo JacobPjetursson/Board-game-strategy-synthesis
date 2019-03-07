@@ -34,6 +34,9 @@ public class FFTManager {
     public static BiFunction<HashSet<Literal>, Integer, FFTState> preconsToState;
 
     public static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
+    public static final String blueBtnStyle = "-fx-border-color: #000000; -fx-background-color: #4444ff;";
+    public static final String redBtnStyle = "-fx-border-color: #000000; -fx-background-color: #ff2222;";
+    public static final String greenBtnStyle = "-fx-border-color: #000000; -fx-background-color: #22ff22;";
 
     // Most game-related classes are processed here
     public FFTManager(FFTGameSpecifics gameSpecifics) {

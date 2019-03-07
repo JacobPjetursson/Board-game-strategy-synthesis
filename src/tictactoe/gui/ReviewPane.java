@@ -48,7 +48,7 @@ public class ReviewPane extends VBox {
             if (Logic.gameOver(currCont.getState())) {
                 Stage newStage = new Stage();
                 newStage.setScene(new Scene(new EndGamePane(primaryStage, Logic.getWinner(currCont.getState()),
-                        currCont), 400, 150));
+                        currCont), 500, 300));
                 newStage.initModality(Modality.APPLICATION_MODAL);
                 newStage.initOwner(currCont.getWindow());
                 newStage.setOnCloseRequest(Event::consume);

@@ -39,8 +39,8 @@ public class LookupTableMinimax extends AI {
     }
 
     // This function fetches the best move from the DB, if it exists
-    public Move makeMove(kulibrat.game.State state) {
-        String teamstr = (team == PLAYER2) ? "CROSS" : "CIRCLE";
+    public Move makeMove(State state) {
+        String teamstr = (team == PLAYER2) ? "BLACK" : "RED";
         System.out.println("Finding best play for " + teamstr);
         if (state.getLegalMoves().size() == 1) {
             return state.getLegalMoves().get(0);
@@ -58,7 +58,7 @@ public class LookupTableMinimax extends AI {
             System.exit(0);
         }
         Move move = play.move;
-        String winner = (play.score >= 1000) ? "CIRCLE" : (play.score == 0) ? "DRAW" : "CROSS";
+        String winner = (play.score >= 1000) ? "RED" : (play.score == 0) ? "DRAW" : "BLACK";
         System.out.print("BEST PLAY:  " + "oldRow: " + move.oldRow +
                 ", oldCol: " + move.oldCol + ", row: " + move.newRow + ", col: " + move.newCol +
                 ", WINNER IS: " + winner);
@@ -67,7 +67,7 @@ public class LookupTableMinimax extends AI {
     }
 
     // Runs an iterative deepening minimax as the exhaustive brute-force for the lookupDB. The data is saved in the transpo table
-    private MinimaxPlay iterativeDeepeningMinimax(kulibrat.game.State state) {
+    private MinimaxPlay iterativeDeepeningMinimax(State state) {
         CURR_MAX_DEPTH = 0;
         boolean done = false;
         MinimaxPlay play = null;
@@ -88,8 +88,8 @@ public class LookupTableMinimax extends AI {
             if (doneCounter == 2) done = true;
 
             if (Math.abs(play.score) >= 1000) {
-                String player = (team == PLAYER1) ? "CIRCLE" : "CROSS";
-                String opponent = (player.equals("CIRCLE")) ? "CROSS" : "CIRCLE";
+                String player = (team == PLAYER1) ? "RED" : "BLACK";
+                String opponent = (player.equals("BLACK")) ? "RED" : "BLACK";
                 String winner = (play.score >= 1000) ? player : opponent;
                 System.out.println("A SOLUTION HAS BEEN FOUND, WINNING STRAT GOES TO: " + winner);
             }
@@ -137,7 +137,7 @@ public class LookupTableMinimax extends AI {
     }
 
     // Heuristic function which values red with 2000 for a win, and -2000 for a loss. All other nodes are 0
-    private int heuristic(kulibrat.game.State state) {
+    private int heuristic(State state) {
         int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
         if (Logic.gameOver(state)) {
             int winner = Logic.getWinner(state);
@@ -150,7 +150,7 @@ public class LookupTableMinimax extends AI {
     }
 
     // This function builds the lookup table from scratch
-    private void buildLookupTable(kulibrat.game.State state) {
+    private void buildLookupTable(State state) {
         Database.createLookupTable();
         long startTime = System.currentTimeMillis();
         iterativeDeepeningMinimax(state);

@@ -81,7 +81,7 @@ public class FFTFailurePane extends BorderPane {
             Stage stage = (Stage) getScene().getWindow();
             FFTState state = fftManager.currFFT.failingPoint.getState();
             FFTMove move = fftManager.currFFT.failingPoint.getMove();
-            EditFFTInteractive interactive = new EditFFTInteractive(prevScene, this.fftManager);
+            EditFFTInteractive interactive = new EditFFTInteractive(this, this.fftManager);
             stage.setScene(new Scene(interactive, Config.WIDTH, Config.HEIGHT));
             interactive.update(state, move);
         });

@@ -20,7 +20,7 @@ import tictactoe.gui.menu.MenuPane;
 import java.util.ArrayList;
 
 public class NavPane extends VBox {
-    private int buttonWidth = Config.WIDTH / 6 + 20;
+    private int buttonWidth = Config.WIDTH / 6 + 40;
     private ArrayList<Button> buttons;
     private Button startAIButton;
     private Button stopAIButton;
@@ -60,8 +60,9 @@ public class NavPane extends VBox {
         AIWidgets.setAlignment(Pos.CENTER);
 
         helpHuman = new CheckBox();
+        helpHuman.setPrefSize(20, 20);
         Label helpHumanLabel = new Label("Show perfect move");
-        helpHumanLabel.setFont(Font.font("Verdana", 14));
+        helpHumanLabel.setFont(Font.font("Verdana", 20));
         helpHumanLabel.setPadding(new Insets(0, 0, 0, 5));
         helpHumanBox = new HBox(helpHuman, helpHumanLabel);
         helpHumanBox.setAlignment(Pos.CENTER);
@@ -81,8 +82,9 @@ public class NavPane extends VBox {
 
         automaticFFT = new CheckBox();
         automaticFFT.setSelected(false);
+        automaticFFT.setPrefSize(20, 20);
         Label automaticLabel = new Label("Automatic FFT");
-        automaticLabel.setFont(Font.font("Verdana", 14));
+        automaticLabel.setFont(Font.font("Verdana", 20));
         automaticLabel.setPadding(new Insets(0, 0, 0, 5));
         automaticFFTBox = new HBox(automaticFFT, automaticLabel);
         automaticFFTBox.setAlignment(Pos.CENTER);
@@ -95,6 +97,7 @@ public class NavPane extends VBox {
             button.setMinWidth(buttonWidth);
             button.setBorder(new Border(new BorderStroke(Color.BLACK,
                     BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+            button.setFont(Font.font("Verdana", 20));
         }
         getChildren().addAll(restartButton, menuButton);
     }

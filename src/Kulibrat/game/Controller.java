@@ -421,7 +421,7 @@ public class Controller {
             else if (playerBlackInstance == HUMAN) state.setTurn(PLAYER2);
 
             newStage.setScene(new Scene(new EndGamePane(primaryStage, winner,
-                    this), 400, 150));
+                    this), 500, 300));
             newStage.initModality(Modality.APPLICATION_MODAL);
             newStage.initOwner(window);
             newStage.setOnCloseRequest(Event::consume);

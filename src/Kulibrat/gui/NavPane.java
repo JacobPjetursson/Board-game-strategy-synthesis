@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import kulibrat.game.Controller;
@@ -20,7 +21,7 @@ import misc.Config;
 import java.util.ArrayList;
 
 public class NavPane extends VBox {
-    private int buttonWidth = Config.WIDTH / 6 + 20;
+    private int buttonWidth = Config.WIDTH / 6 + 40;
     private ArrayList<Button> buttons;
     private Button startAIButton;
     private Button stopAIButton;
@@ -39,6 +40,7 @@ public class NavPane extends VBox {
 
     NavPane(Controller cont) {
         setMinWidth(Config.WIDTH / 3);
+        setMaxWidth(Config.WIDTH / 3);
         setAlignment(Pos.CENTER);
         setSpacing(40);
         buttons = new ArrayList<>();
@@ -57,8 +59,9 @@ public class NavPane extends VBox {
         AIWidgets.setAlignment(Pos.CENTER);
 
         helpHuman = new CheckBox();
+        helpHuman.setPrefSize(20, 20);
         Label helpHumanLabel = new Label("Show perfect move");
-        helpHumanLabel.setFont(Font.font("Verdana", 14));
+        helpHumanLabel.setFont(Font.font("Verdana", 20));
         helpHumanLabel.setPadding(new Insets(0, 0, 0, 5));
         helpHumanBox = new HBox(helpHuman, helpHumanLabel);
         helpHumanBox.setAlignment(Pos.CENTER);
@@ -80,9 +83,10 @@ public class NavPane extends VBox {
         buttons.add(addRuleFFTButton);
 
         automaticFFT = new CheckBox();
+        automaticFFT.setPrefSize(20, 20);
         automaticFFT.setSelected(false);
         Label automaticLabel = new Label("Automatic FFT");
-        automaticLabel.setFont(Font.font("Verdana", 14));
+        automaticLabel.setFont(Font.font("Verdana", 20));
         automaticLabel.setPadding(new Insets(0, 0, 0, 5));
         automaticFFTBox = new HBox(automaticFFT, automaticLabel);
         automaticFFTBox.setAlignment(Pos.CENTER);
@@ -95,6 +99,7 @@ public class NavPane extends VBox {
             button.setMinWidth(buttonWidth);
             button.setBorder(new Border(new BorderStroke(Color.BLACK,
                     BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+            button.setFont(Font.font("Verdana", 20));
         }
         getChildren().addAll(restartButton, menuButton);
     }

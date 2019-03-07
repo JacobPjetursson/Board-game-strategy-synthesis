@@ -97,7 +97,7 @@ public class BoardTile extends StackPane {
         if (clickMode == CLICK_INTERACTIVE) {
             tileOptionsPane = new TileOptionsPane(this);
             tileOptionsStage = new Stage();
-            tileOptionsStage.setScene(new Scene(tileOptionsPane, 400, 400));
+            tileOptionsStage.setScene(new Scene(tileOptionsPane, 600, 600));
             tileOptionsStage.initModality(Modality.APPLICATION_MODAL);
             tileOptionsStage.initOwner(cont.getWindow());
         }
@@ -258,8 +258,9 @@ public class BoardTile extends StackPane {
 
             // Mandatory box
             Label mandatoryLabel = new Label("Use this tile in the rule?");
-            mandatoryLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
+            mandatoryLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
             mandatoryCheckBox = new CheckBox();
+            mandatoryCheckBox.setPrefSize(18, 18);
             mandatoryCheckBox.pressedProperty().addListener((observableValue, oldValue, newValue) -> {
                 setMandatory(!mandatory);
                 cont.getInteractiveState().updateRuleFromTile(bt);
@@ -272,9 +273,10 @@ public class BoardTile extends StackPane {
             // Information
             Label infoLabel = new Label("The grey tile negates what is on the tile.\n" +
                     "The while tile clears the selection.");
-            infoLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
+            infoLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
             infoLabel.setTextAlignment(TextAlignment.CENTER);
             bottomPane.getChildren().add(infoLabel);
+            bottomPane.setPadding(new Insets(0, 0, 20, 0));
             return bottomPane;
         }
 
@@ -299,8 +301,8 @@ public class BoardTile extends StackPane {
             interactiveGrid.getColumnConstraints().addAll(cc1, cc2);
             interactiveGrid.getRowConstraints().addAll(rc1, rc2);
 
-            BoardPiece bp1 = new BoardPiece(PLAYER1, cont, row, col,50, CLICK_DISABLED);
-            BoardPiece bp2 = new BoardPiece(PLAYER2, cont, row, col, 50, CLICK_DISABLED);
+            BoardPiece bp1 = new BoardPiece(PLAYER1, cont, row, col,80, CLICK_DISABLED);
+            BoardPiece bp2 = new BoardPiece(PLAYER2, cont, row, col, 80, CLICK_DISABLED);
             StackPane bpPane1 = new StackPane();
             StackPane bpPane2 = new StackPane();
             bpPane1.setAlignment(Pos.CENTER);

@@ -56,7 +56,8 @@ public class InteractiveState implements InteractiveFFTState {
     public Node getInteractiveNode(Rule r) {
         this.rule = new Rule(r);
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
-        this.move = (Move) r.action.getMove(perspective);
+        if (r.action != null)
+            this.move = (Move) r.action.getMove(perspective);
         if (r.multiRule) {
             // TODO - how to handle multirule?
         } else {

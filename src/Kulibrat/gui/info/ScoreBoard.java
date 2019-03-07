@@ -22,14 +22,14 @@ public class ScoreBoard extends VBox {
         setSpacing(10);
         setPadding(new Insets(20));
         Label score = new Label("Score: ");
-        score.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        score.setFont(Font.font("Verdana", FontWeight.BOLD, 28));
 
         blackLabel = new Label("Black: " + 0);
         blackLabel.setTextFill(Color.BLACK);
-        blackLabel.setFont(Font.font("Verdana", 15));
+        blackLabel.setFont(Font.font("Verdana", 22));
         redLabel = new Label("Red: " + 0);
         redLabel.setTextFill(Color.RED);
-        redLabel.setFont(Font.font("Verdana", 15));
+        redLabel.setFont(Font.font("Verdana", 22));
 
         getChildren().addAll(score, blackLabel, redLabel);
     }

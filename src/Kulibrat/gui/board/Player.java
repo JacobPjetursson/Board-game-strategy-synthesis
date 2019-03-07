@@ -74,10 +74,11 @@ public class Player extends VBox {
 
         typeLabel = new Label();
         setTypeLabelText(type);
-        typeLabel.setFont(Font.font("Verdana", tileSize / 4));
+        typeLabel.setFont(Font.font("Verdana", tileSize / 3));
 
         // swap player button
         swapBtn = new Button("Swap");
+        swapBtn.setFont(Font.font("Verdana", 16));
         ColumnConstraints column1 = new ColumnConstraints((tileSize * 4) / 3);
         for (int i = 0; i < 3; i++) {
             gridPaneDisplay.getColumnConstraints().add(column1);
