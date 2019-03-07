@@ -13,8 +13,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import static kulibrat.game.Logic.POS_NONBOARD;
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Config.*;
 
 public class State implements Serializable, FFTState {
     private int[][] board;
@@ -131,7 +130,7 @@ public class State implements Serializable, FFTState {
         return board;
     }
 
-    void setBoardEntry(int row, int col, int team) {
+    public void setBoardEntry(int row, int col, int team) {
         board[row][col] = team;
     }
 
@@ -163,6 +162,10 @@ public class State implements Serializable, FFTState {
 
     public int getScoreLimit() {
         return scoreLimit;
+    }
+
+    public void setScoreLimit(int scoreLimit) {
+        this.scoreLimit = scoreLimit;
     }
 
     void addUnPlaced(int team) {
@@ -251,6 +254,25 @@ public class State implements Serializable, FFTState {
         literals.add(new Literal("SL=" + scoreLimit));
         literals.add(new Literal("P1SCORE=" + redScore));
         literals.add(new Literal("P2SCORE=" + blackScore));
+        return literals;
+    }
+
+    public HashSet<Literal> getAllLiterals() {
+        HashSet<Literal> literals = new HashSet<>(getLiterals());
+
+        for (int i = 0; i < board.length; i++)
+            for (int j = 0; j < board[i].length; j++)
+                if (board[i][j] == 0)
+                    literals.add(new Literal(i, j, PLAYER_ANY, true));
+
+        for (int i = 0; i < SCORELIMIT; i++) {
+            if (i != scoreLimit)
+                literals.add(new Literal("!SL=" + scoreLimit));
+            if (i != redScore)
+                literals.add(new Literal("!P1SCORE=" + redScore));
+            if (i != blackScore)
+                literals.add(new Literal("!P2SCORE=" + blackScore));
+        }
         return literals;
     }
 

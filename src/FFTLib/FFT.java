@@ -33,10 +33,10 @@ public class FFT {
         int opponent = (team == Config.PLAYER1) ? Config.PLAYER2 : Config.PLAYER1;
         // Check if win or draw is even possible
         int score = FFTManager.db.queryPlay(initialState).getScore();
-        if (team == Config.PLAYER1 && score < 0) {
+        if (team == Config.PLAYER1 && score < -1000) {
             System.out.println("A perfect player 2 has won from start of the game");
             return false;
-        } else if (team == Config.PLAYER2 && score > 0) {
+        } else if (team == Config.PLAYER2 && score > 1000) {
             System.out.println("A perfect player 1 has won from the start of the game");
             return false;
         }
@@ -74,7 +74,6 @@ public class FFT {
                         }
                     }
                 } else if (!nonLosingPlays.contains(move)) {
-                    System.out.println(nonLosingPlays);
                     System.out.println("FFT applied, but its move lost you the game");
                     failingPoint = new FFTStateAndMove(state, move, false);
                     return false;

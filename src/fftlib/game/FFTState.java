@@ -9,6 +9,8 @@ public interface FFTState {
 
     HashSet<Literal> getLiterals();
 
+    HashSet<Literal> getAllLiterals();
+
     int getTurn();
 
     ArrayList<? extends FFTMove> getLegalMoves();

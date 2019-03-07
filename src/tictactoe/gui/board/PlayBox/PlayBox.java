@@ -45,13 +45,13 @@ public class PlayBox extends Group {
         super.layoutChildren();
     }
 
-    public void addHighlight(int row, int col, String color) {
+    public void addHighlight(int row, int col, int team, String color) {
         BoardTile t = board.getTiles()[row][col];
-        t.highlight(color);
+        t.addHighlight(color, team);
         highlights.add(t);
     }
 
-    public void removeHighlights() {
+    void removeHighlights() {
         for (BoardTile bt : highlights)
             bt.removeHighlight();
         highlights.clear();

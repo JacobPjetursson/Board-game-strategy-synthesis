@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Objects;
 
 import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER_ANY;
 
 
 public class State implements FFTState {
@@ -82,7 +83,7 @@ public class State implements FFTState {
         return board;
     }
 
-    void setBoardEntry(int row, int col, int team) {
+    public void setBoardEntry(int row, int col, int team) {
         board[row][col] = team;
     }
 
@@ -110,6 +111,15 @@ public class State implements FFTState {
                 }
             }
         }
+        return literals;
+    }
+
+    public HashSet<Literal> getAllLiterals() { // Including negatives
+        HashSet<Literal> literals = new HashSet<>(getLiterals());
+        for (int i = 0; i < board.length; i++)
+            for (int j = 0; j < board[i].length; j++)
+                if (board[i][j] == 0)
+                    literals.add(new Literal(i, j, PLAYER_ANY, true));
         return literals;
     }
 

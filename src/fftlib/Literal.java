@@ -69,7 +69,7 @@ public class Literal {
         }
     }
 
-    protected Literal(Literal duplicate) {
+    public Literal(Literal duplicate) {
         this.name = duplicate.name;
         this.boardPlacement = duplicate.boardPlacement;
         this.row = duplicate.row;

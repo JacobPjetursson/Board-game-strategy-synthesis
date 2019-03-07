@@ -12,8 +12,13 @@ import kulibrat.game.State;
 import kulibrat.misc.Database;
 import misc.Config;
 
+import java.util.HashSet;
+
+import static fftlib.Literal.PIECEOCC_ANY;
 import static fftlib.game.Transform.TRANS_HREF;
 import static kulibrat.game.Logic.POS_NONBOARD;
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
 
 public class GameSpecifics implements FFTGameSpecifics {
     private Controller cont;
@@ -42,12 +47,12 @@ public class GameSpecifics implements FFTGameSpecifics {
         }
         return new Move(oldRow, oldCol, newRow, newCol, team);
     }
-/*
+
     @Override
-    public FFTState clauseToState(Clause c) {
+    public FFTState preconsToState(HashSet<Literal>literals, int team) {
         State s = new State();
 
-        for (Literal l : c.literals) {
+        for (Literal l : literals) {
             if (!l.boardPlacement) {
                 String[] slSplit = l.name.toUpperCase().split("SL=");
                 if (slSplit.length > 1) {
@@ -73,7 +78,7 @@ public class GameSpecifics implements FFTGameSpecifics {
         }
         return s;
     }
-*/
+
     @Override
     public String getFFTFilePath() {
         return "kulibratFFT.txt";

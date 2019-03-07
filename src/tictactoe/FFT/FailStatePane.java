@@ -28,11 +28,11 @@ public class FailStatePane implements FFTFailState {
         PlayBox pb = new PlayBox(tilesize, CLICK_DISABLED, cont);
         pb.update(s);
         Platform.runLater(() -> {
-            pb.addHighlight(move.row, move.col, BoardTile.blueStr);
+            pb.addHighlight(move.row, move.col, move.team, BoardTile.blueStr);
             for (Move m : nonLosingPlays) {
                 if (m.equals(move))
                     continue;
-                pb.addHighlight(m.row, m.col, BoardTile.greenStr);
+                pb.addHighlight(m.row, m.col, m.team, BoardTile.greenStr);
             }
         });
         return pb;

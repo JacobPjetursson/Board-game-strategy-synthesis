@@ -151,10 +151,11 @@ public class Controller {
         // Show FFT button
         showFFTButton.setOnAction(event -> {
             Stage newStage = new Stage();
+            newStage.setOnHiding(otherevent -> shownFFT = null);
             shownFFT = new ShowFFTPane(fftManager, state);
-            newStage.setScene(new Scene(shownFFT, 450, 550));
+            newStage.setScene(new Scene(shownFFT, 700, 700));
             newStage.show();
-            newStage.setOnCloseRequest(otherevent -> shownFFT = null);
+
 
         });
 

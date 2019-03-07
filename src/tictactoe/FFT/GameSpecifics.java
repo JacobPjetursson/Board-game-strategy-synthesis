@@ -12,6 +12,8 @@ import tictactoe.game.Move;
 import tictactoe.game.State;
 import tictactoe.misc.Database;
 
+import java.util.HashSet;
+
 import static fftlib.game.Transform.*;
 
 
@@ -35,18 +37,16 @@ public class GameSpecifics implements FFTGameSpecifics {
         }
         return new Move(row, col, team);
     }
-/*
-    @Override
-    public FFTState clauseToState(Clause c) {
-        State s = new State();
 
-        for (Literal l : c.literals)
+    @Override
+    public FFTState preconsToState(HashSet<Literal> literals, int team) {
+        State s = new State();
+        for (Literal l : literals)
             if (l.boardPlacement)
                 s.setBoardEntry(l.row, l.col, l.pieceOcc);
-
         return s;
     }
-*/
+
     @Override
     public String getFFTFilePath() {
         return "tictactoeFFT.txt";

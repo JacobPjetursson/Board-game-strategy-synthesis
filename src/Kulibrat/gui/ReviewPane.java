@@ -89,7 +89,7 @@ public class ReviewPane extends VBox {
             HashSet<Move> bestPlays = Database.bestPlays(n);
             PlayBox playBox = getPlayBox(currCont, ps, bestPlays);
             Label turnL = new Label("Turns Played: " + (ps.getTurnNo()));
-            turnL.setFont(Font.font("Verdana", 14));
+            turnL.setFont(Font.font("Verdana", 20));
             turnL.setAlignment(Pos.TOP_CENTER);
             vBox.getChildren().add(turnL);
 
@@ -97,6 +97,7 @@ public class ReviewPane extends VBox {
                             "         (%d, %d) -> (%d, %d)",
                     ps.getMove().oldRow + 1, ps.getMove().oldCol + 1, ps.getMove().newRow + 1, ps.getMove().newCol + 1);
             Label moveL = new Label(moveStr);
+            moveL.setFont(Font.font("Verdana", 18));
             vBox.getChildren().add(moveL);
 
             Label performance;
@@ -108,6 +109,7 @@ public class ReviewPane extends VBox {
                 h.setStyle("-fx-background-color: rgba(255,0,0, 0.5);");
             }
             performance.setAlignment(Pos.CENTER);
+            performance.setFont(Font.font("Verdana", 18));
             vBox.getChildren().add(performance);
 
             State nextState = n.getNextState(ps.getMove());
@@ -123,6 +125,7 @@ public class ReviewPane extends VBox {
             Label turnsToTerminal = new Label("Turns to " + ((score >= 0) ?
                     "win " : "loss ") + "\nafter move: " + scoreStr);
             turnsToTerminal.setAlignment(Pos.CENTER);
+            turnsToTerminal.setFont(Font.font("Verdana", 18));
             vBox.getChildren().add(turnsToTerminal);
 
             h.getChildren().addAll(playBox, vBox);
@@ -159,7 +162,7 @@ public class ReviewPane extends VBox {
 
     private PlayBox getPlayBox(Controller cont, StateAndMove ps, HashSet<Move> bestPlays) {
 
-        PlayBox pb = new PlayBox(20, CLICK_DISABLED, cont);
+        PlayBox pb = new PlayBox(50, CLICK_DISABLED, cont);
         pb.update(ps.getState());
 
         pb.addArrow(ps.getMove(), Color.BLUE);

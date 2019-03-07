@@ -44,7 +44,7 @@ public class ShowFFTPane extends BorderPane {
         lw = new ListView<>();
         lw.setPickOnBounds(false);
         lw.setPrefWidth(350);
-        lw.setSelectionModel(new NoSelectionModel<VBox>());
+        lw.setSelectionModel(new NoSelectionModel<>());
         BorderPane.setMargin(lw, new Insets(15));
         setCenter(lw);
 
@@ -70,12 +70,12 @@ public class ShowFFTPane extends BorderPane {
             VBox rgVBox = new VBox(10);
             rgVBox.setAlignment(Pos.CENTER);
             Label rgLabel = new Label((i + 1) + ": " + rg.name);
-            rgLabel.setFont(Font.font("Verdana", 16));
+            rgLabel.setFont(Font.font("Verdana", 22));
             rgVBox.getChildren().add(rgLabel);
             for (int j = 0; j < rg.rules.size(); j++) {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r.print());
-                rLabel.setFont(Font.font("Verdana", 10));
+                rLabel.setFont(Font.font("Verdana", 16));
                 FFTMove move = r.apply(state);
                 if (!ruleApplied && move != null) {
                     rLabel.setTextFill(Color.BLUE);

@@ -12,12 +12,6 @@ public class Transform {
     public static final int TRANS_HREF = 1;
     public static final int TRANS_VREF = 2;
     public static final int TRANS_ROT = 3;
-    /*
-    public static final int SYM_HVREF = 4;
-    public static final int SYM_HREF_ROT = 5;
-    public static final int SYM_VREF_ROT = 6;
-    public static final int SYM_HVREF_ROT = 7;
-    */
 
     public static class TransformedArray {
         public ArrayList<Integer> transformations;

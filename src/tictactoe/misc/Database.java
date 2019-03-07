@@ -4,6 +4,7 @@ import fftlib.game.FFTDatabase;
 import fftlib.game.FFTMinimaxPlay;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
+import kulibrat.ai.Minimax.Minimax;
 import tictactoe.ai.MinimaxPlay;
 import tictactoe.game.State;
 import tictactoe.game.Logic;
@@ -44,10 +45,11 @@ public class Database implements FFTDatabase {
     // Outputs a string which is the amount of turns to a terminal node, based on a score from the database entry
     public static String turnsToTerminal(int turn, State n) {
         int score = queryPlay(n).score;
-        if (score == 0) {
-            return "DRAW";
+
+        if (score > 0 && score < 1000) { // Draw
+            return "" + score;
         }
-        if (score > 0) {
+        else if (score > 0) {
             if (turn == PLAYER2) {
                 return "" + (-2000 + score);
             } else {
@@ -121,6 +123,10 @@ public class Database implements FFTDatabase {
 
     public FFTMinimaxPlay queryPlay(FFTState s) {
         return queryPlay((State) s);
+    }
+
+    public static HashMap<State, MinimaxPlay> getLookupTable() {
+        return lookupTable;
     }
 
 

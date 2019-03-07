@@ -45,7 +45,7 @@ public class ReadMePane extends VBox {
                 "\n" +
                 "For the lookup table, there is an option to overwrite the database, which is necessary for the perfect player to work. \n" +
                 "\n" +
-                "Once in-game, the human player can ask for help by the perfect player, granted that the database has been built for the chosen score limit. This will highlight the best moves in green, and all other moves in red.\n" +
+                "Once in-game, the human player can ask for help by the perfect player, granted that the database has been built for the chosen score limit. This will addHighlight the best moves in green, and all other moves in red.\n" +
                 "The numbers shown on the tiles say how many turns it takes to win (for positive number) or lose (for negative number), for that child state. This is assuming perfect play from opponent.\n" +
                 "\n" +
                 "During or after the game, it is possible to review the game, when playing vs. the AI. This will show the player all the moves that was made during the game, and if they were perfect or not.\n" +

@@ -52,6 +52,8 @@ public class InteractiveState implements InteractiveFFTState {
         this.rule = new Rule(r);
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
         this.move = (Move) r.action.getMove(perspective);
+        actionTile = pb.getBoard().getTiles()[move.row][move.col];
+        actionTile.setAction(true);
         if (r.multiRule) {
             // TODO - how to handle multirule?
         } else {
@@ -77,7 +79,7 @@ public class InteractiveState implements InteractiveFFTState {
         actionTile = bt;
         this.move = new Move(bt.getRow(), bt.getCol(), perspective);
         this.rule.setAction(move.getAction());
-        pb.addHighlight(actionTile.getRow(), actionTile.getCol(), blueStr);
+        pb.addHighlight(actionTile.getRow(), actionTile.getCol(), perspective, blueStr);
     }
 
     public void removeAction() {
@@ -147,9 +149,5 @@ public class InteractiveState implements InteractiveFFTState {
             }
             rule.addPrecondition(l);
         }
-    }
-
-    public InteractivePlayBox getPlayBox() {
-        return pb;
     }
 }

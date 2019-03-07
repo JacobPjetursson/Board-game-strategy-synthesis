@@ -31,12 +31,13 @@ public class BoardTile extends StackPane {
     private boolean negated; // used for fft
     private boolean mandatory; // used for fft
     private boolean isAction; // used for fft
+    private Node highlightPiece = null;
     private Stage tileOptionsStage;
     private Label turnsToTerminalLabel;
     public TileOptionsPane tileOptionsPane;
 
     private Controller cont;
-    private Color gray = new Color(0.2, 0.2, 0.2, 1.0);
+    private Color gray = new Color(0, 0, 0, 0.4);
     private Node piece;
     int team;
     Group redCross;
@@ -107,9 +108,9 @@ public class BoardTile extends StackPane {
 
     public void setBest(boolean best) {
         if (best) {
-            highlight(greenStr);
+            addHighlight(greenStr, team);
         } else {
-            highlight(whiteStr);
+            addHighlight(whiteStr, team);
         }
     }
 
@@ -123,41 +124,52 @@ public class BoardTile extends StackPane {
         }
     }
 
-    public void highlight(String color) {
+    public void addHighlight(String color, int team) {
         setStyle(color);
+        if (clickMode != CLICK_DEFAULT) {
+            if (highlightPiece != null)
+                getChildren().remove(highlightPiece);
+            highlightPiece = getPiece(team, true);
+            getChildren().add(highlightPiece);
+
+        }
     }
 
     public void removeHighlight() {
         setStyle(whiteStr);
 
-        if (clickMode == CLICK_INTERACTIVE) {
-            this.tileOptionsPane.actionCheckBox.setSelected(false);
-            isAction = false;
+        if (clickMode != CLICK_DEFAULT) {
+            if (highlightPiece != null)
+                getChildren().remove(highlightPiece);
+            if (clickMode == CLICK_INTERACTIVE) {
+                this.tileOptionsPane.actionCheckBox.setSelected(false);
+                isAction = false;
+            }
         }
     }
 
     public void addPiece(int team) {
         removePiece();
-        Node n;
-        if (team == PLAYER1) {
-            n = getCross(false);
-        } else if (team == PLAYER2) {
-            n = getCircle(false);
+        Node n = getPiece(team, false);
+        if (n != null) {
+            getChildren().add(n);
+            this.team = team;
+            this.piece = n;
         }
-        else
-            return;
-        getChildren().add(n);
-        this.team = team;
-        this.piece = n;
+    }
+
+    private Node getPiece(int team, boolean gray) {
+        Node n = null;
+        if (team == PLAYER1) {
+            n = getCross(gray);
+        } else if (team == PLAYER2) {
+            n = getCircle(gray);
+        }
+        return n;
     }
 
     private void addHover(int team) {
-        Node n;
-        if (team == PLAYER1) {
-            n = getCross(true);
-        } else {
-            n = getCircle(true);
-        }
+        Node n = getPiece(team, true);
         hoverNode = n;
         getChildren().add(n);
     }
@@ -283,21 +295,19 @@ public class BoardTile extends StackPane {
         if (clickMode == CLICK_INTERACTIVE)
             setMandatory(piece != null);
     }
-/*
+
     public void setAction(boolean isAction) {
-        if (this.isAction == isAction)
-            return;
         this.isAction = isAction;
         tileOptionsPane.actionCheckBox.setSelected(isAction);
-        removePiece();
-
         if (isAction) {
+            removePiece();
+            setNegated(false);
             setMandatory(true);
-            int team = cont.getInteractiveState().getPerspective();
-            addPiece(team);
+        } else {
+            setMandatory(false);
         }
     }
-*/
+
     public void setMandatory(boolean mandatory) {
         this.mandatory = mandatory;
         tileOptionsPane.mandatoryCheckBox.setSelected(mandatory);
@@ -361,17 +371,11 @@ public class BoardTile extends StackPane {
             actionCheckBox = new CheckBox();
             actionCheckBox.pressedProperty().addListener((observable, oldValue, newValue) -> {
                 isAction = !isAction;
-                actionCheckBox.setSelected(isAction);
-                if (isAction) {
-                    removePiece();
-                    setNegated(false);
+                setAction(isAction);
+                if (isAction)
                     cont.getInteractiveState().setActionFromTile(bt);
-                    setMandatory(true);
-                } else {
+                else
                     cont.getInteractiveState().removeAction();
-                    setMandatory(false);
-                }
-
                 close();
             });
 

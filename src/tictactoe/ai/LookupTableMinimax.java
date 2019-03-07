@@ -79,12 +79,10 @@ public class LookupTableMinimax implements AI {
         if (transpoPlay != null && depth <= transpoPlay.depth) {
             return transpoPlay;
         }
-        boolean evaluated = true;
         for (State child : state.getChildren()) {
             score = minimax(child, depth - 1).score;
             if (score > 1000) score--;
-            else if (score < -1000) score++;
-            else evaluated = false;
+            else score++;
 
             if (state.getTurn() == team) {
                 if (score > bestScore) {
@@ -102,7 +100,6 @@ public class LookupTableMinimax implements AI {
             lookupTable.put(state,
                     new MinimaxPlay(bestMove, bestScore, depth));
         }
-        if (!evaluated) unevaluatedNodes++;
         return new MinimaxPlay(bestMove, bestScore, depth);
     }
 

@@ -142,11 +142,11 @@ public class ReviewPane extends VBox {
         pb.update(ps.getState());
 
         Platform.runLater(() -> {
-            pb.addHighlight(ps.getMove().row, ps.getMove().col, blueStr);
+            pb.addHighlight(ps.getMove().row, ps.getMove().col, ps.getMove().team, blueStr);
             for (Move m : bestPlays) {
                 if (m.equals(ps.getMove()))
                     continue;
-                pb.addHighlight(m.row, m.col, greenStr);
+                pb.addHighlight(m.row, m.col, m.team, greenStr);
             }
         });
 

@@ -208,9 +208,9 @@ public class Controller {
             deselect();
             Stage newStage = new Stage();
             shownFFT = new ShowFFTPane(fftManager, this.state);
-            newStage.setScene(new Scene(shownFFT, 450, 550));
+            newStage.setScene(new Scene(shownFFT, 700, 600));
             newStage.show();
-            newStage.setOnCloseRequest(otherevent -> shownFFT = null);
+            newStage.setOnHiding(otherevent -> shownFFT = null);
 
         });
 
@@ -438,7 +438,7 @@ public class Controller {
         }
     }
 
-    // Shows the red/green/yellow highlight on the tiles when a piece has been selected
+    // Shows the red/green/yellow addHighlight on the tiles when a piece has been selected
     private void highlightMoves(int row, int col, int team, boolean highlight) {
         if (highlight) curHighLights = Logic.legalMovesFromPiece(row,
                 col, team, state.getBoard());
@@ -554,7 +554,7 @@ public class Controller {
     // Opens the review pane
     private void reviewGame() {
         Stage newStage = new Stage();
-        newStage.setScene(new Scene(new ReviewPane(primaryStage, this), 325, Config.HEIGHT - 50));
+        newStage.setScene(new Scene(new ReviewPane(primaryStage, this), 550, Config.HEIGHT - 50));
         newStage.initModality(Modality.APPLICATION_MODAL);
         newStage.initOwner(window);
         newStage.setOnCloseRequest(Event::consume);

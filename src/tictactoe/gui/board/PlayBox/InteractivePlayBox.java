@@ -49,7 +49,7 @@ public class InteractivePlayBox extends PlayBox {
         Platform.runLater(() -> {
             removeHighlights();
             if (m != null) {
-                addHighlight(m.row, m.col, blueStr);
+                addHighlight(m.row, m.col, perspective, blueStr);
             }
         });
 
