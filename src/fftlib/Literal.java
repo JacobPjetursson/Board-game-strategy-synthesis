@@ -12,7 +12,7 @@ public class Literal {
     public String name;
     public boolean boardPlacement;
     public int pieceOcc = PIECEOCC_NONE;
-    boolean negation;
+    public boolean negation;
     boolean error;
 
     private static String errorMsg = "Board position preconditions must be specified with either:\n" +
@@ -122,6 +122,16 @@ public class Literal {
         String teamStr = (pieceOcc == PIECEOCC_PLAYER) ? "P" :
                 (pieceOcc == PIECEOCC_ENEMY) ? "E" : "PE";
         this.name += String.format("%s(%d, %d)", teamStr, row, col);
+    }
+
+    public void setNegation(boolean negation) {
+        this.negation = negation;
+        format();
+    }
+
+    public void setPieceOcc(int pieceOcc) {
+        this.pieceOcc = pieceOcc;
+        format();
     }
 
     @Override

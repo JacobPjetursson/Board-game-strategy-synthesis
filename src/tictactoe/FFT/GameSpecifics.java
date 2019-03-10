@@ -14,6 +14,7 @@ import tictactoe.misc.Database;
 
 import java.util.HashSet;
 
+import static fftlib.Literal.PIECEOCC_ANY;
 import static fftlib.game.Transform.*;
 
 
@@ -42,7 +43,7 @@ public class GameSpecifics implements FFTGameSpecifics {
     public FFTState preconsToState(HashSet<Literal> literals, int team) {
         State s = new State();
         for (Literal l : literals)
-            if (l.boardPlacement)
+            if (l.boardPlacement && !l.negation && l.pieceOcc != PIECEOCC_ANY)
                 s.setBoardEntry(l.row, l.col, l.pieceOcc);
         return s;
     }
@@ -64,7 +65,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public FFTState getInitialState() {
-        return new State(cont.getState());
+        return new State();
     }
 
     @Override

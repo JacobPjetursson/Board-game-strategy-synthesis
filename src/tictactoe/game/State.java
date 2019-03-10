@@ -67,15 +67,13 @@ public class State implements FFTState {
     public boolean equals(Object obj) {
         if (!(obj instanceof State)) return false;
         State state = (State) obj;
-        return this == state || turn == state.getTurn() &&
-                (Arrays.deepEquals(board, state.board));
+        return this == state || (Arrays.deepEquals(board, state.board));
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(turn);
-        result += Arrays.deepHashCode(board);
-        return result;
+        int result = Arrays.deepHashCode(board);
+        return 31 * result;
 
     }
 

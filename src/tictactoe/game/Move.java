@@ -72,6 +72,6 @@ public class Move implements FFTMove {
     }
 
     public String print() {
-        return "ROW: " + row + " COL: " + col;
+        return "ROW: " + row + " COL: " + col + " TEAM: " + team;
     }
 }
