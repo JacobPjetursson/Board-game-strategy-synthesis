@@ -20,8 +20,8 @@ public class Config {
     public static final int AI_VS_AI = 3;
 
     // WINDOW DIMENSIONS
-    public static final int WIDTH = 1300;
-    public static final int HEIGHT = 750;
+    public static final int WIDTH = 1350;
+    public static final int HEIGHT = 850;
 
     // MISC STATIC VARIABLES
     public static final int CLICK_INTERACTIVE = 0;
@@ -36,7 +36,7 @@ public class Config {
 
     // BOARD CONFIG
     public static final int kuliBWidth = 3;
-    public static final int kuliBHeight = 3;
+    public static final int kuliBHeight = 4;
 
     // MISC
     public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";
