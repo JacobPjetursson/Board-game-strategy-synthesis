@@ -37,7 +37,7 @@ public class BoardTile extends StackPane {
     public TileOptionsPane tileOptionsPane;
 
     private Controller cont;
-    private Color gray = new Color(0, 0, 0, 0.2);
+    private Color gray = new Color(0, 0, 0, 0.25);
     private Node piece;
     int team;
     Group redCross;
