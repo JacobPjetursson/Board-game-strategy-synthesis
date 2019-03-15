@@ -1,28 +1,19 @@
 package tictactoe.FFT;
 
-import fftlib.Action;
 import fftlib.FFTManager;
 import fftlib.Literal;
-import fftlib.game.*;
-import fftlib.gui.FFTFailState;
-import fftlib.gui.InteractiveFFTState;
 import tictactoe.ai.LookupTableMinimax;
 import tictactoe.ai.MinimaxPlay;
 import tictactoe.game.Move;
 import tictactoe.game.State;
 import tictactoe.misc.Database;
 
-import java.sql.SQLOutput;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 
-import static fftlib.Literal.PIECEOCC_ANY;
-import static fftlib.Literal.PIECEOCC_PLAYER;
-import static fftlib.game.Transform.TRANS_HREF;
-import static fftlib.game.Transform.TRANS_ROT;
-import static fftlib.game.Transform.TRANS_VREF;
+import static fftlib.Literal.*;
 import static misc.Config.*;
 
 
@@ -112,7 +103,7 @@ public class FFTAutoGen {
             return nonSharedLiterals;
         }
         */
-        public void makeStateGroups() {
+        void makeStateGroups() {
             State s = states.get(0);
             HashSet<Literal> minSet = new HashSet<>();
             HashSet<Literal> copy = new HashSet<>();
@@ -128,43 +119,9 @@ public class FFTAutoGen {
             System.out.println();
             System.out.println("ORIGINAL STATE: " + origState.print());
             System.out.println("ORIGINAL MOVE: " + move.print());
+
             for (Literal l : copy) {
-                boolean unchanged = true;
-                Literal origLiteral = new Literal(l);
-                for (int i = 0; i < PIECEOCC_ANY; i++) {
-                    System.out.print("CHANGING: " + l.name);
-                    l.setPieceOcc(i);
-                    l.setNegation(false);
-                    System.out.println(" TO: " + l.name);
-                    State newState = (State) FFTManager.preconsToState.apply(copy, PLAYER1);
-                    System.out.println("NEWSTATE" + newState.print());
-                    MinimaxPlay play = lookupTable.get(newState);
-                    if (play != null)
-                        System.out.println("PLAY: " + play.move.print());
-                    if (play == null || play.move != this.move) {
-                        unchanged = false;
-                        l.setPieceOcc(origLiteral.pieceOcc);
-                        l.setNegation(origLiteral.negation);
-                        System.out.print("NO LONGER APPLIES: ");
-                        System.out.println(play == null ? "PLAY NULL" : "BEST PLAY CHANGED");
-                        break;
-                    }
-                    l.setNegation(true);
-                    newState = (State) FFTManager.preconsToState.apply(copy, PLAYER1);
-                    System.out.println("NEWSTATE" + newState.print());
-                    play = lookupTable.get(newState);
-                    if (play != null)
-                        System.out.println("PLAY" + play.move.print());
-                    if (play == null || play.move != this.move) {
-                        unchanged = false;
-                        l.setPieceOcc(origLiteral.pieceOcc);
-                        l.setNegation(origLiteral.negation);
-                        System.out.print("NO LONGER APPLIES: ");
-                        System.out.println(play == null ? "PLAY NULL" : "BEST PLAY CHANGED");
-                        break;
-                    }
-                }
-                if (unchanged) {
+                if (!isLiteralRelevant(l, copy)) {
                     System.out.println("REMOVING: " + l.name);
                     minSet.remove(l);
                 }
@@ -177,6 +134,74 @@ public class FFTAutoGen {
             for (Literal l : minSet)
                 System.out.print(l.name + " ");
             System.out.println();
+        }
+
+        boolean isLiteralRelevant(Literal l, HashSet<Literal> stateLits) {
+            Literal origLiteral = new Literal(l);
+            for (int i = PIECEOCC_NONE; i <= PIECEOCC_ANY; i++) {
+                if (origLiteral.pieceOcc == i) // Only change to new pieceocc
+                    continue;
+                System.out.print("CHANGING: " + l.name);
+                l.setPieceOcc(i);
+                System.out.println(" TO: " + l.name);
+                for (Literal l1 : stateLits) {
+                    if (l1.equals(origLiteral))
+                        continue;
+                    changeLiteral(l, l1, origLiteral.pieceOcc);
+                    State newState = (State) FFTManager.preconsToState.apply(stateLits, PLAYER1);
+                    System.out.println("NEWSTATE" + newState.print());
+                    MinimaxPlay play = lookupTable.get(newState);
+                    if (play != null && play.move == this.move) {
+                        l.setPieceOcc(origLiteral.pieceOcc);
+                        System.out.print("PLAY: " + play.move.print());
+                        System.out.print(",  STILL APPLIES: ");
+                        return false;
+                    }
+                }
+            }
+            l.setPieceOcc(origLiteral.pieceOcc);
+            return false;
+        }
+
+        void changeLiteral(Literal stableLit, Literal targetLit, int prevPieceOcc) {
+            if (prevPieceOcc == PIECEOCC_PLAYER) {
+                if (stableLit.pieceOcc == PIECEOCC_NONE) {
+                    if (targetLit.pieceOcc == PIECEOCC_ENEMY)
+                        targetLit.setPieceOcc(PIECEOCC_NONE);
+                    else if (targetLit.pieceOcc == PIECEOCC_NONE)
+                        targetLit.setPieceOcc(PIECEOCC_PLAYER);
+                }
+                else if (stableLit.pieceOcc == PIECEOCC_ENEMY) {
+                    if (targetLit.pieceOcc == PIECEOCC_ENEMY)
+                        targetLit.setPieceOcc(PIECEOCC_PLAYER);
+                }
+            }
+            else if (prevPieceOcc == PIECEOCC_ENEMY) {
+                if (stableLit.pieceOcc == PIECEOCC_NONE) {
+                    if (targetLit.pieceOcc == PIECEOCC_PLAYER)
+                        targetLit.setPieceOcc(PIECEOCC_NONE);
+                    else if (targetLit.pieceOcc == PIECEOCC_NONE)
+                        targetLit.setPieceOcc(PIECEOCC_ENEMY);
+                }
+                else if (stableLit.pieceOcc == PIECEOCC_PLAYER) {
+                    if (targetLit.pieceOcc == PIECEOCC_PLAYER)
+                        targetLit.setPieceOcc(PIECEOCC_ENEMY);
+                }
+            }
+            else if (prevPieceOcc == PIECEOCC_NONE) {
+                if (stableLit.pieceOcc == PIECEOCC_PLAYER) {
+                    if (targetLit.pieceOcc == PIECEOCC_NONE)
+                        targetLit.setPieceOcc(PIECEOCC_ENEMY);
+                    else if (targetLit.pieceOcc == PIECEOCC_PLAYER)
+                        targetLit.setPieceOcc(PIECEOCC_NONE);
+                }
+                else if (stableLit.pieceOcc == PIECEOCC_ENEMY) {
+                    if (targetLit.pieceOcc == PIECEOCC_NONE)
+                        targetLit.setPieceOcc(PIECEOCC_PLAYER);
+                    else if (targetLit.pieceOcc == PIECEOCC_ENEMY)
+                        targetLit.setPieceOcc(PIECEOCC_NONE);
+                }
+            }
         }
     }
 

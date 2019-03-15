@@ -3,7 +3,7 @@ package fftlib;
 import java.util.Objects;
 
 public class Literal {
-    static final int PIECEOCC_NONE = -1;
+    public static final int PIECEOCC_NONE = 0;
     public static final int PIECEOCC_PLAYER = 1;
     public static final int PIECEOCC_ENEMY = 2;
     public static final int PIECEOCC_ANY = 3;
@@ -11,7 +11,7 @@ public class Literal {
     public int col = -1;
     public String name;
     public boolean boardPlacement;
-    public int pieceOcc = PIECEOCC_NONE;
+    public int pieceOcc = -1;
     public boolean negation;
     boolean error;
 
