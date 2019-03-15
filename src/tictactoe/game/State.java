@@ -3,15 +3,14 @@ package tictactoe.game;
 import fftlib.Literal;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
-import misc.Config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER_ANY;
+import static misc.Config.*;
+import static tictactoe.FFT.FFTAutoGen.INCLUDE_ILLEGAL_STATES;
 
 
 public class State implements FFTState {
@@ -59,6 +58,11 @@ public class State implements FFTState {
         for (Move m : getLegalMoves()) {
             State child = new State(this, m);
             children.add(child);
+            if (INCLUDE_ILLEGAL_STATES) {
+                State child1 = new State(this, m);
+                child1.setTurn(m.team);
+                children.add(child1);
+            }
         }
         return children;
     }
@@ -67,12 +71,13 @@ public class State implements FFTState {
     public boolean equals(Object obj) {
         if (!(obj instanceof State)) return false;
         State state = (State) obj;
-        return this == state || (Arrays.deepEquals(board, state.board));
+        return this == state || (Arrays.deepEquals(board, state.board) && turn == state.getTurn());
     }
 
     @Override
     public int hashCode() {
         int result = Arrays.deepHashCode(board);
+        result += Objects.hashCode(turn);
         return 31 * result;
 
     }

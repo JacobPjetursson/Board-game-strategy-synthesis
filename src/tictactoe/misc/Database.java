@@ -4,26 +4,30 @@ import fftlib.game.FFTDatabase;
 import fftlib.game.FFTMinimaxPlay;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
-import kulibrat.ai.Minimax.Minimax;
 import tictactoe.ai.MinimaxPlay;
-import tictactoe.game.State;
 import tictactoe.game.Logic;
 import tictactoe.game.Move;
+import tictactoe.game.State;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
+import static tictactoe.FFT.FFTAutoGen.INCLUDE_ILLEGAL_STATES;
 
 
 public class Database implements FFTDatabase {
     private static HashMap<State, MinimaxPlay> lookupTable;
+    // Used for autogen
+    private static HashMap<State, MinimaxPlay> lookupTableAll;
 
     // Outputs a list of the best plays from a given node. Checks through the children of a node to find the ones
     // which have the least amount of turns to terminal for win, or most for loss.
     public static ArrayList<Move> bestPlays(State n) {
         ArrayList<Move> bestPlays = new ArrayList<>();
+        if (Logic.gameOver(n))
+            return bestPlays;
         MinimaxPlay bestPlay = queryPlay(n);
         int bestScore = 0;
         if (!Logic.gameOver(n.getNextState(bestPlay.move))) {
@@ -105,6 +109,8 @@ public class Database implements FFTDatabase {
 
     // Fetches the best play corresponding to the input node
     private static MinimaxPlay queryPlay(State n) {
+        if (INCLUDE_ILLEGAL_STATES)
+            return lookupTableAll.get(n);
         return lookupTable.get(n);
     }
 
@@ -117,6 +123,12 @@ public class Database implements FFTDatabase {
         lookupTable = lookup;
     }
 
+    // Used for autogen
+    public static void fillLookupTableAll(HashMap<State, MinimaxPlay> lookup) {
+        lookupTableAll = lookup;
+
+    }
+
     public ArrayList<? extends FFTMove> nonLosingPlays(FFTState s) {
         return nonLosingPlays((State) s);
     }
@@ -127,6 +139,11 @@ public class Database implements FFTDatabase {
 
     public static HashMap<State, MinimaxPlay> getLookupTable() {
         return lookupTable;
+    }
+
+    // Used for autogen
+    public static HashMap<State, MinimaxPlay> getLookupTableAll() {
+        return lookupTableAll;
     }
 
 

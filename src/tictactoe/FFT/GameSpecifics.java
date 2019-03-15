@@ -45,6 +45,7 @@ public class GameSpecifics implements FFTGameSpecifics {
         for (Literal l : literals)
             if (l.boardPlacement && !l.negation && l.pieceOcc != PIECEOCC_ANY)
                 s.setBoardEntry(l.row, l.col, l.pieceOcc);
+        s.setTurn(team);
         return s;
     }
 

@@ -41,5 +41,5 @@ public class Config {
     // MISC
     public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";
     public static int SCORELIMIT; // Set by player once (kulibrat)
-    public static boolean FFT_OVERWRITE = false;
+    public static final boolean FFT_OVERWRITE = false;
 }

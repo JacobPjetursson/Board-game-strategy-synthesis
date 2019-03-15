@@ -6,19 +6,22 @@ import fftlib.game.FFTState;
 
 import java.util.ArrayList;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Config.*;
+import static tictactoe.FFT.FFTAutoGen.INCLUDE_ILLEGAL_STATES;
 
 
 public class Logic implements FFTLogic {
 
     static ArrayList<Move> legalMoves(int team, State state) {
         ArrayList<Move> list = new ArrayList<>();
+        int enemy = (team == PLAYER1) ? PLAYER2 : PLAYER1;
         int[][] board = state.getBoard();
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 if (board[i][j] == 0) {
                     list.add(new Move(i, j, team));
+                    if (INCLUDE_ILLEGAL_STATES)
+                        list.add(new Move(i, j, enemy));
                 }
             }
         }
@@ -27,7 +30,7 @@ public class Logic implements FFTLogic {
 
     public static void doTurn(Move m, State state) {
         if (getWinner(state) != 0) return;
-        else if (m.team != state.getTurn()) {
+        else if (!INCLUDE_ILLEGAL_STATES && m.team != state.getTurn()) {
             System.out.println("Not your turn");
             return;
         }

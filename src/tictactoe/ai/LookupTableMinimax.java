@@ -9,19 +9,32 @@ import java.util.HashMap;
 
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
+import static tictactoe.FFT.FFTAutoGen.INCLUDE_ILLEGAL_STATES;
 
 public class LookupTableMinimax implements AI {
     private int CURR_MAX_DEPTH;
     private int unevaluatedNodes = 0;
     private int team;
     private HashMap<State, MinimaxPlay> lookupTable;
+    private HashMap<State, MinimaxPlay> lookupTableAll;
 
 
     public LookupTableMinimax(int team, State state) {
         this.team = team;
         lookupTable = new HashMap<>();
-        iterativeDeepeningMinimax(state);
+        lookupTableAll = new HashMap<>();
+        // Need to produce two hash sets if this bool is set
+        boolean illegal_states_temp = INCLUDE_ILLEGAL_STATES;
+
+        INCLUDE_ILLEGAL_STATES = false;
+        iterativeDeepeningMinimax(state, lookupTable);
         Database.fillLookupTable(lookupTable);
+
+        if (illegal_states_temp) {
+            INCLUDE_ILLEGAL_STATES = true;
+            iterativeDeepeningMinimax(state, lookupTableAll);
+            Database.fillLookupTableAll(lookupTableAll);
+        }
     }
 
     // This function fetches the best move from lookuptable, if it exists
@@ -37,7 +50,7 @@ public class LookupTableMinimax implements AI {
     }
 
     // Runs an iterative deepening minimax as the exhaustive brute-force for the lookupDB. The data is saved in the transpo table
-    private MinimaxPlay iterativeDeepeningMinimax(State state) {
+    private MinimaxPlay iterativeDeepeningMinimax(State state, HashMap<State, MinimaxPlay> lookupTable) {
         CURR_MAX_DEPTH = 0;
         boolean done = false;
         MinimaxPlay play = null;
@@ -48,7 +61,7 @@ public class LookupTableMinimax implements AI {
             int prevUnevaluatedNodes = unevaluatedNodes;
             unevaluatedNodes = 0;
             CURR_MAX_DEPTH += 1;
-            play = minimax(simState, CURR_MAX_DEPTH);
+            play = minimax(simState, CURR_MAX_DEPTH, lookupTable);
             //System.out.println("CURRENT MAX DEPTH: " + CURR_MAX_DEPTH + ", LOOKUP TABLE SIZE: " + lookupTable.size() + ", UNEVALUATED NODES: " + unevaluatedNodes);
             if (lookupTable.size() == prevSize && unevaluatedNodes == prevUnevaluatedNodes) {
                 //System.out.println("State space explored, and unevaluated nodes unchanged between runs. I'm done");
@@ -56,19 +69,12 @@ public class LookupTableMinimax implements AI {
             } else
                 doneCounter = 0;
             if (doneCounter == 2) done = true;
-
-            if (Math.abs(play.score) >= 1000) {
-                String player = (team == PLAYER1) ? "PLAYER1" : "PLAYER2";
-                String opponent = (player.equals("PLAYER1")) ? "PLAYER2" : "PLAYER1";
-                String winner = (play.score >= 1000) ? player : opponent;
-                System.out.println("A SOLUTION HAS BEEN FOUND, WINNING STRAT GOES TO: " + winner);
-            }
         }
         return play;
     }
 
     // Is called for every depth limit of the iterative deepening function. Classic minimax with no pruning
-    private MinimaxPlay minimax(State state, int depth) {
+    private MinimaxPlay minimax(State state, int depth, HashMap<State, MinimaxPlay> lookupTable) {
         Move bestMove = null;
         int bestScore = (state.getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int score;
@@ -80,7 +86,7 @@ public class LookupTableMinimax implements AI {
             return transpoPlay;
         }
         for (State child : state.getChildren()) {
-            score = minimax(child, depth - 1).score;
+            score = minimax(child, depth - 1, lookupTable).score;
             if (score > 1000) score--;
             else score++;
 
