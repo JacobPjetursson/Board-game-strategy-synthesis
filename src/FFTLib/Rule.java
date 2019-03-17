@@ -45,6 +45,13 @@ public class Rule {
         errors = !isValidRuleFormat(this);
     }
 
+    public Rule(Clause precons, Action action) {
+        this.multiRule = false;
+        this.action = action;
+        this.preconditions = precons;
+        this.transformedPrecons = getTransformedPreconditions();
+    }
+
     // Empty constructor to allow rule buildup
     public Rule() {
         this.preconditions = new Clause();

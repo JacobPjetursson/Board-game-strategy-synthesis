@@ -133,6 +133,10 @@ public class Database implements FFTDatabase {
         return nonLosingPlays((State) s);
     }
 
+    public ArrayList<? extends FFTMove> bestPlays(FFTState state) {
+        return bestPlays((State) state);
+    }
+
     public FFTMinimaxPlay queryPlay(FFTState s) {
         return queryPlay((State) s);
     }

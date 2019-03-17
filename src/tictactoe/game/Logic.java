@@ -30,10 +30,7 @@ public class Logic implements FFTLogic {
 
     public static void doTurn(Move m, State state) {
         if (getWinner(state) != 0) return;
-        else if (!INCLUDE_ILLEGAL_STATES && m.team != state.getTurn()) {
-            System.out.println("Not your turn");
-            return;
-        }
+
         state.setBoardEntry(m.row, m.col, m.team);
 
         // Change turn

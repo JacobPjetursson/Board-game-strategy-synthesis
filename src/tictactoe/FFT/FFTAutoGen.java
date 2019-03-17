@@ -1,7 +1,8 @@
 package tictactoe.FFT;
 
-import fftlib.FFTManager;
-import fftlib.Literal;
+import fftlib.*;
+import fftlib.FFT;
+import fftlib.game.FFTMove;
 import tictactoe.ai.LookupTableMinimax;
 import tictactoe.ai.MinimaxPlay;
 import tictactoe.game.Move;
@@ -20,23 +21,50 @@ public class FFTAutoGen {
     static HashMap<Move, MoveGroup> moveGroups = new HashMap<>();
     private static HashMap<State, MinimaxPlay> lookupTable;
     private static HashMap<State, MinimaxPlay> lookupTableAll;
+    private static FFT fft;
 
     public static boolean INCLUDE_ILLEGAL_STATES = false; // Used for FFT autogen, when solving
 
     public static void main(String[] args) {
         GameSpecifics gs = new GameSpecifics(null);
         new FFTManager(gs);
-        INCLUDE_ILLEGAL_STATES = true;
+        fft = new FFT("Autogen");
+        fft.addRuleGroup(new RuleGroup("Autogen"));
         new LookupTableMinimax(PLAYER1, new State());
         lookupTable = Database.getLookupTable();
+
+        INCLUDE_ILLEGAL_STATES = true;
+        new LookupTableFullGen(PLAYER1);
         lookupTableAll = Database.getLookupTableAll();
 
         populateGroups(PLAYER1);
-        Move move = new Move(1, 0, PLAYER1);
-        moveGroups.get(move).makeStateGroups();
-
+        Move move = new Move(1, 1, PLAYER1);
+        moveGroups.get(move).makeRules();
+        move = new Move(0, 0, PLAYER1);
+        moveGroups.get(move).makeRules();
+        move = new Move(1, 0, PLAYER1);
+        moveGroups.get(move).makeRules();
 
         INCLUDE_ILLEGAL_STATES = false;
+    }
+
+    public static FFT generateFFT(int team) {
+        fft = new FFT("Autogen");
+        fft.addRuleGroup(new RuleGroup("Autogen"));
+        lookupTable = Database.getLookupTable();
+
+        new LookupTableFullGen(PLAYER1);
+        lookupTableAll = Database.getLookupTableAll();
+
+        populateGroups(team);
+        Move move = new Move(1, 1, PLAYER1);
+        moveGroups.get(move).makeRules();
+        move = new Move(0, 0, PLAYER1);
+        moveGroups.get(move).makeRules();
+        move = new Move(1, 0, PLAYER1);
+        moveGroups.get(move).makeRules();
+        INCLUDE_ILLEGAL_STATES = false;
+        return fft;
     }
 
 
@@ -75,29 +103,36 @@ public class FFTAutoGen {
 
     private static class MoveGroup {
         Move move;
-        private LinkedList<State> states;
-        private HashSet<Literal> allLiterals;
-        private LinkedList<LinkedList<State>> stateGroupings;
+        private PriorityQueue<State> states;
 
         MoveGroup(Move move) {
             this.move = move;
-            states = new LinkedList<>();
-            allLiterals = new HashSet<>();
-            stateGroupings = new LinkedList<>();
+
+            states = new PriorityQueue<>(new StateComparator());
         }
 
         public void add(State s) {
             states.add(s);
         }
 
-        public void generateAllLiterals() {
-            for (State s : states) {
-                allLiterals.addAll(s.getAllLiterals());
+        void makeRules() {
+            while (!states.isEmpty()) {
+                System.out.println("\nREMAINING STATES: " + states.size());
+                LinkedList<State> deleteList = new LinkedList<>();
+                State state = states.poll();
+                Rule r = makeRule(state);
+                fft.ruleGroups.get(0).rules.add(r);
+                System.out.println("FINAL RULE: " + r.print());
+                for (State s : states) {
+                    FFTMove m = r.apply(s);
+                    if (m != null)
+                        deleteList.add(s);
+                }
+                states.removeAll(deleteList);
             }
         }
 
-        void makeStateGroups() {
-            State s = states.get(0);
+        Rule makeRule(State s) {
             HashSet<Literal> minSet = new HashSet<>();
             HashSet<Literal> copy = new HashSet<>();
             MinimaxPlay bestPlay = lookupTable.get(s);
@@ -105,6 +140,7 @@ public class FFTAutoGen {
                 minSet.add(new Literal(l));
                 copy.add(new Literal(l));
             }
+
             // DEBUG
             System.out.print("ORIGINAL LITERALS: ");
             for (Literal l : copy)
@@ -112,6 +148,8 @@ public class FFTAutoGen {
             System.out.println();
             System.out.println("ORIGINAL STATE: " + s.print());
             System.out.println("ORIGINAL MOVE: " + move.print());
+            System.out.println("ORIGINAL SCORE: " + bestPlay.score);
+
 
             for (Literal l : copy) {
                 if (!isLiteralRelevant(l, copy, bestPlay)) {
@@ -119,6 +157,9 @@ public class FFTAutoGen {
                     minSet.remove(l);
                 }
             }
+
+            // DEBUG
+
             System.out.print("ALL LITERALS: ");
             for (Literal l : s.getAllLiterals())
                 System.out.print(l.name + " ");
@@ -127,6 +168,12 @@ public class FFTAutoGen {
             for (Literal l : minSet)
                 System.out.print(l.name + " ");
             System.out.println();
+
+
+            // Convert minSet with move to rule
+            ArrayList<Literal> lits = new ArrayList<>(minSet);
+            Clause precons = new Clause(lits);
+            return new Rule(precons, move.getAction());
         }
 
         boolean isLiteralRelevant(Literal l, HashSet<Literal> stateLits, MinimaxPlay bestPlay) {
@@ -144,7 +191,11 @@ public class FFTAutoGen {
                 ArrayList<Move> bestMoves = Database.bestPlays(newState);
                 MinimaxPlay newBestPlay = lookupTableAll.get(newState);
                 boolean relevant = false;
-                if (newBestPlay != null && newBestPlay.score != bestPlay.score)
+                if (newBestPlay != null)
+                    System.out.println("NEW SCORE: " + newBestPlay.score + " , OLD SCORE: " + bestPlay.score);
+                if (newBestPlay != null && bestPlay.score > 1000 && newBestPlay.score < bestPlay.score)
+                    relevant = true;
+                if (newBestPlay != null && bestPlay.score >= 0 && newBestPlay.score < 0)
                     relevant = true;
                 if (!bestMoves.isEmpty() && !bestMoves.contains(this.move))
                     relevant = true;
@@ -160,6 +211,21 @@ public class FFTAutoGen {
             l.setPieceOcc(origLiteral.pieceOcc);
             l.setNegation(origLiteral.negation);
             return false;
+        }
+
+    }
+
+    private static class StateComparator implements Comparator<State>{
+
+        @Override
+        public int compare(State s1, State s2) {
+            int s1_score = lookupTable.get(s1).score;
+            int s2_score = lookupTable.get(s2).score;
+            if (s1_score < s2_score)
+                return 1;
+            else if (s1_score > s2_score)
+                return -1;
+            return 0;
         }
     }
 

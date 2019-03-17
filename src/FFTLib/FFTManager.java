@@ -5,6 +5,7 @@ import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
 import javafx.scene.input.DataFormat;
+import tictactoe.FFT.FFTAutoGen;
 import tictactoe.misc.Database;
 
 import java.io.BufferedWriter;
@@ -17,6 +18,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 
 import static misc.Config.FFT_OVERWRITE;
+import static misc.Config.PLAYER1;
 
 
 public class FFTManager {
@@ -155,9 +157,9 @@ public class FFTManager {
         return failState.getFailState(ps, nonLosingPlays);
     }
 
-    public FFT AutoGenFFT() {
-
-        return null;
+    public void autogenFFT() {
+        FFT fft = FFTAutoGen.generateFFT(PLAYER1);
+        ffts.add(fft);
     }
 
 }
