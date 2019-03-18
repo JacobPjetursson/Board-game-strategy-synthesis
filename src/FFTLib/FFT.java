@@ -2,7 +2,6 @@ package fftlib;
 
 import fftlib.game.*;
 import misc.Config;
-import tictactoe.misc.Database;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,12 +23,7 @@ public class FFT {
         FFTManager.save();
     }
 
-    // Overload for simply verification
     public boolean verify(int team, boolean wholeFFT) {
-        return verify(team, wholeFFT, null);
-    }
-
-    public boolean verify(int team, boolean wholeFFT, FFTMinimaxPlay prevBestPlay) {
         FFTState initialState = FFTManager.initialFFTState;
         LinkedList<FFTState> frontier = new LinkedList<>();
         HashSet<FFTState> closedSet = new HashSet<>();
@@ -60,7 +54,7 @@ public class FFT {
                         frontier.add(child);
                     }
             } else {
-                FFTMove move = makeMove(state);
+                FFTMove move = apply(state);
                 ArrayList<? extends FFTMove> nonLosingPlays = FFTManager.db.nonLosingPlays(state);
                 // If move is null, check that all possible (random) moves are ok
                 if (move == null) {
@@ -76,18 +70,6 @@ public class FFT {
                             failingPoint = new FFTStateAndMove(state, m, true);
                             return false;
                         }
-                    }
-                } else if (prevBestPlay != null) { // requires chosen move to be as good as prev best move
-                    FFTMinimaxPlay bestPlay = FFTManager.db.queryPlay(state);
-                    System.out.println(state.print());
-                    System.out.println(prevBestPlay.getScore() + "  " + bestPlay.getScore());
-                    System.out.println("PREV MOVE: " + prevBestPlay.getMove().print());
-                    System.out.println("NEW MOVE: " + bestPlay.getMove().print());
-                    System.out.println();
-                    if (prevBestPlay.getScore() > 1000 && bestPlay.getScore() < prevBestPlay.getScore()) {
-                        //System.out.println("FFT applied, but its move was not among the best moves");
-                        failingPoint = new FFTStateAndMove(state, move, false);
-                        return false;
                     }
                 } else if (!nonLosingPlays.contains(move)) {
                     System.out.println("FFT applied, but its move lost you the game");
@@ -105,7 +87,7 @@ public class FFT {
         return true;
     }
 
-    private FFTMove makeMove(FFTState state) {
+    public FFTMove apply(FFTState state) {
         for (RuleGroup ruleGroup : ruleGroups) {
             for (Rule rule : ruleGroup.rules) {
                     FFTMove move = rule.apply(state);

@@ -40,10 +40,12 @@ public class FFTAutoGen {
         populateGroups(PLAYER1);
         Move move = new Move(1, 1, PLAYER1);
         moveGroups.get(move).makeRules();
+
         move = new Move(0, 0, PLAYER1);
         moveGroups.get(move).makeRules();
         move = new Move(1, 0, PLAYER1);
         moveGroups.get(move).makeRules();
+
 
         INCLUDE_ILLEGAL_STATES = false;
     }
@@ -53,6 +55,7 @@ public class FFTAutoGen {
         fft.addRuleGroup(new RuleGroup("Autogen"));
         lookupTable = Database.getLookupTable();
 
+        INCLUDE_ILLEGAL_STATES = true;
         new LookupTableFullGen(PLAYER1);
         lookupTableAll = Database.getLookupTableAll();
 
@@ -136,6 +139,10 @@ public class FFTAutoGen {
             HashSet<Literal> minSet = new HashSet<>();
             HashSet<Literal> copy = new HashSet<>();
             MinimaxPlay bestPlay = lookupTable.get(s);
+            State enemyS = new State(s);
+            enemyS.setTurn(s.getTurn() == PLAYER1 ? PLAYER2 : PLAYER1);
+            MinimaxPlay bestEnemyPlay = lookupTableAll.get(enemyS);
+
             for (Literal l : s.getAllLiterals()) {
                 minSet.add(new Literal(l));
                 copy.add(new Literal(l));
@@ -149,17 +156,16 @@ public class FFTAutoGen {
             System.out.println("ORIGINAL STATE: " + s.print());
             System.out.println("ORIGINAL MOVE: " + move.print());
             System.out.println("ORIGINAL SCORE: " + bestPlay.score);
-
+            System.out.println("ORIGINAL ENEMY SCORE: " + bestEnemyPlay.score);
 
             for (Literal l : copy) {
-                if (!isLiteralRelevant(l, copy, bestPlay)) {
+                if (!isLiteralRelevant(l, copy, bestPlay, bestEnemyPlay)) {
                     System.out.println("REMOVING: " + l.name);
                     minSet.remove(l);
                 }
             }
 
             // DEBUG
-
             System.out.print("ALL LITERALS: ");
             for (Literal l : s.getAllLiterals())
                 System.out.print(l.name + " ");
@@ -176,7 +182,7 @@ public class FFTAutoGen {
             return new Rule(precons, move.getAction());
         }
 
-        boolean isLiteralRelevant(Literal l, HashSet<Literal> stateLits, MinimaxPlay bestPlay) {
+        boolean isLiteralRelevant(Literal l, HashSet<Literal> stateLits, MinimaxPlay bestPlay, MinimaxPlay bestEnemyPlay) {
             Literal origLiteral = new Literal(l);
             for (int i = PIECEOCC_PLAYER; i <= PIECEOCC_ANY; i++) {
                 if (origLiteral.pieceOcc == i) // Only change to new pieceocc
@@ -187,23 +193,46 @@ public class FFTAutoGen {
                 System.out.println(" TO: " + l.name);
 
                 State newState = (State) FFTManager.preconsToState.apply(stateLits, PLAYER1);
-                System.out.println("NEWSTATE" + newState.print());
+/*
+                FFTMove verificationMove = fft.apply(newState);
+                if (verificationMove != null && verificationMove.equals(move)) {
+                    System.out.println("NEWSTATE APPLIES TO PREVIOUS RULES: " + verificationMove.print());
+                    continue;
+                }
+*/
+                State newEnemyState = new State(newState);
+                newEnemyState.setTurn(newState.getTurn() == PLAYER1 ? PLAYER2 : PLAYER1);
+                System.out.println("NEWSTATE" + newState.print() + " , TEAM: " + newState.getTurn());
                 ArrayList<Move> bestMoves = Database.bestPlays(newState);
                 MinimaxPlay newBestPlay = lookupTableAll.get(newState);
+                MinimaxPlay newBestEnemyPlay = lookupTableAll.get(newEnemyState);
                 boolean relevant = false;
                 if (newBestPlay != null)
-                    System.out.println("NEW SCORE: " + newBestPlay.score + " , OLD SCORE: " + bestPlay.score);
-                if (newBestPlay != null && bestPlay.score > 1000 && newBestPlay.score < bestPlay.score)
+                    System.out.println("NEW SCORE: " + newBestPlay.score + " , OLD SCORE: " + bestPlay.score + "  , ENEMY SCORE: " + newBestEnemyPlay.score);
+                if (newBestEnemyPlay != null && bestEnemyPlay.score > -1000 && newBestEnemyPlay.score < -1000) {
+                    System.out.print("ENEMY STRATEGY CHANGED!\t");
                     relevant = true;
-                if (newBestPlay != null && bestPlay.score >= 0 && newBestPlay.score < 0)
+                }
+                else if (newBestPlay != null && bestPlay.score > 1000 && newBestPlay.score < bestPlay.score) {
+                    System.out.print("WIN IN LESS TURNS TO NO WIN AT ALL!\t");
                     relevant = true;
-                if (!bestMoves.isEmpty() && !bestMoves.contains(this.move))
+                }
+                else if (newBestPlay != null && bestPlay.score >= 0 && newBestPlay.score < 0) {
+                    System.out.print("FROM DRAW TO LOSS!\t");
                     relevant = true;
+                }
+                else if (!bestMoves.isEmpty() && !bestMoves.contains(this.move)) {
+                    System.out.print("MOVE IS NOT AMONG BEST MOVES FOR THAT STATE! BEST MOVES ARE:\t");
+                    for (Move m : bestMoves)
+                        System.out.print(m.print() + "\t");
+                    System.out.println();
+                    relevant = true;
+                }
 
                 if (relevant) {
                     l.setPieceOcc(origLiteral.pieceOcc);
                     l.setNegation(origLiteral.negation);
-                    System.out.println("WRONG PLAY");
+                    System.out.println(l.name + " IS RELEVANT");
                     return true;
                 }
 

@@ -59,8 +59,8 @@ public class State implements FFTState {
             State child = new State(this, m);
             children.add(child);
             if (INCLUDE_ILLEGAL_STATES) {
-                State child1 = new State(this, m);
-                child1.setTurn(m.team);
+                State child1 = new State(child);
+                child1.setTurn(child.getTurn() == PLAYER1 ? PLAYER2 : PLAYER1);
                 children.add(child1);
             }
         }

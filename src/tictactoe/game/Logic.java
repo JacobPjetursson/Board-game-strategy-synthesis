@@ -34,7 +34,7 @@ public class Logic implements FFTLogic {
         state.setBoardEntry(m.row, m.col, m.team);
 
         // Change turn
-        if (m.team == PLAYER1) state.setTurn(PLAYER2);
+        if (state.getTurn() == PLAYER1) state.setTurn(PLAYER2);
         else state.setTurn(PLAYER1);
     }
 

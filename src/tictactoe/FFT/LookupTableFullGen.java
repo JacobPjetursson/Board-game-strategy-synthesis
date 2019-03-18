@@ -21,18 +21,25 @@ public class LookupTableFullGen {
     public LookupTableFullGen(int team) {
         this.team = team;
         lookupTableAll = new HashMap<>();
-        for (State s : getStateSpace())
+        HashSet<State> statespace = getStateSpace();
+
+        INCLUDE_ILLEGAL_STATES = false;
+        for (State s : statespace)
             minimax(s, 0);
         Database.fillLookupTableAll(lookupTableAll);
         INCLUDE_ILLEGAL_STATES = true;
+
     }
 
     private HashSet<State> getStateSpace() {
-        INCLUDE_ILLEGAL_STATES = true;
         HashSet<State> statespace = new HashSet<>();
         State initial_state = new State();
         stateSpaceSearch(initial_state, statespace);
-        INCLUDE_ILLEGAL_STATES = false;
+
+        State enemy_initial_state = new State();
+        enemy_initial_state.setTurn(team == PLAYER1 ? PLAYER2 : PLAYER1);
+        statespace.add(enemy_initial_state);
+
         return statespace;
     }
 
@@ -74,7 +81,6 @@ public class LookupTableFullGen {
                 }
             }
         }
-
         lookupTableAll.put(state, new MinimaxPlay(bestMove, bestScore, depth));
         return new MinimaxPlay(bestMove, bestScore, depth);
     }

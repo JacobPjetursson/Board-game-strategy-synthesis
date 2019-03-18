@@ -35,9 +35,10 @@ public class Database implements FFTDatabase {
         }
         for (State child : n.getChildren()) {
             Move m = child.getMove();
+
             State state = n.getNextState(m);
             if (Logic.gameOver(state)) {
-                if (Logic.getWinner(state) == m.team)
+                if (Logic.getWinner(state) == bestPlay.move.getTeam())
                     bestPlays.add(m);
             } else if (queryPlay(child).score == bestScore) {
                 bestPlays.add(m);
