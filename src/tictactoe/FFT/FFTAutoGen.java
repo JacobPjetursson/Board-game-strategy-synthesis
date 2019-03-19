@@ -40,7 +40,6 @@ public class FFTAutoGen {
         populateGroups(PLAYER1);
         Move move = new Move(1, 1, PLAYER1);
         moveGroups.get(move).makeRules();
-
         move = new Move(0, 0, PLAYER1);
         moveGroups.get(move).makeRules();
         move = new Move(1, 0, PLAYER1);
@@ -203,7 +202,7 @@ public class FFTAutoGen {
                 State newEnemyState = new State(newState);
                 newEnemyState.setTurn(newState.getTurn() == PLAYER1 ? PLAYER2 : PLAYER1);
                 System.out.println("NEWSTATE" + newState.print() + " , TEAM: " + newState.getTurn());
-                ArrayList<Move> bestMoves = Database.bestPlays(newState);
+                ArrayList<Move> nonLosingMoves = Database.nonLosingPlays(newState);
                 MinimaxPlay newBestPlay = lookupTableAll.get(newState);
                 MinimaxPlay newBestEnemyPlay = lookupTableAll.get(newEnemyState);
                 boolean relevant = false;
@@ -213,17 +212,17 @@ public class FFTAutoGen {
                     System.out.print("ENEMY STRATEGY CHANGED!\t");
                     relevant = true;
                 }
-                else if (newBestPlay != null && bestPlay.score > 1000 && newBestPlay.score < bestPlay.score) {
-                    System.out.print("WIN IN LESS TURNS TO NO WIN AT ALL!\t");
+                else if (newBestPlay != null && bestPlay.score > 1000 && newBestPlay.score < 1000) {
+                    System.out.print("FROM WIN TO DRAW/LOSS!\t");
                     relevant = true;
                 }
                 else if (newBestPlay != null && bestPlay.score >= 0 && newBestPlay.score < 0) {
                     System.out.print("FROM DRAW TO LOSS!\t");
                     relevant = true;
                 }
-                else if (!bestMoves.isEmpty() && !bestMoves.contains(this.move)) {
-                    System.out.print("MOVE IS NOT AMONG BEST MOVES FOR THAT STATE! BEST MOVES ARE:\t");
-                    for (Move m : bestMoves)
+                else if (!nonLosingMoves.isEmpty() && !nonLosingMoves.contains(this.move)) {
+                    System.out.print("MOVE IS NOT AMONG NONLOSING MOVES FOR THAT STATE! NONLOSING MOVES ARE:\t");
+                    for (Move m : nonLosingMoves)
                         System.out.print(m.print() + "\t");
                     System.out.println();
                     relevant = true;

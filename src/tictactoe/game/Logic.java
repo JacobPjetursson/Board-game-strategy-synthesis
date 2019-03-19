@@ -14,14 +14,11 @@ public class Logic implements FFTLogic {
 
     static ArrayList<Move> legalMoves(int team, State state) {
         ArrayList<Move> list = new ArrayList<>();
-        int enemy = (team == PLAYER1) ? PLAYER2 : PLAYER1;
         int[][] board = state.getBoard();
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 if (board[i][j] == 0) {
                     list.add(new Move(i, j, team));
-                    if (INCLUDE_ILLEGAL_STATES)
-                        list.add(new Move(i, j, enemy));
                 }
             }
         }

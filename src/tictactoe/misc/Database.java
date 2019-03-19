@@ -38,7 +38,7 @@ public class Database implements FFTDatabase {
 
             State state = n.getNextState(m);
             if (Logic.gameOver(state)) {
-                if (Logic.getWinner(state) == bestPlay.move.getTeam())
+                if (Logic.getWinner(state) == m.getTeam())
                     bestPlays.add(m);
             } else if (queryPlay(child).score == bestScore) {
                 bestPlays.add(m);
@@ -69,12 +69,15 @@ public class Database implements FFTDatabase {
         }
     }
 
-    private static ArrayList<Move> nonLosingPlays(State n) {
+    public static ArrayList<Move> nonLosingPlays(State n) {
         ArrayList<Move> nonLosingPlays = new ArrayList<>();
+        if (Logic.gameOver(n))
+            return nonLosingPlays;
         MinimaxPlay bestPlay = queryPlay(n);
         int bestScore = 0;
         int winner = 0;
         boolean gameover = false;
+
         State next = n.getNextState(bestPlay.move);
         if (Logic.gameOver(next)) {
             gameover = true;

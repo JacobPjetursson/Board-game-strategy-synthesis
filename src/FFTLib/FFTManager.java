@@ -159,7 +159,8 @@ public class FFTManager {
 
     public void autogenFFT() {
         FFT fft = FFTAutoGen.generateFFT(PLAYER1);
-        ffts.add(fft);
+        ffts.add(0, fft);
+        currFFT = fft;
     }
 
 }

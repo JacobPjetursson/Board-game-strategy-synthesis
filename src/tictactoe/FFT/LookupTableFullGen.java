@@ -38,7 +38,7 @@ public class LookupTableFullGen {
 
         State enemy_initial_state = new State();
         enemy_initial_state.setTurn(team == PLAYER1 ? PLAYER2 : PLAYER1);
-        statespace.add(enemy_initial_state);
+        stateSpaceSearch(enemy_initial_state, statespace);
 
         return statespace;
     }
