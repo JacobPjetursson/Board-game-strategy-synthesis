@@ -27,16 +27,14 @@ public class Transform {
             if (!(obj instanceof TransformedArray)) return false;
 
             TransformedArray arr = (TransformedArray) obj;
-            if (this == arr)
-                return true;
-            return Arrays.deepEquals(this.board, arr.board) && this.transformations.equals(arr.transformations);
+            if (this == arr) return true;
+            return Arrays.deepEquals(this.board, arr.board);
         }
 
         @Override
         public int hashCode() {
             int hash = 0;
             hash += Arrays.deepHashCode(this.board);
-            hash += this.transformations.hashCode();
             return 31 * hash;
         }
     }

@@ -76,7 +76,6 @@ public class LookupTableMinimax implements AI {
             score = minimax(child, depth - 1).score;
             if (score > 1000) score--;
             else score++;
-
             if (state.getTurn() == team) {
                 if (score > bestScore) {
                     bestScore = score;

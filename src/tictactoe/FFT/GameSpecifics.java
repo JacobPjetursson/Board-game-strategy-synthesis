@@ -15,7 +15,10 @@ import tictactoe.misc.Database;
 import java.util.HashSet;
 
 import static fftlib.Literal.PIECEOCC_ANY;
+import static fftlib.Literal.PIECEOCC_PLAYER;
 import static fftlib.game.Transform.*;
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
 
 
 public class GameSpecifics implements FFTGameSpecifics {
@@ -42,9 +45,17 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public FFTState preconsToState(HashSet<Literal> literals, int team) {
         State s = new State();
+        int opponent = team == PLAYER1 ? PLAYER2 : PLAYER1;
         for (Literal l : literals)
-            if (l.boardPlacement && !l.negation && l.pieceOcc != PIECEOCC_ANY)
-                s.setBoardEntry(l.row, l.col, l.pieceOcc);
+            if (l.boardPlacement && !l.negation && l.pieceOcc != PIECEOCC_ANY) {
+                int entry;
+                if (l.pieceOcc == PIECEOCC_PLAYER)
+                    entry = team;
+                else
+                    entry = opponent;
+
+                s.setBoardEntry(l.row, l.col, entry);
+            }
         s.setTurn(team);
         return s;
     }

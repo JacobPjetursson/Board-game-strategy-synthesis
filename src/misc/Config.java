@@ -36,7 +36,7 @@ public class Config {
 
     // BOARD CONFIG
     public static final int kuliBWidth = 3;
-    public static final int kuliBHeight = 4;
+    public static final int kuliBHeight = 3;
 
     // MISC
     public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";

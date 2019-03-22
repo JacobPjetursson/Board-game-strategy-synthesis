@@ -9,8 +9,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 
+import static fftlib.game.Transform.*;
 import static misc.Config.*;
-import static tictactoe.FFT.FFTAutoGen.INCLUDE_ILLEGAL_STATES;
+import static tictactoe.FFT.LookupTableFullGen.BUILD_FULL_STATE_SPACE;
 
 
 public class State implements FFTState {
@@ -18,6 +19,7 @@ public class State implements FFTState {
     private int turn;
     private ArrayList<Move> legalMoves;
     private Move move;
+    private static int[] transformations = {TRANS_HREF, TRANS_VREF, TRANS_ROT};
 
     // Starting state
     public State() {
@@ -58,7 +60,7 @@ public class State implements FFTState {
         for (Move m : getLegalMoves()) {
             State child = new State(this, m);
             children.add(child);
-            if (INCLUDE_ILLEGAL_STATES) {
+            if (BUILD_FULL_STATE_SPACE) {
                 State child1 = new State(child);
                 child1.setTurn(child.getTurn() == PLAYER1 ? PLAYER2 : PLAYER1);
                 children.add(child1);
@@ -71,11 +73,17 @@ public class State implements FFTState {
     public boolean equals(Object obj) {
         if (!(obj instanceof State)) return false;
         State state = (State) obj;
-        return this == state || (Arrays.deepEquals(board, state.board) && turn == state.getTurn());
+        if (this == state) return true;
+        /*
+        return (Transform.applyAll(transformations, board).equals(
+                Transform.applyAll(transformations, state.getBoard())) && turn == state.getTurn());
+        */
+        return Arrays.deepEquals(board, state.board) && turn == state.getTurn();
     }
 
     @Override
     public int hashCode() {
+        //int result = Transform.applyAll(transformations, board).hashCode();
         int result = Arrays.deepHashCode(board);
         result += Objects.hashCode(turn);
         return 31 * result;

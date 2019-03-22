@@ -1,5 +1,6 @@
 package tictactoe.FFT;
 
+import kulibrat.ai.Minimax.Minimax;
 import tictactoe.ai.MinimaxPlay;
 import tictactoe.game.Logic;
 import tictactoe.game.Move;
@@ -16,18 +17,19 @@ import static tictactoe.FFT.FFTAutoGen.INCLUDE_ILLEGAL_STATES;
 public class LookupTableFullGen {
     private int team;
     private HashMap<State, MinimaxPlay> lookupTableAll;
+    public static boolean BUILD_FULL_STATE_SPACE = false;
 
 
     public LookupTableFullGen(int team) {
+        BUILD_FULL_STATE_SPACE = true;
         this.team = team;
         lookupTableAll = new HashMap<>();
         HashSet<State> statespace = getStateSpace();
 
-        INCLUDE_ILLEGAL_STATES = false;
+        BUILD_FULL_STATE_SPACE = false;
         for (State s : statespace)
             minimax(s, 0);
         Database.fillLookupTableAll(lookupTableAll);
-        INCLUDE_ILLEGAL_STATES = true;
 
     }
 

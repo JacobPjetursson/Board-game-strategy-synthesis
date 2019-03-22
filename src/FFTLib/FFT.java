@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 
+import static misc.Config.PLAYER2;
+
 
 public class FFT {
     public String name;
@@ -28,13 +30,13 @@ public class FFT {
         LinkedList<FFTState> frontier = new LinkedList<>();
         HashSet<FFTState> closedSet = new HashSet<>();
         frontier.add(initialState);
-        int opponent = (team == Config.PLAYER1) ? Config.PLAYER2 : Config.PLAYER1;
+        int opponent = (team == Config.PLAYER1) ? PLAYER2 : Config.PLAYER1;
         // Check if win or draw is even possible
         int score = FFTManager.db.queryPlay(initialState).getScore();
         if (team == Config.PLAYER1 && score < -1000) {
             System.out.println("A perfect player 2 has won from start of the game");
             return false;
-        } else if (team == Config.PLAYER2 && score > 1000) {
+        } else if (team == PLAYER2 && score > 1000) {
             System.out.println("A perfect player 1 has won from the start of the game");
             return false;
         }
