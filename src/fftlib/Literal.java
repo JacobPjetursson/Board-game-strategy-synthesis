@@ -3,6 +3,7 @@ package fftlib;
 import java.util.Objects;
 
 public class Literal {
+    public static final int NOT_A_PIECE = -1;
     public static final int PIECEOCC_NONE = 0;
     public static final int PIECEOCC_PLAYER = 1;
     public static final int PIECEOCC_ENEMY = 2;

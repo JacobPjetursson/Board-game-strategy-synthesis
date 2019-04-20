@@ -134,7 +134,7 @@ public class Logic implements FFTLogic {
             state.setBoardEntry(m.oldRow, m.oldCol, 0);
         }
         // Change turn
-        if (m.team == PLAYER1) state.setTurn(PLAYER2);
+        if (state.getTurn() == PLAYER1) state.setTurn(PLAYER2);
         else state.setTurn(PLAYER1);
         // If the new player has no move, pass that turn
         if (legalMoves(state.getTurn(), state).isEmpty()) {
@@ -142,12 +142,12 @@ public class Logic implements FFTLogic {
         }
     }
 
-    // Passes the turn for the current player
     public static boolean gameOver(State state) {
         return state.getScore(PLAYER1) == state.getScoreLimit() ||
                 state.getScore(PLAYER2) == state.getScoreLimit() || locked(state);
     }
 
+    // Passes the turn for the current player
     private static void passTurn(State state) {
         if (state.getTurn() == PLAYER1) state.setTurn(PLAYER2);
         else state.setTurn(PLAYER1);

@@ -107,7 +107,7 @@ public class InteractiveState implements InteractiveFFTState {
         HashSet<Literal> literals = s.getLiterals();
         ArrayList<Literal> literalList = new ArrayList<>(literals);
         // Remove scorelimit and points
-        ArrayList<Literal> lits = new ArrayList<>();
+        HashSet<Literal> lits = new HashSet<>();
         for (Literal l : literalList)
             if (l.boardPlacement)
                 lits.add(l);

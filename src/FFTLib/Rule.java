@@ -2,22 +2,23 @@ package fftlib;
 
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
+import fftlib.game.FFTStateAndMove;
 import fftlib.game.Transform;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.*;
 
 import static fftlib.Literal.PIECEOCC_ANY;
 import static fftlib.Literal.PIECEOCC_ENEMY;
 import static fftlib.Literal.PIECEOCC_PLAYER;
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
+import static misc.Config.PLAYER_ANY;
 
 
 public class Rule {
     private static final ArrayList<String> separators = new ArrayList<>(
             Arrays.asList("and", "And", "AND", "&", "∧"));
-    private ArrayList<Clause> transformedPrecons;
+    private HashSet<Clause> transformedPrecons;
     public Clause preconditions;
     public Action action;
     private String actionStr, preconStr;
@@ -163,7 +164,7 @@ public class Rule {
     }
 
     private static Clause getPreconditions(String clauseStr) {
-        ArrayList<Literal> literals = new ArrayList<>();
+        HashSet<Literal> literals = new HashSet<>();
         for (String c : prepPreconditions(clauseStr)) {
             literals.add(new Literal(c));
         }
@@ -297,9 +298,9 @@ public class Rule {
             return actionStr;
     }
 
-    private ArrayList<Clause> getTransformedPreconditions() {
-        ArrayList<Clause> transformedPrecons = new ArrayList<>();
-        ArrayList<Literal> nonBoardPlacements = preconditions.extractNonBoardPlacements();
+    private HashSet<Clause> getTransformedPreconditions() {
+        HashSet<Clause> transformedPrecons = new HashSet<>();
+        HashSet<Literal> nonBoardPlacements = preconditions.extractNonBoardPlacements();
         int[][] cBoard = preconsToBoard(preconditions);
         HashSet<Transform.TransformedArray> tSet = Transform.applyAll(FFTManager.gameSymmetries, cBoard);
         for (Transform.TransformedArray tArr : tSet)
@@ -352,6 +353,67 @@ public class Rule {
         return null;
     }
 
+    public boolean verify(int team) {
+        if (team == PLAYER_ANY)
+            return verify(PLAYER1) && verify(PLAYER2);
+        FFTState initialState = FFTManager.initialFFTState;
+        LinkedList<FFTState> frontier = new LinkedList<>();
+        HashSet<FFTState> closedSet = new HashSet<>();
+        frontier.add(initialState);
+        int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
+        // Check if win or draw is even possible
+        int score = FFTManager.db.queryPlay(initialState).getScore();
+        if (team == PLAYER1 && score < -1000) {
+            System.out.println("A perfect player 2 has won from start of the game");
+            return false;
+        } else if (team == PLAYER2 && score > 1000) {
+            System.out.println("A perfect player 1 has won from the start of the game");
+            return false;
+        }
+
+        while (!frontier.isEmpty()) {
+            FFTState state = frontier.pop();
+            if (FFTManager.logic.gameOver(state)) {
+                if (FFTManager.logic.getWinner(state) == opponent) {
+                    // Should not hit this given initial check
+                    System.out.println("No chance of winning vs. perfect player");
+                    return false;
+                }
+            } else if (team != state.getTurn()) {
+                for (FFTState child : state.getChildren())
+                    if (!closedSet.contains(child)) {
+                        closedSet.add(child);
+                        frontier.add(child);
+                    }
+            } else {
+                FFTMove move = apply(state);
+                ArrayList<? extends FFTMove> nonLosingPlays = FFTManager.db.nonLosingMoves(state);
+                // If move is null, check that all possible (random) moves are ok
+                if (move == null) {
+                    for (FFTMove m : state.getLegalMoves()) {
+                        if (nonLosingPlays.contains(m)) {
+                            FFTState nextState = state.getNextState(m);
+                            if (!closedSet.contains(nextState)) {
+                                closedSet.add(nextState);
+                                frontier.add(nextState);
+                            }
+                        }
+                    }
+                } else if (!nonLosingPlays.contains(move)) {
+                    System.out.println("Rule applied, but its move lost you the game");
+                    return false;
+                } else {
+                    FFTState nextNode = state.getNextState(move);
+                    if (!closedSet.contains(nextNode)) {
+                        closedSet.add(nextNode);
+                        frontier.add(nextNode);
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     private boolean matchLiteral(Literal l, HashSet<Literal> stLiterals) {
         if (l.negation) {
             Literal temp = new Literal(l);
@@ -381,8 +443,8 @@ public class Rule {
     }
 
     // returns preconditions derives from transformed integer matrix and non-boardplacement literals
-    private static Clause boardToPrecons(Transform.TransformedArray tArr, ArrayList<Literal> nonBoardPlacements) {
-        ArrayList<Literal> literals = new ArrayList<>();
+    private static Clause boardToPrecons(Transform.TransformedArray tArr, HashSet<Literal> nonBoardPlacements) {
+        HashSet<Literal> literals = new HashSet<>();
         for (int i = 0; i < tArr.board.length; i++) {
             for (int j = 0; j < tArr.board[i].length; j++) {
                 int val = tArr.board[i][j];

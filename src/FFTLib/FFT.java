@@ -6,8 +6,11 @@ import misc.Config;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
+import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
+import static misc.Config.PLAYER_ANY;
 
 
 public class FFT {
@@ -20,20 +23,31 @@ public class FFT {
         ruleGroups = new ArrayList<>();
     }
 
+    public FFT(FFT duplicate) {
+        this.name = duplicate.name;
+        ruleGroups = new ArrayList<>();
+        for (RuleGroup rg : duplicate.ruleGroups) {
+            ruleGroups.add(new RuleGroup(rg));
+        }
+        this.failingPoint = duplicate.failingPoint;
+    }
+
     public void addRuleGroup(RuleGroup ruleGroup) {
         ruleGroups.add(ruleGroup);
         FFTManager.save();
     }
 
     public boolean verify(int team, boolean wholeFFT) {
+        if (team == PLAYER_ANY)
+            return verify(PLAYER1, wholeFFT) && verify(PLAYER2, wholeFFT);
         FFTState initialState = FFTManager.initialFFTState;
         LinkedList<FFTState> frontier = new LinkedList<>();
         HashSet<FFTState> closedSet = new HashSet<>();
         frontier.add(initialState);
-        int opponent = (team == Config.PLAYER1) ? PLAYER2 : Config.PLAYER1;
+        int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
         // Check if win or draw is even possible
         int score = FFTManager.db.queryPlay(initialState).getScore();
-        if (team == Config.PLAYER1 && score < -1000) {
+        if (team == PLAYER1 && score < -1000) {
             System.out.println("A perfect player 2 has won from start of the game");
             return false;
         } else if (team == PLAYER2 && score > 1000) {
@@ -57,7 +71,7 @@ public class FFT {
                     }
             } else {
                 FFTMove move = apply(state);
-                ArrayList<? extends FFTMove> nonLosingPlays = FFTManager.db.nonLosingPlays(state);
+                ArrayList<? extends FFTMove> nonLosingPlays = FFTManager.db.nonLosingMoves(state);
                 // If move is null, check that all possible (random) moves are ok
                 if (move == null) {
                     for (FFTMove m : state.getLegalMoves()) {
@@ -99,5 +113,52 @@ public class FFT {
             }
         }
         return null;
+    }
+
+    public boolean isMinimal(int team) {
+        if (!verify(team, true)) {
+            System.out.println("FFT is not a winning strategy, so it is not minimal");
+            return false;
+        }
+        for (RuleGroup rg : ruleGroups) {
+            for (int i = 0; i < rg.rules.size(); i++) {
+                Rule r = rg.rules.get(i);
+                rg.rules.remove(r);
+                if (verify(team, true)) {
+                    rg.rules.add(i, r);
+                    return false;
+                }
+                rg.rules.add(i, r);
+            }
+        }
+        return true;
+    }
+
+    public void removeRules(ArrayList<Rule> rules) {
+        for (RuleGroup rg : ruleGroups) {
+            rg.rules.removeAll(rules);
+        }
+
+    }
+
+    public ArrayList<Rule> minimize(int team) {
+        ArrayList<Rule> redundantRules = new ArrayList<>();
+        if (!verify(team, true)) {
+            System.out.println("FFT is not a winning strategy, so it is not minimal");
+            return redundantRules;
+        }
+
+        for (RuleGroup rg : ruleGroups) {
+            ListIterator<Rule> itr = rg.rules.listIterator();
+            while(itr.hasNext()) {
+                Rule r = itr.next();
+                itr.remove();
+                if (verify(team, true))
+                    redundantRules.add(r);
+                else
+                    itr.add(r);
+            }
+        }
+        return redundantRules;
     }
 }

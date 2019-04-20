@@ -5,8 +5,9 @@ import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
 import javafx.scene.input.DataFormat;
+import kulibrat.FFT.AutoGen.FFTAutoGenKuli;
 import tictactoe.FFT.FFTAutoGen;
-import tictactoe.misc.Database;
+
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -153,7 +154,7 @@ public class FFTManager {
     public Node getFailState() {
         FFTStateAndMove ps = currFFT.failingPoint;
         FFTState s = ps.getState();
-        ArrayList<? extends FFTMove> nonLosingPlays = FFTManager.db.nonLosingPlays(s);
+        ArrayList<? extends FFTMove> nonLosingPlays = FFTManager.db.nonLosingMoves(s);
         return failState.getFailState(ps, nonLosingPlays);
     }
 

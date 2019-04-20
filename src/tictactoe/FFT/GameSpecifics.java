@@ -17,8 +17,7 @@ import java.util.HashSet;
 import static fftlib.Literal.PIECEOCC_ANY;
 import static fftlib.Literal.PIECEOCC_PLAYER;
 import static fftlib.game.Transform.*;
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Config.*;
 
 
 public class GameSpecifics implements FFTGameSpecifics {

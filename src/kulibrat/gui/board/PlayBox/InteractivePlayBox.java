@@ -16,6 +16,7 @@ import kulibrat.game.State;
 import kulibrat.gui.board.BoardTile;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import static fftlib.Literal.*;
 import static misc.Config.PLAYER1;
@@ -153,7 +154,7 @@ public class InteractivePlayBox extends PlayBox {
 
 
     public void update(Rule r, int perspective) {
-        ArrayList<Literal> nonBoardLits = r.preconditions.extractNonBoardPlacements();
+        HashSet<Literal> nonBoardLits = r.preconditions.extractNonBoardPlacements();
         int[][] preconBoard = Rule.preconsToBoard(r.preconditions);
         Move m = (Move) r.action.getMove(perspective);
 

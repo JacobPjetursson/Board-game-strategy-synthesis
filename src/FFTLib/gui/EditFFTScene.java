@@ -165,7 +165,7 @@ public class EditFFTScene extends VBox {
         teamChoice.setMaxWidth(textFieldWidth);
         teamChoice.setValue("Player 1");
         teamChoice.setStyle("-fx-font: 16px \"Verdana\";");
-        teamChoice.setItems(FXCollections.observableArrayList("Player 1", "Player 2"));
+        teamChoice.setItems(FXCollections.observableArrayList("Player 1", "Player 2", "Both"));
 
         Label forLabel = new Label(" for: ");
         forLabel.setFont(Font.font("Verdana", 16));
@@ -188,7 +188,7 @@ public class EditFFTScene extends VBox {
             boolean verified = fftManager.currFFT.verify(team, wholeFFT);
             if (!verified) {
                 if (fftManager.currFFT.failingPoint == null) {
-                    Label verifiedLabel = new Label("Unable to win vs. perfect player");
+                    Label verifiedLabel = new Label("Always loses to perfect player");
                     verifiedLabel.setFont(Font.font("Verdana", 16));
                     getChildren().add(4, verifiedLabel);
 

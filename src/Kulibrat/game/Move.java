@@ -7,6 +7,7 @@ import fftlib.game.FFTMove;
 import misc.Config;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
 
 import static fftlib.Literal.PIECEOCC_PLAYER;
@@ -70,10 +71,10 @@ public class Move implements FFTMove {
 
     @Override
     public Action getAction() {
-        ArrayList<Literal> addLits = new ArrayList<>();
+        HashSet<Literal> addLits = new HashSet<>();
         if (newRow != POS_NONBOARD)
             addLits.add(new Literal(newRow, newCol, PIECEOCC_PLAYER, false));
-        ArrayList<Literal> remLits = new ArrayList<>();
+        HashSet<Literal> remLits = new HashSet<>();
         if (oldRow != POS_NONBOARD)
             remLits.add(new Literal(oldRow, oldCol, PIECEOCC_PLAYER, false));
         Clause addClause = new Clause(addLits);
@@ -83,8 +84,8 @@ public class Move implements FFTMove {
 
     @Override
     public String print() {
-        return String.format("OLDROW: %s, OLDCOL: %s, NEWROW: %s, NEWCOL: %s",
-                oldRow, oldCol, newRow, newCol);
+        return String.format("OLDROW: %s, OLDCOL: %s, NEWROW: %s, NEWCOL: %s, TEAM: %s",
+                oldRow, oldCol, newRow, newCol, team);
     }
 
     public Move reflect() {

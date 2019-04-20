@@ -6,6 +6,7 @@ import fftlib.Literal;
 import fftlib.game.FFTMove;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
 
 import static fftlib.Literal.PIECEOCC_PLAYER;
@@ -58,9 +59,9 @@ public class Move implements FFTMove {
 
     @Override
     public Action getAction() {
-        ArrayList<Literal> addLits = new ArrayList<>();
+        HashSet<Literal> addLits = new HashSet<>();
         addLits.add(new Literal(row, col, PIECEOCC_PLAYER, false));
-        ArrayList<Literal> remLits = new ArrayList<>();
+        HashSet<Literal> remLits = new HashSet<>();
 
         Clause addClause = new Clause(addLits);
         Clause remClause = new Clause(remLits);

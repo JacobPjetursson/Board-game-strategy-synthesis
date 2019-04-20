@@ -14,6 +14,7 @@ import java.util.HashMap;
 
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
+import static misc.Config.PLAYER_NONE;
 import static tictactoe.FFT.FFTAutoGen.INCLUDE_ILLEGAL_STATES;
 
 
@@ -70,57 +71,48 @@ public class Database implements FFTDatabase {
     }
 
     public static ArrayList<Move> nonLosingMoves(State state) {
-        ArrayList<Move> nonLosingPlays = new ArrayList<>();
+        ArrayList<Move> nonLosingMoves = new ArrayList<>();
         if (Logic.gameOver(state))
-            return nonLosingPlays;
+            return nonLosingMoves;
         MinimaxPlay bestPlay = queryPlay(state);
         State next = state.getNextState(bestPlay.move);
 
         // In case of game over
         if (Logic.gameOver(next)) {
-
             int winner = Logic.getWinner(next);
             for (State child : state.getChildren()) {
                 Move m = child.getMove();
                 if (Logic.gameOver(child)) {
                     if (Logic.getWinner(child) == winner)
-                        nonLosingPlays.add(m);
+                        nonLosingMoves.add(m);
                 } else {
-                    int score = queryPlay(child).score;
-                    if (winner == PLAYER1 && score > 1000)
-                        nonLosingPlays.add(m);
-                    else if (winner == PLAYER2 && score < -1000)
-                        nonLosingPlays.add(m);
-                    else if (winner == 0 && (score < 1000 && score > 0))
-                        nonLosingPlays.add(m);
+                    int childWinner = queryPlay(child).getWinner();
+                    if (winner == childWinner)
+                        nonLosingMoves.add(m);
                 }
             }
-            return nonLosingPlays;
+            return nonLosingMoves;
         }
 
-        int bestScore = queryPlay(next).score;
+        int bestMoveWinner = queryPlay(next).getWinner();
         int team = state.getTurn();
 
         for (State child : state.getChildren()) {
             Move m = child.getMove();
-            int score = queryPlay(child).score;
+            int childWinner = queryPlay(child).getWinner();
             if (team == PLAYER1) {
-                if (bestScore > 1000 && score > 1000)
-                    nonLosingPlays.add(m);
-                else if (bestScore > 0 && bestScore < 1000 && score > 0 && score < 1000)
-                    nonLosingPlays.add(m);
-                else if (bestScore < -1000)
-                    nonLosingPlays.add(m);
+                if (bestMoveWinner == childWinner)
+                    nonLosingMoves.add(m);
+                else if (bestMoveWinner == PLAYER2)
+                    nonLosingMoves.add(m);
             } else {
-                if (bestScore < -1000 && score < -1000)
-                    nonLosingPlays.add(m);
-                else if (bestScore > 0 && bestScore < 1000 && score > 0 && score < 1000)
-                    nonLosingPlays.add(m);
-                else if (bestScore > 1000)
-                    nonLosingPlays.add(m);
+                if (bestMoveWinner == childWinner)
+                    nonLosingMoves.add(m);
+                else if (bestMoveWinner == PLAYER1)
+                    nonLosingMoves.add(m);
             }
         }
-        return nonLosingPlays;
+        return nonLosingMoves;
     }
 
     // Fetches the best play corresponding to the input node
@@ -145,7 +137,7 @@ public class Database implements FFTDatabase {
 
     }
 
-    public ArrayList<? extends FFTMove> nonLosingPlays(FFTState s) {
+    public ArrayList<? extends FFTMove> nonLosingMoves(FFTState s) {
         return nonLosingMoves((State) s);
     }
 

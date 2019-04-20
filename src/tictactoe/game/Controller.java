@@ -148,6 +148,9 @@ public class Controller {
         fftAutomaticMode = false;
         automaticFFTBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
             fftAutomaticMode = newValue;
+            if (fftAutomaticMode && (state.getTurn() == PLAYER2 && player2Instance == FFT) ||
+                    (state.getTurn() == PLAYER1 && player1Instance == FFT))
+                doAITurn();
         });
 
         // Show FFT button

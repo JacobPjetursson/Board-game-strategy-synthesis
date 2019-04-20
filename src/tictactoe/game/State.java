@@ -3,6 +3,7 @@ package tictactoe.game;
 import fftlib.Literal;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
+import misc.Config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,9 +24,7 @@ public class State implements FFTState {
 
     // Starting state
     public State() {
-        int rows = 3;
-        int columns = 3;
-        board = new int[rows][columns];
+        board = new int[3][3];
         turn = PLAYER1;
     }
 
@@ -135,7 +134,7 @@ public class State implements FFTState {
     }
 
     public String print() {
-        return Arrays.deepToString(board);
+        return Arrays.deepToString(board) + " , TEAM: " + turn;
     }
 
     public int getTurn() {

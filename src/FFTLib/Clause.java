@@ -1,25 +1,26 @@
 package fftlib;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Objects;
 
 public class Clause{
-    public ArrayList<Literal> literals;
+    public HashSet<Literal> literals;
     ArrayList<Integer> transformations;
 
     public Clause() {
-        this.literals = new ArrayList<>();
+        this.literals = new HashSet<>();
         this.transformations = new ArrayList<>();
     }
 
-    public Clause(ArrayList<Literal> literals) {
+    public Clause(HashSet<Literal> literals) {
         this.literals = literals;
         this.transformations = new ArrayList<>();
     }
 
     public Clause(Clause duplicate) {
-        this.literals = new ArrayList<>();
+        this.literals = new HashSet<>();
         for (Literal l : duplicate.literals) {
             Literal copy = new Literal(l);
             literals.add(copy);
@@ -27,7 +28,7 @@ public class Clause{
         this.transformations = new ArrayList<>(duplicate.transformations);
     }
 
-    Clause(ArrayList<Integer> transformations, ArrayList<Literal> literals) {
+    Clause(ArrayList<Integer> transformations, HashSet<Literal> literals) {
         this.transformations = transformations;
         this.literals = literals;
     }
@@ -59,8 +60,8 @@ public class Clause{
     }
 
 
-    public ArrayList<Literal> extractNonBoardPlacements() {
-        ArrayList<Literal> nonBoardPlacements = new ArrayList<>();
+    public HashSet<Literal> extractNonBoardPlacements() {
+        HashSet<Literal> nonBoardPlacements = new HashSet<>();
         for (Literal l : literals)
             if (!l.boardPlacement)
                 nonBoardPlacements.add(l);

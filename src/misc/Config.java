@@ -38,6 +38,8 @@ public class Config {
     public static final int kuliBWidth = 3;
     public static final int kuliBHeight = 3;
 
+    public static final boolean simpleTicTacToe = false;
+
     // MISC
     public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";
     public static int SCORELIMIT; // Set by player once (kulibrat)

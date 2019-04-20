@@ -11,7 +11,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 
+import static kulibrat.FFT.AutoGen.LookupFull.BUILD_FULL_STATE_SPACE;
 import static kulibrat.game.Logic.POS_NONBOARD;
 import static misc.Config.*;
 
@@ -20,7 +22,7 @@ public class State implements Serializable, FFTState {
     private int turn;
     private int redScore;
     private int blackScore;
-    private int scoreLimit;
+    private int scoreLimit; // Should've made static
     private int unplacedRed;
     private int unplacedBlack;
     private ArrayList<Move> legalMoves;
@@ -29,9 +31,7 @@ public class State implements Serializable, FFTState {
 
     // Starting Root state
     public State() {
-        int rows = Config.kuliBHeight;
-        int columns = Config.kuliBWidth;
-        board = new int[rows][columns];
+        board = new int[Config.kuliBHeight][Config.kuliBWidth];
         redScore = 0;
         blackScore = 0;
         unplacedRed = 4;
@@ -66,7 +66,7 @@ public class State implements Serializable, FFTState {
         move = state.move;
         zobrist_key = state.zobrist_key;
     }
-
+/*
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof State)) return false;
@@ -77,11 +77,31 @@ public class State implements Serializable, FFTState {
     public int hashCode() {
         return (int) zobrist_key;
     }
+    */
 
     public long getHashCode() {
         return this.zobrist_key;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof State)) return false;
+        State state = (State) o;
+        return getTurn() == state.getTurn() &&
+                redScore == state.redScore &&
+                blackScore == state.blackScore &&
+                Arrays.deepEquals(getBoard(), state.getBoard());
+    }
+
+    @Override
+    public int hashCode() {
+
+        int result = Objects.hash(getTurn(), redScore, blackScore);
+        result = 31 * result + Arrays.deepHashCode(getBoard());
+        return result;
+    }
 
     private long initHashCode() {
         long hash = 0L;
@@ -193,7 +213,7 @@ public class State implements Serializable, FFTState {
                 }
             }
         }
-        if (getUnplaced(team) > 0) {
+        if (getUnplaced(team) > 0 || BUILD_FULL_STATE_SPACE) {
             entries.add(new Point(POS_NONBOARD, POS_NONBOARD));
         }
         return entries;
@@ -215,6 +235,12 @@ public class State implements Serializable, FFTState {
         for (Move m : getLegalMoves()) {
             State child = new State(this, m);
             children.add(child);
+            if (BUILD_FULL_STATE_SPACE) {
+                State child1 = new State(child);
+                child1.setTurn(child.getTurn() == PLAYER1 ? PLAYER2 : PLAYER1);
+                //child1.zobrist_key = child1.initHashCode();
+                children.add(child1);
+            }
         }
         return children;
     }
@@ -266,18 +292,18 @@ public class State implements Serializable, FFTState {
                     literals.add(new Literal(i, j, PLAYER_ANY, true));
 
         for (int i = 0; i < SCORELIMIT; i++) {
-            if (i != scoreLimit)
-                literals.add(new Literal("!SL=" + scoreLimit));
+            if ((i+1) != scoreLimit)
+                literals.add(new Literal("!SL=" + i));
             if (i != redScore)
-                literals.add(new Literal("!P1SCORE=" + redScore));
+                literals.add(new Literal("!P1SCORE=" + i));
             if (i != blackScore)
-                literals.add(new Literal("!P2SCORE=" + blackScore));
+                literals.add(new Literal("!P2SCORE=" + i));
         }
         return literals;
     }
 
     public String print() {
-        return Arrays.deepToString(board);
+        return Arrays.deepToString(board) + " , TURN: " + turn + ", P1SCORE: " + redScore + " , P2SCORE: " + blackScore;
     }
 
 

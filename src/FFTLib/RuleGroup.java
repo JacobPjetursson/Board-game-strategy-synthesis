@@ -17,7 +17,9 @@ public class RuleGroup {
     }
 
     public RuleGroup(RuleGroup copy) {
-        this.rules = new ArrayList<>(copy.rules);
+        this.rules = new ArrayList<>();
+        for (Rule r : copy.rules)
+            rules.add(new Rule(r));
         this.name = copy.name;
     }
 

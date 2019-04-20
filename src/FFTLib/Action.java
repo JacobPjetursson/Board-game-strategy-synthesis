@@ -5,6 +5,7 @@ import fftlib.game.Transform;
 import misc.Config;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
 
 import static fftlib.Literal.PIECEOCC_PLAYER;
@@ -126,8 +127,8 @@ public class Action {
     // Takes empty addClause and remClause lists (except for constants),
     // and fill them up with the rotated pieces from the cb array.
     private Action boardToAction(ArrayList<Integer> transformations, int[][] cb) {
-        ArrayList<Literal> addLits = new ArrayList<>();
-        ArrayList<Literal> remLits = new ArrayList<>();
+        HashSet<Literal> addLits = new HashSet<>();
+        HashSet<Literal> remLits = new HashSet<>();
         // Add back to list
         for (int i = 0; i < cb.length; i++) {
             for (int j = 0; j < cb[i].length; j++) {

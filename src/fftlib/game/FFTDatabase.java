@@ -7,7 +7,7 @@ public interface FFTDatabase {
 
     FFTMinimaxPlay queryPlay(FFTState state);
 
-    ArrayList<? extends FFTMove> nonLosingPlays(FFTState state);
+    ArrayList<? extends FFTMove> nonLosingMoves(FFTState state);
 
     boolean connectAndVerify();
 }

@@ -2,6 +2,7 @@ package tictactoe.gui.board;
 
 import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
+import misc.Config;
 import tictactoe.game.Controller;
 import tictactoe.game.State;
 

@@ -22,12 +22,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import static kulibrat.FFT.AutoGen.FFTAutoGenKuli.INCLUDE_ILLEGAL_STATES;
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
 
 
 public class Database implements FFTDatabase {
     public static Connection dbConnection;
+
+    // Only used for autogen
+    private static HashMap<State, MinimaxPlay> lookupTable;
+    private static HashMap<State, MinimaxPlay> lookupTableFull;
 
     public boolean connectAndVerify() {
         return connectwithVerification();
@@ -45,7 +50,7 @@ public class Database implements FFTDatabase {
         System.out.println("Connection successful");
 
         String tableName = "plays_" + Config.SCORELIMIT;
-        long key = new State(new kulibrat.game.State()).getHashCode();
+        long key = new State(new State()).getHashCode();
         boolean error = false;
         // Try query to check for table existance
         try {
@@ -110,42 +115,69 @@ public class Database implements FFTDatabase {
         return bestPlays;
     }
 
-    public static ArrayList<Move> nonLosingPlays(State n) {
-        ArrayList<Move> nonLosingPlays = new ArrayList<>();
+    public static ArrayList<Move> nonLosingMoves(State n) {
+        ArrayList<Move> nonLosingMoves = new ArrayList<>();
+        if (Logic.gameOver(n))
+            return nonLosingMoves;
         MinimaxPlay bestPlay = queryPlay(n);
-        int bestScore = 0;
-        boolean won = false;
-        if (!Logic.gameOver(n.getNextState(bestPlay.move))) {
-            bestScore = queryPlay(n.getNextState(bestPlay.move)).score;
-        } else
-            won = true;
+        if (bestPlay.move == null) // There is no moves in this state
+            return nonLosingMoves;
+        State next = n.getNextState(bestPlay.move);
+
+        // In case of game over
+        if (Logic.gameOver(next)) {
+
+            int winner = Logic.getWinner(next);
+            for (State child : n.getChildren()) {
+                Move m = child.getMove();
+                if (Logic.gameOver(child)) {
+                    if (Logic.getWinner(child) == winner)
+                        nonLosingMoves.add(m);
+                } else {
+                    int score = queryPlay(child).score;
+                    if (winner == PLAYER1 && score > 1000)
+                        nonLosingMoves.add(m);
+                    else if (winner == PLAYER2 && score < -1000)
+                        nonLosingMoves.add(m);
+                    else if (winner == 0 && (score < 1000 && score > 0))
+                        nonLosingMoves.add(m);
+                }
+            }
+            return nonLosingMoves;
+        }
+
+        int bestScore = queryPlay(next).score;;
+        int team = n.getTurn();
 
         for (State child : n.getChildren()) {
             Move m = child.getMove();
-            kulibrat.game.State state = n.getNextState(m);
-            if (Logic.gameOver(state)) {
-                if (Logic.getWinner(state) == m.team)
-                    nonLosingPlays.add(m);
+            int score = queryPlay(child).score;
+            if (team == PLAYER1) {
+                if (bestScore > 1000 && score > 1000)
+                    nonLosingMoves.add(m);
+                else if (bestScore > 0 && bestScore < 1000 && score > 0 && score < 1000)
+                    nonLosingMoves.add(m);
+                else if (bestScore < -1000)
+                    nonLosingMoves.add(m);
             } else {
-                int score = queryPlay(child).score;
-                if (score == bestScore) {
-                    nonLosingPlays.add(m);
-                } else if (won && m.team == PLAYER1 && score > 0)
-                    nonLosingPlays.add(m);
-                else if (won && m.team == PLAYER2 && score < 0)
-                    nonLosingPlays.add(m);
-                else if (bestScore > 0 && score > 0) {
-                    nonLosingPlays.add(m);
-                } else if (bestScore < 0 && score < 0) {
-                    nonLosingPlays.add(m);
-                }
+                if (bestScore < -1000 && score < -1000)
+                    nonLosingMoves.add(m);
+                else if (bestScore > 0 && bestScore < 1000 && score > 0 && score < 1000)
+                    nonLosingMoves.add(m);
+                else if (bestScore > 1000)
+                    nonLosingMoves.add(m);
             }
         }
-        return nonLosingPlays;
+        return nonLosingMoves;
     }
 
     // Fetches the best play corresponding to the input node
     public static MinimaxPlay queryPlay(State n) {
+        if (INCLUDE_ILLEGAL_STATES)
+            return lookupTableFull.get(n);
+        else if (!lookupTable.isEmpty())
+            return lookupTable.get(n);
+
         MinimaxPlay play = null;
         String tableName = "plays_" + Config.SCORELIMIT;
         Long key = n.getHashCode();
@@ -248,12 +280,29 @@ public class Database implements FFTDatabase {
 
     // Builds the DB
     public static void buildLookupDB() {
-        kulibrat.game.State state = new kulibrat.game.State();
+        State state = new State();
         new LookupTableMinimax(PLAYER1, state, true);
     }
 
-    public ArrayList<? extends FFTMove> nonLosingPlays(FFTState n) {
-        return nonLosingPlays((State) n);
+    public static void setLookupTable(HashMap<State, MinimaxPlay> inputTable) {
+        lookupTable = inputTable;
+    }
+
+    public static void setLookupTableFull(HashMap<State, MinimaxPlay> inputTable) {
+        lookupTableFull = inputTable;
+    }
+
+    public static HashMap<State, MinimaxPlay> getLookupTable() {
+        return lookupTable;
+    }
+
+    public static HashMap<State, MinimaxPlay> getLookupTableFull() {
+        return lookupTableFull;
+    }
+
+    @Override
+    public ArrayList<? extends FFTMove> nonLosingMoves(FFTState n) {
+        return nonLosingMoves((State) n);
     }
 
     public FFTMinimaxPlay queryPlay(FFTState n) {
