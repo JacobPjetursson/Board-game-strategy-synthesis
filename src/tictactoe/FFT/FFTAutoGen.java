@@ -17,7 +17,7 @@ import static misc.Config.*;
 public class FFTAutoGen {
     private static HashMap<State, MinimaxPlay> lookupTable;
     private static HashMap<State, MinimaxPlay> lookupTableAll;
-    private static PriorityQueue<State> states;
+    private static LinkedList<State> states;
     private static FFT fft;
 
     // CONFIGURATION
@@ -49,7 +49,7 @@ public class FFTAutoGen {
         System.out.println("LOOKUP TABLE SIZE: " + lookupTable.size());
         System.out.println("ILLEGAL LOOKUP TABLE SIZE: " + lookupTableAll.size());
 
-        states = new PriorityQueue<>(new StateComparator());
+        states = new LinkedList<>();
         populateQueue(perspective);
         System.out.println("AMOUNT OF STATES BEFORE DELETION: " + states.size());
         deleteIrrelevantStates();
@@ -99,13 +99,13 @@ public class FFTAutoGen {
 
     // States where all moves are correct should not be part of FFT
     private static void deleteIrrelevantStates() {
-        ArrayList<State> deleteList = new ArrayList<>();
-        for (State s : states) {
+        Iterator<State> itr = states.listIterator();
+        while(itr.hasNext()) {
+            State s = itr.next();
             ArrayList<Move> nonLosingMoves = Database.nonLosingMoves(s);
             if (nonLosingMoves.size() == s.getLegalMoves().size())
-                deleteList.add(s);
+                itr.remove();
         }
-        states.removeAll(deleteList);
     }
 
     private static void makeRules() {
@@ -119,14 +119,14 @@ public class FFTAutoGen {
 
             fft.ruleGroups.get(0).rules.add(r);
             System.out.println("FINAL RULE: " + r.print());
-            ArrayList<State> deleteList = new ArrayList<>(); // TODO - deleteList sucks duck
-            for (State s : states) {
+            Iterator<State> itr = states.listIterator();
+            while(itr.hasNext()) {
+                State s = itr.next();
                 //ArrayList<Move> nonLosingMoves = Database.nonLosingMoves(s);
                 Move m = (Move) r.apply(s);
                 if (m != null/* && nonLosingMoves.contains(m)*/)
-                    deleteList.add(s);
+                    itr.remove();
             }
-            states.removeAll(deleteList);
         }
     }
 
@@ -154,7 +154,7 @@ public class FFTAutoGen {
         System.out.println("ORIGINAL ENEMY SCORE: " + bestEnemyPlay.score);
 
         for (Literal l : copy) {
-            if (!isLiteralRelevant(l, copy, bestPlay, bestEnemyPlay)) {
+            if (!relevant(l, copy, bestPlay, bestEnemyPlay)) {
                 System.out.println("REMOVING: " + l.name);
                 minSet.remove(l);
             }
@@ -175,7 +175,8 @@ public class FFTAutoGen {
         return new Rule(precons, bestPlay.move.getAction());
     }
 
-    private static boolean isLiteralRelevant(Literal l, HashSet<Literal> stateLits, MinimaxPlay bestPlay, MinimaxPlay bestEnemyPlay) {
+    private static boolean relevant(Literal l, HashSet<Literal> stateLits, MinimaxPlay bestPlay, MinimaxPlay bestEnemyPlay) {
+
         Literal origLiteral = new Literal(l);
         int team = bestPlay.move.team;
         int opponent = team == PLAYER1 ? PLAYER2 : PLAYER1;
@@ -252,6 +253,7 @@ public class FFTAutoGen {
                 System.out.println("MOVE IS NOT AMONG NONLOSING MOVES FOR THAT STATE!");
                 relevant = true;
             }
+            
             if (!relevant && newBestPlay != null) {
                 Rule r = new Rule(new Clause(stateLits), newBestPlay.move.getAction());
                 if (!r.verify(perspective)) {
