@@ -5,9 +5,7 @@ import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
 import javafx.scene.input.DataFormat;
-import kulibrat.FFT.AutoGen.FFTAutoGenKuli;
 import tictactoe.FFT.FFTAutoGen;
-
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,7 +13,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.function.BiFunction;
 
 import static misc.Config.FFT_OVERWRITE;
@@ -96,37 +96,26 @@ public class FFTManager {
         try {
             if (!fftFile.createNewFile()) {
                 lines = Files.readAllLines(Paths.get(path));
-                RuleGroup rg = null;
-                FFT fft = null;
+                int fftIndex = -1;
+                int rgIndex = -1;
                 for (String line : lines) {
                     if (line.startsWith("{")) {
-                        if (fft != null) {
-                            ffts.add(fft);
-                        }
-                        fft = new FFT(line.substring(1, line.length() - 1));
+                        ffts.add(new FFT(line.substring(1, line.length() - 1)));
+                        fftIndex++;
+                        rgIndex = -1;
                     }
                     // Rulegroup name
                     else if (line.startsWith("[")) {
-                        if (rg != null && fft != null) {
-                            fft.ruleGroups.add(rg);
-                        }
-                        rg = new RuleGroup(line.substring(1, line.length() - 1));
+                        ffts.get(fftIndex).addRuleGroup(new RuleGroup(line.substring(1, line.length() - 1)));
+                        rgIndex++;
                     } else {
                         String[] rule = line.split("->");
                         String clauseStr = rule[0].trim();
                         String actionStr = rule[1].trim();
-                        if (rg != null)
-                            rg.rules.add(new Rule(clauseStr, actionStr));
-
+                        ffts.get(fftIndex).ruleGroups.get(rgIndex).addRule(new Rule(clauseStr, actionStr));
                     }
                 }
-                // In case of at least 1 FFT
-                if (fft != null) {
-                    if (rg != null)
-                        fft.ruleGroups.add(rg);
 
-                    ffts.add(fft);
-                }
             }
         } catch (IOException e) {
             e.printStackTrace();

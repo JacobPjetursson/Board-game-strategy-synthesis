@@ -82,13 +82,11 @@ public class FFT {
                                 frontier.add(nextState);
                             }
                         } else if (wholeFFT) {
-                            System.out.println("FFT did not apply to certain state, random move lost you the game");
                             failingPoint = new FFTStateAndMove(state, m, true);
                             return false;
                         }
                     }
                 } else if (!nonLosingPlays.contains(move)) {
-                    System.out.println("FFT applied, but its move lost you the game");
                     failingPoint = new FFTStateAndMove(state, move, false);
                     return false;
                 } else {
@@ -142,6 +140,7 @@ public class FFT {
     }
 
     public ArrayList<Rule> minimize(int team) {
+        System.out.println("Minimizing FFT");
         ArrayList<Rule> redundantRules = new ArrayList<>();
         if (!verify(team, true)) {
             System.out.println("FFT is not a winning strategy, so it is not minimal");

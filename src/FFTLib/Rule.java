@@ -400,7 +400,6 @@ public class Rule {
                         }
                     }
                 } else if (!nonLosingPlays.contains(move)) {
-                    System.out.println("Rule applied, but its move lost you the game");
                     return false;
                 } else {
                     FFTState nextNode = state.getNextState(move);
