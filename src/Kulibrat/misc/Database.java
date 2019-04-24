@@ -8,6 +8,7 @@ import javafx.event.Event;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import kulibrat.FFT.AutoGen.LookupSimple;
 import kulibrat.ai.Minimax.LookupTableMinimax;
 import kulibrat.ai.Minimax.MinimaxPlay;
 import kulibrat.game.State;
@@ -22,7 +23,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import static kulibrat.FFT.AutoGen.FFTAutoGenKuli.INCLUDE_ILLEGAL_STATES;
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
 
@@ -31,8 +31,7 @@ public class Database implements FFTDatabase {
     public static Connection dbConnection;
 
     // Only used for autogen
-    private static HashMap<State, MinimaxPlay> lookupTable;
-    private static HashMap<State, MinimaxPlay> lookupTableFull;
+    private static HashMap<? extends FFTState, ? extends MinimaxPlay> lookupTable;
 
     public boolean connectAndVerify() {
         return connectwithVerification();
@@ -146,7 +145,7 @@ public class Database implements FFTDatabase {
             return nonLosingMoves;
         }
 
-        int bestScore = queryPlay(next).score;;
+        int bestScore = queryPlay(next).score;
         int team = n.getTurn();
 
         for (State child : n.getChildren()) {
@@ -173,9 +172,7 @@ public class Database implements FFTDatabase {
 
     // Fetches the best play corresponding to the input node
     public static MinimaxPlay queryPlay(State n) {
-        if (INCLUDE_ILLEGAL_STATES)
-            return lookupTableFull.get(n);
-        else if (!lookupTable.isEmpty())
+        if (!lookupTable.isEmpty())
             return lookupTable.get(n);
 
         MinimaxPlay play = null;
@@ -288,16 +285,9 @@ public class Database implements FFTDatabase {
         lookupTable = inputTable;
     }
 
-    public static void setLookupTableFull(HashMap<State, MinimaxPlay> inputTable) {
-        lookupTableFull = inputTable;
-    }
-
-    public static HashMap<State, MinimaxPlay> getLookupTable() {
+    public HashMap<? extends FFTState, ? extends MinimaxPlay> getSolution() {
+        new LookupSimple(PLAYER1, new State());
         return lookupTable;
-    }
-
-    public static HashMap<State, MinimaxPlay> getLookupTableFull() {
-        return lookupTableFull;
     }
 
     @Override

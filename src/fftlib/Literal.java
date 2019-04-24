@@ -38,11 +38,11 @@ public class Literal {
         }
         this.boardPlacement = isBoardPlacement(this.name);
         if (this.boardPlacement) {
-            if (name.toLowerCase().startsWith("pe"))
+            if (name.startsWith("PE"))
                 this.pieceOcc = PIECEOCC_ANY;
-            else if (name.toLowerCase().startsWith("p"))
+            else if (name.startsWith("P"))
                 this.pieceOcc = PIECEOCC_PLAYER;
-            else if (name.toLowerCase().startsWith("e"))
+            else if (name.startsWith("E"))
                 this.pieceOcc = PIECEOCC_ENEMY;
 
             else {
@@ -83,10 +83,10 @@ public class Literal {
     private static boolean isBoardPlacement(String name) {
         if (name.startsWith("!"))
             name = name.substring(1);
-        if (name.toLowerCase().startsWith("pe"))
+        if (name.startsWith("PE"))
             name = name.substring(2);
-        else if (name.toLowerCase().startsWith("e") ||
-                name.toLowerCase().startsWith("p"))
+        else if (name.startsWith("E") ||
+                name.startsWith("P"))
             name = name.substring(1);
         else
             return false;
@@ -114,15 +114,13 @@ public class Literal {
         return coords;
     }
 
-    public void format() {
+    void format() {
         // Check for + and - in case of action
-        this.name = "";
-        if (negation)
-            this.name += "!";
+        this.name = (negation) ? "!" : "";
 
         String teamStr = (pieceOcc == PIECEOCC_PLAYER) ? "P" :
                 (pieceOcc == PIECEOCC_ENEMY) ? "E" : "PE";
-        this.name += String.format("%s(%d, %d)", teamStr, row, col);
+        this.name += (teamStr + "(" + row + ", " + col + ")");
     }
 
     public void setNegation(boolean negation) {
@@ -142,7 +140,7 @@ public class Literal {
         Literal literal = (Literal) obj;
         if (this == literal)
             return true;
-        return this.name.toLowerCase().equals(literal.name.toLowerCase());
+        return this.name.equals(literal.name);
     }
 
     @Override

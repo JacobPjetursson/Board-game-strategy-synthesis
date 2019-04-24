@@ -16,6 +16,7 @@ import tictactoe.gui.board.PlayBox.InteractivePlayBox;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 import static fftlib.Literal.PIECEOCC_PLAYER;
 import static misc.Config.*;

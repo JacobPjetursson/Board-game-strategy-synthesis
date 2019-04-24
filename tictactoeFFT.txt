@@ -1,6 +1,7 @@
 {test}
 [test]
-!PE(1, 1) ∧ !PE(1, 0) ∧ !PE(1, 2) ∧ !PE(0, 0) ∧ P(2, 2) -> +P(0, 2)
+ -> +P(2, 2)
+ -> +P(2, 0)
 {Perfect Strategy}
 [Win]
 P(0,x) AND P(1,x) -> +P(2, x)

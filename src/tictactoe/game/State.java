@@ -3,16 +3,12 @@ package tictactoe.game;
 import fftlib.Literal;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
-import misc.Config;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.*;
 
 import static fftlib.game.Transform.*;
-import static misc.Config.*;
-import static tictactoe.FFT.LookupTableFullGen.BUILD_FULL_STATE_SPACE;
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER_ANY;
 
 
 public class State implements FFTState {
@@ -59,34 +55,8 @@ public class State implements FFTState {
         for (Move m : getLegalMoves()) {
             State child = new State(this, m);
             children.add(child);
-            if (BUILD_FULL_STATE_SPACE) {
-                State child1 = new State(child);
-                child1.setTurn(child.getTurn() == PLAYER1 ? PLAYER2 : PLAYER1);
-                children.add(child1);
-            }
         }
         return children;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof State)) return false;
-        State state = (State) obj;
-        if (this == state) return true;
-        /*
-        return (Transform.applyAll(transformations, board).equals(
-                Transform.applyAll(transformations, state.getBoard())) && turn == state.getTurn());
-        */
-        return Arrays.deepEquals(board, state.board) && turn == state.getTurn();
-    }
-
-    @Override
-    public int hashCode() {
-        //int result = Transform.applyAll(transformations, board).hashCode();
-        int result = Arrays.deepHashCode(board);
-        result += Objects.hashCode(turn);
-        return 31 * result;
-
     }
 
     public int[][] getBoard() {
@@ -151,4 +121,19 @@ public class State implements FFTState {
         legalMoves = Logic.legalMoves(turn, this);
         return legalMoves;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof State)) return false;
+
+        State state = (State) obj;
+        return this == state ||
+                Arrays.deepEquals(this.board, state.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * Arrays.deepHashCode(board);
+    }
+
 }

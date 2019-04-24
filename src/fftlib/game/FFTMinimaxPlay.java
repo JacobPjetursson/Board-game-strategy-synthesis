@@ -7,4 +7,6 @@ public interface FFTMinimaxPlay {
     FFTMove getMove();
 
     int getDepth();
+
+    int getWinner();
 }

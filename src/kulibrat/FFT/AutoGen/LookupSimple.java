@@ -20,9 +20,13 @@ public class LookupSimple {
 
 
     public LookupSimple(int team, State state) {
+        System.out.println("Solving the game");
         this.team = team;
         lookupTable = new HashMap<>();
+        long timeStart = System.currentTimeMillis();
         buildLookupTable(state);
+        double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
+        System.out.println("Time spent on solving game: " + timeSpent);
     }
 
     // Runs an iterative deepening minimax as the exhaustive brute-force for the lookupDB. The data is saved in the transpo table
@@ -32,17 +36,20 @@ public class LookupSimple {
         MinimaxPlay play = null;
         int doneCounter = 0;
         while (!done) {
+            CURR_MAX_DEPTH += 1;
+            System.out.print("At depth " + CURR_MAX_DEPTH);
             State simState = new State(state); // Start from fresh (Don't reuse previous game tree in new iterations)
             int prevSize = lookupTable.size();
             int prevUnevaluatedNodes = unevaluatedNodes;
             unevaluatedNodes = 0;
-            CURR_MAX_DEPTH += 1;
             play = minimax(simState, CURR_MAX_DEPTH);
             if (lookupTable.size() == prevSize && unevaluatedNodes == prevUnevaluatedNodes) {
                 doneCounter++;
+                System.out.print(": game solved");
             } else
                 doneCounter = 0;
             if (doneCounter == 2) done = true;
+            System.out.println();
         }
         return play;
     }

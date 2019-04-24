@@ -5,7 +5,7 @@ import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
 import javafx.scene.input.DataFormat;
-import tictactoe.FFT.FFTAutoGen;
+import fftlib.game.FFTAutoGen;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,8 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import static misc.Config.FFT_OVERWRITE;
-import static misc.Config.PLAYER1;
+import static misc.Config.*;
 
 
 public class FFTManager {
@@ -148,7 +147,7 @@ public class FFTManager {
     }
 
     public void autogenFFT() {
-        FFT fft = FFTAutoGen.generateFFT(PLAYER1);
+        FFT fft = FFTAutoGen.generateFFT(AUTOGEN_PERSPECTIVE, GAME_WINNER);
         ffts.add(0, fft);
         currFFT = fft;
     }

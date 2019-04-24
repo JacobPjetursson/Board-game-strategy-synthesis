@@ -303,8 +303,9 @@ public class Rule {
         HashSet<Literal> nonBoardPlacements = preconditions.extractNonBoardPlacements();
         int[][] cBoard = preconsToBoard(preconditions);
         HashSet<Transform.TransformedArray> tSet = Transform.applyAll(FFTManager.gameSymmetries, cBoard);
-        for (Transform.TransformedArray tArr : tSet)
+        for (Transform.TransformedArray tArr : tSet) {
             transformedPrecons.add(boardToPrecons(tArr, nonBoardPlacements));
+        }
 
         return transformedPrecons;
     }
@@ -321,7 +322,7 @@ public class Rule {
             return null;
         }
         HashSet<Literal> stLiterals = state.getLiterals();
-        for (Clause clause : transformedPrecons) {
+        for (Clause clause : transformedPrecons) { // TODO - possible to optimize here by only including unique clauses
             boolean match = true;
             for (Literal l : clause.literals) {
                 if (l.pieceOcc == PIECEOCC_ANY) {
@@ -351,6 +352,16 @@ public class Rule {
             }
         }
         return null;
+    }
+
+    private boolean matchLiteral(Literal l, HashSet<Literal> stLiterals) {
+        if (l.negation) {
+            Literal temp = new Literal(l);
+            temp.negation = false;
+            temp.format();
+            return !stLiterals.contains(temp);
+        }
+        return stLiterals.contains(l);
     }
 
     public boolean verify(int team) {
@@ -411,17 +422,6 @@ public class Rule {
             }
         }
         return true;
-    }
-
-    private boolean matchLiteral(Literal l, HashSet<Literal> stLiterals) {
-        if (l.negation) {
-            Literal temp = new Literal(l);
-            temp.negation = false;
-            temp.format();
-            return !stLiterals.contains(temp);
-
-        } else
-            return stLiterals.contains(l);
     }
 
     // Returns a board with the literals on it, the value equals to the piece occ.

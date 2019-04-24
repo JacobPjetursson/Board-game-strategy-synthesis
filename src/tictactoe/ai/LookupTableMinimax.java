@@ -18,10 +18,14 @@ public class LookupTableMinimax implements AI {
 
 
     public LookupTableMinimax(int team, State state) {
+        long timeStart = System.currentTimeMillis();
         this.team = team;
         lookupTable = new HashMap<>();
         iterativeDeepeningMinimax(state);
         Database.fillLookupTable(lookupTable);
+
+        double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
+        System.out.println("Time spent on solving game: " + timeSpent);
     }
 
     // This function fetches the best move from lookuptable, if it exists

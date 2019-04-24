@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
 
+import static fftlib.FFTManager.gameBoardHeight;
+import static fftlib.FFTManager.gameBoardWidth;
 import static fftlib.Literal.PIECEOCC_PLAYER;
 import static kulibrat.game.Logic.POS_NONBOARD;
 
@@ -95,7 +97,7 @@ public class Action {
     // Takes as input copies of the addClause, remClause lists and removes all the literals that are board placements
     // It returns a board with the literals on it, the value equals to the piece occ.
     private int[][] actionToBoard() {
-        int[][] clauseBoard = new int[FFTManager.gameBoardHeight][FFTManager.gameBoardWidth];
+        int[][] clauseBoard = new int[gameBoardHeight][gameBoardWidth];
 
         for (Literal l : addClause.literals) {
             if (l.row != POS_NONBOARD)

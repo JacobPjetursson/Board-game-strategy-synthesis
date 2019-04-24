@@ -77,7 +77,8 @@ public class Controller {
         gameSpecifics = new GameSpecifics(this);
         this.fftManager = new FFTManager(gameSpecifics);
         // Autogenerate
-        fftManager.autogenFFT();
+        if (Config.USE_AUTOGEN)
+            fftManager.autogenFFT();
 
         PlayPane playPane = new PlayPane(this);
         primaryStage.setScene(new Scene(playPane,

@@ -4,6 +4,7 @@ import fftlib.Literal;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 public interface FFTState {
 

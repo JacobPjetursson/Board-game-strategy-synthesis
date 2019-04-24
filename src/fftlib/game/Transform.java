@@ -28,16 +28,18 @@ public class Transform {
 
             TransformedArray arr = (TransformedArray) obj;
             if (this == arr) return true;
-            return Arrays.deepEquals(this.board, arr.board);
+            return Arrays.deepEquals(this.board, arr.board) && this.transformations.equals(arr.transformations);
         }
 
         @Override
         public int hashCode() {
             int hash = 0;
             hash += Arrays.deepHashCode(this.board);
+            hash += Objects.hashCode(this.transformations);
             return 31 * hash;
         }
     }
+
 
     // reflect horizontally, with mirror along y-axis
     private static int[][] reflectH(int[][] board) {

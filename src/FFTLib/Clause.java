@@ -74,11 +74,14 @@ public class Clause{
 
         Clause list = (Clause) obj;
         return this == list ||
-                (this.literals.equals(list.literals));
+                (this.literals.equals(list.literals) && this.transformations.equals(list.transformations));
     }
 
     @Override
     public int hashCode() {
-        return 31 * Objects.hashCode(this.literals);
+        int hashCode = 0;
+        hashCode += Objects.hashCode(this.literals);
+        hashCode += Objects.hashCode(this.transformations);
+        return 31 * hashCode;
     }
 }

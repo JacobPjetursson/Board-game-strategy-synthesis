@@ -18,6 +18,7 @@ import kulibrat.gui.board.BoardTile;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 import static fftlib.Literal.PIECEOCC_PLAYER;
 import static kulibrat.game.Logic.POS_NONBOARD;

@@ -8,12 +8,8 @@ import misc.Config;
 
 import java.awt.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.*;
 
-import static kulibrat.FFT.AutoGen.LookupFull.BUILD_FULL_STATE_SPACE;
 import static kulibrat.game.Logic.POS_NONBOARD;
 import static misc.Config.*;
 
@@ -213,7 +209,7 @@ public class State implements Serializable, FFTState {
                 }
             }
         }
-        if (getUnplaced(team) > 0 || BUILD_FULL_STATE_SPACE) {
+        if (getUnplaced(team) > 0) {
             entries.add(new Point(POS_NONBOARD, POS_NONBOARD));
         }
         return entries;
@@ -235,12 +231,6 @@ public class State implements Serializable, FFTState {
         for (Move m : getLegalMoves()) {
             State child = new State(this, m);
             children.add(child);
-            if (BUILD_FULL_STATE_SPACE) {
-                State child1 = new State(child);
-                child1.setTurn(child.getTurn() == PLAYER1 ? PLAYER2 : PLAYER1);
-                //child1.zobrist_key = child1.initHashCode();
-                children.add(child1);
-            }
         }
         return children;
     }
