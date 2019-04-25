@@ -35,6 +35,7 @@ public class FFTManager {
     public static InteractiveFFTState interactiveState;
     public static BiFunction<Action, Integer, FFTMove> actionToMove;
     public static BiFunction<HashSet<Literal>, Integer, FFTState> preconsToState;
+    public static int gameWinner;
 
     public static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     public static final String blueBtnStyle = "-fx-border-color: #000000; -fx-background-color: #4444ff;";
@@ -56,6 +57,7 @@ public class FFTManager {
         preconsToState = gameSpecifics::preconsToState;
         failState = gameSpecifics.getFailState();
         interactiveState = gameSpecifics.getInteractiveState();
+        gameWinner = gameSpecifics.getGameWinner();
 
         // Try loading ffts from file in working directory
         load();
@@ -149,7 +151,7 @@ public class FFTManager {
 
     public void autogenFFT() {
         if (Config.USE_AUTOGEN) {
-            FFT fft = FFTAutoGen.generateFFT(AUTOGEN_PERSPECTIVE, GAME_WINNER);
+            FFT fft = FFTAutoGen.generateFFT(AUTOGEN_PERSPECTIVE, gameWinner);
             ffts.add(0, fft);
             currFFT = fft;
         }

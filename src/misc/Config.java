@@ -47,7 +47,6 @@ public class Config {
     public static final int ZOBRIST_SEED = -1554012918;
 
     public static final int AUTOGEN_PERSPECTIVE = PLAYER_ANY;
-    public static final int GAME_WINNER = PLAYER_NONE;
     public static final boolean FFT_OVERWRITE = false;
 
     // MISC

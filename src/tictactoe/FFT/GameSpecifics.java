@@ -6,6 +6,7 @@ import fftlib.Literal;
 import fftlib.game.*;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
+import misc.Config;
 import tictactoe.game.Controller;
 import tictactoe.game.Logic;
 import tictactoe.game.Move;
@@ -99,5 +100,12 @@ public class GameSpecifics implements FFTGameSpecifics {
         if (interactiveState == null)
             interactiveState = new InteractiveState(cont);
         return interactiveState;
+    }
+
+    @Override
+    public int getGameWinner() {
+        if (Config.simpleTicTacToe)
+            return PLAYER1;
+        return PLAYER_NONE;
     }
 }

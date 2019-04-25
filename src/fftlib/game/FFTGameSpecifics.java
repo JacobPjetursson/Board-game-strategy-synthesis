@@ -30,4 +30,6 @@ public interface FFTGameSpecifics {
     FFTFailState getFailState();
 
     InteractiveFFTState getInteractiveState();
+
+    int getGameWinner();
 }

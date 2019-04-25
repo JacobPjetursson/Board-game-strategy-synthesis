@@ -17,8 +17,7 @@ import java.util.HashSet;
 import static fftlib.Literal.PIECEOCC_ANY;
 import static fftlib.game.Transform.TRANS_HREF;
 import static kulibrat.game.Logic.POS_NONBOARD;
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Config.*;
 
 public class GameSpecifics implements FFTGameSpecifics {
     private Controller cont;
@@ -119,5 +118,12 @@ public class GameSpecifics implements FFTGameSpecifics {
         if (interactiveState == null)
             this.interactiveState = new InteractiveState(cont);
         return interactiveState;
+    }
+
+    @Override
+    public int getGameWinner() {
+        if (Config.kuliBHeight == 3 || Config.SCORELIMIT < 8)
+            return PLAYER1;
+        return PLAYER_NONE;
     }
 }
