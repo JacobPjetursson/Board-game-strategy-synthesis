@@ -90,6 +90,15 @@ public class Logic implements FFTLogic {
                     return team;
                 } else if (board[1][2] == team && board[2][2] == team) {
                     return team;
+
+                } else if (board[1][0] == team && board[0][1] == team) {
+                    return team;
+                } else if (board[0][1] == team && board[1][2] == team) {
+                    return team;
+                } else if (board[1][0] == team && board[2][1] == team) {
+                    return team;
+                } else if (board[2][1] == team && board[1][2] == team) {
+                    return team;
                 }
             }
             else {

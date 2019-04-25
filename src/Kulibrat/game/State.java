@@ -35,16 +35,17 @@ public class State implements Serializable, FFTState {
 
         turn = PLAYER1;
         this.scoreLimit = Config.SCORELIMIT;
-        this.zobrist_key = initHashCode();
+        System.out.println(scoreLimit);
+        //this.zobrist_key = initHashCode();
     }
 
     // Non-root state
     private State(State parent, Move m) {
         this(parent);
-        zobrist_key = parent.zobrist_key;
         move = m;
         Logic.doTurn(m, this);
-        updateHashCode(parent);
+        //zobrist_key = parent.zobrist_key;
+        //updateHashCode(parent);
     }
 
     // Duplicate constructor, for "root" state
@@ -60,7 +61,7 @@ public class State implements Serializable, FFTState {
         turn = state.turn;
         scoreLimit = state.scoreLimit;
         move = state.move;
-        zobrist_key = state.zobrist_key;
+        //zobrist_key = state.zobrist_key;
     }
 /*
     @Override
@@ -274,21 +275,25 @@ public class State implements Serializable, FFTState {
     }
 
     public HashSet<Literal> getAllLiterals() {
-        HashSet<Literal> literals = new HashSet<>(getLiterals());
+        HashSet<Literal> literals = new HashSet<>();
 
-        for (int i = 0; i < board.length; i++)
-            for (int j = 0; j < board[i].length; j++)
-                if (board[i][j] == 0)
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                int pieceOcc = board[i][j];
+                if (pieceOcc > 0) {
+                    if (turn == PLAYER1)
+                        literals.add(new Literal(i, j, pieceOcc, false));
+                    else {
+                        pieceOcc = (pieceOcc == 1) ? 2 : 1;
+                        literals.add(new Literal(i, j, pieceOcc, false));
+                    }
+                } else
                     literals.add(new Literal(i, j, PLAYER_ANY, true));
-
-        for (int i = 0; i < SCORELIMIT; i++) {
-            if ((i+1) != scoreLimit)
-                literals.add(new Literal("!SL=" + i));
-            if (i != redScore)
-                literals.add(new Literal("!P1SCORE=" + i));
-            if (i != blackScore)
-                literals.add(new Literal("!P2SCORE=" + i));
+            }
         }
+        literals.add(new Literal("SL=" + scoreLimit));
+        literals.add(new Literal("P1SCORE=" + redScore));
+        literals.add(new Literal("P2SCORE=" + blackScore));
         return literals;
     }
 

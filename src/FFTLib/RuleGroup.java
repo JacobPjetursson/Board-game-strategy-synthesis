@@ -26,4 +26,14 @@ public class RuleGroup {
     public void addRule(Rule r) {
         rules.add(r);
     }
+
+    public String printRules() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Printing rules in rg:\n");
+        sb.append("-----------------\n");
+        for (Rule r : rules)
+            sb.append(r.print()).append("\n");
+        sb.append("-----------------\n");
+        return sb.toString();
+    }
 }

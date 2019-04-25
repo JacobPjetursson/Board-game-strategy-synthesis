@@ -37,9 +37,9 @@ public class FFT {
         FFTManager.save();
     }
 
-    public boolean verify(int team, boolean wholeFFT) {
+    public boolean verify(int team, boolean complete) {
         if (team == PLAYER_ANY)
-            return verify(PLAYER1, wholeFFT) && verify(PLAYER2, wholeFFT);
+            return verify(PLAYER1, complete) && verify(PLAYER2, complete);
         FFTState initialState = FFTManager.initialFFTState;
         LinkedList<FFTState> frontier = new LinkedList<>();
         HashSet<FFTState> closedSet = new HashSet<>();
@@ -81,7 +81,7 @@ public class FFT {
                                 closedSet.add(nextState);
                                 frontier.add(nextState);
                             }
-                        } else if (wholeFFT) {
+                        } else if (complete) {
                             failingPoint = new FFTStateAndMove(state, m, true);
                             return false;
                         }

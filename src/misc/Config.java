@@ -38,12 +38,12 @@ public class Config {
     public static final int kuliBWidth = 3;
     public static final int kuliBHeight = 3;
 
-    public static final boolean simpleTicTacToe = true;
+    public static final boolean simpleTicTacToe = false;
 
     // TODO - gui for this configuration
     public static final boolean USE_AUTOGEN = true;
     public static final int AUTOGEN_PERSPECTIVE = PLAYER1;
-    public  static final int GAME_WINNER = PLAYER1;
+    public  static final int GAME_WINNER = PLAYER_NONE;
 
     // MISC
     public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";

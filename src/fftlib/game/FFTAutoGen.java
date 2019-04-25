@@ -85,18 +85,14 @@ public class FFTAutoGen {
 
     // States where all moves are correct should not be part of FFT
     private static void deleteIrrelevantStates() {
-        //Iterator<State> itr = states.listIterator(); // itr
-        LinkedList<FFTState> deleteList = new LinkedList<>(); // del
-        //while(itr.hasNext()) { // itr
-        for (FFTState s : states) { // del
-            //State s = itr.next(); // itr
+        LinkedList<FFTState> deleteList = new LinkedList<>();
+        for (FFTState s : states) {
             ArrayList<? extends FFTMove> nonLosingMoves = FFTManager.db.nonLosingMoves(s);
             if (nonLosingMoves.size() == s.getLegalMoves().size()) {
-                deleteList.add(s); // del
-                //itr.remove(); // itr
+                deleteList.add(s);
             }
         }
-        states.removeAll(deleteList); // del
+        states.removeAll(deleteList);
     }
 
     private static void makeRules() {
@@ -104,43 +100,35 @@ public class FFTAutoGen {
             System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + rg.rules.size());
             FFTState state = states.poll();
 
-            Rule r = makeRule(state);
-            if (rg.rules.contains(r))
-                continue;
-
-            rg.rules.add(r);
+            Rule r = addRule(state);
             if (detailedDebug) System.out.println("FINAL RULE: " + r.print());
 
-            LinkedList<FFTState> deleteList = new LinkedList<>(); // del
-            //Iterator<State> itr = states.listIterator(); // itr
-            //while(itr.hasNext()) { // itr
-            //    State s = itr.next(); // itr
-            for (FFTState s : states) { // del
-                if (r.apply(s) != null) {
-                    deleteList.add(s); // del
-                    //itr.remove(); // itr
-                }
-            }
-            states.removeAll(deleteList); // del
+            // Delete states that apply
+            LinkedList<FFTState> deleteList = new LinkedList<>();
+            for (FFTState s : states)
+                if (r.apply(s) != null)
+                    deleteList.add(s);
 
+            states.removeAll(deleteList);
         }
     }
 
-    private static Rule makeRule(FFTState s) {
+    private static Rule addRule(FFTState s) {
         HashSet<Literal> minSet = new HashSet<>();
-        ArrayList<Literal> copy = new ArrayList<>();
+        HashSet<Literal> literals = s.getAllLiterals();
         FFTMinimaxPlay bestPlay = lookupTable.get(s);
         Action bestAction = bestPlay.getMove().getAction();
 
-        for (Literal l : s.getAllLiterals()) {
+        for (Literal l : literals)
             minSet.add(new Literal(l));
-            copy.add(new Literal(l));
-        }
+
+        Rule r = new Rule(new Clause(minSet), bestAction);
+        rg.rules.add(r);
 
         // DEBUG
         if (detailedDebug) {
             System.out.print("ORIGINAL LITERALS: ");
-            for (Literal l : copy)
+            for (Literal l : literals)
                 System.out.print(l.name + " ");
             System.out.println();
             System.out.println("ORIGINAL STATE: " + s.print());
@@ -148,36 +136,18 @@ public class FFTAutoGen {
             System.out.println("ORIGINAL SCORE: " + bestPlay.getScore());
         }
 
-        for (Literal l : copy) {
+        for (Literal l : literals) {
             if (detailedDebug) System.out.println("INSPECTING: " + l.name);
-            minSet.remove(l);
-            Rule r = new Rule(new Clause(minSet), bestAction);
-            rg.rules.add(r);
+            r.removePrecondition(l);
 
             if (!fft.verify(perspective, false)) {
                 if (detailedDebug) System.out.println("FAILED TO VERIFY RULE!");
-                minSet.add(l);
+                r.addPrecondition(l);
             } else if (detailedDebug)
                 System.out.println("REMOVING: " + l.name);
-
-            rg.rules.remove(r);
         }
 
-        // DEBUG
-        if (detailedDebug) {
-            System.out.print("ALL LITERALS: ");
-            for (Literal l : s.getAllLiterals())
-                System.out.print(l.name + " ");
-            System.out.println();
-            System.out.print("MINSET: ");
-            for (Literal l : minSet)
-                System.out.print(l.name + " ");
-            System.out.println();
-        }
-
-        // Convert minSet with move to rule
-        Clause precons = new Clause(minSet);
-        return new Rule(precons, bestAction);
+        return r;
     }
 
     private static class StateComparator implements Comparator<FFTState>{
@@ -185,9 +155,9 @@ public class FFTAutoGen {
         public int compare(FFTState s1, FFTState s2) {
             // TODO - consider if ordering is important, and how to order in best way
             // TODO - also, why is a 0-compare version twice as fast as linkedlist, and better results than manual compare function?
-            /*
-            int s1_score = lookupTable.get(s1).score;
-            int s2_score = lookupTable.get(s2).score;
+/*
+            int s1_score = lookupTable.get(s1).getScore();
+            int s2_score = lookupTable.get(s2).getScore();
             if (perspective == PLAYER1) {
                 return s1_score - s2_score;
             } else if (perspective == PLAYER2) {
@@ -195,8 +165,8 @@ public class FFTAutoGen {
             } else {
                 return Math.abs(s1_score) - Math.abs(s2_score);
             }
-            */
-            return 0;
+*/
+            return -1;
         }
     }
 

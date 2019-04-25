@@ -95,11 +95,22 @@ public class State implements FFTState {
     }
 
     public HashSet<Literal> getAllLiterals() { // Including negatives
-        HashSet<Literal> literals = new HashSet<>(getLiterals());
-        for (int i = 0; i < board.length; i++)
-            for (int j = 0; j < board[i].length; j++)
-                if (board[i][j] == 0)
+        HashSet<Literal> literals = new HashSet<>();
+
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                int pieceOcc = board[i][j];
+                if (pieceOcc > 0) {
+                    if (turn == PLAYER1)
+                        literals.add(new Literal(i, j, pieceOcc, false));
+                    else {
+                        pieceOcc = (pieceOcc == 1) ? 2 : 1;
+                        literals.add(new Literal(i, j, pieceOcc, false));
+                    }
+                } else
                     literals.add(new Literal(i, j, PLAYER_ANY, true));
+            }
+        }
         return literals;
     }
 
