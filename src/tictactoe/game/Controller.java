@@ -77,8 +77,7 @@ public class Controller {
         gameSpecifics = new GameSpecifics(this);
         this.fftManager = new FFTManager(gameSpecifics);
         // Autogenerate
-        if (Config.USE_AUTOGEN)
-            fftManager.autogenFFT();
+        fftManager.autogenFFT();
 
         PlayPane playPane = new PlayPane(this);
         primaryStage.setScene(new Scene(playPane,
@@ -146,7 +145,7 @@ public class Controller {
         });
 
         // automatic mode
-        fftAutomaticMode = false;
+        fftAutomaticMode = true;
         automaticFFTBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
             fftAutomaticMode = newValue;
             if (fftAutomaticMode && (state.getTurn() == PLAYER2 && player2Instance == FFT) ||

@@ -199,7 +199,7 @@ public class Controller {
         });
 
         // automatic mode
-        fftAutomaticMode = false;
+        fftAutomaticMode = true;
         automaticFFTBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
             deselect();
             fftAutomaticMode = newValue;

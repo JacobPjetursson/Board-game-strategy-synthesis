@@ -141,8 +141,6 @@ public class State implements Serializable, FFTState {
         }
     }
 
-
-
     public int[][] getBoard() {
         return board;
     }

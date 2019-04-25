@@ -3,6 +3,7 @@ package tictactoe.game;
 import fftlib.Literal;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
+import tictactoe.ai.Zobrist;
 
 import java.util.*;
 
@@ -16,12 +17,14 @@ public class State implements FFTState {
     private int turn;
     private ArrayList<Move> legalMoves;
     private Move move;
+    private long zobrist_key;
     private static int[] transformations = {TRANS_HREF, TRANS_VREF, TRANS_ROT};
 
     // Starting state
     public State() {
         board = new int[3][3];
         turn = PLAYER1;
+        zobrist_key = initHashCode();
     }
 
     // Duplicate constructor
@@ -32,6 +35,7 @@ public class State implements FFTState {
         }
         turn = state.turn;
         move = state.move;
+        this.zobrist_key = state.zobrist_key;
     }
 
     // Non-root state
@@ -39,6 +43,31 @@ public class State implements FFTState {
         this(parent);
         Logic.doTurn(m, this);
         this.move = m;
+        updateHashCode(parent);
+    }
+
+    private long initHashCode() {
+        long hash = 0L;
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                if (board[i][j] != 0) {
+                    int k = board[i][j]; // team occupying spot
+                    hash = hash ^ Zobrist.board[i][j][k];
+                }
+            }
+        }
+        hash = hash ^ Zobrist.turn[turn];
+        return hash;
+    }
+
+    private void updateHashCode(State parent) {
+        zobrist_key ^= Zobrist.turn[parent.getTurn()];
+        zobrist_key ^= Zobrist.turn[turn];
+
+        int k_parent = parent.board[move.row][move.col];
+        int k = board[move.row][move.col];
+        zobrist_key ^= Zobrist.board[move.row][move.col][k_parent];
+        zobrist_key ^= Zobrist.board[move.row][move.col][k];
     }
 
     @Override
@@ -139,12 +168,12 @@ public class State implements FFTState {
 
         State state = (State) obj;
         return this == state ||
-                Arrays.deepEquals(this.board, state.board);
+                this.zobrist_key == state.zobrist_key;
     }
 
     @Override
     public int hashCode() {
-        return 31 * Arrays.deepHashCode(board);
+        return (int) zobrist_key;
     }
 
 }

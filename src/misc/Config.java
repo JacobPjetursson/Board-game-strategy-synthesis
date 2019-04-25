@@ -41,12 +41,16 @@ public class Config {
     public static final boolean simpleTicTacToe = false;
 
     // TODO - gui for this configuration
-    public static final boolean USE_AUTOGEN = true;
-    public static final int AUTOGEN_PERSPECTIVE = PLAYER1;
-    public  static final int GAME_WINNER = PLAYER_NONE;
+    public static boolean USE_AUTOGEN = false;
+
+    public static final boolean RANDOM_ZOBRIST_SEED = false;
+    public static final int ZOBRIST_SEED = -1554012918;
+
+    public static final int AUTOGEN_PERSPECTIVE = PLAYER_ANY;
+    public static final int GAME_WINNER = PLAYER_NONE;
+    public static final boolean FFT_OVERWRITE = false;
 
     // MISC
     public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";
     public static int SCORELIMIT; // Set by player once (kulibrat)
-    public static final boolean FFT_OVERWRITE = false;
 }

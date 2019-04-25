@@ -6,6 +6,7 @@ import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
 import javafx.scene.input.DataFormat;
 import fftlib.game.FFTAutoGen;
+import misc.Config;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -147,9 +148,12 @@ public class FFTManager {
     }
 
     public void autogenFFT() {
-        FFT fft = FFTAutoGen.generateFFT(AUTOGEN_PERSPECTIVE, GAME_WINNER);
-        ffts.add(0, fft);
-        currFFT = fft;
+        if (Config.USE_AUTOGEN) {
+            FFT fft = FFTAutoGen.generateFFT(AUTOGEN_PERSPECTIVE, GAME_WINNER);
+            ffts.add(0, fft);
+            currFFT = fft;
+        }
+        USE_AUTOGEN = false;
     }
 
 }

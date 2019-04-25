@@ -84,7 +84,7 @@ public class NavPane extends VBox {
 
         automaticFFT = new CheckBox();
         automaticFFT.setPrefSize(20, 20);
-        automaticFFT.setSelected(false);
+        automaticFFT.setSelected(true);
         Label automaticLabel = new Label("Automatic FFT");
         automaticLabel.setFont(Font.font("Verdana", 20));
         automaticLabel.setPadding(new Insets(0, 0, 0, 5));

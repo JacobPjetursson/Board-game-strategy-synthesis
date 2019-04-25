@@ -153,9 +153,10 @@ public class FFTAutoGen {
     private static class StateComparator implements Comparator<FFTState>{
         @Override
         public int compare(FFTState s1, FFTState s2) {
+            /*
             // TODO - consider if ordering is important, and how to order in best way
             // TODO - also, why is a 0-compare version twice as fast as linkedlist, and better results than manual compare function?
-/*
+
             int s1_score = lookupTable.get(s1).getScore();
             int s2_score = lookupTable.get(s2).getScore();
             if (perspective == PLAYER1) {
@@ -163,10 +164,12 @@ public class FFTAutoGen {
             } else if (perspective == PLAYER2) {
                 return s2_score - s1_score;
             } else {
-                return Math.abs(s1_score) - Math.abs(s2_score);
+                int score = Math.abs(s1_score) - Math.abs(s2_score);
+                if (score == 0)  return -1;
+                else return score;
             }
-*/
-            return -1;
+            */
+            return 0;
         }
     }
 
