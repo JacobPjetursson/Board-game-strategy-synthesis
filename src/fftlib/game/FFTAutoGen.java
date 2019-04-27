@@ -9,7 +9,7 @@ import static misc.Config.*;
 
 public class FFTAutoGen {
     private static HashMap<? extends FFTState, ? extends FFTMinimaxPlay> lookupTable;
-    private static PriorityQueue<FFTState> states;
+    private static HashMap<Long, FFTState> states;
     private static FFT fft;
     private static RuleGroup rg;
 
@@ -34,7 +34,7 @@ public class FFTAutoGen {
 
         System.out.println("Solution size: " + lookupTable.size());
 
-        states = new PriorityQueue<>(new StateComparator());
+        states = new HashMap<>();
         System.out.println("Filtering...");
         populateQueue();
         deleteIrrelevantStates();
@@ -78,38 +78,39 @@ public class FFTAutoGen {
                     break;
             }
             if (threshold) {
-                states.add(state);
+                states.put(state.getZobristKey(), state);
             }
         }
     }
 
     // States where all moves are correct should not be part of FFT
     private static void deleteIrrelevantStates() {
-        LinkedList<FFTState> deleteList = new LinkedList<>();
-        for (FFTState s : states) {
+        Iterator<Map.Entry<Long, FFTState>> itr = states.entrySet().iterator();
+        while (itr.hasNext()) {
+            FFTState s = itr.next().getValue();
             ArrayList<? extends FFTMove> nonLosingMoves = FFTManager.db.nonLosingMoves(s);
             if (nonLosingMoves.size() == s.getLegalMoves().size()) {
-                deleteList.add(s);
+                itr.remove();
             }
         }
-        states.removeAll(deleteList);
     }
 
     private static void makeRules() {
         while (!states.isEmpty()) {
             System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + rg.rules.size());
-            FFTState state = states.poll();
+            FFTState state = states.entrySet().iterator().next().getValue();
 
             Rule r = addRule(state);
             if (detailedDebug) System.out.println("FINAL RULE: " + r.print());
 
             // Delete states that apply
-            LinkedList<FFTState> deleteList = new LinkedList<>();
-            for (FFTState s : states)
+            Iterator<Map.Entry<Long, FFTState>> itr = states.entrySet().iterator();
+            while (itr.hasNext()) {
+                FFTState s = itr.next().getValue();
                 if (r.apply(s) != null)
-                    deleteList.add(s);
+                    itr.remove();
 
-            states.removeAll(deleteList);
+            }
         }
     }
 

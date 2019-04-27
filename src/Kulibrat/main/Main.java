@@ -19,8 +19,6 @@ public class Main extends Application {
         Config.CURRENT_GAME = Config.KULIBRAT;
         Scene menuScene = new Scene(new MenuPane(this), Config.WIDTH, Config.HEIGHT);
         primaryStage.setScene(menuScene);
-        Zobrist.initialize();
-
         primaryStage.show();
     }
 }

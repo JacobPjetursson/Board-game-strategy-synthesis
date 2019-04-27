@@ -82,8 +82,7 @@ public class Database implements FFTDatabase {
                     if (Logic.getWinner(child) == winner)
                         nonLosingMoves.add(m);
                 } else {
-                    int childWinner = queryPlay(child).getWinner();
-                    if (winner == childWinner)
+                    if (winner == queryPlay(child).getWinner())
                         nonLosingMoves.add(m);
                 }
             }

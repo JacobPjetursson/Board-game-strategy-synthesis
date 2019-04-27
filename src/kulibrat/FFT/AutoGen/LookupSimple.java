@@ -18,7 +18,6 @@ public class LookupSimple {
     private HashMap<State, MinimaxPlay> lookupTable;
     private int team;
 
-
     public LookupSimple(int team, State state) {
         System.out.println("Solving the game");
         this.team = team;

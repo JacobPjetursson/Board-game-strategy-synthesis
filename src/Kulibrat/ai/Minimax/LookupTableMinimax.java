@@ -105,7 +105,7 @@ public class LookupTableMinimax extends AI {
         if (Logic.gameOver(state) || depth == 0) {
             return new MinimaxPlay(bestMove, heuristic(state), depth);
         }
-        MinimaxPlay transpoPlay = lookupTable.get(state.getHashCode());
+        MinimaxPlay transpoPlay = lookupTable.get(state.getZobristKey());
         if (transpoPlay != null && depth <= transpoPlay.depth) {
             return transpoPlay;
         }
@@ -129,7 +129,7 @@ public class LookupTableMinimax extends AI {
             }
         }
         if (transpoPlay == null || depth > transpoPlay.depth) {
-            lookupTable.put(state.getHashCode(),
+            lookupTable.put(state.getZobristKey(),
                     new MinimaxPlay(bestMove, bestScore, depth));
         }
         if (!evaluated) unevaluatedNodes++;

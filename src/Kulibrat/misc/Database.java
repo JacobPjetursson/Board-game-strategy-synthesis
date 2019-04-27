@@ -49,7 +49,7 @@ public class Database implements FFTDatabase {
         System.out.println("Connection successful");
 
         String tableName = "plays_" + Config.SCORELIMIT;
-        long key = new State(new State()).getHashCode();
+        long key = new State(new State()).getZobristKey();
         boolean error = false;
         // Try query to check for table existance
         try {
@@ -118,6 +118,7 @@ public class Database implements FFTDatabase {
         ArrayList<Move> nonLosingMoves = new ArrayList<>();
         if (Logic.gameOver(n))
             return nonLosingMoves;
+
         MinimaxPlay bestPlay = queryPlay(n);
         if (bestPlay.move == null) // There is no moves in this state
             return nonLosingMoves;
@@ -125,45 +126,42 @@ public class Database implements FFTDatabase {
 
         // In case of game over
         if (Logic.gameOver(next)) {
-
             int winner = Logic.getWinner(next);
             for (State child : n.getChildren()) {
                 Move m = child.getMove();
-                if (Logic.gameOver(child)) {
-                    if (Logic.getWinner(child) == winner)
+                int childWinner = Logic.getWinner(child);
+                if (childWinner == winner)
                         nonLosingMoves.add(m);
-                } else {
-                    int score = queryPlay(child).score;
-                    if (winner == PLAYER1 && score > 1000)
-                        nonLosingMoves.add(m);
-                    else if (winner == PLAYER2 && score < -1000)
-                        nonLosingMoves.add(m);
-                    else if (winner == 0 && (score < 1000 && score > 0))
+                else if (childWinner == 0) { // Game still going
+                    if (queryPlay(child).getWinner() == winner)
                         nonLosingMoves.add(m);
                 }
             }
             return nonLosingMoves;
         }
 
-        int bestScore = queryPlay(next).score;
+        int bestMoveWinner = queryPlay(next).getWinner();
         int team = n.getTurn();
 
         for (State child : n.getChildren()) {
             Move m = child.getMove();
-            int score = queryPlay(child).score;
+            if (Logic.gameOver(child)) { // Game is stuck
+                if (team == PLAYER1 && bestMoveWinner == PLAYER2)
+                    nonLosingMoves.add(m);
+                else if (team == PLAYER2 && bestMoveWinner == PLAYER1)
+                    nonLosingMoves.add(m);
+                continue;
+            }
+            int childWinner = queryPlay(child).getWinner();
             if (team == PLAYER1) {
-                if (bestScore > 1000 && score > 1000)
+                if (bestMoveWinner == childWinner)
                     nonLosingMoves.add(m);
-                else if (bestScore > 0 && bestScore < 1000 && score > 0 && score < 1000)
-                    nonLosingMoves.add(m);
-                else if (bestScore < -1000)
+                else if (bestMoveWinner == PLAYER2)
                     nonLosingMoves.add(m);
             } else {
-                if (bestScore < -1000 && score < -1000)
+                if (bestMoveWinner == childWinner)
                     nonLosingMoves.add(m);
-                else if (bestScore > 0 && bestScore < 1000 && score > 0 && score < 1000)
-                    nonLosingMoves.add(m);
-                else if (bestScore > 1000)
+                else if (bestMoveWinner == PLAYER1)
                     nonLosingMoves.add(m);
             }
         }
@@ -172,12 +170,12 @@ public class Database implements FFTDatabase {
 
     // Fetches the best play corresponding to the input node
     public static MinimaxPlay queryPlay(State n) {
-        if (!lookupTable.isEmpty())
+        if (lookupTable != null)
             return lookupTable.get(n);
 
         MinimaxPlay play = null;
         String tableName = "plays_" + Config.SCORELIMIT;
-        Long key = n.getHashCode();
+        Long key = n.getZobristKey();
         try {
             Statement statement = dbConnection.createStatement();
             ResultSet resultSet = statement.executeQuery("select oldRow, oldCol, newRow, newCol, team, score from "

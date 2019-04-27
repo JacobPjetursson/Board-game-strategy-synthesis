@@ -85,30 +85,31 @@ public class Action {
     }
 
     Action transform(ArrayList<Integer> transformations) {
-        int[][] aBoard = actionToBoard();
-        int[][] tBoard = Transform.apply(transformations, aBoard);
-        return boardToAction(transformations, tBoard);
+        HashSet<Literal> addLits = new HashSet<>();
+        HashSet<Literal> remLits = new HashSet<>();
+        for (Literal l : addClause.literals) {
+            if (l.row != POS_NONBOARD) {
+                int[] pos = Transform.apply(transformations, l.row, l.col, gameBoardWidth, gameBoardHeight);
+                addLits.add(new Literal(pos[0], pos[1], l.pieceOcc, l.negation));
+            }
+        }
+        for (Literal l : remClause.literals) {
+            if (l.row != POS_NONBOARD) {
+                int[] pos = Transform.apply(transformations, l.row, l.col, gameBoardWidth, gameBoardHeight);
+                remLits.add(new Literal(pos[0], pos[1], l.pieceOcc, l.negation));
+            }
+        }
+        Clause addC = new Clause(transformations, addLits);
+        Clause remC = new Clause(transformations, remLits);
+        return new Action(addC, remC);
+
+        //int[][] aBoard = actionToBoard();
+        //int[][] tBoard = Transform.apply(transformations, aBoard);
+        //return boardToAction(transformations, tBoard);
     }
 
     public FFTMove getMove(int team) {
         return FFTManager.actionToMove.apply(this, team);
-    }
-
-    // Takes as input copies of the addClause, remClause lists and removes all the literals that are board placements
-    // It returns a board with the literals on it, the value equals to the piece occ.
-    private int[][] actionToBoard() {
-        int[][] clauseBoard = new int[gameBoardHeight][gameBoardWidth];
-
-        for (Literal l : addClause.literals) {
-            if (l.row != POS_NONBOARD)
-                clauseBoard[l.row][l.col] = l.pieceOcc;
-        }
-        for (Literal l : remClause.literals) {
-            if (l.row != POS_NONBOARD)
-                clauseBoard[l.row][l.col] = -l.pieceOcc;
-        }
-
-        return clauseBoard;
     }
 
     String getFormattedString() {
@@ -144,6 +145,23 @@ public class Action {
         Clause addC = new Clause(transformations, addLits);
         Clause remC = new Clause(transformations, remLits);
         return new Action(addC, remC);
+    }
+
+    // Takes as input copies of the addClause, remClause lists and removes all the literals that are board placements
+    // It returns a board with the literals on it, the value equals to the piece occ.
+    private int[][] actionToBoard() {
+        int[][] clauseBoard = new int[gameBoardHeight][gameBoardWidth];
+
+        for (Literal l : addClause.literals) {
+            if (l.row != POS_NONBOARD)
+                clauseBoard[l.row][l.col] = l.pieceOcc;
+        }
+        for (Literal l : remClause.literals) {
+            if (l.row != POS_NONBOARD)
+                clauseBoard[l.row][l.col] = -l.pieceOcc;
+        }
+
+        return clauseBoard;
     }
 
     @Override

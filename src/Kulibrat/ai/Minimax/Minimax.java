@@ -71,7 +71,7 @@ public class Minimax extends AI {
             return new MinimaxPlay(null, heuristic(state), depth);
         MinimaxPlay transpoPlay = null;
         if (useTranspo) {
-            transpoPlay = transTable.get(state.getHashCode());
+            transpoPlay = transTable.get(state.getZobristKey());
             if (transpoPlay != null && (depth <= transpoPlay.depth || Math.abs(transpoPlay.score) >= 1000)) {
                 return transpoPlay;
             }
@@ -115,7 +115,7 @@ public class Minimax extends AI {
         }
         if (useTranspo && !searchCutOff) {
             if (transpoPlay == null || depth > transpoPlay.depth) {
-                transTable.put(state.getHashCode(), new MinimaxPlay(bestMove, bestScore, depth));
+                transTable.put(state.getZobristKey(), new MinimaxPlay(bestMove, bestScore, depth));
             }
         }
         return new MinimaxPlay(bestMove, bestScore, depth);

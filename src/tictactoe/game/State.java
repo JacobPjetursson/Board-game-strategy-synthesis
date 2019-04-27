@@ -143,6 +143,11 @@ public class State implements FFTState {
         return literals;
     }
 
+    @Override
+    public long getZobristKey() {
+        return zobrist_key;
+    }
+
     public String print() {
         return Arrays.deepToString(board) + " , TEAM: " + turn;
     }

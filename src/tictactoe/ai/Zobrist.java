@@ -12,8 +12,9 @@ public class Zobrist {
         long range = Long.MAX_VALUE;
         Random r = new Random();
         int seed = (Config.RANDOM_ZOBRIST_SEED) ? r.nextInt() : Config.ZOBRIST_SEED;
-        System.out.println("Zobrist seed: " + seed);
         r.setSeed(seed);
+        System.out.println("Zobrist seed: " + seed);
+
         // board keys
         int rows = 3;
         int cols = 3;

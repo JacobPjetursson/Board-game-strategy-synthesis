@@ -18,7 +18,7 @@ public class State implements Serializable, FFTState {
     private int turn;
     private int redScore;
     private int blackScore;
-    private int scoreLimit; // Should've made static
+    private static int scoreLimit; // Should've made static
     private int unplacedRed;
     private int unplacedBlack;
     private ArrayList<Move> legalMoves;
@@ -34,18 +34,15 @@ public class State implements Serializable, FFTState {
         unplacedBlack = 4;
 
         turn = PLAYER1;
-        this.scoreLimit = Config.SCORELIMIT;
-        System.out.println(scoreLimit);
-        //this.zobrist_key = initHashCode();
+        scoreLimit = Config.SCORELIMIT;
+        this.zobrist_key = initZobrist();
     }
 
     // Non-root state
     private State(State parent, Move m) {
         this(parent);
-        move = m;
+        this.move = m;
         Logic.doTurn(m, this);
-        //zobrist_key = parent.zobrist_key;
-        //updateHashCode(parent);
     }
 
     // Duplicate constructor, for "root" state
@@ -59,28 +56,28 @@ public class State implements Serializable, FFTState {
         unplacedRed = state.unplacedRed;
         unplacedBlack = state.unplacedBlack;
         turn = state.turn;
-        scoreLimit = state.scoreLimit;
         move = state.move;
-        //zobrist_key = state.zobrist_key;
+        zobrist_key = state.zobrist_key;
     }
-/*
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof State)) return false;
-        return (((State) obj).getHashCode() == getHashCode());
+        State state = (State) obj;
+        return this.zobrist_key == state.zobrist_key;
     }
 
     @Override
     public int hashCode() {
         return (int) zobrist_key;
     }
-    */
 
-    public long getHashCode() {
+
+    public long getZobristKey() {
         return this.zobrist_key;
     }
 
-
+/*
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -99,62 +96,45 @@ public class State implements Serializable, FFTState {
         result = 31 * result + Arrays.deepHashCode(getBoard());
         return result;
     }
-
-    private long initHashCode() {
+*/
+    private long initZobrist() {
         long hash = 0L;
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
+        for (int i = 0; i < board.length; i++)
+            for (int j = 0; j < board[i].length; j++)
                 if (board[i][j] != 0) {
                     int k = board[i][j]; // team occupying spot
                     hash = hash ^ Zobrist.board[i][j][k];
                 }
-            }
-        }
         hash = hash ^ Zobrist.turn[turn];
         hash = hash ^ Zobrist.redPoints[redScore];
         hash = hash ^ Zobrist.blackPoints[blackScore];
         return hash;
     }
-
-    private void updateHashCode(State parent) {
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                if (board[i][j] != parent.getBoard()[i][j]) {
-                    int k_parent = parent.getBoard()[i][j]; // team occupying spot
-                    int k = board[i][j];
-                    if (k_parent != 0) zobrist_key ^= Zobrist.board[i][j][k_parent];
-                    if (k != 0) zobrist_key ^= Zobrist.board[i][j][k];
-                }
-            }
-        }
-        if (turn != parent.getTurn()) {
-            zobrist_key ^= Zobrist.turn[parent.getTurn()];
-            zobrist_key ^= Zobrist.turn[turn];
-        }
-        if (redScore != parent.getScore(PLAYER1)) {
-            zobrist_key ^= Zobrist.redPoints[parent.getScore(PLAYER1)];
-            zobrist_key ^= Zobrist.redPoints[redScore];
-        }
-        if (blackScore != parent.getScore(PLAYER2)) {
-            zobrist_key ^= Zobrist.blackPoints[parent.getScore(PLAYER2)];
-            zobrist_key ^= Zobrist.blackPoints[blackScore];
-        }
-    }
-
     public int[][] getBoard() {
         return board;
     }
 
     public void setBoardEntry(int row, int col, int team) {
+        int k = board[row][col];
         board[row][col] = team;
+        if (k != 0)
+            zobrist_key ^= Zobrist.board[row][col][k];
+        if (team != 0)
+            zobrist_key ^= Zobrist.board[row][col][team];
     }
 
     void addPoint(int team) {
         if (team == PLAYER1) {
+            if (redScore != 0)
+                zobrist_key ^= Zobrist.redPoints[redScore];
             redScore++;
+            zobrist_key ^= Zobrist.redPoints[redScore];
             unplacedRed++;
         } else {
+            if (blackScore != 0)
+                zobrist_key ^= Zobrist.blackPoints[blackScore];
             blackScore++;
+            zobrist_key ^= Zobrist.blackPoints[blackScore];
             unplacedBlack++;
         }
     }
@@ -171,16 +151,19 @@ public class State implements Serializable, FFTState {
         return turn;
     }
 
-    public void setTurn(int turn) {
-        this.turn = turn;
+    public void setTurn(int newTurn) {
+        zobrist_key ^= Zobrist.turn[turn];
+        zobrist_key ^= Zobrist.turn[newTurn];
+
+        this.turn = newTurn;
     }
 
     public int getScoreLimit() {
         return scoreLimit;
     }
 
-    public void setScoreLimit(int scoreLimit) {
-        this.scoreLimit = scoreLimit;
+    public void setScoreLimit(int sl) {
+        scoreLimit = sl;
     }
 
     void addUnPlaced(int team) {
@@ -218,11 +201,23 @@ public class State implements Serializable, FFTState {
         return (team == PLAYER1) ? redScore : blackScore;
     }
 
-    public void setScore(int team, int score) {
-        if (team == PLAYER1)
-            redScore = score;
-        else if (team == PLAYER2)
-            blackScore = score;
+    public void setScore(int team, int newScore) {
+        if (team == PLAYER1) {
+            if (redScore != 0)
+                zobrist_key ^= Zobrist.redPoints[redScore];
+            if (newScore != 0)
+                zobrist_key ^= Zobrist.redPoints[newScore];
+
+            redScore = newScore;
+        }
+        else if (team == PLAYER2) {
+            if (blackScore != 0)
+                zobrist_key ^= Zobrist.blackPoints[blackScore];
+            if (newScore != 0)
+                zobrist_key ^= Zobrist.blackPoints[newScore];
+
+            blackScore = newScore;
+        }
     }
 
     public ArrayList<State> getChildren() {

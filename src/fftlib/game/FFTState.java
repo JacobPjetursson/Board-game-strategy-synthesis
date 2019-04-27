@@ -12,6 +12,8 @@ public interface FFTState {
 
     HashSet<Literal> getAllLiterals();
 
+    long getZobristKey();
+
     int getTurn();
 
     ArrayList<? extends FFTMove> getLegalMoves();
