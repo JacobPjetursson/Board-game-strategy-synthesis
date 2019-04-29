@@ -22,5 +22,7 @@ public interface FFTState {
 
     FFTState getNextState(FFTMove move);
 
+    FFTMove getMove();
+
     String print();
 }

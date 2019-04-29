@@ -46,7 +46,7 @@ public class FFT {
         frontier.add(initialState);
         int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
         // Check if win or draw is even possible
-        int score = FFTManager.db.queryPlay(initialState).getScore();
+        int score = FFTManager.db.queryState(initialState).getScore();
         if (team == PLAYER1 && score < -1000) {
             System.out.println("A perfect player 2 has won from start of the game");
             return false;

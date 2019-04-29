@@ -41,7 +41,7 @@ public class Config {
 
 
     // TODO - gui for this configuration
-    public static boolean USE_AUTOGEN = true;
+    public static boolean USE_AUTOGEN = false;
 
     public static final boolean RANDOM_ZOBRIST_SEED = true;
     public static final int ZOBRIST_SEED = 0; // 0 is required for database

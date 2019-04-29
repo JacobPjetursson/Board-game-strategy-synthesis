@@ -120,6 +120,14 @@ public class Database implements FFTDatabase {
         return true;
     }
 
+    @Override
+    public boolean isLosingChild(FFTMinimaxPlay bestPlay, FFTState bestChild, FFTState child) {
+        if (bestPlay == null)
+            return true;
+
+        return false;
+    }
+
     public static void fillLookupTable(HashMap<State, MinimaxPlay> lookup) {
         lookupTable = lookup;
     }
@@ -132,7 +140,7 @@ public class Database implements FFTDatabase {
         return bestPlays((State) state);
     }
 
-    public FFTMinimaxPlay queryPlay(FFTState s) {
+    public FFTMinimaxPlay queryState(FFTState s) {
         return queryPlay((State) s);
     }
 

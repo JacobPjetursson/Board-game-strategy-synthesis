@@ -114,7 +114,7 @@ public class Database implements FFTDatabase {
         return bestPlays;
     }
 
-    public static ArrayList<Move> nonLosingMoves(State n) {
+    private static ArrayList<Move> nonLosingMoves(State n) {
         ArrayList<Move> nonLosingMoves = new ArrayList<>();
         if (Logic.gameOver(n))
             return nonLosingMoves;
@@ -166,6 +166,40 @@ public class Database implements FFTDatabase {
             }
         }
         return nonLosingMoves;
+    }
+
+    private static boolean isLosingChild(MinimaxPlay bestPlay, State bestChild, State child) {
+        if (bestPlay == null || bestPlay.move == null)
+            return true;
+        int bestMoveWinner = bestPlay.getWinner();
+        // In case of game over with perfect move
+        if (Logic.gameOver(bestChild)) {
+            int childWinner = Logic.getWinner(child);
+            if (childWinner == bestMoveWinner)
+                return false;
+            else if (childWinner == 0) { // Game still going
+                return queryPlay(child).getWinner() != bestMoveWinner;
+            }
+            return true;
+        }
+
+        int team = child.getTurn();
+
+        if (Logic.gameOver(child)) { // Game is stuck
+            if (team == PLAYER1 && bestMoveWinner == PLAYER2)
+                return false;
+            else return team != PLAYER2 || bestMoveWinner != PLAYER1;
+        }
+        int childWinner = queryPlay(child).getWinner();
+        if (team == PLAYER1) {
+            if (bestMoveWinner == childWinner)
+                return false;
+            else return bestMoveWinner != PLAYER2;
+        } else {
+            if (bestMoveWinner == childWinner)
+                return false;
+            else return bestMoveWinner != PLAYER1;
+        }
     }
 
     // Fetches the best play corresponding to the input node
@@ -293,7 +327,13 @@ public class Database implements FFTDatabase {
         return nonLosingMoves((State) n);
     }
 
-    public FFTMinimaxPlay queryPlay(FFTState n) {
+    @Override
+    public boolean isLosingChild(FFTMinimaxPlay bestPlay, FFTState bestChild, FFTState child) {
+        return isLosingChild((MinimaxPlay) bestPlay, (State) bestChild, (State) child);
+    }
+
+
+    public FFTMinimaxPlay queryState(FFTState n) {
         return queryPlay((State) n);
     }
 
