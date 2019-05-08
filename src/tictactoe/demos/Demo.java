@@ -5,8 +5,6 @@ import tictactoe.FFT.GameSpecifics;
 import tictactoe.ai.LookupTableMinimax;
 import tictactoe.game.State;
 
-import java.util.HashSet;
-
 import static misc.Config.PLAYER1;
 
 public class Demo {
@@ -30,7 +28,7 @@ public class Demo {
         Clause remC = new Clause();
         Action a = new Action(addC, remC);
         Rule r = new Rule(lits, a);
-        System.out.println(r.print());
+        System.out.println(r);
         System.out.println(r.verify(PLAYER1));
     }
 }

@@ -16,8 +16,14 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.*;
-import javafx.scene.layout.*;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -27,9 +33,7 @@ import javafx.util.Duration;
 
 import java.util.ArrayList;
 
-import static fftlib.FFTManager.SERIALIZED_MIME_TYPE;
-import static fftlib.FFTManager.greenBtnStyle;
-import static fftlib.FFTManager.redBtnStyle;
+import static fftlib.FFTManager.*;
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
 
@@ -211,7 +215,7 @@ public class EditFFTInteractive extends BorderPane {
         Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.5), ev -> {
             Rule r = interactiveFFTState.getRule();
             if (r != null)
-                ruleLabel.setText(r.print());
+                ruleLabel.setText(r.toString());
         }));
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
@@ -263,7 +267,7 @@ public class EditFFTInteractive extends BorderPane {
                 selectedIndices = new int[]{rgIdx, rIdx};
             });
             Rule r = rg.rules.get(rIdx);
-            this.label = new Label((rIdx + 1) + ": " + r.print());
+            this.label = new Label((rIdx + 1) + ": " + r);
             label.setFont(Font.font("Verdana", 13));
             getChildren().add(label);
         }

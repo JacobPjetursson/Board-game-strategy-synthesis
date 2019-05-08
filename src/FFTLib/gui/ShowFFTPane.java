@@ -74,7 +74,7 @@ public class ShowFFTPane extends BorderPane {
             rgVBox.getChildren().add(rgLabel);
             for (int j = 0; j < rg.rules.size(); j++) {
                 Rule r = rg.rules.get(j);
-                Label rLabel = new Label((j + 1) + ": " + r.print());
+                Label rLabel = new Label((j + 1) + ": " + r);
                 rLabel.setFont(Font.font("Verdana", 16));
                 FFTMove move = r.apply(state);
                 if (!ruleApplied && move != null) {

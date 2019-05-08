@@ -2,7 +2,6 @@ package kulibrat.gui.board.PlayBox;
 
 import fftlib.Literal;
 import fftlib.Rule;
-import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -15,7 +14,6 @@ import kulibrat.game.Move;
 import kulibrat.game.State;
 import kulibrat.gui.board.BoardTile;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 import static fftlib.Literal.*;

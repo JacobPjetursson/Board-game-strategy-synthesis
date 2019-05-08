@@ -10,7 +10,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.*;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -150,7 +153,7 @@ public class EditRuleGroupPane extends VBox {
             super();
             this.idx = idx;
             Rule r = rg_changes.rules.get(idx);
-            Label rLabel = new Label((idx + 1) + ": " + r.print());
+            Label rLabel = new Label((idx + 1) + ": " + r);
             rLabel.setFont(Font.font("Verdana", 11));
 
             // Remove button

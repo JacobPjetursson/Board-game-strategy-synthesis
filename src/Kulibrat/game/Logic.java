@@ -6,7 +6,6 @@ import fftlib.game.FFTState;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;

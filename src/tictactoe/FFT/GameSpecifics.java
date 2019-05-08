@@ -1,7 +1,6 @@
 package tictactoe.FFT;
 
 import fftlib.Action;
-import fftlib.Clause;
 import fftlib.Literal;
 import fftlib.game.*;
 import fftlib.gui.FFTFailState;

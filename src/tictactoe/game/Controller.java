@@ -157,7 +157,7 @@ public class Controller {
         showFFTButton.setOnAction(event -> {
             Stage newStage = new Stage();
             newStage.setOnHiding(otherevent -> shownFFT = null);
-            System.out.println(this.state.print());
+            System.out.println(this.state);
             shownFFT = new ShowFFTPane(fftManager, this.state);
             newStage.setScene(new Scene(shownFFT, 700, 700));
             newStage.show();

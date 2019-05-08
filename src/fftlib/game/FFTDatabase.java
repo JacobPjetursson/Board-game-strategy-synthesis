@@ -2,7 +2,6 @@ package fftlib.game;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 public interface FFTDatabase {
 

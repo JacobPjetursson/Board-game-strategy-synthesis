@@ -8,7 +8,9 @@ import misc.Config;
 
 import java.awt.*;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import static kulibrat.game.Logic.POS_NONBOARD;
 import static misc.Config.*;
@@ -290,7 +292,7 @@ public class State implements Serializable, FFTState {
         return literals;
     }
 
-    public String print() {
+    public String toString() {
         return Arrays.deepToString(board) + " , TURN: " + turn + ", P1SCORE: " + redScore + " , P2SCORE: " + blackScore;
     }
 

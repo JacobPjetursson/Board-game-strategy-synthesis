@@ -34,6 +34,7 @@ public class Config {
     public static final int TICTACTOE = 1;
     public static final boolean simpleTicTacToe = false;
     public static int CURRENT_GAME;
+    public static int FFT_INDEX = 0; // selected fft, hacky solution
 
     // BOARD CONFIG
     public static final int kuliBWidth = 3;
@@ -47,7 +48,7 @@ public class Config {
     public static final int ZOBRIST_SEED = 0; // 0 is required for database
 
     public static final int AUTOGEN_PERSPECTIVE = PLAYER1;
-    public static final boolean FFT_OVERWRITE = true;
+    public static final boolean FFT_OVERWRITE = false;
 
     // MISC
     public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";

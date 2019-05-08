@@ -3,7 +3,6 @@ package kulibrat.main;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import kulibrat.ai.Minimax.Zobrist;
 import kulibrat.gui.menu.MenuPane;
 import misc.Config;
 

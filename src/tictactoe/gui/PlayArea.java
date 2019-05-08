@@ -5,11 +5,10 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import tictactoe.game.Controller;
-import tictactoe.gui.board.Board;
 import tictactoe.gui.board.PlayBox.PlayBox;
-import tictactoe.gui.board.Player;
 
-import static misc.Config.*;
+import static misc.Config.CLICK_DEFAULT;
+import static misc.Config.WIDTH;
 
 
 public class PlayArea extends GridPane {

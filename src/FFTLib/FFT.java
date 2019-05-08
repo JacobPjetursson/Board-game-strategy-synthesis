@@ -1,16 +1,15 @@
 package fftlib;
 
-import fftlib.game.*;
-import misc.Config;
+import fftlib.game.FFTMove;
+import fftlib.game.FFTState;
+import fftlib.game.FFTStateAndMove;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
-import static misc.Config.PLAYER_ANY;
+import static misc.Config.*;
 
 
 public class FFT {

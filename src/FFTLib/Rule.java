@@ -6,12 +6,8 @@ import fftlib.game.Transform;
 
 import java.util.*;
 
-import static fftlib.Literal.PIECEOCC_ANY;
-import static fftlib.Literal.PIECEOCC_ENEMY;
-import static fftlib.Literal.PIECEOCC_PLAYER;
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
-import static misc.Config.PLAYER_ANY;
+import static fftlib.Literal.*;
+import static misc.Config.*;
 
 
 public class Rule {
@@ -271,7 +267,7 @@ public class Rule {
         }
     }
 
-    public String print() {
+    public String toString() {
         String cStr, aStr;
         if (preconditions != null && action != null) {
             cStr = preconditions.getFormattedString();

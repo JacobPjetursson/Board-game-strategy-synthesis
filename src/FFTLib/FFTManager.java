@@ -5,7 +5,6 @@ import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
 import javafx.scene.input.DataFormat;
-import fftlib.game.FFTAutoGen;
 import misc.Config;
 
 import java.io.BufferedWriter;
@@ -62,7 +61,7 @@ public class FFTManager {
         // Try loading ffts from file in working directory
         load();
         if (!ffts.isEmpty())
-            currFFT = ffts.get(0);
+            currFFT = ffts.get(FFT_INDEX);
 
     }
 
@@ -126,18 +125,22 @@ public class FFTManager {
 
     public void setCurrFFT(int index) {
         currFFT = ffts.get(index);
+        FFT_INDEX = index;
     }
 
     public void addNewFFT(String name) {
         FFT newFFT = new FFT(name);
         ffts.add(newFFT);
         currFFT = newFFT;
+        FFT_INDEX = ffts.size() - 1;
     }
 
     public void deleteCurrFFT() {
         ffts.remove(currFFT);
-        if (!ffts.isEmpty())
+        if (!ffts.isEmpty()) {
             currFFT = ffts.get(0);
+            FFT_INDEX = 0;
+        }
         else
             currFFT = null;
     }

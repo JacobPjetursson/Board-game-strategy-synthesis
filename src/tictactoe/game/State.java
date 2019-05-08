@@ -5,7 +5,9 @@ import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import tictactoe.ai.Zobrist;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import static fftlib.game.Transform.*;
 import static misc.Config.PLAYER1;
@@ -148,7 +150,7 @@ public class State implements FFTState {
         return zobrist_key;
     }
 
-    public String print() {
+    public String toString() {
         return Arrays.deepToString(board) + " , TEAM: " + turn;
     }
 

@@ -1,9 +1,7 @@
 package fftlib.game;
 
 import fftlib.Action;
-import fftlib.Clause;
 import fftlib.Literal;
-import fftlib.Rule;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 

@@ -7,7 +7,6 @@ import fftlib.Rule;
 import fftlib.game.FFTState;
 import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
-import javafx.scene.paint.Color;
 import tictactoe.game.Controller;
 import tictactoe.game.Move;
 import tictactoe.game.State;
@@ -16,11 +15,8 @@ import tictactoe.gui.board.PlayBox.InteractivePlayBox;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 
-import static fftlib.Literal.PIECEOCC_PLAYER;
 import static misc.Config.*;
-import static misc.Config.PLAYER1;
 import static tictactoe.gui.board.BoardTile.blueStr;
 
 public class InteractiveState implements InteractiveFFTState {

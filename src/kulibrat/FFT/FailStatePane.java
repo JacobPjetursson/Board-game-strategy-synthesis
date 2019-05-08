@@ -3,7 +3,6 @@ package kulibrat.FFT;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTStateAndMove;
 import fftlib.gui.FFTFailState;
-import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import kulibrat.game.Controller;
@@ -15,8 +14,6 @@ import kulibrat.gui.board.PlayBox.StaticPlayBox;
 import java.util.ArrayList;
 
 import static misc.Config.CLICK_DISABLED;
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
 
 public class FailStatePane implements FFTFailState {
 

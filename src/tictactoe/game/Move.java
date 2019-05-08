@@ -5,7 +5,6 @@ import fftlib.Clause;
 import fftlib.Literal;
 import fftlib.game.FFTMove;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -72,7 +71,7 @@ public class Move implements FFTMove {
         this.team = team;
     }
 
-    public String print() {
+    public String toString() {
         return "ROW: " + row + " COL: " + col + " TEAM: " + team;
     }
 }

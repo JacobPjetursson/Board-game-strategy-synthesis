@@ -32,7 +32,7 @@ public class RuleGroup {
         sb.append("Printing rules in rg:\n");
         sb.append("-----------------\n");
         for (Rule r : rules)
-            sb.append(r.print()).append("\n");
+            sb.append(r).append("\n");
         sb.append("-----------------\n");
         return sb.toString();
     }

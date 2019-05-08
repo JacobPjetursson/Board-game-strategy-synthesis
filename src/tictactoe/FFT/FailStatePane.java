@@ -8,8 +8,8 @@ import javafx.scene.Node;
 import tictactoe.game.Controller;
 import tictactoe.game.Move;
 import tictactoe.game.State;
-import tictactoe.gui.board.PlayBox.PlayBox;
 import tictactoe.gui.board.BoardTile;
+import tictactoe.gui.board.PlayBox.PlayBox;
 
 import java.util.ArrayList;
 

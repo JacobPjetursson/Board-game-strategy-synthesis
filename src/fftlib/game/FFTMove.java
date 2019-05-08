@@ -9,6 +9,4 @@ public interface FFTMove {
     Action getAction();
 
     void setTeam(int team);
-
-    String print();
 }

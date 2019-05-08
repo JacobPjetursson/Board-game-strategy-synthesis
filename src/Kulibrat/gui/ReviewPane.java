@@ -1,7 +1,6 @@
 package kulibrat.gui;
 
 
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -18,11 +17,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import kulibrat.game.State;
-import kulibrat.game.Controller;
-import kulibrat.game.Logic;
-import kulibrat.game.Move;
-import kulibrat.game.StateAndMove;
+import kulibrat.game.*;
 import kulibrat.gui.board.PlayBox.PlayBox;
 import kulibrat.misc.Database;
 
@@ -30,9 +25,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import static misc.Config.CLICK_DISABLED;
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Config.*;
 
 public class ReviewPane extends VBox {
     private ListView<HBox> lw;

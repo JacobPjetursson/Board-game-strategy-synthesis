@@ -4,7 +4,6 @@ import fftlib.game.FFTDatabase;
 import fftlib.game.FFTMinimaxPlay;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
-import kulibrat.ai.Minimax.Minimax;
 import tictactoe.ai.MinimaxPlay;
 import tictactoe.game.Logic;
 import tictactoe.game.Move;
@@ -122,10 +121,8 @@ public class Database implements FFTDatabase {
 
     @Override
     public boolean isLosingChild(FFTMinimaxPlay bestPlay, FFTState bestChild, FFTState child) {
-        if (bestPlay == null)
-            return true;
+        return bestPlay == null;
 
-        return false;
     }
 
     public static void fillLookupTable(HashMap<State, MinimaxPlay> lookup) {

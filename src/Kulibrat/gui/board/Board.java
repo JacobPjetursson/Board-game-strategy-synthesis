@@ -6,8 +6,6 @@ import kulibrat.game.Controller;
 import kulibrat.game.State;
 import misc.Config;
 
-import java.util.Arrays;
-
 public class Board extends GridPane {
     private static final int boardRows = Config.kuliBHeight;
     private static final int boardColumns = Config.kuliBWidth;

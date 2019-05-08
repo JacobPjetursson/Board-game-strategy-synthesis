@@ -14,24 +14,20 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.*;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import misc.Config;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
-import static fftlib.FFTManager.SERIALIZED_MIME_TYPE;
-import static fftlib.FFTManager.blueBtnStyle;
-import static fftlib.FFTManager.redBtnStyle;
+import static fftlib.FFTManager.*;
 import static misc.Config.WIDTH;
 
 public class EditFFTScene extends VBox {
@@ -303,7 +299,7 @@ public class EditFFTScene extends VBox {
 
             for (int j = 0; j < rg.rules.size(); j++) {
                 Rule r = rg.rules.get(j);
-                Label rLabel = new Label((j + 1) + ": " + r.print());
+                Label rLabel = new Label((j + 1) + ": " + r);
                 rLabel.setFont(Font.font("Verdana", 13));
                 rgVBox.getChildren().add(rLabel);
             }

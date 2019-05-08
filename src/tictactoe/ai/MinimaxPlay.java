@@ -3,9 +3,7 @@ package tictactoe.ai;
 import fftlib.game.FFTMinimaxPlay;
 import tictactoe.game.Move;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
-import static misc.Config.PLAYER_NONE;
+import static misc.Config.*;
 
 // Class binds a move to a score for the minimax algorithm
 public class MinimaxPlay implements FFTMinimaxPlay {

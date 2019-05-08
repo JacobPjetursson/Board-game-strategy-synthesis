@@ -19,7 +19,7 @@ public class FFT_Follower {
             for (Rule rule : ruleGroup.rules) {
                 FFTMove move = rule.apply(state);
                 if (move != null) {
-                    System.out.println("Applying rule: " + rule.print());
+                    System.out.println("Applying rule: " + rule);
                     return move;
                 }
             }

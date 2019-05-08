@@ -101,7 +101,7 @@ public class FFTAutoGen {
             FFTState state = states.entrySet().iterator().next().getValue();
 
             Rule r = addRule(state);
-            if (detailedDebug) System.out.println("FINAL RULE: " + r.print());
+            if (detailedDebug) System.out.println("FINAL RULE: " + r);
 
             // Delete states that apply
             Iterator<Map.Entry<Long, FFTState>> itr = states.entrySet().iterator();
@@ -132,8 +132,8 @@ public class FFTAutoGen {
             for (Literal l : literals)
                 System.out.print(l.name + " ");
             System.out.println();
-            System.out.println("ORIGINAL STATE: " + s.print());
-            System.out.println("ORIGINAL MOVE: " + bestPlay.getMove().print());
+            System.out.println("ORIGINAL STATE: " + s);
+            System.out.println("ORIGINAL MOVE: " + bestPlay.getMove());
             System.out.println("ORIGINAL SCORE: " + bestPlay.getScore());
         }
 
@@ -154,9 +154,6 @@ public class FFTAutoGen {
     private static class StateComparator implements Comparator<FFTState>{
         @Override
         public int compare(FFTState s1, FFTState s2) {
-            /*
-            // TODO - consider if ordering is important, and how to order in best way
-            // TODO - also, why is a 0-compare version twice as fast as linkedlist, and better results than manual compare function?
 
             int s1_score = lookupTable.get(s1).getScore();
             int s2_score = lookupTable.get(s2).getScore();
@@ -169,8 +166,6 @@ public class FFTAutoGen {
                 if (score == 0)  return -1;
                 else return score;
             }
-            */
-            return 0;
         }
     }
 

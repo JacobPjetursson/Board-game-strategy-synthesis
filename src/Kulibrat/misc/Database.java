@@ -11,9 +11,9 @@ import javafx.stage.Stage;
 import kulibrat.FFT.AutoGen.LookupSimple;
 import kulibrat.ai.Minimax.LookupTableMinimax;
 import kulibrat.ai.Minimax.MinimaxPlay;
-import kulibrat.game.State;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
+import kulibrat.game.State;
 import kulibrat.gui.Dialogs.OverwriteDBDialog;
 import misc.Config;
 

@@ -1,26 +1,25 @@
 package kulibrat.FFT;
 
-import fftlib.*;
+import fftlib.Action;
+import fftlib.Clause;
+import fftlib.Literal;
+import fftlib.Rule;
 import fftlib.game.FFTState;
 import fftlib.game.Transform;
 import fftlib.gui.InteractiveFFTState;
-import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import kulibrat.game.Controller;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
 import kulibrat.game.State;
-import kulibrat.gui.board.PlayBox.InteractivePlayBox;
-import kulibrat.gui.board.PlayBox.PlayBox;
 import kulibrat.gui.board.BoardPiece;
 import kulibrat.gui.board.BoardTile;
+import kulibrat.gui.board.PlayBox.InteractivePlayBox;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 
-import static fftlib.Literal.PIECEOCC_PLAYER;
 import static kulibrat.game.Logic.POS_NONBOARD;
 import static misc.Config.*;
 

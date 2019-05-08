@@ -6,7 +6,6 @@ import fftlib.Literal;
 import fftlib.game.FFTMove;
 import misc.Config;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -83,7 +82,7 @@ public class Move implements FFTMove {
     }
 
     @Override
-    public String print() {
+    public String toString() {
         return String.format("OLDROW: %s, OLDCOL: %s, NEWROW: %s, NEWCOL: %s, TEAM: %s",
                 oldRow, oldCol, newRow, newCol, team);
     }
