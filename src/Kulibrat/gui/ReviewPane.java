@@ -79,8 +79,8 @@ public class ReviewPane extends VBox {
             vBox.setAlignment(Pos.CENTER);
             vBox.setFillWidth(true);
             State n = new State(ps.getState());
-            HashSet<Move> bestPlays = Database.bestPlays(n);
-            PlayBox playBox = getPlayBox(currCont, ps, bestPlays);
+            HashSet<Move> bestMoves = Database.bestMoves(n);
+            PlayBox playBox = getPlayBox(currCont, ps, bestMoves);
             Label turnL = new Label("Turns Played: " + (ps.getTurnNo()));
             turnL.setFont(Font.font("Verdana", 20));
             turnL.setAlignment(Pos.TOP_CENTER);
@@ -94,7 +94,7 @@ public class ReviewPane extends VBox {
             vBox.getChildren().add(moveL);
 
             Label performance;
-            if (bestPlays.contains(ps.getMove())) {
+            if (bestMoves.contains(ps.getMove())) {
                 h.setStyle("-fx-background-color: rgba(0, 255, 0, 0.5);");
                 performance = new Label("Perfect move");
             } else {
@@ -153,13 +153,13 @@ public class ReviewPane extends VBox {
         getChildren().addAll(lw, bottomBox);
     }
 
-    private PlayBox getPlayBox(Controller cont, StateAndMove ps, HashSet<Move> bestPlays) {
+    private PlayBox getPlayBox(Controller cont, StateAndMove ps, HashSet<Move> bestMoves) {
 
         PlayBox pb = new PlayBox(50, CLICK_DISABLED, cont);
         pb.update(ps.getState());
 
         pb.addArrow(ps.getMove(), Color.BLUE);
-        for (Move m : bestPlays) {
+        for (Move m : bestMoves) {
             if (m.equals(ps.getMove())) continue;
             pb.addArrow(m, Color.GREEN);
         }

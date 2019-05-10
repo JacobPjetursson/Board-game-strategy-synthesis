@@ -1,27 +1,34 @@
-package kulibrat.ai.Minimax;
+package tictactoe.ai;
 
-import fftlib.game.FFTMinimaxPlay;
-import kulibrat.game.Move;
+import fftlib.game.FFTStateMapping;
+import tictactoe.game.Move;
 
 import static misc.Config.*;
 
 // Class binds a move to a score for the minimax algorithm
-public class MinimaxPlay implements FFTMinimaxPlay {
+public class StateMapping implements FFTStateMapping {
     public int score;
     public Move move;
     public int depth;
 
-    public MinimaxPlay(Move move, int score, int depth) {
+    public StateMapping(Move move, int score, int depth) {
         this.move = move;
         this.score = score;
         this.depth = depth;
+    }
+
+    public int getScore() {
+        return score;
     }
 
     public int getDepth() {
         return depth;
     }
 
-    @Override
+    public Move getMove() {
+        return move;
+    }
+
     public int getWinner() {
         if (score > 1000)
             return PLAYER1;
@@ -32,11 +39,7 @@ public class MinimaxPlay implements FFTMinimaxPlay {
         return -1;
     }
 
-    public int getScore() {
-        return score;
-    }
-
-    public Move getMove() {
-        return move;
+    public String toString() {
+        return move.toString() + " , SCORE: " + score;
     }
 }

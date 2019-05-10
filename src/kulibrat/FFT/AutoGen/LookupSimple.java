@@ -1,6 +1,6 @@
 package kulibrat.FFT.AutoGen;
 
-import kulibrat.ai.Minimax.MinimaxPlay;
+import kulibrat.ai.Minimax.StateMapping;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
 import kulibrat.game.State;
@@ -15,7 +15,7 @@ import static misc.Config.PLAYER2;
 public class LookupSimple {
     private int CURR_MAX_DEPTH;
     private int unevaluatedNodes = 0;
-    private HashMap<State, MinimaxPlay> lookupTable;
+    private HashMap<State, StateMapping> lookupTable;
     private int team;
 
     public LookupSimple(int team, State state) {
@@ -29,10 +29,10 @@ public class LookupSimple {
     }
 
     // Runs an iterative deepening minimax as the exhaustive brute-force for the lookupDB. The data is saved in the transpo table
-    private MinimaxPlay iterativeDeepeningMinimax(State state) {
+    private StateMapping iterativeDeepeningMinimax(State state) {
         CURR_MAX_DEPTH = 0;
         boolean done = false;
-        MinimaxPlay play = null;
+        StateMapping play = null;
         int doneCounter = 0;
         while (!done) {
             CURR_MAX_DEPTH += 1;
@@ -54,16 +54,16 @@ public class LookupSimple {
     }
 
     // Is called for every depth limit of the iterative deepening function. Classic minimax with no pruning
-    private MinimaxPlay minimax(State state, int depth) {
+    private StateMapping minimax(State state, int depth) {
         Move bestMove = null;
         int bestScore = (state.getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int score;
         if (Logic.gameOver(state) || depth == 0) {
-            return new MinimaxPlay(bestMove, heuristic(state), depth);
+            return new StateMapping(bestMove, heuristic(state), depth);
         }
-        MinimaxPlay transpoPlay = lookupTable.get(state);
-        if (transpoPlay != null && depth <= transpoPlay.depth) {
-            return transpoPlay;
+        StateMapping mapping = lookupTable.get(state);
+        if (mapping != null && depth <= mapping.depth) {
+            return mapping;
         }
         boolean evaluated = true;
         for (State child : state.getChildren()) {
@@ -84,12 +84,12 @@ public class LookupSimple {
                 }
             }
         }
-        if (transpoPlay == null || depth > transpoPlay.depth) {
+        if (mapping == null || depth > mapping.depth) {
             lookupTable.put(state,
-                    new MinimaxPlay(bestMove, bestScore, depth));
+                    new StateMapping(bestMove, bestScore, depth));
         }
         if (!evaluated) unevaluatedNodes++;
-        return new MinimaxPlay(bestMove, bestScore, depth);
+        return new StateMapping(bestMove, bestScore, depth);
     }
 
     // Heuristic function which values red with 2000 for a win, and -2000 for a loss. All other nodes are 0

@@ -1,6 +1,6 @@
 package fftlib.game;
 
-public interface FFTMinimaxPlay {
+public interface FFTStateMapping {
 
     int getScore();
 

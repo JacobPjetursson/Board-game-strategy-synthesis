@@ -36,4 +36,11 @@ public class RuleGroup {
         sb.append("-----------------\n");
         return sb.toString();
     }
+
+    public int getAmountOfPreconditions() {
+        int precons = 0;
+        for (Rule r : rules)
+            precons += r.preconditions.literals.size();
+        return precons;
+    }
 }

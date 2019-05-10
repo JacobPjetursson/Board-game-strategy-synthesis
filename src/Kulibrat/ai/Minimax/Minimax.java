@@ -17,7 +17,7 @@ public class Minimax extends AI {
     private int CURR_MAX_DEPTH;
     private boolean moveOrdering = true;
     private boolean useTranspo = true;
-    private HashMap<Long, MinimaxPlay> transTable;
+    private HashMap<Long, StateMapping> transTable;
     private State prevBestState;
 
     public Minimax(int team, int calculationTime) {
@@ -40,40 +40,40 @@ public class Minimax extends AI {
     }
 
     // Iteratively increases the depth limit while called minimax continuously. Stops when win is ensured or time is up.
-    private MinimaxPlay iterativeDeepeningMinimax(kulibrat.game.State state, long startTime) {
+    private StateMapping iterativeDeepeningMinimax(kulibrat.game.State state, long startTime) {
         resetVariables();
-        MinimaxPlay bestPlay = null;
+        StateMapping info = null;
         boolean winCutOff = false;
         while (!outOfTime(startTime) && !winCutOff) {
             State simState = new State(state); // Start from fresh (Don't reuse previous game tree in new iterations)
             CURR_MAX_DEPTH++;
-            MinimaxPlay play = minimax(simState, CURR_MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, startTime);
-            if (!searchCutOff) bestPlay = play;
-            if (Math.abs(play.score) >= 1000) winCutOff = true;
+            StateMapping mapping = minimax(simState, CURR_MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, startTime);
+            if (!searchCutOff) info = mapping;
+            if (Math.abs(mapping.score) >= 1000) winCutOff = true;
         }
         // random move if null (No time to calculate minimax)
-        if (bestPlay == null) {
+        if (info == null) {
             int r = new Random().nextInt(state.getLegalMoves().size());
-            bestPlay = new MinimaxPlay(state.getLegalMoves().get(r), Integer.MIN_VALUE, 0);
+            info = new StateMapping(state.getLegalMoves().get(r), Integer.MIN_VALUE, 0);
         }
-        System.out.println("Score: " + bestPlay.score + ", Depth: " + CURR_MAX_DEPTH + ", Play:  oldRow: " + bestPlay.move.oldRow + ", oldCol: " +
-                bestPlay.move.oldCol + ", row: " + bestPlay.move.newRow + ", col: " + bestPlay.move.newCol + ", team: " + bestPlay.move.team);
-        return bestPlay;
+        System.out.println("Score: " + info.score + ", Depth: " + CURR_MAX_DEPTH + ", Play:  oldRow: " + info.move.oldRow + ", oldCol: " +
+                info.move.oldCol + ", row: " + info.move.newRow + ", col: " + info.move.newCol + ", team: " + info.move.team);
+        return info;
     }
 
     // Minimax with pruning, move ordering and a detailed heuristic
-    public MinimaxPlay minimax(State state, int depth, int alpha, int beta, long startTime) {
+    public StateMapping minimax(State state, int depth, int alpha, int beta, long startTime) {
         Move bestMove = null;
         int bestScore = (state.getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int score;
         if (outOfTime(startTime)) searchCutOff = true;
         if (Logic.gameOver(state) || depth <= 0 || searchCutOff)
-            return new MinimaxPlay(null, heuristic(state), depth);
-        MinimaxPlay transpoPlay = null;
+            return new StateMapping(null, heuristic(state), depth);
+        StateMapping mapping = null;
         if (useTranspo) {
-            transpoPlay = transTable.get(state.getZobristKey());
-            if (transpoPlay != null && (depth <= transpoPlay.depth || Math.abs(transpoPlay.score) >= 1000)) {
-                return transpoPlay;
+            mapping = transTable.get(state.getZobristKey());
+            if (mapping != null && (depth <= mapping.depth || Math.abs(mapping.score) >= 1000)) {
+                return mapping;
             }
         }
         if (moveOrdering && depth == CURR_MAX_DEPTH && prevBestState != null) {
@@ -114,11 +114,11 @@ public class Minimax extends AI {
             prevBestState = state.getNextState(bestMove);
         }
         if (useTranspo && !searchCutOff) {
-            if (transpoPlay == null || depth > transpoPlay.depth) {
-                transTable.put(state.getZobristKey(), new MinimaxPlay(bestMove, bestScore, depth));
+            if (mapping == null || depth > mapping.depth) {
+                transTable.put(state.getZobristKey(), new StateMapping(bestMove, bestScore, depth));
             }
         }
-        return new MinimaxPlay(bestMove, bestScore, depth);
+        return new StateMapping(bestMove, bestScore, depth);
     }
 
     private boolean outOfTime(long startTime) {

@@ -148,8 +148,8 @@ public class FFTManager {
     public Node getFailState() {
         FFTStateAndMove ps = currFFT.failingPoint;
         FFTState s = ps.getState();
-        ArrayList<? extends FFTMove> nonLosingPlays = FFTManager.db.nonLosingMoves(s);
-        return failState.getFailState(ps, nonLosingPlays);
+        ArrayList<? extends FFTMove> nonLosingMoves = FFTManager.db.nonLosingMoves(s);
+        return failState.getFailState(ps, nonLosingMoves);
     }
 
     public void autogenFFT() {

@@ -1,13 +1,11 @@
 package fftlib;
 
+import fftlib.game.FFTStateMapping;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import fftlib.game.FFTStateAndMove;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.ListIterator;
+import java.util.*;
 
 import static misc.Config.*;
 
@@ -37,8 +35,12 @@ public class FFT {
     }
 
     public boolean verify(int team, boolean complete) {
+        return verify(team, complete, null);
+    }
+
+    public boolean verify(int team, boolean complete, HashMap<FFTState, FFTStateMapping> strategy) {
         if (team == PLAYER_ANY)
-            return verify(PLAYER1, complete) && verify(PLAYER2, complete);
+            return verify(PLAYER1, complete, strategy) && verify(PLAYER2, complete, strategy);
         FFTState initialState = FFTManager.initialFFTState;
         LinkedList<FFTState> frontier = new LinkedList<>();
         HashSet<FFTState> closedSet = new HashSet<>();
@@ -70,11 +72,26 @@ public class FFT {
                     }
             } else {
                 FFTMove move = apply(state);
-                ArrayList<? extends FFTMove> nonLosingPlays = FFTManager.db.nonLosingMoves(state);
+                ArrayList<? extends FFTMove> nonLosingMoves = FFTManager.db.nonLosingMoves(state);
                 // If move is null, check that all possible (random) moves are ok
                 if (move == null) {
+
+                    if (!complete && strategy != null) { // only expand on move from strategy
+                        FFTStateMapping info = strategy.get(state);
+                        if (info == null) {
+                            System.out.println("Given strategy is not a winning strategy");
+                            return false;
+                        }
+                        FFTState nextState = state.getNextState(info.getMove());
+                        if (!closedSet.contains(nextState)) {
+                            closedSet.add(nextState);
+                            frontier.add(nextState);
+                        }
+                        continue;
+                    }
+
                     for (FFTMove m : state.getLegalMoves()) {
-                        if (nonLosingPlays.contains(m)) {
+                        if (nonLosingMoves.contains(m)) {
                             FFTState nextState = state.getNextState(m);
                             if (!closedSet.contains(nextState)) {
                                 closedSet.add(nextState);
@@ -85,14 +102,25 @@ public class FFT {
                             return false;
                         }
                     }
-                } else if (!nonLosingPlays.contains(move)) {
+                } else if (!nonLosingMoves.contains(move)) {
                     failingPoint = new FFTStateAndMove(state, move, false);
                     return false;
                 } else {
-                    FFTState nextNode = state.getNextState(move);
-                    if (!closedSet.contains(nextNode)) {
-                        closedSet.add(nextNode);
-                        frontier.add(nextNode);
+                    if (!complete && strategy != null) { // check that move is same as from strategy
+                        FFTStateMapping info = strategy.get(state);
+                        if (info == null) {
+                            System.out.println("Given strategy is not a winning strategy");
+                            return false;
+                        }
+                        if (!info.getMove().equals(move)) { // DOESN'T WORK BECAUSE OF TRANSFORMATIONS!
+                            return false;
+                        }
+
+                    }
+                    FFTState nextState = state.getNextState(move);
+                    if (!closedSet.contains(nextState)) {
+                        closedSet.add(nextState);
+                        frontier.add(nextState);
                     }
                 }
             }
@@ -138,11 +166,11 @@ public class FFT {
 
     }
 
-    public ArrayList<Rule> minimize(int team) {
-        System.out.println("Minimizing FFT");
+    public ArrayList<Rule> minimizeRules(int team) {
+        System.out.println("Minimizing rules in FFT");
         ArrayList<Rule> redundantRules = new ArrayList<>();
         if (!verify(team, true)) {
-            System.out.println("FFT is not a winning strategy, so it is not minimal");
+            System.out.println("FFT is not a winning strategy, so it can not be minimized");
             return redundantRules;
         }
 
@@ -151,12 +179,36 @@ public class FFT {
             while(itr.hasNext()) {
                 Rule r = itr.next();
                 itr.remove();
-                if (verify(team, true))
+                if (verify(team, true)) {
                     redundantRules.add(r);
+                }
                 else
                     itr.add(r);
             }
         }
         return redundantRules;
     }
+
+    public void minimizePreconditions(int team) {
+        System.out.println("Minimizing preconditions in rules in FFT");
+        if (!verify(team, true)) {
+            System.out.println("FFT is not a winning strategy, so it can not be minimized");
+            return;
+        }
+
+        for (RuleGroup rg : ruleGroups) {
+            for(Rule r : rg.rules) {
+                ArrayList<Literal> literals = new ArrayList<>();
+                for (Literal l : r.preconditions.literals)
+                    literals.add(new Literal(l));
+
+                for (Literal l : literals) {
+                    r.removePrecondition(l);
+                    if (!verify(team, true))
+                        r.addPrecondition(l);
+                }
+            }
+        }
+    }
+
 }

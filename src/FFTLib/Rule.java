@@ -393,11 +393,11 @@ public class Rule {
                     }
             } else {
                 FFTMove move = apply(state);
-                ArrayList<? extends FFTMove> nonLosingPlays = FFTManager.db.nonLosingMoves(state);
+                ArrayList<? extends FFTMove> nonLosingMoves = FFTManager.db.nonLosingMoves(state);
                 // If move is null, check that all possible (random) moves are ok
                 if (move == null) {
                     for (FFTMove m : state.getLegalMoves()) {
-                        if (nonLosingPlays.contains(m)) {
+                        if (nonLosingMoves.contains(m)) {
                             FFTState nextState = state.getNextState(m);
                             if (!closedSet.contains(nextState)) {
                                 closedSet.add(nextState);
@@ -405,7 +405,7 @@ public class Rule {
                             }
                         }
                     }
-                } else if (!nonLosingPlays.contains(move)) {
+                } else if (!nonLosingMoves.contains(move)) {
                     return false;
                 } else {
                     FFTState nextNode = state.getNextState(move);

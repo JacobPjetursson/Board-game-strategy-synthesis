@@ -444,9 +444,9 @@ public class Controller {
     private void highlightMoves(int row, int col, int team, boolean highlight) {
         if (highlight) curHighLights = Logic.legalMovesFromPiece(row,
                 col, team, state.getBoard());
-        HashSet<Move> bestPlays = null;
+        HashSet<Move> bestMoves = null;
         if (highlight && helpHumanBox.isSelected()) {
-            bestPlays = Database.bestPlays(new State(state));
+            bestMoves = Database.bestMoves(new State(state));
         }
         ArrayList<String> turnsToTerminalList = null;
         if (highlight && helpHumanBox.isSelected()) {
@@ -460,7 +460,7 @@ public class Controller {
                 turns = turnsToTerminalList.get(i);
             }
             boolean bestMove = false;
-            if (bestPlays != null && bestPlays.contains(m)) {
+            if (bestMoves != null && bestMoves.contains(m)) {
                 bestMove = true;
             }
             if (m.newCol == POS_NONBOARD && m.newRow == POS_NONBOARD) {
@@ -476,8 +476,8 @@ public class Controller {
     // Highlights the best pieces found above
     private void highlightBestPieces(boolean highlight) {
         State n = new State(state);
-        HashSet<Move> bestPlays = null;
-        if (highlight) bestPlays = Database.bestPlays(n);
+        HashSet<Move> bestMoves = null;
+        if (highlight) bestMoves = Database.bestMoves(n);
         BoardTile[][] tiles = playArea.getPlayBox().getBoard().getTiles();
 
         for (BoardTile[] tile : tiles) {
@@ -489,7 +489,7 @@ public class Controller {
                 if (!highlight)
                     continue;
 
-                for (Move m : bestPlays) {
+                for (Move m : bestMoves) {
                     if (m.oldCol == p.getCol() && m.oldRow == p.getRow())
                         p.setBest(true);
                 }
@@ -499,7 +499,7 @@ public class Controller {
         for (BoardPiece p : playArea.getPlayBox().getPlayer(player).getPieces()) {
             p.setBest(false);
             if (!highlight) continue;
-            for (Move m : bestPlays) {
+            for (Move m : bestMoves) {
                 if (m.oldCol == p.getCol() && m.oldRow == p.getRow()) {
                     p.setBest(true);
                 }

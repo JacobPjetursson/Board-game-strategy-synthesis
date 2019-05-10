@@ -178,4 +178,8 @@ public class Action {
         int hash = Objects.hash(addClause, remClause);
         return 31 * hash;
     }
+
+    public String toString() {
+        return getFormattedString();
+    }
 }

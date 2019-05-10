@@ -17,7 +17,7 @@ public class LookupTableMinimax extends AI {
     private boolean useDB = true;
     private int CURR_MAX_DEPTH;
     private int unevaluatedNodes = 0;
-    private HashMap<Long, MinimaxPlay> lookupTable;
+    private HashMap<Long, StateMapping> lookupTable;
 
 
     public LookupTableMinimax(int team, State state, boolean overwriteDB) {
@@ -47,30 +47,30 @@ public class LookupTableMinimax extends AI {
         }
         // table lookup
         State simState = new State(state);
-        MinimaxPlay play;
+        StateMapping mapping;
         if (useDB) {
-            play = Database.queryPlay(simState);
+            mapping = Database.queryState(simState);
         } else {
-            play = iterativeDeepeningMinimax(state);
+            mapping = iterativeDeepeningMinimax(state);
         }
-        if (play == null) {
+        if (mapping == null) {
             System.err.println("DB Table is empty and needs to be rebuilt. Exiting");
             System.exit(0);
         }
-        Move move = play.move;
-        String winner = (play.score >= 1000) ? "RED" : (play.score == 0) ? "DRAW" : "BLACK";
+        Move move = mapping.move;
+        String winner = (mapping.score >= 1000) ? "RED" : (mapping.score == 0) ? "DRAW" : "BLACK";
         System.out.print("BEST PLAY:  " + "oldRow: " + move.oldRow +
                 ", oldCol: " + move.oldCol + ", row: " + move.newRow + ", col: " + move.newCol +
                 ", WINNER IS: " + winner);
-        System.out.println(" in " + (play.score >= 1000 ? 2000 - play.score : (play.score == 0) ? "∞" : 2000 + play.score) + " moves!");
+        System.out.println(" in " + (mapping.score >= 1000 ? 2000 - mapping.score : (mapping.score == 0) ? "∞" : 2000 + mapping.score) + " moves!");
         return move;
     }
 
     // Runs an iterative deepening minimax as the exhaustive brute-force for the lookupDB. The data is saved in the transpo table
-    private MinimaxPlay iterativeDeepeningMinimax(State state) {
+    private StateMapping iterativeDeepeningMinimax(State state) {
         CURR_MAX_DEPTH = 0;
         boolean done = false;
-        MinimaxPlay play = null;
+        StateMapping play = null;
         int doneCounter = 0;
         while (!done) {
             State simState = new State(state); // Start from fresh (Don't reuse previous game tree in new iterations)
@@ -98,16 +98,16 @@ public class LookupTableMinimax extends AI {
     }
 
     // Is called for every depth limit of the iterative deepening function. Classic minimax with no pruning
-    private MinimaxPlay minimax(State state, int depth) {
+    private StateMapping minimax(State state, int depth) {
         Move bestMove = null;
         int bestScore = (state.getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int score;
         if (Logic.gameOver(state) || depth == 0) {
-            return new MinimaxPlay(bestMove, heuristic(state), depth);
+            return new StateMapping(bestMove, heuristic(state), depth);
         }
-        MinimaxPlay transpoPlay = lookupTable.get(state.getZobristKey());
-        if (transpoPlay != null && depth <= transpoPlay.depth) {
-            return transpoPlay;
+        StateMapping mapping = lookupTable.get(state.getZobristKey());
+        if (mapping != null && depth <= mapping.depth) {
+            return mapping;
         }
         boolean evaluated = true;
         for (State child : state.getChildren()) {
@@ -128,12 +128,12 @@ public class LookupTableMinimax extends AI {
                 }
             }
         }
-        if (transpoPlay == null || depth > transpoPlay.depth) {
+        if (mapping == null || depth > mapping.depth) {
             lookupTable.put(state.getZobristKey(),
-                    new MinimaxPlay(bestMove, bestScore, depth));
+                    new StateMapping(bestMove, bestScore, depth));
         }
         if (!evaluated) unevaluatedNodes++;
-        return new MinimaxPlay(bestMove, bestScore, depth);
+        return new StateMapping(bestMove, bestScore, depth);
     }
 
     // Heuristic function which values red with 2000 for a win, and -2000 for a loss. All other nodes are 0

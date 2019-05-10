@@ -23,13 +23,13 @@ public class FailStatePane implements FFTFailState {
         this.cont = cont;
     }
 
-    private PlayBox getFailStatePane(State s, Move move, ArrayList<Move> nonLosingPlays) {
+    private PlayBox getFailStatePane(State s, Move move, ArrayList<Move> nonLosingMoves) {
         int tilesize = 90;
         PlayBox pb = new PlayBox(tilesize, CLICK_DISABLED, cont);
         pb.update(s);
         Platform.runLater(() -> {
             pb.addHighlight(move.row, move.col, move.team, BoardTile.blueStr);
-            for (Move m : nonLosingPlays) {
+            for (Move m : nonLosingMoves) {
                 if (m.equals(move))
                     continue;
                 pb.addHighlight(m.row, m.col, m.team, BoardTile.greenStr);
@@ -39,7 +39,7 @@ public class FailStatePane implements FFTFailState {
     }
 
     @Override
-    public Node getFailState(FFTStateAndMove ps, ArrayList<? extends FFTMove> nonLosingPlays) {
-        return getFailStatePane((State) ps.getState(), (Move) ps.getMove(), (ArrayList<Move>) nonLosingPlays);
+    public Node getFailState(FFTStateAndMove ps, ArrayList<? extends FFTMove> nonLosingMoves) {
+        return getFailStatePane((State) ps.getState(), (Move) ps.getMove(), (ArrayList<Move>) nonLosingMoves);
     }
 }

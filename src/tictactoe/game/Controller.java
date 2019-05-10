@@ -339,9 +339,9 @@ public class Controller {
 
     private void highlightHelp(boolean highlight) {
         State n = new State(state);
-        ArrayList<Move> bestPlays = null;
+        ArrayList<Move> bestMoves = null;
         if (highlight)
-            bestPlays = Database.bestPlays(n);
+            bestMoves = Database.bestMoves(n);
         BoardTile[][] tiles = playArea.getPlayBox().getBoard().getTiles();
 
         for (BoardTile[] tile : tiles) {
@@ -350,7 +350,7 @@ public class Controller {
                 aTile.setTurnsToTerminal("");
                 if (!highlight)
                     continue;
-                for (Move m : bestPlays) {
+                for (Move m : bestMoves) {
                     if (m.col == aTile.getCol() && m.row == aTile.getRow())
                         aTile.setBest(true);
                 }

@@ -5,14 +5,14 @@ import java.util.HashMap;
 
 public interface FFTDatabase {
 
-    FFTMinimaxPlay queryState(FFTState state);
+    FFTStateMapping queryState(FFTState state);
 
     ArrayList<? extends FFTMove> nonLosingMoves(FFTState state);
 
     boolean connectAndVerify();
 
-    boolean isLosingChild(FFTMinimaxPlay bestPlay, FFTState bestChild, FFTState state);
+    boolean isLosingChild(FFTStateMapping info, FFTState bestChild, FFTState state);
 
     // Used for Autogen
-    HashMap<? extends FFTState, ? extends FFTMinimaxPlay> getSolution();
+    HashMap<? extends FFTState, ? extends FFTStateMapping> getSolution();
 }

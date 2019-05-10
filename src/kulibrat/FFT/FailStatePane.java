@@ -23,13 +23,13 @@ public class FailStatePane implements FFTFailState {
         this.cont = cont;
     }
 
-    private PlayBox getFailState(State s, Move move, ArrayList<Move> nonLosingPlays) {
+    private PlayBox getFailState(State s, Move move, ArrayList<Move> nonLosingMoves) {
         int tilesize = 60;
         StaticPlayBox pb = new StaticPlayBox(tilesize, CLICK_DISABLED, cont);
         pb.update(s);
 
         pb.addArrow(move, Color.BLUE);
-        for (Move m : nonLosingPlays) {
+        for (Move m : nonLosingMoves) {
             if (m.equals(move))
                 continue;
             pb.addArrow(m, Color.GREEN);
@@ -39,7 +39,7 @@ public class FailStatePane implements FFTFailState {
     }
 
     @Override
-    public Node getFailState(FFTStateAndMove ps, ArrayList<? extends FFTMove> nonLosingPlays) {
-        return getFailState((State) ps.getState(), (Move) ps.getMove(), (ArrayList<Move>) nonLosingPlays);
+    public Node getFailState(FFTStateAndMove ps, ArrayList<? extends FFTMove> nonLosingMoves) {
+        return getFailState((State) ps.getState(), (Move) ps.getMove(), (ArrayList<Move>) nonLosingMoves);
     }
 }

@@ -1,10 +1,10 @@
 package tictactoe.misc;
 
 import fftlib.game.FFTDatabase;
-import fftlib.game.FFTMinimaxPlay;
+import fftlib.game.FFTStateMapping;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
-import tictactoe.ai.MinimaxPlay;
+import tictactoe.ai.StateMapping;
 import tictactoe.game.Logic;
 import tictactoe.game.Move;
 import tictactoe.game.State;
@@ -16,18 +16,18 @@ import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
 
 public class Database implements FFTDatabase {
-    private static HashMap<? extends FFTState, ? extends FFTMinimaxPlay> lookupTable;
+    private static HashMap<? extends FFTState, ? extends FFTStateMapping> lookupTable;
 
     // Outputs a list of the best plays from a given node. Checks through the children of a node to find the ones
     // which have the least amount of turns to terminal for win, or most for loss.
-    public static ArrayList<Move> bestPlays(State n) {
-        ArrayList<Move> bestPlays = new ArrayList<>();
+    public static ArrayList<Move> bestMoves(State n) {
+        ArrayList<Move> bestMoves = new ArrayList<>();
         if (Logic.gameOver(n))
-            return bestPlays;
-        MinimaxPlay bestPlay = queryPlay(n);
+            return bestMoves;
+        StateMapping mapping = queryState(n);
         int bestScore = 0;
-        if (!Logic.gameOver(n.getNextState(bestPlay.move))) {
-            bestScore = queryPlay(n.getNextState(bestPlay.move)).score;
+        if (!Logic.gameOver(n.getNextState(mapping.move))) {
+            bestScore = queryState(n.getNextState(mapping.move)).score;
         }
         for (State child : n.getChildren()) {
             Move m = child.getMove();
@@ -35,17 +35,17 @@ public class Database implements FFTDatabase {
             State state = n.getNextState(m);
             if (Logic.gameOver(state)) {
                 if (Logic.getWinner(state) == m.getTeam())
-                    bestPlays.add(m);
-            } else if (queryPlay(child).score == bestScore) {
-                bestPlays.add(m);
+                    bestMoves.add(m);
+            } else if (queryState(child).score == bestScore) {
+                bestMoves.add(m);
             }
         }
-        return bestPlays;
+        return bestMoves;
     }
 
     // Outputs a string which is the amount of turns to a terminal node, based on a score from the database entry
     public static String turnsToTerminal(int turn, State n) {
-        int score = queryPlay(n).score;
+        int score = queryState(n).score;
 
         if (score > 0 && score < 1000) { // Draw
             return "" + score;
@@ -69,8 +69,8 @@ public class Database implements FFTDatabase {
         ArrayList<Move> nonLosingMoves = new ArrayList<>();
         if (Logic.gameOver(state))
             return nonLosingMoves;
-        MinimaxPlay bestPlay = queryPlay(state);
-        State next = state.getNextState(bestPlay.move);
+        StateMapping mapping = queryState(state);
+        State next = state.getNextState(mapping.move);
 
         // In case of game over
         if (Logic.gameOver(next)) {
@@ -81,19 +81,19 @@ public class Database implements FFTDatabase {
                     if (Logic.getWinner(child) == winner)
                         nonLosingMoves.add(m);
                 } else {
-                    if (winner == queryPlay(child).getWinner())
+                    if (winner == queryState(child).getWinner())
                         nonLosingMoves.add(m);
                 }
             }
             return nonLosingMoves;
         }
 
-        int bestMoveWinner = queryPlay(next).getWinner();
+        int bestMoveWinner = queryState(next).getWinner();
         int team = state.getTurn();
 
         for (State child : state.getChildren()) {
             Move m = child.getMove();
-            int childWinner = queryPlay(child).getWinner();
+            int childWinner = queryState(child).getWinner();
             if (team == PLAYER1) {
                 if (bestMoveWinner == childWinner)
                     nonLosingMoves.add(m);
@@ -110,8 +110,8 @@ public class Database implements FFTDatabase {
     }
 
     // Fetches the best play corresponding to the input node
-    private static MinimaxPlay queryPlay(State n) {
-        return (MinimaxPlay) lookupTable.get(n);
+    private static StateMapping queryState(State n) {
+        return (StateMapping) lookupTable.get(n);
     }
 
     public boolean connectAndVerify() {
@@ -120,12 +120,12 @@ public class Database implements FFTDatabase {
     }
 
     @Override
-    public boolean isLosingChild(FFTMinimaxPlay bestPlay, FFTState bestChild, FFTState child) {
-        return bestPlay == null;
+    public boolean isLosingChild(FFTStateMapping mapping, FFTState bestChild, FFTState child) {
+        return mapping == null;
 
     }
 
-    public static void fillLookupTable(HashMap<State, MinimaxPlay> lookup) {
+    public static void fillLookupTable(HashMap<State, StateMapping> lookup) {
         lookupTable = lookup;
     }
 
@@ -133,15 +133,15 @@ public class Database implements FFTDatabase {
         return nonLosingMoves((State) s);
     }
 
-    public ArrayList<? extends FFTMove> bestPlays(FFTState state) {
-        return bestPlays((State) state);
+    public ArrayList<? extends FFTMove> bestMoves(FFTState state) {
+        return bestMoves((State) state);
     }
 
-    public FFTMinimaxPlay queryState(FFTState s) {
-        return queryPlay((State) s);
+    public FFTStateMapping queryState(FFTState s) {
+        return queryState((State) s);
     }
 
-    public HashMap<? extends FFTState, ? extends FFTMinimaxPlay> getSolution() {
+    public HashMap<? extends FFTState, ? extends FFTStateMapping> getSolution() {
         return lookupTable;
     }
 
