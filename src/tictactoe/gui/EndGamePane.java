@@ -48,7 +48,7 @@ public class EndGamePane extends VBox {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
             new Controller(primaryStage, cont.getPlayerInstance(PLAYER1),
-                    cont.getPlayerInstance(PLAYER2), new State(), cont.getTime(PLAYER1), cont.getTime(PLAYER2));
+                    cont.getPlayerInstance(PLAYER2), new State());
         });
         restartGameBtn.setPrefWidth(110);
         hBox.getChildren().add(restartGameBtn);

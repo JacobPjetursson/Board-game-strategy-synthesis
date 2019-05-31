@@ -30,18 +30,22 @@ import misc.Config;
 import static fftlib.FFTManager.*;
 import static misc.Config.WIDTH;
 
-public class EditFFTScene extends VBox {
+public class FFTOverviewPane extends VBox {
     private int textFieldWidth = 150;
     private ListView<RulePane> lw;
     private FFTManager fftManager;
     private Label title;
     private Button delBtn, renameBtn, newBtn, addNewRuleGroupBtn, verifyBtn;
     private ComboBox<String> changeBox;
-    private EditFFTScene thisScene = this;
 
-    public EditFFTScene(Stage primaryStage, Scene prevScene, FFTManager fftManager) {
+    private FFTInteractivePane interactivePane;
+
+    public FFTOverviewPane(Stage primaryStage, FFTManager fftManager, FFTInteractivePane interactivePane) {
         setSpacing(15);
         setAlignment(Pos.CENTER);
+        this.interactivePane = interactivePane;
+
+        Scene prevScene = primaryStage.getScene();
 
         this.fftManager = fftManager;
         title = new Label();
@@ -128,7 +132,6 @@ public class EditFFTScene extends VBox {
         topPane.add(labelBox, 1, 0);
         topPane.add(changeRenameBox, 0, 0);
         topPane.add(delNewBox, 2, 0);
-        // Make box here with rename, change, delete (not now)
 
         // Existing rule groups
         lw = new ListView<>();
@@ -161,7 +164,8 @@ public class EditFFTScene extends VBox {
         teamChoice.setMaxWidth(textFieldWidth);
         teamChoice.setValue("Player 1");
         teamChoice.setStyle("-fx-font: 16px \"Verdana\";");
-        teamChoice.setItems(FXCollections.observableArrayList("Player 1", "Player 2", "Both"));
+        String[] playerNames = FFTManager.playerNames;
+        teamChoice.setItems(FXCollections.observableArrayList(playerNames[0], playerNames[1], "Both"));
 
         Label forLabel = new Label(" for: ");
         forLabel.setFont(Font.font("Verdana", 16));
@@ -194,7 +198,7 @@ public class EditFFTScene extends VBox {
                     timeline.play();
                 } else {
                     Scene scene = primaryStage.getScene();
-                    primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager), WIDTH, Config.HEIGHT));
+                    primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager, interactivePane), WIDTH, Config.HEIGHT));
                 }
             } else {
                 Label verifiedLabel = new Label("The FFT was successfully verified");
@@ -219,9 +223,9 @@ public class EditFFTScene extends VBox {
         intEditBtn.setAlignment(Pos.CENTER);
         intEditBtn.setOnMouseClicked((event -> {
             Scene scene = primaryStage.getScene();
-
-            primaryStage.setScene(new Scene(
-                    new EditFFTInteractive(scene, fftManager), WIDTH, Config.HEIGHT));
+            primaryStage.setScene(interactivePane.getScene());
+            interactivePane.setPrevScene(scene);
+            interactivePane.setUpdateFunc(this::update);
         }));
 
 
@@ -242,6 +246,7 @@ public class EditFFTScene extends VBox {
     }
 
     public void update() {
+        interactivePane.refresh();
         boolean isNull = fftManager.currFFT == null;
         changeBox.setDisable(isNull);
         delBtn.setDisable(isNull);
@@ -252,7 +257,7 @@ public class EditFFTScene extends VBox {
             title.setText("Please make a new FFT");
             return;
         } else
-            title.setText("Edit FFT with name:\n" + fftManager.currFFT.name);
+            title.setText(fftManager.currFFT.name);
         // Items in changeBox (combobox)
         ObservableList<String> fftStrs = FXCollections.observableArrayList();
         for (FFT fft : FFTManager.ffts) {
@@ -273,18 +278,10 @@ public class EditFFTScene extends VBox {
         lw.setItems(ruleGroups);
     }
 
-    public void removeRuleGroup(int index) {
-        lw.getItems().remove(index);
-        fftManager.currFFT.ruleGroups.remove(index);
-        update();
-        FFTManager.save();
-    }
-
     private class RulePane extends BorderPane {
 
         int idx;
         VBox rgVBox;
-        VBox buttons;
 
         RulePane(int idx) { // Rulegroup entry
             super();
@@ -303,45 +300,7 @@ public class EditFFTScene extends VBox {
                 rLabel.setFont(Font.font("Verdana", 13));
                 rgVBox.getChildren().add(rLabel);
             }
-
-            // Edit / Remove buttons
-            int buttonSize = 150;
-            buttons = new VBox();
-            buttons.setAlignment(Pos.CENTER);
-
-            Button editButton = new Button("Edit");
-            editButton.setStyle(blueBtnStyle);
-            editButton.setMinWidth(buttonSize);
-            editButton.setFont(Font.font("Verdana", 16));
-            editButton.setOnMouseClicked(event -> {
-                Stage newStage = new Stage();
-                newStage.setScene(new Scene(
-                        new EditRuleGroupPane(rg, thisScene), 700, 500));
-                newStage.initModality(Modality.APPLICATION_MODAL);
-                newStage.initOwner(getScene().getWindow());
-                newStage.setOnCloseRequest(Event::consume);
-                newStage.show();
-            });
-
-            Button removeButton = new Button("Remove");
-            removeButton.setStyle(redBtnStyle);
-            removeButton.setFont(Font.font("Verdana", 16));
-            removeButton.setMinWidth(buttonSize);
-            removeButton.setOnMouseClicked(event -> {
-                // Confirmation (Pretty big delete after all)
-                String labelText = "Are you sure you want to delete the rule group:\n" + rg.name;
-                Stage newStage = new Stage();
-                newStage.setScene(new Scene(
-                        new DeleteRGDialog(labelText, thisScene, idx), 500, 150));
-                newStage.initModality(Modality.APPLICATION_MODAL);
-                newStage.initOwner(getScene().getWindow());
-                newStage.setOnCloseRequest(Event::consume);
-                newStage.show();
-
-            });
-            buttons.getChildren().addAll(editButton, removeButton);
             setCenter(rgVBox);
-            setRight(buttons);
         }
     }
 
@@ -401,7 +360,6 @@ public class EditFFTScene extends VBox {
                     fftManager.currFFT.ruleGroups.add(droppedIdx, rg_dragged);
 
                     event.setDropCompleted(true);
-                    FFTManager.save();
                     showRuleGroups();
                     lw.getSelectionModel().select(droppedIdx);
                 }
@@ -423,7 +381,7 @@ public class EditFFTScene extends VBox {
     }
 
     // Can be either rename or new fft
-    private class NameFFTPane extends RenamePane {
+    private class NameFFTPane extends InputPane {
         private boolean rename;
 
         NameFFTPane(String labelText, boolean rename) {
@@ -438,10 +396,11 @@ public class EditFFTScene extends VBox {
                     fftManager.currFFT.name = tf.getText();
                 else
                     fftManager.addNewFFT(tf.getText());
-                FFTManager.save();
                 Stage stage = (Stage) getScene().getWindow();
                 stage.close();
                 update();
+
+                save();
             }
         }
     }

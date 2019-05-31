@@ -5,12 +5,12 @@ import javafx.stage.Stage;
 
 public class DeleteFFTDialog extends ConfirmDialog {
     FFTManager fftManager;
-    EditFFTScene editFFTScene;
+    FFTOverviewPane FFTOverviewPane;
 
-    public DeleteFFTDialog(String labelText, EditFFTScene editFFTScene, FFTManager fftManager) {
+    public DeleteFFTDialog(String labelText, FFTOverviewPane FFTOverviewPane, FFTManager fftManager) {
         super(labelText);
         this.fftManager = fftManager;
-        this.editFFTScene = editFFTScene;
+        this.FFTOverviewPane = FFTOverviewPane;
     }
 
     @Override
@@ -18,8 +18,7 @@ public class DeleteFFTDialog extends ConfirmDialog {
         Stage stage = (Stage) getScene().getWindow();
         stage.close();
         fftManager.deleteCurrFFT();
-        editFFTScene.update();
-        FFTManager.save();
+        FFTOverviewPane.update();
     }
 
 

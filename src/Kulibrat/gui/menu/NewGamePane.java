@@ -18,6 +18,10 @@ import kulibrat.game.Controller;
 import kulibrat.game.State;
 import misc.Config;
 
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
+import static misc.Config.PLAYER_ANY;
+
 
 public class NewGamePane extends AnchorPane {
     private int choiceWidth = Config.WIDTH / 3;
@@ -37,6 +41,12 @@ public class NewGamePane extends AnchorPane {
     private VBox finalBox;
     private Label AIDelayLabelBlack;
     private Label AIDelayLabelRed;
+
+    // autogen
+    private CheckBox autogenCheck;
+    private CheckBox autogenRandomCheck;
+    private VBox autogenExtraBox;
+    private VBox autogenBox;
 
     NewGamePane() {
         setPrefSize(Config.WIDTH, Config.HEIGHT);
@@ -58,11 +68,12 @@ public class NewGamePane extends AnchorPane {
         playerBlackChoices.setMaxWidth(choiceWidth);
         playerBlackChoices.setStyle("-fx-font: 20px \"Verdana\";");
         playerBlackChoices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (!playerBlackChoices.getItems().get((Integer) newValue).equals(human)) {
+            String val = playerBlackChoices.getItems().get((Integer) newValue);
+            if (!val.equals(human)) {
                 if (!finalBox.getChildren().contains(blackDelayBox)) {
                     finalBox.getChildren().add(1, blackDelayBox);
                 }
-                if (playerBlackChoices.getItems().get((Integer) newValue).equals(lookup) &&
+                if (val.equals(lookup) &&
                         !finalBox.getChildren().contains(overwriteDB)) {
                     int index = finalBox.getChildren().contains(redDelayBox) ? 4 : 3;
                     finalBox.getChildren().add(index, overwriteDB);
@@ -76,11 +87,17 @@ public class NewGamePane extends AnchorPane {
                 }
             }
 
-            if (playerBlackChoices.getItems().get((Integer) newValue).equals(fft) ||
-                    playerBlackChoices.getItems().get((Integer) newValue).equals(lookup))
+            if (val.equals(fft) || val.equals(lookup))
                 AIDelayLabelBlack.setText("AI Move delay in ms");
             else
                 AIDelayLabelBlack.setText("AI Calculation time in ms");
+
+            if (val.equals(fft) && !finalBox.getChildren().contains(autogenBox)) {
+                int idx = finalBox.getChildren().size() - 1;
+                finalBox.getChildren().add(idx, autogenBox);
+            }
+            else if (!val.equals(fft) && !playerRedChoices.getValue().equals(fft))
+                finalBox.getChildren().remove(autogenBox);
 
         });
 
@@ -98,12 +115,13 @@ public class NewGamePane extends AnchorPane {
         playerRedChoices.setMaxWidth(choiceWidth);
         playerRedChoices.setStyle("-fx-font: 20px \"Verdana\";");
         playerRedChoices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (!playerRedChoices.getItems().get((Integer) newValue).equals(human)) {
+            String val = playerRedChoices.getItems().get((Integer) newValue);
+            if (!val.equals(human)) {
                 if (!finalBox.getChildren().contains(redDelayBox)) {
                     int index = finalBox.getChildren().contains(blackDelayBox) ? 3 : 2;
                     finalBox.getChildren().add(index, redDelayBox);
                 }
-                if (playerRedChoices.getItems().get((Integer) newValue).equals(lookup) &&
+                if (val.equals(lookup) &&
                         !finalBox.getChildren().contains(overwriteDB)) {
                     int index = finalBox.getChildren().contains(blackDelayBox) ? 4 : 3;
                     finalBox.getChildren().add(index, overwriteDB);
@@ -117,15 +135,21 @@ public class NewGamePane extends AnchorPane {
                     finalBox.getChildren().remove(overwriteDB);
                 }
             }
-            if (playerRedChoices.getItems().get((Integer) newValue).equals(fft) ||
-                    playerRedChoices.getItems().get((Integer) newValue).equals(lookup))
+            if (val.equals(fft) || val.equals(lookup))
                 AIDelayLabelRed.setText("AI Move delay in ms");
             else
                 AIDelayLabelRed.setText("AI Calculation time in ms");
 
+            if (val.equals(fft) && !finalBox.getChildren().contains(autogenBox)) {
+                int idx = finalBox.getChildren().size() - 1;
+                finalBox.getChildren().add(idx, autogenBox);
+            }
+            else if (!val.equals(fft) && !playerBlackChoices.getValue().equals(fft))
+                finalBox.getChildren().remove(autogenBox);
+
         });
 
-        Label playerRedLabel = new Label("Player Red: ");
+        Label playerRedLabel = new Label("Player Red (first): ");
         playerRedLabel.setFont(Font.font("Verdana", 20));
         playerRedLabel.setPadding(new Insets(0, 10, 0, 0));
         playerRedLabel.setTextFill(Color.WHITE);
@@ -199,6 +223,69 @@ public class NewGamePane extends AnchorPane {
         overwriteDB = new CheckBox("Overwrite Database\n (Takes a lot of time)");
         overwriteDB.setFont(Font.font("Verdana", 20));
         overwriteDB.setTextFill(Color.WHITE);
+
+
+
+
+        // Autogen options
+        autogenCheck = new CheckBox("Autogenerate FFT");
+        autogenCheck.setAlignment(Pos.CENTER);
+        autogenCheck.setTextFill(Color.WHITE);
+        autogenCheck.setFont(Font.font("Verdana", 20));
+        autogenCheck.setSelected(true);
+        autogenCheck.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
+            Config.USE_AUTOGEN = newValue;
+
+            if (newValue && !autogenBox.getChildren().contains(autogenExtraBox))
+                autogenBox.getChildren().add(autogenExtraBox);
+            else if (!newValue)
+                autogenBox.getChildren().remove(autogenExtraBox);
+        });
+
+        ChoiceBox<String> autogenChoices = new ChoiceBox<>();
+        autogenChoices.setValue("Red");
+        autogenChoices.setStyle("-fx-font: 20px \"Verdana\";");
+        autogenChoices.setItems(FXCollections.observableArrayList("Red", "Black", "Both"));
+        autogenChoices.setMinWidth(200);
+        autogenChoices.setMaxWidth(200);
+        autogenChoices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
+            String val = autogenChoices.getItems().get(newValue.intValue());
+            switch (val) {
+                case "Red":
+                    Config.AUTOGEN_PERSPECTIVE = PLAYER1;
+                    break;
+                case "Black":
+                    Config.AUTOGEN_PERSPECTIVE = PLAYER2;
+                    break;
+                default:
+                    Config.AUTOGEN_PERSPECTIVE = PLAYER_ANY;
+                    break;
+            }
+        });
+
+        Label autogenChoicesLabel = new Label("Choose perspective of autogenerated FFT");
+        autogenChoicesLabel.setFont(Font.font("Verdana", 16));
+        autogenChoicesLabel.setPadding(new Insets(0, 10, 0, 0));
+        autogenChoicesLabel.setTextFill(Color.WHITE);
+
+        HBox autogenChoiceBox = new HBox(autogenChoicesLabel, autogenChoices);
+        autogenChoiceBox.setAlignment(Pos.CENTER);
+
+        // Autogen options
+        autogenRandomCheck = new CheckBox("Randomize rule ordering");
+        autogenRandomCheck.setAlignment(Pos.CENTER);
+        autogenRandomCheck.setTextFill(Color.WHITE);
+        autogenRandomCheck.setFont(Font.font("Verdana", 16));
+        autogenRandomCheck.setSelected(false);
+        autogenRandomCheck.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
+            Config.RANDOM_RULE_ORDERING = newValue;
+        });
+
+        autogenExtraBox = new VBox(10, autogenChoiceBox, autogenRandomCheck);
+        autogenExtraBox.setAlignment(Pos.CENTER);
+
+        autogenBox = new VBox(10, autogenCheck, autogenExtraBox);
+        autogenBox.setAlignment(Pos.CENTER);
 
         Button startGame = new Button("Start Game");
         startGame.setFont(Font.font("Verdana", 20));

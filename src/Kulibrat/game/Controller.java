@@ -1,8 +1,8 @@
 package kulibrat.game;
 
 import fftlib.FFTManager;
-import fftlib.gui.EditFFTInteractive;
-import fftlib.gui.EditFFTScene;
+import fftlib.gui.FFTInteractivePane;
+import fftlib.gui.FFTOverviewPane;
 import fftlib.gui.ShowFFTPane;
 import javafx.application.Platform;
 import javafx.event.Event;
@@ -72,6 +72,9 @@ public class Controller {
     private ShowFFTPane shownFFT;
     private GameSpecifics gameSpecifics;
 
+    FFTOverviewPane fftOverviewPane;
+    FFTInteractivePane fftInteractivePane;
+
     public Controller(Stage primaryStage, int playerRedInstance, int playerBlackInstance,
                       kulibrat.game.State state, int redTime, int blackTime, boolean overwriteDB) {
         this.mode = setMode(playerRedInstance, playerBlackInstance);
@@ -114,6 +117,11 @@ public class Controller {
         automaticFFTBox = navPane.getAutomaticFFTBox();
         goalRed = playArea.getPlayBox().getGoal(PLAYER1);
         goalBlack = playArea.getPlayBox().getGoal(PLAYER2);
+
+        fftInteractivePane = new FFTInteractivePane(fftManager);
+        fftOverviewPane = new FFTOverviewPane(primaryStage, this.fftManager, fftInteractivePane);
+        new Scene(fftInteractivePane, Config.WIDTH, Config.HEIGHT);
+        new Scene(fftOverviewPane, Config.WIDTH, Config.HEIGHT);
 
         showNavButtons();
 
@@ -186,16 +194,14 @@ public class Controller {
         // FFTManager LISTENERS
         // edit fftManager button
         editFFTButton.setOnAction(event -> {
-            Scene scene = primaryStage.getScene();
-            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, this.fftManager), Config.WIDTH, Config.HEIGHT));
+            primaryStage.setScene(fftOverviewPane.getScene());
         });
 
         // add rule to FFT button
         addRuleFFTButton.setOnAction(event -> {
-            Scene scene = primaryStage.getScene();
-            EditFFTInteractive interactive = new EditFFTInteractive(scene, this.fftManager);
-            primaryStage.setScene(new Scene(interactive, Config.WIDTH, Config.HEIGHT));
-            interactive.update(this.state);
+            primaryStage.setScene(fftInteractivePane.getScene());
+            fftInteractivePane.update(this.state);
+            fftInteractivePane.setPrevScene(primaryStage.getScene());
         });
 
         // automatic mode

@@ -98,6 +98,8 @@ public class InteractiveState implements InteractiveFFTState {
             this.move = new Move();
         else
             this.move = (Move) a.getMove(perspective);
+        actionTile = pb.getBoard().getTiles()[move.row][move.col];
+        actionTile.setAction(true);
         pb.update(rule, perspective);
     }
     private Rule getRuleFromState(State s) {

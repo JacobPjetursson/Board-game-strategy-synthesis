@@ -29,10 +29,12 @@ import static misc.Config.PLAYER_ANY;
 public class FFTFailurePane extends BorderPane {
     private FFTManager fftManager;
     private ListView<VBox> lw;
+    FFTInteractivePane interactivePane;
 
-    public FFTFailurePane(Scene prevScene, FFTManager fftManager) {
+    public FFTFailurePane(Scene prevScene, FFTManager fftManager, FFTInteractivePane interactivePane) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         this.fftManager = fftManager;
+        this.interactivePane = interactivePane;
         Label title = new Label("This is the first state where the FFT failed");
         title.setFont(Font.font("Verdana", FontWeight.BOLD, 28));
         title.setAlignment(Pos.CENTER);
@@ -83,9 +85,9 @@ public class FFTFailurePane extends BorderPane {
             Stage stage = (Stage) getScene().getWindow();
             FFTState state = fftManager.currFFT.failingPoint.getState();
             FFTMove move = fftManager.currFFT.failingPoint.getMove();
-            EditFFTInteractive interactive = new EditFFTInteractive(prevScene, this.fftManager);
-            stage.setScene(new Scene(interactive, Config.WIDTH, Config.HEIGHT));
-            interactive.update(state, move);
+            stage.setScene(interactivePane.getScene());
+            interactivePane.update(state, move);
+            interactivePane.setPrevScene(getScene());
         });
 
         BorderPane.setAlignment(back, Pos.CENTER_RIGHT);

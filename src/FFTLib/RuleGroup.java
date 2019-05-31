@@ -27,7 +27,7 @@ public class RuleGroup {
         rules.add(r);
     }
 
-    public String printRules() {
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Printing rules in rg:\n");
         sb.append("-----------------\n");
@@ -37,10 +37,12 @@ public class RuleGroup {
         return sb.toString();
     }
 
-    public int getAmountOfPreconditions() {
+    int getAmountOfPreconditions() {
         int precons = 0;
-        for (Rule r : rules)
-            precons += r.preconditions.literals.size();
+        for (Rule r : rules) {
+            if (r.multiRule) continue; // TODO - fuck this shit
+            precons += r.preconditions.size();
+        }
         return precons;
     }
 }

@@ -116,8 +116,7 @@ public class ReviewPane extends VBox {
             int index = lw.getSelectionModel().getSelectedIndex();
             StateAndMove selected = currCont.getPreviousStates().get(index);
             Controller selectedCont = new Controller(primaryStage, currCont.getPlayerInstance(PLAYER1),
-                    currCont.getPlayerInstance(PLAYER2), selected.getState(),
-                    currCont.getTime(PLAYER1), currCont.getTime(PLAYER2));
+                    currCont.getPlayerInstance(PLAYER2), selected.getState());
 
             selectedCont.setTurnNo(selected.getTurnNo());
             selectedCont.getPlayArea().update(selectedCont);

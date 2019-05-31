@@ -10,10 +10,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-public abstract class RenamePane extends VBox {
+public abstract class InputPane extends VBox {
     TextField tf;
 
-    public RenamePane(String labelText) {
+    public InputPane(String labelText) {
         setAlignment(Pos.CENTER);
         setSpacing(15);
         setPadding(new Insets(10));

@@ -25,6 +25,6 @@ public class RestartGameDialog extends ConfirmDialog {
         Stage stage = (Stage) getScene().getWindow();
         stage.close();
         new Controller(primaryStage, cont.getPlayerInstance(PLAYER1),
-                cont.getPlayerInstance(PLAYER2), new State(), cont.getTime(PLAYER1), cont.getTime(PLAYER1));
+                cont.getPlayerInstance(PLAYER2), new State());
     }
 }

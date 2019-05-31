@@ -29,6 +29,5 @@ public class Demo {
         Action a = new Action(addC, remC);
         Rule r = new Rule(lits, a);
         System.out.println(r);
-        System.out.println(r.verify(PLAYER1));
     }
 }

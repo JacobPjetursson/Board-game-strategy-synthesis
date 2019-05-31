@@ -1,8 +1,8 @@
 package tictactoe.game;
 
 import fftlib.FFTManager;
-import fftlib.gui.EditFFTInteractive;
-import fftlib.gui.EditFFTScene;
+import fftlib.gui.FFTInteractivePane;
+import fftlib.gui.FFTOverviewPane;
 import fftlib.gui.ShowFFTPane;
 import javafx.application.Platform;
 import javafx.event.Event;
@@ -33,8 +33,6 @@ public class Controller {
     private int mode;
     private int player1Instance;
     private int player2Instance;
-    private int player1Time;
-    private int player2Time;
     private int turnNo;
     private AI aiCross;
     private AI aiCircle;
@@ -59,13 +57,12 @@ public class Controller {
     private GameSpecifics gameSpecifics;
     private CheckBox helpHumanBox;
 
+
     public Controller(Stage primaryStage, int player1Instance, int player2Instance,
-                      State state, int player1Time, int player2Time) {
+                      State state) {
         this.mode = setMode(player1Instance, player2Instance);
         this.player1Instance = player1Instance;
         this.player2Instance = player2Instance;
-        this.player1Time = player1Time;
-        this.player2Time = player2Time;
         this.turnNo = 0;
         this.state = state;
         this.primaryStage = primaryStage;
@@ -98,6 +95,11 @@ public class Controller {
         reviewButton = navPane.getReviewButton();
         automaticFFTBox = navPane.getAutomaticFFTBox();
         helpHumanBox = navPane.getHelpHumanBox();
+
+        FFTInteractivePane fftInteractivePane = new FFTInteractivePane(fftManager);
+        new Scene(fftInteractivePane, Config.WIDTH, Config.HEIGHT);
+        FFTOverviewPane fftOverviewPane = new FFTOverviewPane(primaryStage, fftManager, fftInteractivePane);
+        new Scene(fftOverviewPane, Config.WIDTH, Config.HEIGHT);
 
         showNavButtons();
 
@@ -132,16 +134,15 @@ public class Controller {
         // FFTManager LISTENERS
         // edit fftManager button
         editFFTButton.setOnAction(event -> {
-            Scene scene = primaryStage.getScene();
-            primaryStage.setScene(new Scene(new EditFFTScene(primaryStage, scene, fftManager), Config.WIDTH, Config.HEIGHT));
+            primaryStage.setScene(fftOverviewPane.getScene());
         });
 
         // add rule to FFT button
         addRuleFFTButton.setOnAction(event -> {
             Scene scene = primaryStage.getScene();
-            EditFFTInteractive interactive = new EditFFTInteractive(scene, this.fftManager);
-            primaryStage.setScene(new Scene(interactive, Config.WIDTH, Config.HEIGHT));
-            interactive.update(this.state);
+            primaryStage.setScene(fftInteractivePane.getScene());
+            fftInteractivePane.update(this.state);
+            fftInteractivePane.setPrevScene(scene);
         });
 
         // automatic mode
@@ -270,15 +271,8 @@ public class Controller {
                     if (fftUserInteraction) {
                         stopAIButton.fire();
                     }
-                    if (player1Instance == LOOKUP_TABLE && player2Instance == LOOKUP_TABLE) {
-                        Thread.sleep(player1Time);
-                    } else if (state.getTurn() == PLAYER1 && player1Instance == FFT && !fftUserInteraction)
-                        Thread.sleep(player1Time);
-                    else if (state.getTurn() == PLAYER2 && player2Instance == FFT && !fftUserInteraction)
-                        Thread.sleep(player2Time);
-                    else {
-                        Thread.sleep(0); // To allow thread interruption
-                    }
+                    Thread.sleep(0); // To allow thread interruption
+
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -452,10 +446,6 @@ public class Controller {
         return mode;
     }
 
-    public int getTime(int team) {
-        if (team == PLAYER1) return player1Time;
-        else return player2Time;
-    }
     public Window getWindow() {
         return window;
     }

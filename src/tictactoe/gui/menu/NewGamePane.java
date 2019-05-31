@@ -5,11 +5,9 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -21,21 +19,21 @@ import misc.Config;
 import tictactoe.game.Controller;
 import tictactoe.game.State;
 
+import static misc.Config.*;
+
 public class NewGamePane extends AnchorPane {
     private int choiceWidth = Config.WIDTH / 3;
-    private int textFieldWidth = choiceWidth - 125;
     private String human = "Human";
     private String lookup = "Lookup Table";
     private String fft = "Fast and Frugal Tree";
-    private TextField crossDelayField;
-    private TextField circleDelayField;
-    private HBox crossDelayBox;
-    private HBox circleDelayBox;
     private ChoiceBox<String> crossChoices;
     private ChoiceBox<String> circleChoices;
     private VBox finalBox;
-    private Label AIDelayLabelCross;
-    private Label AIDelayLabelCircle;
+
+    VBox autogenBox;
+    CheckBox autogenCheck;
+    CheckBox autogenRandomCheck;
+    VBox autogenExtraBox;
 
     NewGamePane() {
         setPrefSize(Config.WIDTH, Config.HEIGHT);
@@ -57,14 +55,13 @@ public class NewGamePane extends AnchorPane {
         crossChoices.setMaxWidth(choiceWidth);
         crossChoices.setStyle("-fx-font: 20px \"Verdana\";");
         crossChoices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (!crossChoices.getItems().get((Integer) newValue).equals(human)) {
-                if (!finalBox.getChildren().contains(crossDelayBox)) {
-                    finalBox.getChildren().add(1, crossDelayBox);
-                }
+            String val = crossChoices.getItems().get((Integer) newValue);
+            if (val.equals(fft) && !finalBox.getChildren().contains(autogenBox)) {
+                int idx = finalBox.getChildren().size() - 1;
+                finalBox.getChildren().add(idx, autogenBox);
             }
-            else {
-                finalBox.getChildren().remove(crossDelayBox);
-            }
+            else if (!val.equals(fft) && !circleChoices.getValue().equals(fft))
+                finalBox.getChildren().remove(autogenBox);
 
         });
 
@@ -82,16 +79,13 @@ public class NewGamePane extends AnchorPane {
         circleChoices.setMinWidth(choiceWidth);
         circleChoices.setMaxWidth(choiceWidth);
         circleChoices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
-            if (!circleChoices.getItems().get((Integer) newValue).equals(human)) {
-                if (!finalBox.getChildren().contains(circleDelayBox)) {
-                    int index = finalBox.getChildren().contains(crossDelayBox) ? 3 : 2;
-                    finalBox.getChildren().add(index, circleDelayBox);
-                }
+            String val = circleChoices.getItems().get((Integer) newValue);
+            if (val.equals(fft) && !finalBox.getChildren().contains(autogenBox)) {
+                int idx = finalBox.getChildren().size() - 1;
+                finalBox.getChildren().add(idx, autogenBox);
             }
-            else {
-                finalBox.getChildren().remove(circleDelayBox);
-            }
-
+            else if (!val.equals(fft) && !crossChoices.getValue().equals(fft))
+                finalBox.getChildren().remove(autogenBox);
         });
 
         Label circleLabel = new Label("Circle");
@@ -101,57 +95,66 @@ public class NewGamePane extends AnchorPane {
         HBox circle = new HBox(circleLabel, circleChoices);
         circle.setAlignment(Pos.CENTER);
 
-        crossDelayField = new TextField("1000");
-        crossDelayField.setMinWidth(textFieldWidth);
-        crossDelayField.setMaxWidth(textFieldWidth);
-        crossDelayField.setStyle("-fx-font: 20px \"Verdana\";");
-        crossDelayField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                crossDelayField.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-            if (newValue.isEmpty()) {
-                crossDelayField.setText(newValue.replaceAll("", "0"));
-            }
-        });
-        crossDelayField.setOnKeyPressed((KeyEvent event) -> {
-            if (event.getCode() == KeyCode.ESCAPE || event.getCode() == KeyCode.ENTER) {
-                this.requestFocus();
-            }
-        });
-        AIDelayLabelCross = new Label();
-        AIDelayLabelCross.setFont(Font.font("Verdana", 20));
-        AIDelayLabelCross.setPadding(new Insets(0, 10, 0, 0));
-        AIDelayLabelCross.setTextFill(Color.WHITE);
-        AIDelayLabelCross.setAlignment(Pos.CENTER);
-        AIDelayLabelCross.setText("AI Move delay in ms");
-        crossDelayBox = new HBox(AIDelayLabelCross, crossDelayField);
-        crossDelayBox.setAlignment(Pos.CENTER);
-        circleDelayField = new TextField("1000");
-        circleDelayField.setMinWidth(textFieldWidth);
-        circleDelayField.setMaxWidth(textFieldWidth);
-        circleDelayField.setStyle("-fx-font: 20px \"Verdana\";");
-        circleDelayField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                circleDelayField.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-            if (newValue.isEmpty()) {
-                circleDelayField.setText(newValue.replaceAll("", "0"));
-            }
-        });
-        circleDelayField.setOnKeyPressed((KeyEvent event) -> {
-            if (event.getCode() == KeyCode.ESCAPE || event.getCode() == KeyCode.ENTER) {
-                this.requestFocus();
+        // Autogen options
+        autogenCheck = new CheckBox("Autogenerate FFT");
+        autogenCheck.setAlignment(Pos.CENTER);
+        autogenCheck.setTextFill(Color.WHITE);
+        autogenCheck.setFont(Font.font("Verdana", 20));
+        autogenCheck.setSelected(true);
+        autogenCheck.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
+            Config.USE_AUTOGEN = newValue;
+
+            if (newValue && !autogenBox.getChildren().contains(autogenExtraBox))
+                autogenBox.getChildren().add(autogenExtraBox);
+            else if (!newValue) {
+                autogenBox.getChildren().remove(autogenExtraBox);
             }
         });
 
-        AIDelayLabelCircle = new Label();
-        AIDelayLabelCircle.setFont(Font.font("Verdana", 20));
-        AIDelayLabelCircle.setPadding(new Insets(0, 10, 0, 0));
-        AIDelayLabelCircle.setTextFill(Color.WHITE);
-        AIDelayLabelCircle.setAlignment(Pos.CENTER);
-        AIDelayLabelCircle.setText("AI Move delay in ms");
-        circleDelayBox = new HBox(AIDelayLabelCircle, circleDelayField);
-        circleDelayBox.setAlignment(Pos.CENTER);
+        ChoiceBox<String> autogenChoices = new ChoiceBox<>();
+        autogenChoices.setValue("Cross");
+        autogenChoices.setStyle("-fx-font: 20px \"Verdana\";");
+        autogenChoices.setItems(FXCollections.observableArrayList("Cross", "Circle", "Both"));
+        autogenChoices.setMinWidth(200);
+        autogenChoices.setMaxWidth(200);
+        autogenChoices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
+            String val = autogenChoices.getItems().get(newValue.intValue());
+            switch (val) {
+                case "Cross":
+                    Config.AUTOGEN_PERSPECTIVE = PLAYER1;
+                    break;
+                case "Circle":
+                    Config.AUTOGEN_PERSPECTIVE = PLAYER2;
+                    break;
+                default:
+                    Config.AUTOGEN_PERSPECTIVE = PLAYER_ANY;
+                    break;
+            }
+        });
+
+        Label autogenChoicesLabel = new Label("Choose perspective of autogenerated FFT");
+        autogenChoicesLabel.setFont(Font.font("Verdana", 16));
+        autogenChoicesLabel.setTextFill(Color.WHITE);
+
+        HBox autogenChoiceBox = new HBox(10, autogenChoicesLabel, autogenChoices);
+        autogenChoiceBox.setAlignment(Pos.CENTER);
+
+
+        // Autogen options
+        autogenRandomCheck = new CheckBox("Randomize rule ordering");
+        autogenRandomCheck.setAlignment(Pos.CENTER);
+        autogenRandomCheck.setTextFill(Color.WHITE);
+        autogenRandomCheck.setFont(Font.font("Verdana", 16));
+        autogenRandomCheck.setSelected(false);
+        autogenRandomCheck.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
+            Config.RANDOM_RULE_ORDERING = newValue;
+        });
+
+        autogenExtraBox = new VBox(10, autogenChoiceBox, autogenRandomCheck);
+        autogenExtraBox.setAlignment(Pos.CENTER);
+
+        autogenBox = new VBox(10, autogenCheck, autogenExtraBox);
+        autogenBox.setAlignment(Pos.CENTER);
 
         Button startGame = new Button("Start Game");
         startGame.setMinWidth(Config.WIDTH / 4);
@@ -166,9 +169,7 @@ public class NewGamePane extends AnchorPane {
             int playerCircleMode = (circleValue.equals(human)) ? Config.HUMAN :
                     (circleValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
             new Controller(stage, playerCrossMode,
-                    playerCircleMode, new State(),
-                    Integer.parseInt(crossDelayField.getText()),
-                    Integer.parseInt(circleDelayField.getText()));
+                    playerCircleMode, new State());
         });
 
         Button back = new Button("Back");

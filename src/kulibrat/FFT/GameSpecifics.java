@@ -89,6 +89,11 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
+    public String[] getPlayerNames() {
+        return new String[]{"Red", "Black"};
+    }
+
+    @Override
     public int[] getAllowedTransformations() {
         return new int[]{TRANS_HREF};
     }

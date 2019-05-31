@@ -37,7 +37,7 @@ public class InteractiveState implements InteractiveFFTState {
     InteractiveState(Controller cont) {
         this.rule = new Rule();
         this.cont = cont;
-        this.tilesize = 60;
+        this.tilesize = 52;
         curHighLights = new ArrayList<>();
     }
 

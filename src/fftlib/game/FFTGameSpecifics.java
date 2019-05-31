@@ -17,6 +17,8 @@ public interface FFTGameSpecifics {
 
     int[] getBoardDim(); // row, col
 
+    String[] getPlayerNames();
+
     int[] getAllowedTransformations();
 
     FFTState getInitialState();
@@ -28,6 +30,7 @@ public interface FFTGameSpecifics {
     FFTFailState getFailState();
 
     InteractiveFFTState getInteractiveState();
+
 
     int getGameWinner();
 }

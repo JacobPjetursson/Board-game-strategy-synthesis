@@ -41,6 +41,13 @@ public class Rule {
         errors = !isValidRuleFormat(this);
     }
 
+    public Rule(HashSet<Literal> precons, Action action) {
+        this.multiRule = false;
+        this.action = action;
+        this.preconditions = new Clause(precons);
+        this.transformedPrecons = getTransformedPreconditions();
+    }
+
     public Rule(Clause precons, Action action) {
         this.multiRule = false;
         this.action = action;
@@ -357,66 +364,6 @@ public class Rule {
             return !stLiterals.contains(temp);
         }
         return stLiterals.contains(l);
-    }
-
-    public boolean verify(int team) {
-        if (team == PLAYER_ANY)
-            return verify(PLAYER1) && verify(PLAYER2);
-        FFTState initialState = FFTManager.initialFFTState;
-        LinkedList<FFTState> frontier = new LinkedList<>();
-        HashSet<FFTState> closedSet = new HashSet<>();
-        frontier.add(initialState);
-        int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
-        // Check if win or draw is even possible
-        int score = FFTManager.db.queryState(initialState).getScore();
-        if (team == PLAYER1 && score < -1000) {
-            System.out.println("A perfect player 2 has won from start of the game");
-            return false;
-        } else if (team == PLAYER2 && score > 1000) {
-            System.out.println("A perfect player 1 has won from the start of the game");
-            return false;
-        }
-
-        while (!frontier.isEmpty()) {
-            FFTState state = frontier.pop();
-            if (FFTManager.logic.gameOver(state)) {
-                if (FFTManager.logic.getWinner(state) == opponent) {
-                    // Should not hit this given initial check
-                    System.out.println("No chance of winning vs. perfect player");
-                    return false;
-                }
-            } else if (team != state.getTurn()) {
-                for (FFTState child : state.getChildren())
-                    if (!closedSet.contains(child)) {
-                        closedSet.add(child);
-                        frontier.add(child);
-                    }
-            } else {
-                FFTMove move = apply(state);
-                ArrayList<? extends FFTMove> nonLosingMoves = FFTManager.db.nonLosingMoves(state);
-                // If move is null, check that all possible (random) moves are ok
-                if (move == null) {
-                    for (FFTMove m : state.getLegalMoves()) {
-                        if (nonLosingMoves.contains(m)) {
-                            FFTState nextState = state.getNextState(m);
-                            if (!closedSet.contains(nextState)) {
-                                closedSet.add(nextState);
-                                frontier.add(nextState);
-                            }
-                        }
-                    }
-                } else if (!nonLosingMoves.contains(move)) {
-                    return false;
-                } else {
-                    FFTState nextNode = state.getNextState(move);
-                    if (!closedSet.contains(nextNode)) {
-                        closedSet.add(nextNode);
-                        frontier.add(nextNode);
-                    }
-                }
-            }
-        }
-        return true;
     }
 
     // Returns a board with the literals on it, the value equals to the piece occ.

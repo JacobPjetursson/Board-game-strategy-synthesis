@@ -32,26 +32,18 @@ public class Config {
     // GAMES
     public static final int KULIBRAT = 0;
     public static int SCORELIMIT; // Set by player once (kulibrat)
+    public static boolean USE_AUTOGEN = true;
+    public static int AUTOGEN_PERSPECTIVE = PLAYER1;
     public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";
 
     public static final int TICTACTOE = 1;
     public static final boolean simpleTicTacToe = false;
     public static int CURRENT_GAME;
-    public static int FFT_INDEX = 0; // selected fft, hacky solution
 
     // BOARD CONFIG
-    public static final int kuliBWidth = 3;
     public static final int kuliBHeight = 4;
+    public static final int kuliBWidth = 3;
 
-
-    // TODO - gui for this configuration
-    public static boolean USE_AUTOGEN = false;
-    public static boolean VERIFY_SINGLE_STRATEGY = false; // build fft for specific strategy
-
-    public static final boolean RANDOM_ZOBRIST_SEED = true;
+    public static boolean RANDOM_RULE_ORDERING = false;
     public static final int ZOBRIST_SEED = 0; // 0 is required for database
-
-    public static final int AUTOGEN_PERSPECTIVE = PLAYER1;
-    public static final boolean FFT_OVERWRITE = false;
-
 }

@@ -9,8 +9,9 @@ import static misc.Config.*;
 
 public class FFTAutoGen {
     private static HashMap<? extends FFTState, ? extends FFTStateMapping> lookupTable;
-    //private static HashMap<Long, FFTState> states;
-    private static LinkedList<FFTState> states;
+
+    private static PriorityQueue<FFTState> states;
+
     private static HashMap<FFTState, FFTStateMapping> strategy;
     private static FFT fft;
     private static RuleGroup rg;
@@ -20,6 +21,8 @@ public class FFTAutoGen {
     private static int winner;
     private static boolean detailedDebug = false;
     private static boolean fullRules = false; // mainly for debug
+    private static boolean try_all_moves = false;
+    public static boolean verify_single_strategy = false; // build fft for specific strategy
 
     public static FFT generateFFT(int perspective_, int winner_) {
         perspective = perspective_;
@@ -37,11 +40,10 @@ public class FFTAutoGen {
 
         System.out.println("Solution size: " + lookupTable.size());
 
-        //states = new HashMap<>();
-        states = new LinkedList<>();
+        states = new PriorityQueue<>(new StateComparator());
 
         System.out.println("Filtering...");
-        if (VERIFY_SINGLE_STRATEGY) {
+        if (verify_single_strategy) {
             strategy = new HashMap<>();
             System.out.println("Filtering for single strategy");
             filterToSingleStrat();
@@ -55,13 +57,11 @@ public class FFTAutoGen {
         System.out.println("Making rules");
         makeRules();
 
-        System.out.println("Amount of rules before minimizing: " + rg.rules.size());
-        fft.minimizeRules(perspective);
-        System.out.println("Amount of rules after minimizing: " + rg.rules.size());
-
-        System.out.println("Amount of preconditions before minimizing: " + rg.getAmountOfPreconditions());
-        fft.minimizePreconditions(perspective);
-        System.out.println("Amount of preconditions after minimizing: " + rg.getAmountOfPreconditions());
+        System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
+        System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
+        int i = fft.minimize(perspective);
+        System.out.println("Amount of rules after " + i + " minimize iterations: " + fft.getAmountOfRules());
+        System.out.println("Amount of preconditions after " + i + " minimize iterations: " + fft.getAmountOfPreconditions());
 
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
         System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
@@ -95,7 +95,6 @@ public class FFTAutoGen {
                     break;
             }
             if (threshold) {
-                //states.put(state.getZobristKey(), state);
                 states.add(state);
             }
         }
@@ -103,10 +102,8 @@ public class FFTAutoGen {
 
     // States where all moves are correct should not be part of FFT
     private static void deleteIrrelevantStates() {
-        //Iterator<Map.Entry<Long, FFTState>> itr = states.entrySet().iterator();
-        Iterator<FFTState> itr = states.listIterator();
+        Iterator<FFTState> itr = states.iterator();
         while (itr.hasNext()) {
-            //FFTState s = itr.next().getValue();
             FFTState s = itr.next();
             ArrayList<? extends FFTMove> nonLosingMoves = FFTManager.db.nonLosingMoves(s);
             if (nonLosingMoves.size() == s.getLegalMoves().size()) {
@@ -131,7 +128,6 @@ public class FFTAutoGen {
                         frontier.add(child);
                     }
             } else {
-                //states.put(state.getZobristKey(), state);
                 states.add(state);
                 FFTStateMapping info = lookupTable.get(state);
                 strategy.put(state, info);
@@ -147,11 +143,9 @@ public class FFTAutoGen {
     private static void makeRules() {
         while (!states.isEmpty()) {
             System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + rg.rules.size());
-            //FFTState state = states.entrySet().iterator().next().getValue();
-            FFTState state = states.listIterator().next();
+            FFTState state = states.iterator().next();
 
             Rule r = addRule(state);
-            //states.remove(state.getZobristKey());
             states.remove(state);
             if (detailedDebug) System.out.println("FINAL RULE: " + r);
 
@@ -162,15 +156,7 @@ public class FFTAutoGen {
             }
 
             // Delete states that apply
-            //Iterator<Map.Entry<Long, FFTState>> itr = states.entrySet().iterator();
-            Iterator<FFTState> itr = states.listIterator();
-            while (itr.hasNext()) {
-                //FFTState s = itr.next().getValue();
-                FFTState s = itr.next();
-                if (r.apply(s) != null)
-                    itr.remove();
-
-            }
+            states.removeIf(s -> r.apply(s) != null);
 
         }
 
@@ -179,17 +165,30 @@ public class FFTAutoGen {
     private static Rule addRule(FFTState s) {
         HashSet<Literal> minSet = new HashSet<>();
         HashSet<Literal> literals = s.getAllLiterals();
+        ArrayList<Action> actions = new ArrayList<>();
+        ArrayList<Action> actionsCopy;
         FFTStateMapping mapping = lookupTable.get(s);
         Action bestAction = mapping.getMove().getAction();
 
         for (Literal l : literals)
             minSet.add(new Literal(l));
 
-        Rule r = new Rule(new Clause(minSet), bestAction);
-        rg.rules.add(r);
+        for (FFTMove m : FFTManager.db.nonLosingMoves(s))
+            actions.add(m.getAction());
+        actionsCopy = new ArrayList<>(actions);
 
         if (fullRules)
-            return r;
+            return new Rule(minSet, actions.get(0));
+
+        Rule r;
+        if (try_all_moves) {
+            r = new Rule();
+            r.setPreconditions(new Clause(minSet));
+        } else {
+            r = new Rule(minSet, bestAction);
+        }
+
+        rg.rules.add(r);
 
         // DEBUG
         if (detailedDebug) {
@@ -202,36 +201,61 @@ public class FFTAutoGen {
             System.out.println("ORIGINAL SCORE: " + mapping.getScore());
         }
 
-        for (Literal l : literals) {
-            if (detailedDebug) System.out.println("INSPECTING: " + l.name);
-            r.removePrecondition(l);
+        if (try_all_moves) {
+            for (Literal l : literals) {
+                if (detailedDebug) System.out.println("INSPECTING: " + l.name);
+                r.removePrecondition(l);
 
-            boolean verify = fft.verify(perspective, false, strategy); // strategy is null if VERIFY_SINGLE_STRAT is false
-            if (!verify) {
-                if (detailedDebug) System.out.println("FAILED TO VERIFY RULE!");
-                r.addPrecondition(l);
-            } else if (detailedDebug)
-                System.out.println("REMOVING: " + l.name);
+                for (Action a : actionsCopy) {
+                    r.setAction(a);
+                    boolean verify = fft.verify(perspective, false, null); // strategy is null if VERIFY_SINGLE_STRAT is false
+                    if (!verify) {
+                        actions.remove(a);
+                    } else if (detailedDebug)
+                        System.out.println("REMOVING: " + l.name);
+                }
+                if (actions.isEmpty()) {
+                    actions = actionsCopy;
+                    r.addPrecondition(l);
+                }
+                actionsCopy = new ArrayList<>(actions);
+            }
+            // take bestaction if still in list
+            if (actions.contains(bestAction))
+                r.setAction(bestAction);
+            else
+                r.setAction(actions.get(0));
+
+        } else {
+            for (Literal l : literals) {
+                if (detailedDebug) System.out.println("INSPECTING: " + l.name);
+                r.removePrecondition(l);
+
+                boolean verify = fft.verify(perspective, false, null); // strategy is null if VERIFY_SINGLE_STRAT is false
+                if (!verify) {
+                    if (detailedDebug) System.out.println("FAILED TO VERIFY RULE!");
+                    r.addPrecondition(l);
+                } else if (detailedDebug)
+                    System.out.println("REMOVING: " + l.name);
+            }
         }
-
         return r;
     }
 
     private static class StateComparator implements Comparator<FFTState>{
         @Override
         public int compare(FFTState s1, FFTState s2) {
-
+            if (RANDOM_RULE_ORDERING)
+                return 0;
             int s1_score = lookupTable.get(s1).getScore();
             int s2_score = lookupTable.get(s2).getScore();
-            if (perspective == PLAYER1) {
-                return s1_score - s2_score;
-            } else if (perspective == PLAYER2) {
-                return s2_score - s1_score;
-            } else {
-                int score = Math.abs(s1_score) - Math.abs(s2_score);
-                if (score == 0)  return -1;
-                else return score;
-            }
+
+            if (Math.abs(s1_score) > 1000)
+                s1_score = Math.abs(Math.abs(s1_score) - 2000);
+            if (Math.abs(s2_score) > 1000)
+                s2_score = Math.abs(Math.abs(s2_score) - 2000);
+
+            return s1_score - s2_score; // s1 - s2 means states closer to terminal first
         }
     }
 

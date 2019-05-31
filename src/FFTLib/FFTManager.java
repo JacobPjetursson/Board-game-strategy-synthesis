@@ -35,11 +35,14 @@ public class FFTManager {
     public static BiFunction<Action, Integer, FFTMove> actionToMove;
     public static BiFunction<HashSet<Literal>, Integer, FFTState> preconsToState;
     public static int gameWinner;
+    public static String[] playerNames;
+    private static int fft_index = 0;
 
     public static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     public static final String blueBtnStyle = "-fx-border-color: #000000; -fx-background-color: #4444ff;";
     public static final String redBtnStyle = "-fx-border-color: #000000; -fx-background-color: #ff2222;";
     public static final String greenBtnStyle = "-fx-border-color: #000000; -fx-background-color: #22ff22;";
+    public static final String orangeBtnStyle = "-fx-border-color: #000000; -fx-background-color: #ffa500;";
 
     // Most game-related classes are processed here
     public FFTManager(FFTGameSpecifics gameSpecifics) {
@@ -57,17 +60,16 @@ public class FFTManager {
         failState = gameSpecifics.getFailState();
         interactiveState = gameSpecifics.getInteractiveState();
         gameWinner = gameSpecifics.getGameWinner();
+        playerNames = gameSpecifics.getPlayerNames();
 
         // Try loading ffts from file in working directory
         load();
         if (!ffts.isEmpty())
-            currFFT = ffts.get(FFT_INDEX);
+            currFFT = ffts.get(fft_index);
 
     }
 
     public static void save() {
-        if (!FFT_OVERWRITE)
-            return;
         BufferedWriter writer;
         try {
             writer = new BufferedWriter(new FileWriter(path));
@@ -125,24 +127,28 @@ public class FFTManager {
 
     public void setCurrFFT(int index) {
         currFFT = ffts.get(index);
-        FFT_INDEX = index;
+        fft_index = index;
     }
 
     public void addNewFFT(String name) {
         FFT newFFT = new FFT(name);
         ffts.add(newFFT);
         currFFT = newFFT;
-        FFT_INDEX = ffts.size() - 1;
+        fft_index = ffts.size() - 1;
+
+        save();
     }
 
     public void deleteCurrFFT() {
         ffts.remove(currFFT);
         if (!ffts.isEmpty()) {
             currFFT = ffts.get(0);
-            FFT_INDEX = 0;
+            fft_index = 0;
         }
         else
             currFFT = null;
+
+        save();
     }
 
     public Node getFailState() {

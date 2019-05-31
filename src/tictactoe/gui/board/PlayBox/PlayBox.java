@@ -12,6 +12,7 @@ import tictactoe.gui.board.Player;
 
 import java.util.ArrayList;
 
+import static misc.Config.CLICK_INTERACTIVE;
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
 
