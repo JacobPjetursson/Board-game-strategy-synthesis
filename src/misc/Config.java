@@ -45,5 +45,6 @@ public class Config {
     public static final int kuliBWidth = 3;
 
     public static boolean RANDOM_RULE_ORDERING = false;
+    public static boolean MINIMIZE_PRECONDITIONS = true;
     public static final int ZOBRIST_SEED = 0; // 0 is required for database
 }

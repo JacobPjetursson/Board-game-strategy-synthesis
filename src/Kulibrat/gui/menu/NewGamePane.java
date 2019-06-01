@@ -42,9 +42,6 @@ public class NewGamePane extends AnchorPane {
     private Label AIDelayLabelBlack;
     private Label AIDelayLabelRed;
 
-    // autogen
-    private CheckBox autogenCheck;
-    private CheckBox autogenRandomCheck;
     private VBox autogenExtraBox;
     private VBox autogenBox;
 
@@ -228,7 +225,8 @@ public class NewGamePane extends AnchorPane {
 
 
         // Autogen options
-        autogenCheck = new CheckBox("Autogenerate FFT");
+        // autogen
+        CheckBox autogenCheck = new CheckBox("Autogenerate FFT");
         autogenCheck.setAlignment(Pos.CENTER);
         autogenCheck.setTextFill(Color.WHITE);
         autogenCheck.setFont(Font.font("Verdana", 20));
@@ -272,7 +270,7 @@ public class NewGamePane extends AnchorPane {
         autogenChoiceBox.setAlignment(Pos.CENTER);
 
         // Autogen options
-        autogenRandomCheck = new CheckBox("Randomize rule ordering");
+        CheckBox autogenRandomCheck = new CheckBox("Randomize rule ordering");
         autogenRandomCheck.setAlignment(Pos.CENTER);
         autogenRandomCheck.setTextFill(Color.WHITE);
         autogenRandomCheck.setFont(Font.font("Verdana", 16));
@@ -281,7 +279,16 @@ public class NewGamePane extends AnchorPane {
             Config.RANDOM_RULE_ORDERING = newValue;
         });
 
-        autogenExtraBox = new VBox(10, autogenChoiceBox, autogenRandomCheck);
+        CheckBox autogenMinimizeCheck = new CheckBox("Minimize rule preconditions");
+        autogenMinimizeCheck.setAlignment(Pos.CENTER);
+        autogenMinimizeCheck.setTextFill(Color.WHITE);
+        autogenMinimizeCheck.setFont(Font.font("Verdana", 16));
+        autogenMinimizeCheck.setSelected(true);
+        autogenMinimizeCheck.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
+            Config.MINIMIZE_PRECONDITIONS = newValue;
+        });
+
+        autogenExtraBox = new VBox(10, autogenChoiceBox, autogenRandomCheck, autogenMinimizeCheck);
         autogenExtraBox.setAlignment(Pos.CENTER);
 
         autogenBox = new VBox(10, autogenCheck, autogenExtraBox);
@@ -326,7 +333,7 @@ public class NewGamePane extends AnchorPane {
 
         finalBox = new VBox(playerBlack, playerRed, scoreLimitBox, btnBox);
         finalBox.setAlignment(Pos.CENTER);
-        finalBox.setSpacing(40);
+        finalBox.setSpacing(25);
 
         AnchorPane.setTopAnchor(finalBox, 0.0);
         AnchorPane.setRightAnchor(finalBox, 0.0);

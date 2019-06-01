@@ -162,9 +162,9 @@ public class FFTOverviewPane extends VBox {
         ChoiceBox<String> teamChoice = new ChoiceBox<>();
         teamChoice.setMinWidth(textFieldWidth);
         teamChoice.setMaxWidth(textFieldWidth);
-        teamChoice.setValue("Player 1");
         teamChoice.setStyle("-fx-font: 16px \"Verdana\";");
         String[] playerNames = FFTManager.playerNames;
+        teamChoice.setValue(playerNames[0]);
         teamChoice.setItems(FXCollections.observableArrayList(playerNames[0], playerNames[1], "Both"));
 
         Label forLabel = new Label(" for: ");

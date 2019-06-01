@@ -2,6 +2,7 @@ package fftlib.game;
 
 import fftlib.*;
 import fftlib.FFT;
+import misc.Config;
 
 import java.util.*;
 
@@ -19,9 +20,9 @@ public class FFTAutoGen {
     // CONFIGURATION
     private static int perspective;
     private static int winner;
-    private static boolean detailedDebug = false;
+    private static boolean detailedDebug = true;
     private static boolean fullRules = false; // mainly for debug
-    private static boolean try_all_moves = false;
+    private static boolean try_all_combinations = true;
     public static boolean verify_single_strategy = false; // build fft for specific strategy
 
     public static FFT generateFFT(int perspective_, int winner_) {
@@ -59,7 +60,7 @@ public class FFTAutoGen {
 
         System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
-        int i = fft.minimize(perspective);
+        int i = fft.minimize(perspective, Config.MINIMIZE_PRECONDITIONS);
         System.out.println("Amount of rules after " + i + " minimize iterations: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions after " + i + " minimize iterations: " + fft.getAmountOfPreconditions());
 
@@ -148,6 +149,7 @@ public class FFTAutoGen {
             Rule r = addRule(state);
             states.remove(state);
             if (detailedDebug) System.out.println("FINAL RULE: " + r);
+            System.out.println();
 
 
             if (fft.verify(perspective, true)) {
@@ -181,7 +183,7 @@ public class FFTAutoGen {
             return new Rule(minSet, actions.get(0));
 
         Rule r;
-        if (try_all_moves) {
+        if (try_all_combinations) {
             r = new Rule();
             r.setPreconditions(new Clause(minSet));
         } else {
@@ -201,32 +203,30 @@ public class FFTAutoGen {
             System.out.println("ORIGINAL SCORE: " + mapping.getScore());
         }
 
-        if (try_all_moves) {
-            for (Literal l : literals) {
-                if (detailedDebug) System.out.println("INSPECTING: " + l.name);
-                r.removePrecondition(l);
-
-                for (Action a : actionsCopy) {
-                    r.setAction(a);
-                    boolean verify = fft.verify(perspective, false, null); // strategy is null if VERIFY_SINGLE_STRAT is false
-                    if (!verify) {
-                        actions.remove(a);
-                    } else if (detailedDebug)
-                        System.out.println("REMOVING: " + l.name);
+        if (try_all_combinations) {
+            LinkedList<Literal> copy = new LinkedList<>(literals);
+            LinkedList<Literal> bestPath = new LinkedList<>();
+            Action chosenAction = null;
+            for (Action a : actionsCopy) {
+                r.setAction(a);
+                LinkedList<Literal> path = getBestRemovalPath(copy, r, new LinkedList<>());
+                if (path.size() >= bestPath.size()) {
+                    chosenAction = a;
+                    bestPath = path;
                 }
-                if (actions.isEmpty()) {
-                    actions = actionsCopy;
-                    r.addPrecondition(l);
-                }
-                actionsCopy = new ArrayList<>(actions);
             }
-            // take bestaction if still in list
-            if (actions.contains(bestAction))
-                r.setAction(bestAction);
-            else
-                r.setAction(actions.get(0));
-
-        } else {
+            r.setAction(chosenAction);
+            if (detailedDebug) {
+                System.out.println("Best removal path (removed " + bestPath.size() + "): ");
+                for (Literal l : bestPath)
+                    System.out.print(l.name + " ");
+                System.out.println();
+            }
+            for (Literal l : bestPath)
+                r.removePrecondition(l);
+            System.out.println();
+        }
+        else {
             for (Literal l : literals) {
                 if (detailedDebug) System.out.println("INSPECTING: " + l.name);
                 r.removePrecondition(l);
@@ -239,7 +239,35 @@ public class FFTAutoGen {
                     System.out.println("REMOVING: " + l.name);
             }
         }
+
         return r;
+    }
+
+    private static LinkedList<Literal> getBestRemovalPath(LinkedList<Literal> literals, Rule r, LinkedList<Literal> path) {
+        ListIterator<Literal> it = literals.listIterator();
+        LinkedList<Literal> bestPath = path;
+
+        while(it.hasNext()) {
+            Literal l = it.next();
+            r.removePrecondition(l);
+            boolean verify = fft.verify(perspective, false, null);
+            if (!verify) {
+                r.addPrecondition(l);
+                continue;
+            }
+            it.remove();
+
+            LinkedList<Literal> copy = new LinkedList<>(path);
+            copy.add(l);
+            LinkedList<Literal> p = getBestRemovalPath(new LinkedList<>(literals), r, copy);
+
+            if (p.size() > bestPath.size())
+                bestPath = p;
+
+            it.add(l);
+            r.addPrecondition(l);
+        }
+        return bestPath;
     }
 
     private static class StateComparator implements Comparator<FFTState>{

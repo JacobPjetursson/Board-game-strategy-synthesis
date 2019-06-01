@@ -157,7 +157,7 @@ public class FFT {
         return precSize;
     }
 
-    public int minimize(int perspective) { // Returns amount of iterations
+    public int minimize(int perspective, boolean minimize_precons) { // Returns amount of iterations
         if (!verify(perspective, true)) {
             System.out.println("FFT is not a winning strategy, so it can not be minimized");
             return 0;
@@ -167,7 +167,9 @@ public class FFT {
         int precSize = getAmountOfPreconditions();
 
         minimizeRules(perspective);
-        minimizePreconditions(perspective);
+        if (minimize_precons)
+            minimizePreconditions(perspective);
+
 
         int minRuleSize = getAmountOfRules();
         int minPrecSize = getAmountOfPreconditions();
@@ -176,8 +178,11 @@ public class FFT {
         while (ruleSize != minRuleSize || precSize != minPrecSize) {
             ruleSize = minRuleSize;
             precSize = minPrecSize;
+
             minimizeRules(perspective);
-            minimizePreconditions(perspective);
+            if (minimize_precons)
+                minimizePreconditions(perspective);
+
             minRuleSize = getAmountOfRules();
             minPrecSize = getAmountOfPreconditions();
             i++;
@@ -186,7 +191,6 @@ public class FFT {
     }
 
     private ArrayList<Rule> minimizeRules(int team) {
-        System.out.println("Minimizing rules in FFT");
         ArrayList<Rule> redundantRules = new ArrayList<>();
 
         for (RuleGroup rg : ruleGroups) {
@@ -206,8 +210,6 @@ public class FFT {
     }
 
     private void minimizePreconditions(int team) {
-        System.out.println("Minimizing preconditions in rules in FFT");
-
         for (RuleGroup rg : ruleGroups) {
             for(Rule r : rg.rules) {
                 if (r.multiRule) continue; // TODO - support multirule when minimizing?

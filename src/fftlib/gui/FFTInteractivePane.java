@@ -697,6 +697,7 @@ public class FFTInteractivePane extends BorderPane {
     }
 
     public class MinimizeFFTPane extends AnchorPane {
+        CheckBox minimizeBox;
 
         MinimizeFFTPane() {
             Label label = new Label("Choose which team to minimize the FFT for");
@@ -707,10 +708,22 @@ public class FFTInteractivePane extends BorderPane {
             AnchorPane.setLeftAnchor(label, 0.0);
             AnchorPane.setRightAnchor(label, 0.0);
 
+            minimizeBox = new CheckBox("Minimize preconditions");
+            minimizeBox.setSelected(true);
+            minimizeBox.setAlignment(Pos.CENTER);
+            AnchorPane.setLeftAnchor(minimizeBox, 0.0);
+            AnchorPane.setRightAnchor(minimizeBox, 0.0);
+            AnchorPane.setTopAnchor(minimizeBox, 0.0);
+            AnchorPane.setBottomAnchor(minimizeBox, 20.0);
+
             String[] playerNames = FFTManager.playerNames;
 
-            Button p2Btn = new Button(playerNames[1]);
+            Button p1Btn = new Button(playerNames[0]);
+            p1Btn.setOnMouseClicked(event -> {
+                minimizeAndClose(PLAYER1);
+            });
 
+            Button p2Btn = new Button(playerNames[1]);
             p2Btn.setOnMouseClicked(event -> {
                 minimizeAndClose(PLAYER2);
             });
@@ -720,17 +733,13 @@ public class FFTInteractivePane extends BorderPane {
                 minimizeAndClose(PLAYER_ANY);
             });
 
-            Button p1Btn = new Button(playerNames[0]);
-            p1Btn.setOnMouseClicked(event -> {
-                minimizeAndClose(PLAYER1);
-            });
 
             HBox btnBox = new HBox(20, p1Btn, p2Btn, bothBtn);
             btnBox.setAlignment(Pos.CENTER);
             AnchorPane.setLeftAnchor(btnBox, 0.0);
             AnchorPane.setRightAnchor(btnBox, 0.0);
             AnchorPane.setTopAnchor(btnBox, 0.0);
-            AnchorPane.setBottomAnchor(btnBox, 0.0);
+            AnchorPane.setBottomAnchor(btnBox, 20.0);
 
             getChildren().addAll(label, btnBox);
         }
@@ -740,7 +749,7 @@ public class FFTInteractivePane extends BorderPane {
             pushUndoStack();
             int ruleSize = fftManager.currFFT.getAmountOfRules();
             int precSize = fftManager.currFFT.getAmountOfPreconditions();
-            fftManager.currFFT.minimize(perspective);
+            fftManager.currFFT.minimize(perspective, minimizeBox.isSelected());
             int diffRules = ruleSize - fftManager.currFFT.getAmountOfRules();
             int diffPrecs = precSize - fftManager.currFFT.getAmountOfPreconditions();
             if (diffRules == 0 && diffPrecs == 0) {
