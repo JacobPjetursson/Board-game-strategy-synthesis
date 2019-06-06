@@ -696,7 +696,7 @@ public class FFTInteractivePane extends BorderPane {
         }
     }
 
-    public class MinimizeFFTPane extends AnchorPane {
+    public class MinimizeFFTPane extends VBox {
         CheckBox minimizeBox;
 
         MinimizeFFTPane() {
@@ -704,17 +704,10 @@ public class FFTInteractivePane extends BorderPane {
             label.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
             label.setAlignment(Pos.CENTER);
             label.setTextAlignment(TextAlignment.CENTER);
-            AnchorPane.setTopAnchor(label, 20.0);
-            AnchorPane.setLeftAnchor(label, 0.0);
-            AnchorPane.setRightAnchor(label, 0.0);
 
             minimizeBox = new CheckBox("Minimize preconditions");
             minimizeBox.setSelected(true);
             minimizeBox.setAlignment(Pos.CENTER);
-            AnchorPane.setLeftAnchor(minimizeBox, 0.0);
-            AnchorPane.setRightAnchor(minimizeBox, 0.0);
-            AnchorPane.setTopAnchor(minimizeBox, 0.0);
-            AnchorPane.setBottomAnchor(minimizeBox, 20.0);
 
             String[] playerNames = FFTManager.playerNames;
 
@@ -736,12 +729,12 @@ public class FFTInteractivePane extends BorderPane {
 
             HBox btnBox = new HBox(20, p1Btn, p2Btn, bothBtn);
             btnBox.setAlignment(Pos.CENTER);
-            AnchorPane.setLeftAnchor(btnBox, 0.0);
-            AnchorPane.setRightAnchor(btnBox, 0.0);
-            AnchorPane.setTopAnchor(btnBox, 0.0);
-            AnchorPane.setBottomAnchor(btnBox, 20.0);
 
-            getChildren().addAll(label, btnBox);
+            setSpacing(20);
+            setPadding(new Insets(20, 0, 20, 0));
+            setAlignment(Pos.CENTER);
+
+            getChildren().addAll(label, minimizeBox, btnBox);
         }
 
         private void minimizeAndClose(int perspective) {
@@ -753,12 +746,16 @@ public class FFTInteractivePane extends BorderPane {
             int diffRules = ruleSize - fftManager.currFFT.getAmountOfRules();
             int diffPrecs = precSize - fftManager.currFFT.getAmountOfPreconditions();
             if (diffRules == 0 && diffPrecs == 0) {
-                playMsg("FFT is already fully minimized", 5);
+                String msg = "FFT is already fully minimized";
+                System.out.println(msg);
+                playMsg(msg, 5);
                 popUndoStack();
                 changes = tempChanges;
 
             } else {
-                playMsg(diffRules + " rules and " + diffPrecs + " preconditions were removed", 5);
+                String msg = diffRules + " rules and " + diffPrecs + " preconditions were removed";
+                System.out.println(msg);
+                playMsg(msg, 5);
                 changes = true;
             }
             refresh();
