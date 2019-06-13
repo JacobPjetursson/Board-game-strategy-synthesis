@@ -20,9 +20,9 @@ public class FFTAutoGen {
     // CONFIGURATION
     private static int perspective;
     private static int winner;
-    private static boolean detailedDebug = true;
+    private static boolean detailedDebug = false;
     private static boolean fullRules = false; // mainly for debug
-    private static boolean try_all_combinations = true;
+    private static boolean try_all_combinations = false;
     public static boolean verify_single_strategy = false; // build fft for specific strategy
 
     public static FFT generateFFT(int perspective_, int winner_) {
@@ -210,10 +210,12 @@ public class FFTAutoGen {
             for (Action a : actionsCopy) {
                 r.setAction(a);
                 LinkedList<Literal> path = getBestRemovalPath(copy, r, new LinkedList<>());
-                if (path.size() >= bestPath.size()) {
+                if (path.size() > bestPath.size()) {
                     chosenAction = a;
                     bestPath = path;
                 }
+                if (path.size() >= FFTManager.MAX_PRECONS) // Everything has been removed
+                    break;
             }
             r.setAction(chosenAction);
             if (detailedDebug) {
@@ -266,6 +268,9 @@ public class FFTAutoGen {
 
             it.add(l);
             r.addPrecondition(l);
+
+            if (bestPath.size() >= FFTManager.MAX_PRECONS) // Everything removed, no better path exists
+                break;
         }
         return bestPath;
     }

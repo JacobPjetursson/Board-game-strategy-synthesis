@@ -126,6 +126,12 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
+    public int getMaxPrecons() {
+        int[] dim = getBoardDim();
+        return dim[0] * dim[1] + 2; // tiles, score, score
+    }
+
+    @Override
     public int getGameWinner() {
         if (Config.kuliBHeight == 3 || Config.SCORELIMIT < 8)
             return PLAYER1;

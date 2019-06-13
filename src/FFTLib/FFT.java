@@ -160,7 +160,7 @@ public class FFT {
     public int minimize(int perspective, boolean minimize_precons) { // Returns amount of iterations
         if (!verify(perspective, true)) {
             System.out.println("FFT is not a winning strategy, so it can not be minimized");
-            return 0;
+            return -1;
         }
 
         int ruleSize = getAmountOfRules();

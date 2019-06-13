@@ -107,6 +107,12 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
+    public int getMaxPrecons() {
+        int[] dim = getBoardDim();
+        return dim[0] * dim[1];
+    }
+
+    @Override
     public int getGameWinner() {
         if (Config.simpleTicTacToe)
             return PLAYER1;

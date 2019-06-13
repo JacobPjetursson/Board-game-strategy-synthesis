@@ -395,7 +395,9 @@ public class FFTInteractivePane extends BorderPane {
         update(FFTManager.initialFFTState);
     }
 
-    void refresh() {
+    void refresh(boolean clearUndo) {
+        if (clearUndo)
+            undoStack.clear();
         clearPane();
         showRuleGroups();
     }
@@ -403,6 +405,7 @@ public class FFTInteractivePane extends BorderPane {
     public void update(FFTState state) {
         selectedIndices = null;
         FFTManager.interactiveState.clear();
+        undoStack.clear();
         saveRuleBtn.setDisable(true);
         deleteRuleBtn.setDisable(true);
         lw.getSelectionModel().clearSelection();
@@ -742,23 +745,26 @@ public class FFTInteractivePane extends BorderPane {
             pushUndoStack();
             int ruleSize = fftManager.currFFT.getAmountOfRules();
             int precSize = fftManager.currFFT.getAmountOfPreconditions();
-            fftManager.currFFT.minimize(perspective, minimizeBox.isSelected());
+            int iterations = fftManager.currFFT.minimize(perspective, minimizeBox.isSelected());
             int diffRules = ruleSize - fftManager.currFFT.getAmountOfRules();
             int diffPrecs = precSize - fftManager.currFFT.getAmountOfPreconditions();
-            if (diffRules == 0 && diffPrecs == 0) {
-                String msg = "FFT is already fully minimized";
-                System.out.println(msg);
-                playMsg(msg, 5);
+            String msg;
+            if (iterations == -1) { // error, not a winning strategy
+                msg = "FFT is not a winning strategy, so it can't be minimized";
                 popUndoStack();
                 changes = tempChanges;
-
+            }
+            else if (diffRules == 0 && diffPrecs == 0) {
+                msg = "FFT is already fully minimized";
+                popUndoStack();
+                changes = tempChanges;
             } else {
-                String msg = diffRules + " rules and " + diffPrecs + " preconditions were removed";
-                System.out.println(msg);
-                playMsg(msg, 5);
+                msg = diffRules + " rules and " + diffPrecs + " preconditions were removed";
                 changes = true;
             }
-            refresh();
+            System.out.println(msg);
+            playMsg(msg, 5);
+            refresh(false);
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
         }

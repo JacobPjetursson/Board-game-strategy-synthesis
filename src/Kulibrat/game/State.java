@@ -263,7 +263,6 @@ public class State implements Serializable, FFTState {
                 }
             }
         }
-        literals.add(new Literal("SL=" + scoreLimit));
         literals.add(new Literal("P1SCORE=" + redScore));
         literals.add(new Literal("P2SCORE=" + blackScore));
         return literals;
@@ -286,7 +285,6 @@ public class State implements Serializable, FFTState {
                     literals.add(new Literal(i, j, PLAYER_ANY, true));
             }
         }
-        literals.add(new Literal("SL=" + scoreLimit));
         literals.add(new Literal("P1SCORE=" + redScore));
         literals.add(new Literal("P2SCORE=" + blackScore));
         return literals;

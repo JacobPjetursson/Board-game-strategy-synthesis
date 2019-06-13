@@ -72,6 +72,7 @@ public class FFTOverviewPane extends VBox {
             fftManager.setCurrFFT((Integer) newValue);
             Platform.runLater(() -> changeBox.getSelectionModel().clearSelection());
             update();
+            interactivePane.refresh(true);
         });
         changeRenameBox.getChildren().add(changeBox);
 
@@ -152,6 +153,7 @@ public class FFTOverviewPane extends VBox {
             fftManager.currFFT.addRuleGroup(rg);
             newRuleGroupField.clear();
             update();
+            interactivePane.refresh(true);
         });
 
         HBox ruleGroupBox = new HBox(newRuleGroupLabel, newRuleGroupField, addNewRuleGroupBtn);
@@ -246,7 +248,6 @@ public class FFTOverviewPane extends VBox {
     }
 
     public void update() {
-        interactivePane.refresh();
         boolean isNull = fftManager.currFFT == null;
         changeBox.setDisable(isNull);
         delBtn.setDisable(isNull);
@@ -399,6 +400,7 @@ public class FFTOverviewPane extends VBox {
                 Stage stage = (Stage) getScene().getWindow();
                 stage.close();
                 update();
+                interactivePane.refresh(true);
 
                 save();
             }

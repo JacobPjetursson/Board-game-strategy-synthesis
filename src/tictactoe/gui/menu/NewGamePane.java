@@ -174,6 +174,8 @@ public class NewGamePane extends AnchorPane {
                     (crossValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
             int playerCircleMode = (circleValue.equals(human)) ? Config.HUMAN :
                     (circleValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
+            if (playerCrossMode != Config.FFT && playerCircleMode != Config.FFT)
+                Config.USE_AUTOGEN = false;
             new Controller(stage, playerCrossMode,
                     playerCircleMode, new State());
         });
