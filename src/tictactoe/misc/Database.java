@@ -4,6 +4,7 @@ import fftlib.game.FFTDatabase;
 import fftlib.game.FFTStateMapping;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
+import org.ggp.base.util.statemachine.MachineState;
 import tictactoe.ai.StateMapping;
 import tictactoe.game.Logic;
 import tictactoe.game.Move;
@@ -11,6 +12,7 @@ import tictactoe.game.State;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
@@ -117,12 +119,6 @@ public class Database implements FFTDatabase {
     public boolean connectAndVerify() {
         // There is no db
         return true;
-    }
-
-    @Override
-    public boolean isLosingChild(FFTStateMapping mapping, FFTState bestChild, FFTState child) {
-        return mapping == null;
-
     }
 
     public static void fillLookupTable(HashMap<State, StateMapping> lookup) {

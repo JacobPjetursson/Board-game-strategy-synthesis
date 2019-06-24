@@ -36,12 +36,20 @@ public class RuleGroup {
         sb.append("-----------------\n");
         return sb.toString();
     }
-
+/*
     int getAmountOfPreconditions() {
         int precons = 0;
         for (Rule r : rules) {
             if (r.multiRule) continue; // TODO - fuck this shit
             precons += r.preconditions.size();
+        }
+        return precons;
+    }
+    */
+    int getAmountOfPreconditions() {
+        int precons = 0;
+        for (Rule r : rules) {
+            precons += r.sentences.size();
         }
         return precons;
     }

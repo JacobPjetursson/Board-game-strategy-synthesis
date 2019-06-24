@@ -3,6 +3,12 @@ package fftlib;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import fftlib.game.Transform;
+import org.ggp.base.util.gdl.grammar.GdlLiteral;
+import org.ggp.base.util.gdl.grammar.GdlSentence;
+import org.ggp.base.util.statemachine.MachineState;
+import org.ggp.base.util.statemachine.Move;
+import org.ggp.base.util.statemachine.Role;
+import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 
 import java.util.*;
 
@@ -14,6 +20,7 @@ public class Rule {
     private static final ArrayList<String> separators = new ArrayList<>(
             Arrays.asList("and", "And", "AND", "&", "∧"));
     private HashSet<Clause> transformedPrecons;
+    //private HashSet<Clause> transformedSentences;
     public Clause preconditions;
     public Action action;
     private String actionStr, preconStr;
@@ -23,6 +30,10 @@ public class Rule {
     public boolean multiRule;
     public HashSet<Rule> rules;
     public boolean errors;
+
+    // General game playing
+    public Set<GdlSentence> sentences;
+    private Move move;
 
     // parsing constructor
     public Rule(String preconStr, String actionStr) {
@@ -53,6 +64,14 @@ public class Rule {
         this.action = action;
         this.preconditions = precons;
         this.transformedPrecons = getTransformedPreconditions();
+    }
+
+    // GDL Constructor
+    public Rule(Set<GdlSentence> sentences, Move move) {
+        this.multiRule = false;
+        this.sentences = sentences;
+        this.move = move;
+        //this.transformedSentences = getTransformedSentences();
     }
 
     // Empty constructor to allow rule buildup
@@ -86,9 +105,19 @@ public class Rule {
         this.transformedPrecons = getTransformedPreconditions();
     }
 
+    public void addPrecondition(GdlSentence s) {
+        this.sentences.add(s);
+        //this.transformedSentences = getTransformedSentences();
+    }
+
     public void removePrecondition(Literal l) {
         this.preconditions.remove(l);
         this.transformedPrecons = getTransformedPreconditions();
+    }
+
+    public void removePrecondition(GdlSentence s) {
+        this.sentences.remove(s);
+        //this.transformedSentences = getTransformedSentences();
     }
 
     public void removeLiterals(int row, int col) {
@@ -121,12 +150,21 @@ public class Rule {
             this.action = a;
     }
 
+    public void setMove(Move m) {
+        this.move = move;
+    }
+
     public void setPreconditions(Clause c) {
         if (c == null)
             this.preconditions = new Clause();
         else
             this.preconditions = c;
         this.transformedPrecons = getTransformedPreconditions();
+    }
+
+    public void setSentences(Set<GdlSentence> sentences) {
+        this.sentences = sentences;
+        //this.transformedSentences = getTransformedSentences();
     }
 
     private static ArrayList<String> prepPreconditions(String preconStr) {
@@ -275,6 +313,9 @@ public class Rule {
     }
 
     public String toString() {
+        if (sentences != null || move != null) { // ggp
+            return "IF: " + sentences + " THEN: " + move;
+        }
         String cStr, aStr;
         if (preconditions != null && action != null) {
             cStr = preconditions.getFormattedString();
@@ -356,6 +397,31 @@ public class Rule {
         return null;
     }
 
+    public Move apply(MachineState state) throws MoveDefinitionException {
+        Set<GdlSentence> stSentences = state.getContents();
+        // TODO - transformations of sentences
+        //for (Clause clause : transformedSentences) {
+            boolean match = true;
+            for (GdlSentence s : sentences) {
+                match = matchSentence(s, stSentences);
+                if (!match)
+                    break;
+
+            }
+
+            if (match) {
+                // todo - transform move
+                //Move m = FFTManager.transformMove(move, transformations);
+                Role r = FFTManager.getStateRole(state);
+                if (FFTManager.sm.getLegalMoves(state, r).contains(move)) {
+                    return move;
+                }
+            }
+        //}
+
+        return null;
+    }
+
     private boolean matchLiteral(Literal l, HashSet<Literal> stLiterals) {
         if (l.negation) {
             Literal temp = new Literal(l);
@@ -364,6 +430,12 @@ public class Rule {
             return !stLiterals.contains(temp);
         }
         return stLiterals.contains(l);
+    }
+
+    private boolean matchSentence(GdlSentence s, Set<GdlSentence> stSentences) {
+        if (false) // todo - negation
+            return false;
+        return stSentences.contains(s);
     }
 
     // Returns a board with the literals on it, the value equals to the piece occ.

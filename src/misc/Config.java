@@ -37,7 +37,7 @@ public class Config {
     public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";
 
     public static final int TICTACTOE = 1;
-    public static final boolean simpleTicTacToe = false;
+    public static final boolean simpleTicTacToe = true;
     public static int CURRENT_GAME;
 
     // BOARD CONFIG

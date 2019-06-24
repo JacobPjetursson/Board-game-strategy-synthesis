@@ -16,12 +16,10 @@ import kulibrat.game.Move;
 import kulibrat.game.State;
 import kulibrat.gui.Dialogs.OverwriteDBDialog;
 import misc.Config;
+import org.ggp.base.util.statemachine.MachineState;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
@@ -168,40 +166,6 @@ public class Database implements FFTDatabase {
         return nonLosingMoves;
     }
 
-    private static boolean isLosingChild(StateMapping mapping, State bestChild, State child) {
-        if (mapping == null || mapping.move == null)
-            return true;
-        int bestMoveWinner = mapping.getWinner();
-        // In case of game over with perfect move
-        if (Logic.gameOver(bestChild)) {
-            int childWinner = Logic.getWinner(child);
-            if (childWinner == bestMoveWinner)
-                return false;
-            else if (childWinner == 0) { // Game still going
-                return queryState(child).getWinner() != bestMoveWinner;
-            }
-            return true;
-        }
-
-        int team = child.getTurn();
-
-        if (Logic.gameOver(child)) { // Game is stuck
-            if (team == PLAYER1 && bestMoveWinner == PLAYER2)
-                return false;
-            else return team != PLAYER2 || bestMoveWinner != PLAYER1;
-        }
-        int childWinner = queryState(child).getWinner();
-        if (team == PLAYER1) {
-            if (bestMoveWinner == childWinner)
-                return false;
-            else return bestMoveWinner != PLAYER2;
-        } else {
-            if (bestMoveWinner == childWinner)
-                return false;
-            else return bestMoveWinner != PLAYER1;
-        }
-    }
-
     // Fetches the best play corresponding to the input node
     public static StateMapping queryState(State n) {
         if (lookupTable != null)
@@ -326,12 +290,6 @@ public class Database implements FFTDatabase {
     public ArrayList<? extends FFTMove> nonLosingMoves(FFTState n) {
         return nonLosingMoves((State) n);
     }
-
-    @Override
-    public boolean isLosingChild(FFTStateMapping mapping, FFTState bestChild, FFTState child) {
-        return isLosingChild((StateMapping) mapping, (State) bestChild, (State) child);
-    }
-
 
     public FFTStateMapping queryState(FFTState n) {
         return queryState((State) n);

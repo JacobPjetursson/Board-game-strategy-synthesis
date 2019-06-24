@@ -6,6 +6,18 @@ import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
 import javafx.scene.input.DataFormat;
 import misc.Config;
+import org.ggp.base.util.gdl.grammar.Gdl;
+import org.ggp.base.util.gdl.grammar.GdlPool;
+import org.ggp.base.util.gdl.grammar.GdlRelation;
+import org.ggp.base.util.gdl.grammar.GdlSentence;
+import org.ggp.base.util.statemachine.MachineState;
+import org.ggp.base.util.statemachine.Move;
+import org.ggp.base.util.statemachine.Role;
+import org.ggp.base.util.statemachine.StateMachine;
+import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
+import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
+import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
+import org.ggp.base.util.statemachine.implementation.prover.ProverStateMachine;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,9 +25,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
 
 import static misc.Config.*;
@@ -38,6 +48,12 @@ public class FFTManager {
     public static int MAX_PRECONS;
     public static String[] playerNames;
     private static int fft_index = 0;
+
+    // General game playing
+    public static StateMachine sm;
+    public static Role xrole;
+    public static Role orole;
+    public static Move noop;
 
     public static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     public static final String blueBtnStyle = "-fx-border-color: #000000; -fx-background-color: #4444ff;";
@@ -70,6 +86,64 @@ public class FFTManager {
             currFFT = ffts.get(fft_index);
 
     }
+
+    public static void initialize(List<Gdl> rules) {
+        sm = new ProverStateMachine();
+        sm.initialize(rules);
+        xrole = FFTManager.sm.getRoles().get(0);
+        orole = FFTManager.sm.getRoles().get(1);
+        noop = new Move(GdlPool.getConstant("noop"));
+    }
+
+    /* BELOW FUNCTIONS SHOULD ALL BE IN A SUBCLASS OF MACHINESTATE, OR SIMILAR! */
+    public static MachineState getNextState(MachineState ms, Move move) throws MoveDefinitionException, TransitionDefinitionException {
+        Role r = getStateRole(ms);
+        int roleIdx = sm.getRoleIndices().get(r);
+        Move[] moveList = new Move[] {noop, noop};
+        moveList[roleIdx] = move;
+        return sm.getNextState(ms, Arrays.asList(moveList));
+    }
+
+    public static Role getStateRole(MachineState ms) throws MoveDefinitionException {
+        List<Move> moves = FFTManager.sm.getLegalMoves(ms, xrole);
+        return (moves.size() == 1 && moves.get(0).equals(noop)) ? orole : xrole;
+    }
+
+    public static int roleToPlayer(Role r) {
+        return r.equals(xrole) ? PLAYER1 : PLAYER2;
+    }
+
+    /** Return all roles if draw, otherwise return role that won the game. Assumes turn-based game **/
+    public static List<Role> getWinners(MachineState ms){
+        List<Integer> goals; // same order as getRoles()
+        try {
+            goals = sm.getGoals(ms);
+        } catch (GoalDefinitionException e) {
+            return null;
+        }
+        int max = Collections.max(goals);
+
+        List<Role> roles = sm.getRoles();
+        List<Role> winners = new ArrayList<>();
+        for (int i = 0; i < goals.size(); i++) {
+            if (goals.get(i) == max) {
+                winners.add(roles.get(i));
+            }
+        }
+        return winners;
+    }
+
+    public static List<Integer> getPlayerWinners(MachineState ms){
+        List<Role> roleWinners = getWinners(ms);
+        if (roleWinners == null)
+            return null;
+        List<Integer> playerWinners = new ArrayList<>();
+        for (Role r : roleWinners) {
+            playerWinners.add(roleToPlayer(r));
+        }
+        return playerWinners;
+    }
+    /* ------------------------------------------------------------------ */
 
     public static void save() {
         BufferedWriter writer;
@@ -160,7 +234,7 @@ public class FFTManager {
         return failState.getFailState(ps, nonLosingMoves);
     }
 
-    public void autogenFFT() {
+    public void autogenFFT() throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
         if (Config.USE_AUTOGEN) {
             FFT fft = FFTAutoGen.generateFFT(AUTOGEN_PERSPECTIVE, gameWinner);
             ffts.add(0, fft);

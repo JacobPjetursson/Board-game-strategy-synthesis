@@ -3,6 +3,9 @@ package fftlib.game;
 import fftlib.*;
 import fftlib.FFT;
 import misc.Config;
+import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
+import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
+import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import java.util.*;
 
@@ -25,14 +28,14 @@ public class FFTAutoGen {
     private static boolean try_all_combinations = false;
     public static boolean verify_single_strategy = false; // build fft for specific strategy
 
-    public static FFT generateFFT(int perspective_, int winner_) {
+    public static FFT generateFFT(int perspective_, int winner_) throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
         perspective = perspective_;
         winner = winner_;
         setup();
         return fft;
     }
 
-    private static void setup() {
+    private static void setup() throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
         long timeStart = System.currentTimeMillis();
         fft = new FFT("Autogen");
         rg = new RuleGroup("Autogen");
@@ -141,7 +144,7 @@ public class FFTAutoGen {
         }
     }
 
-    private static void makeRules() {
+    private static void makeRules() throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
         while (!states.isEmpty()) {
             System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + rg.rules.size());
             FFTState state = states.iterator().next();
@@ -164,7 +167,7 @@ public class FFTAutoGen {
 
     }
 
-    private static Rule addRule(FFTState s) {
+    private static Rule addRule(FFTState s) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
         HashSet<Literal> minSet = new HashSet<>();
         HashSet<Literal> literals = s.getAllLiterals();
         ArrayList<Action> actions = new ArrayList<>();
@@ -245,7 +248,7 @@ public class FFTAutoGen {
         return r;
     }
 
-    private static LinkedList<Literal> getBestRemovalPath(LinkedList<Literal> literals, Rule r, LinkedList<Literal> path) {
+    private static LinkedList<Literal> getBestRemovalPath(LinkedList<Literal> literals, Rule r, LinkedList<Literal> path) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
         ListIterator<Literal> it = literals.listIterator();
         LinkedList<Literal> bestPath = path;
 

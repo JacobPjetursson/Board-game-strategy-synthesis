@@ -17,7 +17,7 @@ public interface FFTGameSpecifics {
 
     int[] getBoardDim(); // row, col
 
-    String[] getPlayerNames();
+    String[] getPlayerNames(); // VISUAL
 
     int[] getAllowedTransformations();
 
@@ -27,9 +27,9 @@ public interface FFTGameSpecifics {
 
     FFTDatabase getDatabase();
 
-    FFTFailState getFailState();
+    FFTFailState getFailState(); // VISUAL
 
-    InteractiveFFTState getInteractiveState();
+    InteractiveFFTState getInteractiveState(); // VISUAL
 
     int getMaxPrecons();
 

@@ -13,6 +13,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import misc.Config;
+import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
+import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
+import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 import tictactoe.FFT.GameSpecifics;
 import tictactoe.FFT.InteractiveState;
 import tictactoe.ai.AI;
@@ -74,7 +77,15 @@ public class Controller {
         gameSpecifics = new GameSpecifics(this);
         this.fftManager = new FFTManager(gameSpecifics);
         // Autogenerate
-        fftManager.autogenFFT();
+        try {
+            fftManager.autogenFFT();
+        } catch (TransitionDefinitionException e) {
+            e.printStackTrace();
+        } catch (MoveDefinitionException e) {
+            e.printStackTrace();
+        } catch (GoalDefinitionException e) {
+            e.printStackTrace();
+        }
 
         PlayPane playPane = new PlayPane(this);
         primaryStage.setScene(new Scene(playPane,

@@ -26,6 +26,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import misc.Config;
+import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
+import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
+import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import static fftlib.FFTManager.*;
 import static misc.Config.WIDTH;
@@ -187,7 +190,16 @@ public class FFTOverviewPane extends VBox {
                 return;
             int team = teamChoice.getSelectionModel().getSelectedIndex() + 1;
             boolean wholeFFT = verificationChoice.getSelectionModel().getSelectedIndex() == 0;
-            boolean verified = fftManager.currFFT.verify(team, wholeFFT);
+            boolean verified = false;
+            try {
+                verified = fftManager.currFFT.verify(team, wholeFFT);
+            } catch (TransitionDefinitionException e) {
+                e.printStackTrace();
+            } catch (MoveDefinitionException e) {
+                e.printStackTrace();
+            } catch (GoalDefinitionException e) {
+                e.printStackTrace();
+            }
             if (!verified) {
                 if (fftManager.currFFT.failingPoint == null) {
                     Label verifiedLabel = new Label("Always loses to perfect player");

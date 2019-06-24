@@ -27,6 +27,9 @@ import kulibrat.gui.board.Goal;
 import kulibrat.gui.board.Player;
 import kulibrat.misc.Database;
 import misc.Config;
+import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
+import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
+import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -94,7 +97,15 @@ public class Controller {
         gameSpecifics = new GameSpecifics(this);
         this.fftManager = new FFTManager(gameSpecifics);
         // Autogenerate
-        fftManager.autogenFFT();
+        try {
+            fftManager.autogenFFT();
+        } catch (TransitionDefinitionException e) {
+            e.printStackTrace();
+        } catch (MoveDefinitionException e) {
+            e.printStackTrace();
+        } catch (GoalDefinitionException e) {
+            e.printStackTrace();
+        }
 
         PlayPane playPane = new PlayPane(this);
         primaryStage.setScene(new Scene(playPane,
