@@ -8,8 +8,6 @@ import javafx.scene.input.DataFormat;
 import misc.Config;
 import org.ggp.base.util.gdl.grammar.Gdl;
 import org.ggp.base.util.gdl.grammar.GdlPool;
-import org.ggp.base.util.gdl.grammar.GdlRelation;
-import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
@@ -51,8 +49,8 @@ public class FFTManager {
 
     // General game playing
     public static StateMachine sm;
-    public static Role xrole;
-    public static Role orole;
+    public static Role p1role;
+    public static Role p2role;
     public static Move noop;
 
     public static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
@@ -90,8 +88,8 @@ public class FFTManager {
     public static void initialize(List<Gdl> rules) {
         sm = new ProverStateMachine();
         sm.initialize(rules);
-        xrole = FFTManager.sm.getRoles().get(0);
-        orole = FFTManager.sm.getRoles().get(1);
+        p1role = FFTManager.sm.getRoles().get(0);
+        p2role = FFTManager.sm.getRoles().get(1);
         noop = new Move(GdlPool.getConstant("noop"));
     }
 
@@ -104,23 +102,26 @@ public class FFTManager {
         return sm.getNextState(ms, Arrays.asList(moveList));
     }
 
-    public static Role getStateRole(MachineState ms) throws MoveDefinitionException {
-        List<Move> moves = FFTManager.sm.getLegalMoves(ms, xrole);
-        return (moves.size() == 1 && moves.get(0).equals(noop)) ? orole : xrole;
+    public static Role getStateRole(MachineState ms) {
+        try {
+            List<Move> moves = FFTManager.sm.getLegalMoves(ms, p1role);
+            return (moves.size() == 1 && moves.get(0).equals(noop)) ? p2role : p1role;
+        } catch (MoveDefinitionException e) {
+            return p2role;
+        }
     }
 
     public static int roleToPlayer(Role r) {
-        return r.equals(xrole) ? PLAYER1 : PLAYER2;
+        return r.equals(p1role) ? PLAYER1 : PLAYER2;
     }
 
     /** Return all roles if draw, otherwise return role that won the game. Assumes turn-based game **/
-    public static List<Role> getWinners(MachineState ms){
-        List<Integer> goals; // same order as getRoles()
-        try {
-            goals = sm.getGoals(ms);
-        } catch (GoalDefinitionException e) {
+    public static List<Role> getWinners(MachineState ms) throws GoalDefinitionException {
+        if (!sm.isTerminal(ms)) // TODO - catch exception and suppress output
             return null;
-        }
+
+        List<Integer> goals = sm.getGoals(ms); // same order as getRoles()
+
         int max = Collections.max(goals);
 
         List<Role> roles = sm.getRoles();
@@ -133,7 +134,7 @@ public class FFTManager {
         return winners;
     }
 
-    public static List<Integer> getPlayerWinners(MachineState ms){
+    public static List<Integer> getPlayerWinners(MachineState ms) throws GoalDefinitionException {
         List<Role> roleWinners = getWinners(ms);
         if (roleWinners == null)
             return null;

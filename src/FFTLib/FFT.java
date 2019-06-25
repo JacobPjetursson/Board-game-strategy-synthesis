@@ -1,10 +1,7 @@
 package fftlib;
 
-import fftlib.GGP.Database;
-import fftlib.GGP.GGPMapping;
-import fftlib.game.FFTStateMapping;
-import fftlib.game.FFTMove;
-import fftlib.game.FFTState;
+import fftlib.GGPAutogen.Database;
+import fftlib.GGPAutogen.GGPMapping;
 import fftlib.game.FFTStateAndMove;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
@@ -13,6 +10,7 @@ import org.ggp.base.util.statemachine.Role;
 import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
+
 
 import java.util.*;
 
@@ -358,8 +356,7 @@ public class FFT {
         for (RuleGroup rg : ruleGroups) {
             sb.append(rg.name).append(":\n");
             for (Rule r : rg.rules)
-                sb.append(r);
-            sb.append("\n");
+                sb.append(r).append("\n");
         }
         return sb.toString();
     }

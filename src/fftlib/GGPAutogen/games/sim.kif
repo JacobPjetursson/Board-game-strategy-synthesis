@@ -1,0 +1,68 @@
+; Sim
+; by Alex
+; Rules of Sim: http://en.wikipedia.org/wiki/Sim_(pencil_game)
+
+(role red)
+(role blue)
+
+(init (control red))
+
+(<= (legal ?player (color ?i ?j))
+    (true (control ?player))
+    (lt ?i ?j)
+    (not (isColored ?i ?j)))
+
+(<= (isColored ?i ?j)
+    (true (line ?anyColor ?i ?j)))
+    
+(<= (legal ?player noop)
+    (role ?player)
+    (not (true (control ?player))))
+    
+(<= (next (control red))
+    (true (control blue)))
+(<= (next (control blue))
+    (true (control red)))
+
+(<= (next (line ?player ?i ?j))
+    (does ?player (color ?i ?j)))
+
+(<= (next (line ?player ?i ?j))
+    (true (line ?player ?i ?j)))
+
+(<= (triangle ?player)
+    (true (line ?player ?a ?b))
+    (true (line ?player ?b ?c))
+    (true (line ?player ?a ?c)))
+
+(<= terminal
+    (triangle ?player))
+
+(<= (goal ?player 0)
+    (triangle ?player))
+(<= (goal ?player 100)
+    (triangle ?opponent)
+    (role ?player)
+    (distinct ?player ?opponent))
+
+(succ 1 2)
+(succ 2 3)
+(succ 3 4)
+(succ 4 5)
+(succ 5 6)
+(<= (lt ?a ?b)
+    (succ ?a ?b))
+(<= (lt ?a ?c)
+    (succ ?a ?b)
+    (lt ?b ?c))
+
+(<= (base (control ?player))
+    (role ?player))
+(<= (base (line ?player ?i ?j))
+    (role ?player)
+    (lt ?i ?j))
+(<= (input ?player noop)
+    (role ?player))
+(<= (input ?player (color ?i ?j))
+    (role ?player)
+    (lt ?i ?j))

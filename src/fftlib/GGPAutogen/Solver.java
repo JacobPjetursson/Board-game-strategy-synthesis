@@ -1,4 +1,4 @@
-package fftlib.GGP;
+package fftlib.GGPAutogen;
 
 
 import fftlib.FFTManager;
@@ -26,8 +26,8 @@ public class Solver {
     public Solver() {
         this.sm = FFTManager.sm;
         lookupTable = new HashMap<>();
-        p1Role = FFTManager.xrole;
-        p2Role = FFTManager.orole;
+        p1Role = FFTManager.p1role;
+        p2Role = FFTManager.p2role;
         solverRole = p1Role; // role needs to be consistent when solving, doesn't matter which is chosen
         noop = FFTManager.noop;
     }
@@ -51,8 +51,8 @@ public class Solver {
             int prevSize = lookupTable.size();
             int prevUnevaluatedNodes = unevaluatedNodes;
             unevaluatedNodes = 0;
-            System.out.println("Minimax iterative depth: " + CURR_MAX_DEPTH);
             CURR_MAX_DEPTH += 1;
+            System.out.println("Minimax iterative depth: " + CURR_MAX_DEPTH + ". Size of solution: " + lookupTable.size());
             MachineState initialState = sm.getInitialState();
             minimax(initialState.clone(), CURR_MAX_DEPTH);
 
@@ -84,10 +84,18 @@ public class Solver {
             return mapping;
         }
         boolean evaluated = true;
+        if (depth == 8) {
+            System.out.println();
+            System.out.println("STATE: " + state);
+            System.out.println("STATEROLE: " + stateRole);
+            System.out.print("LEGAL MOVES: ");
+            System.out.println(sm.getLegalMoves(state, stateRole));
+        }
 
 
         for (Move move : sm.getLegalMoves(state, stateRole)) {
             MachineState child = FFTManager.getNextState(state, move);
+            if (depth == 8) System.out.println("CHILD: " + child);
             score = minimax(child, depth - 1).score;
             if (score > 1000) score--;
             else {

@@ -1,4 +1,4 @@
-package fftlib.GGP;
+package fftlib.GGPAutogen;
 
 import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
@@ -43,5 +43,10 @@ public class GGPMapping {
 
     public Role getRole() {
         return role;
+    }
+
+    public String toString() {
+        String winnerStr = getWinner() == PLAYER1 ? "Player 1" : (getWinner() == PLAYER2) ? "Player 2" : "Draw";
+        return "Winner: " + winnerStr + ". Score: " + getScore() + ". Move: " + getMove() + ". Role: " + getRole();
     }
 }

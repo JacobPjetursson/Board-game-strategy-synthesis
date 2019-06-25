@@ -1,4 +1,4 @@
-package fftlib.GGP;
+package fftlib.GGPAutogen;
 
 import fftlib.FFTManager;
 import org.ggp.base.util.statemachine.MachineState;

@@ -1,10 +1,11 @@
-package fftlib.GGP;
+package fftlib.GGPAutogen;
 
 import fftlib.FFT;
 import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
 import misc.Config;
+
 import org.ggp.base.util.files.FileUtils;
 import org.ggp.base.util.game.Game;
 import org.ggp.base.util.gdl.grammar.Gdl;
@@ -19,6 +20,7 @@ import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 import org.ggp.base.validator.StaticValidator;
 import org.ggp.base.validator.ValidatorException;
 
+
 import java.io.File;
 import java.util.*;
 
@@ -32,7 +34,7 @@ public class Runner {
     private static HashMap<MachineState, GGPMapping> strategy;
     private static FFT fft;
     private static RuleGroup rg;
-    private static Role xrole, orole;
+    private static Role p1Role, p2Role;
     private static Move noop;
     private static StateMachine sm;
 
@@ -48,13 +50,13 @@ public class Runner {
 
         String filename;
         // TODO - input to program
-        String base_path = "src/fftlib/GGP/games/";
+        String base_path = "src/fftlib/GGPAutogen/games/";
         if (simpleTicTacToe)
             filename = "tictactoe_simple.kif";
         else
             filename = "tictactoe.kif";
 
-        //filename = "sum15.kif";
+        filename = "kulibrat_3x3.kif";
 
 
         String rawSheet = FileUtils.readFileAsString(new File(base_path + filename));
@@ -74,8 +76,8 @@ public class Runner {
         List<Gdl> rules = theGame.getRules();
         FFTManager.initialize(rules);
         sm = FFTManager.sm;
-        xrole = FFTManager.xrole;
-        orole = FFTManager.orole;
+        p1Role = FFTManager.p1role;
+        p2Role = FFTManager.p2role;
         noop = FFTManager.noop;
         System.out.println("Gdl rules validated. Autogenerating FFT");
 
@@ -135,9 +137,9 @@ public class Runner {
         for (Map.Entry<MachineState, GGPMapping> entry : lookupTable.entrySet()) {
             MachineState state = entry.getKey();
             GGPMapping mapping = entry.getValue();
-            if (perspective == PLAYER1 && !mapping.getRole().equals(xrole))
+            if (perspective == PLAYER1 && !mapping.getRole().equals(p1Role))
                 continue;
-            else if (perspective == PLAYER2 && !mapping.getRole().equals(orole))
+            else if (perspective == PLAYER2 && !mapping.getRole().equals(p2Role))
                 continue;
 
             boolean threshold = false;
@@ -149,10 +151,10 @@ public class Runner {
                     threshold = mapping.getWinner() == PLAYER2 || winner == mapping.getWinner();
                     break;
                 case PLAYER_ANY:
-                    if (mapping.getRole().equals(xrole) && (mapping.getWinner() == PLAYER1 || mapping.getWinner() == PLAYER_NONE))
+                    if (mapping.getRole().equals(p1Role) && (mapping.getWinner() == PLAYER1 || mapping.getWinner() == PLAYER_NONE))
                         threshold = true;
 
-                    else if (mapping.getRole().equals(orole) &&
+                    else if (mapping.getRole().equals(p2Role) &&
                             (mapping.getWinner() == PLAYER2 || mapping.getWinner() == PLAYER_NONE))
                         threshold = true;
                     break;
