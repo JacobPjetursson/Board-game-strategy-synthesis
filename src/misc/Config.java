@@ -31,7 +31,7 @@ public class Config {
     // PREFERENCES / CUSTOMIZATION
     // GAMES
     public static final int KULIBRAT = 0;
-    public static int SCORELIMIT; // Set by player once (kulibrat)
+    public static int SCORELIMIT = 1; // Set by player once (kulibrat)
     public static boolean USE_AUTOGEN = true;
     public static int AUTOGEN_PERSPECTIVE = PLAYER1;
     public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";
@@ -41,7 +41,7 @@ public class Config {
     public static int CURRENT_GAME;
 
     // BOARD CONFIG
-    public static final int kuliBHeight = 4;
+    public static final int kuliBHeight = 3;
     public static final int kuliBWidth = 3;
 
     public static boolean RANDOM_RULE_ORDERING = false;

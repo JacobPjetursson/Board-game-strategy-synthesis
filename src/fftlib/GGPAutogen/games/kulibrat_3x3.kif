@@ -115,19 +115,52 @@
     (true (cell ?x ?y ?p))
     (different_cells ?x ?y ?x1 ?y1))
 
-; NOOPS CHANGE NOTHING
+; Noop when in control changes nothing
 (<= (next (cell ?x ?y ?p))
     (does ?player noop)
     (true (control ?player))
     (true (cell ?x ?y ?p)))
 
+(<= (next (pieces_left ?player ?y))
+    (does ?player noop)
+    (true (control ?player))
+    (true (pieces_left ?player ?y)))
+
+(<= (next (pieces_left ?player ?y))
+    (does blackplayer noop)
+    (does redplayer noop)
+    (true (pieces_left ?player ?y)))
+
+; Score can only be changed when removing piece
 (<= (next (score ?player ?y))
     (does ?player noop)
     (true (score ?player ?y)))
 
+; Noop should persist pieces_left, but only if it is not changed by opponent move
+(<= (next (pieces_left redplayer ?y))
+    (true (pieces_left redplayer ?y))
+    (does redplayer noop)
+    (does blackplayer (move black ?x1 ?y1 ?x2 ?y2))
+    (not (true (cell ?x2 ?y2 red))))
+
+(<= (next (pieces_left blackplayer ?y))
+    (true (pieces_left blackplayer ?y))
+    (does blackplayer noop)
+    (does redplayer (move red ?x1 ?y1 ?x2 ?y2))
+    (not (true (cell ?x2 ?y2 black))))
+
+(<= (next (pieces_left ?player ?y))
+    (true (pieces_left ?player ?y))
+    (does ?player noop)
+    (opponent ?player ?opponent)
+    (does ?opponent (add ?p ?x1 ?y1)))
+
 (<= (next (pieces_left ?player ?y))
     (does ?player noop)
+    (opponent ?player ?opponent)
+    (does ?opponent (remove ?p ?x1 ?y1))
     (true (pieces_left ?player ?y)))
+
 
 ; CONTROL TRANSFER
 (<= (next (control redplayer))
@@ -228,7 +261,7 @@
 
 (<= (legal_add ?player ?piece ?u ?v)
     (piece_owner ?piece ?player)
-    (distinct (pieces_left ?player) 0)
+    (not (true(pieces_left ?player 0)))
     (add_piece ?player ?u ?v))
 
 (<= (add_piece redplayer ?u 3)

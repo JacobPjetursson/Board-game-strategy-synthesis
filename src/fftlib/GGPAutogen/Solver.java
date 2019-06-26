@@ -2,6 +2,8 @@ package fftlib.GGPAutogen;
 
 
 import fftlib.FFTManager;
+import kulibrat.game.State;
+import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
@@ -10,8 +12,10 @@ import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+
+import static misc.Config.PLAYER1;
+import static misc.Config.PLAYER2;
 
 
 public class Solver {
@@ -21,6 +25,8 @@ public class Solver {
     private static StateMachine sm;
     private static Role p1Role, p2Role, solverRole;
     private static Move noop;
+
+    private static int maxSentences; // for test purposes
 
 
     public Solver() {
@@ -46,6 +52,7 @@ public class Solver {
         System.out.println("Solving the game");
         long timeStart = System.currentTimeMillis();
         boolean done = false;
+        maxSentences = sm.getInitialState().getContents().size();
         int doneCounter = 0;
         while (!done) {
             int prevSize = lookupTable.size();
@@ -69,6 +76,100 @@ public class Solver {
         return lookupTable;
     }
 
+    private boolean testGameRules(MachineState state) throws MoveDefinitionException {
+        State testState = new State();
+        for (GdlSentence sentence : state.getContents()) {
+            String s = sentence.toString();
+            if (s.contains("pieces_left redplayer ")) {
+                String pieces_red = Character.toString(s.split("pieces_left redplayer ")[1].charAt(0));
+                testState.setUnplaced(PLAYER1, Integer.parseInt(pieces_red));
+            }
+            else if (s.contains("pieces_left blackplayer ")) {
+                String pieces_black = Character.toString(s.split("pieces_left blackplayer ")[1].charAt(0));
+                testState.setUnplaced(PLAYER1, Integer.parseInt(pieces_black));
+            }
+            else if (s.contains("score redplayer ")) {
+                String score_red = Character.toString(s.split("score redplayer ")[1].charAt(0));
+                testState.setScore(PLAYER1, Integer.parseInt(score_red));
+            }
+            else if (s.contains("score blackplayer ")) {
+                String score_black = Character.toString(s.split("score blackplayer ")[1].charAt(0));
+                testState.setScore(PLAYER1, Integer.parseInt(score_black));
+            }
+            else if (s.contains("control redplayer")) {
+                testState.setTurn(PLAYER1);
+            }
+            else if (s.contains("control blackplayer")) {
+                testState.setTurn(PLAYER2);
+            }
+            else if (s.contains("cell ")) {
+                String cellInfo = s.split("cell ")[1];
+                String col = Character.toString(cellInfo.charAt(0));
+                String row = Character.toString(cellInfo.charAt(2));
+                String team = cellInfo.substring(4);
+                if (team.startsWith("red"))
+                    testState.setBoardEntry(Integer.parseInt(row) - 1, Integer.parseInt(col) - 1, PLAYER1);
+                else if (team.startsWith("black"))
+                    testState.setBoardEntry(Integer.parseInt(row) - 1, Integer.parseInt(col) - 1, PLAYER2);
+            }
+        }
+        List<Move> legalMoves = sm.getLegalMoves(state, FFTManager.getStateRole(state));
+        Set<kulibrat.game.Move> kMoves = new HashSet<>();
+        for (Move move : legalMoves) {
+            String m = move.toString();
+            if (m.contains("add black ")) {
+                String add = m.split("add black ")[1];
+                int newCol = Integer.parseInt(Character.toString(add.charAt(0))) - 1;
+                int newRow = Integer.parseInt(Character.toString(add.charAt(2))) - 1;
+                kMoves.add(new kulibrat.game.Move(-1, -1, newRow, newCol, PLAYER2));
+            }
+            else if (m.contains("add red ")) {
+                String add = m.split("add red ")[1];
+                int newCol = Integer.parseInt(Character.toString(add.charAt(0))) - 1;
+                int newRow = Integer.parseInt(Character.toString(add.charAt(2))) - 1;
+                kMoves.add(new kulibrat.game.Move(-1, -1, newRow, newCol, PLAYER1));
+            }
+            else if (m.contains("remove black ")) {
+                String remove = m.split("remove black ")[1];
+                int oldCol = Integer.parseInt(Character.toString(remove.charAt(0))) - 1;
+                int oldRow = Integer.parseInt(Character.toString(remove.charAt(2))) - 1;
+                kMoves.add(new kulibrat.game.Move(oldRow, oldCol, -1, -1, PLAYER2));
+            }
+            else if (m.contains("remove red ")) {
+                String remove = m.split("remove red ")[1];
+                int oldCol = Integer.parseInt(Character.toString(remove.charAt(0))) - 1;
+                int oldRow = Integer.parseInt(Character.toString(remove.charAt(2))) - 1;
+                kMoves.add(new kulibrat.game.Move(oldRow, oldCol, -1, -1, PLAYER1));
+            }
+            else if (m.contains("move black ")) {
+                String moveStr = m.split("move black ")[1];
+                int oldCol = Integer.parseInt(Character.toString(moveStr.charAt(0))) - 1;
+                int oldRow = Integer.parseInt(Character.toString(moveStr.charAt(2))) - 1;
+                int newCol = Integer.parseInt(Character.toString(moveStr.charAt(4))) - 1;
+                int newRow = Integer.parseInt(Character.toString(moveStr.charAt(6))) - 1;
+                kMoves.add(new kulibrat.game.Move(oldRow, oldCol, newRow, newCol, PLAYER2));
+            } else if (m.contains("move red ")) {
+                String moveStr = m.split("move red ")[1];
+                int oldCol = Integer.parseInt(Character.toString(moveStr.charAt(0))) - 1;
+                int oldRow = Integer.parseInt(Character.toString(moveStr.charAt(2))) - 1;
+                int newCol = Integer.parseInt(Character.toString(moveStr.charAt(4))) - 1;
+                int newRow = Integer.parseInt(Character.toString(moveStr.charAt(6))) - 1;
+                kMoves.add(new kulibrat.game.Move(oldRow, oldCol, newRow, newCol, PLAYER1));
+            }
+        }
+        HashSet<kulibrat.game.Move> moveSet = new HashSet<>(testState.getLegalMoves());
+        if (!kMoves.equals(moveSet)) {
+            System.out.println("ERROR");
+            System.out.println("MACHINESTATE: " + state);
+            System.out.println("TESTSTATE: " + testState);
+            System.out.println("MACHINESTATE MOVES: " + legalMoves);
+            System.out.println("Translated moves: " + kMoves);
+            System.out.println("legal moves: " + testState.getLegalMoves());
+            System.out.println();
+        }
+        return true;
+    }
+
     // Is called for every depth limit of the iterative deepening function. Classic minimax with no pruning
     private GGPMapping minimax(MachineState state, int depth) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
         // TODO - crucial to speed up this process
@@ -84,7 +185,10 @@ public class Solver {
             return mapping;
         }
         boolean evaluated = true;
-        if (depth == 8) {
+
+        boolean debug = false;
+
+        if (debug) {
             System.out.println();
             System.out.println("STATE: " + state);
             System.out.println("STATEROLE: " + stateRole);
@@ -95,7 +199,12 @@ public class Solver {
 
         for (Move move : sm.getLegalMoves(state, stateRole)) {
             MachineState child = FFTManager.getNextState(state, move);
-            if (depth == 8) System.out.println("CHILD: " + child);
+            if (!testGameRules(child)) {
+                System.out.println("STATE: " + state);
+                System.out.print("LEGAL MOVES: ");
+                System.out.println(sm.getLegalMoves(state, stateRole));
+                System.out.println("CHILD: " + child);
+            }
             score = minimax(child, depth - 1).score;
             if (score > 1000) score--;
             else {

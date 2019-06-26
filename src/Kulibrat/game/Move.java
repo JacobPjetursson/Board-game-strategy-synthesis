@@ -83,7 +83,7 @@ public class Move implements FFTMove {
 
     @Override
     public String toString() {
-        return String.format("OLDROW: %s, OLDCOL: %s, NEWROW: %s, NEWCOL: %s, TEAM: %s",
+        return String.format("(OLDROW: %s, OLDCOL: %s, NEWROW: %s, NEWCOL: %s, TEAM: %s)",
                 oldRow, oldCol, newRow, newCol, team);
     }
 

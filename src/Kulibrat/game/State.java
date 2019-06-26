@@ -168,12 +168,12 @@ public class State implements Serializable, FFTState {
         scoreLimit = sl;
     }
 
-    void addUnPlaced(int team) {
+    public void addUnPlaced(int team) {
         if (team == PLAYER1) unplacedRed++;
         else unplacedBlack++;
     }
 
-    void removeUnPlaced(int team) {
+    public void removeUnPlaced(int team) {
         if (team == PLAYER1) unplacedRed--;
         else unplacedBlack--;
     }
@@ -181,6 +181,13 @@ public class State implements Serializable, FFTState {
     public int getUnplaced(int team) {
         if (team == PLAYER1) return unplacedRed;
         else return unplacedBlack;
+    }
+
+    public void setUnplaced(int team, int unplaced) {
+        if (team == PLAYER1)
+            unplacedRed = unplaced;
+        else
+            unplacedBlack = unplaced;
     }
 
     // Get a list of pieces/points from this state
