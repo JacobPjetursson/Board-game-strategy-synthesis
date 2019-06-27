@@ -61,7 +61,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public String getFFTFilePath() {
-        return "tictactoeFFT.txt";
+        return "tictactoe_GGP_FFT.txt";
     }
 
     @Override

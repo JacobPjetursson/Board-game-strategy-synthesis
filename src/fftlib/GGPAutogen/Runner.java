@@ -39,7 +39,7 @@ public class Runner {
     private static StateMachine sm;
 
     // CONFIGURATION
-    private static int perspective = PLAYER1;
+    private static int perspective;
     private static int winner;
     private static boolean detailedDebug = true;
     private static boolean fullRules = false; // mainly for debug
@@ -56,7 +56,8 @@ public class Runner {
         else
             filename = "tictactoe.kif";
 
-        filename = "kulibrat_3x3.kif";
+        //filename = "kulibrat_3x3_simple.kif";
+        perspective = PLAYER1;
 
 
         String rawSheet = FileUtils.readFileAsString(new File(base_path + filename));

@@ -76,6 +76,71 @@ public class Solver {
         return lookupTable;
     }
 
+    // Is called for every depth limit of the iterative deepening function. Classic minimax with no pruning
+    private GGPMapping minimax(MachineState state, int depth) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
+        // TODO - crucial to speed up this process
+        Move bestMove = null;
+        Role stateRole = getStateRole(state); // TODO - scale to other games and more than 2 players
+        int bestScore = (stateRole.equals(solverRole)) ? Integer.MIN_VALUE : Integer.MAX_VALUE; // TODO - same as above
+        int score;
+        if (sm.isTerminal(state) || depth == 0) {
+            return new GGPMapping(bestMove, heuristic(state), depth, stateRole);
+        }
+        GGPMapping mapping = lookupTable.get(state);
+        if (mapping != null && depth <= mapping.depth) {
+            return mapping;
+        }
+        boolean evaluated = true;
+
+        boolean debug = false;
+        if (debug) {
+            testGameRules(state);
+        }
+
+
+        for (Move move : sm.getLegalMoves(state, stateRole)) {
+            MachineState child = FFTManager.getNextState(state, move);
+            score = minimax(child, depth - 1).score;
+            if (score > 1000) score--;
+            else {
+                score++;
+                evaluated = false;
+            }
+
+            if (stateRole.equals(solverRole)) {
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = move;
+                }
+            } else {
+                if (score < bestScore) {
+                    bestScore = score;
+                    bestMove = move;
+                }
+            }
+        }
+        if (mapping == null || depth > mapping.depth) {
+            lookupTable.put(state,
+                    new GGPMapping(bestMove, bestScore, depth, stateRole));
+        }
+        if (!evaluated) unevaluatedNodes++;
+        return new GGPMapping(bestMove, bestScore, depth, stateRole);
+    }
+
+    // Heuristic function which values a win with 2000, and -2000 for a loss. All other nodes are 0
+    private int heuristic(MachineState state) throws GoalDefinitionException {
+        if (sm.isTerminal(state)) {
+            List<Role> winners = FFTManager.getWinners(state);
+            if (winners.size() == sm.getRoles().size())
+                return 0;
+            if (winners.contains(solverRole)) // TODO - scale to several players
+                return 2000;
+            else
+                return -2000;
+        }
+        return 0;
+    }
+
     private boolean testGameRules(MachineState state) throws MoveDefinitionException {
         State testState = new State();
         for (GdlSentence sentence : state.getContents()) {
@@ -86,7 +151,7 @@ public class Solver {
             }
             else if (s.contains("pieces_left blackplayer ")) {
                 String pieces_black = Character.toString(s.split("pieces_left blackplayer ")[1].charAt(0));
-                testState.setUnplaced(PLAYER1, Integer.parseInt(pieces_black));
+                testState.setUnplaced(PLAYER2, Integer.parseInt(pieces_black));
             }
             else if (s.contains("score redplayer ")) {
                 String score_red = Character.toString(s.split("score redplayer ")[1].charAt(0));
@@ -158,92 +223,17 @@ public class Solver {
             }
         }
         HashSet<kulibrat.game.Move> moveSet = new HashSet<>(testState.getLegalMoves());
-        if (!kMoves.equals(moveSet)) {
+        if (maxSentences != state.getContents().size() || !kMoves.equals(moveSet)) {
             System.out.println("ERROR");
             System.out.println("MACHINESTATE: " + state);
             System.out.println("TESTSTATE: " + testState);
+            System.out.println("TESTSTATE PIECES LEFT: " + testState.getUnplaced(PLAYER1) + " " + testState.getUnplaced(PLAYER2));
             System.out.println("MACHINESTATE MOVES: " + legalMoves);
             System.out.println("Translated moves: " + kMoves);
             System.out.println("legal moves: " + testState.getLegalMoves());
             System.out.println();
         }
         return true;
-    }
-
-    // Is called for every depth limit of the iterative deepening function. Classic minimax with no pruning
-    private GGPMapping minimax(MachineState state, int depth) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
-        // TODO - crucial to speed up this process
-        Move bestMove = null;
-        Role stateRole = getStateRole(state); // TODO - scale to other games and more than 2 players
-        int bestScore = (stateRole.equals(solverRole)) ? Integer.MIN_VALUE : Integer.MAX_VALUE; // TODO - same as above
-        int score;
-        if (sm.isTerminal(state) || depth == 0) {
-            return new GGPMapping(bestMove, heuristic(state), depth, stateRole);
-        }
-        GGPMapping mapping = lookupTable.get(state);
-        if (mapping != null && depth <= mapping.depth) {
-            return mapping;
-        }
-        boolean evaluated = true;
-
-        boolean debug = false;
-
-        if (debug) {
-            System.out.println();
-            System.out.println("STATE: " + state);
-            System.out.println("STATEROLE: " + stateRole);
-            System.out.print("LEGAL MOVES: ");
-            System.out.println(sm.getLegalMoves(state, stateRole));
-        }
-
-
-        for (Move move : sm.getLegalMoves(state, stateRole)) {
-            MachineState child = FFTManager.getNextState(state, move);
-            if (!testGameRules(child)) {
-                System.out.println("STATE: " + state);
-                System.out.print("LEGAL MOVES: ");
-                System.out.println(sm.getLegalMoves(state, stateRole));
-                System.out.println("CHILD: " + child);
-            }
-            score = minimax(child, depth - 1).score;
-            if (score > 1000) score--;
-            else {
-                score++;
-                evaluated = false;
-            }
-
-            if (stateRole.equals(solverRole)) {
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestMove = move;
-                }
-            } else {
-                if (score < bestScore) {
-                    bestScore = score;
-                    bestMove = move;
-                }
-            }
-        }
-        if (mapping == null || depth > mapping.depth) {
-            lookupTable.put(state,
-                    new GGPMapping(bestMove, bestScore, depth, stateRole));
-        }
-        if (!evaluated) unevaluatedNodes++;
-        return new GGPMapping(bestMove, bestScore, depth, stateRole);
-    }
-
-    // Heuristic function which values a win with 2000, and -2000 for a loss. All other nodes are 0
-    private int heuristic(MachineState state) throws GoalDefinitionException {
-        if (sm.isTerminal(state)) {
-            List<Role> winners = FFTManager.getWinners(state);
-            if (winners.size() == sm.getRoles().size())
-                return 0;
-            if (winners.contains(solverRole)) // TODO - scale to several players
-                return 2000;
-            else
-                return -2000;
-        }
-        return 0;
     }
 
 }

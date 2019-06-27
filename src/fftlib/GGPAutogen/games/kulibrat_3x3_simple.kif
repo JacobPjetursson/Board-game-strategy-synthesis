@@ -1,3 +1,5 @@
+; Kulibrat but without vertical moves, board capture and piece limit
+
 ; CONFIGURATION
 (score_limit 1)
 
@@ -23,8 +25,6 @@
 (init (control redplayer))
 (init (score redplayer 0))
 (init (score blackplayer 0))
-(init (pieces_left redplayer 4))
-(init (pieces_left blackplayer 4))
 
 ; End initial state
 
@@ -55,36 +55,6 @@
     (does ?player (remove ?p ?u ?v))
     (true (score ?player ?x))
     (succ ?x ?y))
-
-; DECREMENT PIECES_LEFT
-(<= (next (pieces_left ?player ?y))
-    (does ?player (add ?p ?u ?v))
-    (true (pieces_left ?player ?x))
-    (succ ?y ?x))
-
-; INCREMENT PIECES_LEFT
-(<= (next (pieces_left ?player ?y))
-    (does ?player (remove ?p ?u ?v))
-    (true (pieces_left ?player ?x))
-    (succ ?x ?y))
-
-; PIECE INCREMENTED WHEN CAPTURING
-(<= (next (pieces_left redplayer ?a))
-    (does blackplayer (move ?p ?u ?v ?x ?y))
-    (true (cell ?x ?y red))
-    (true (pieces_left redplayer ?b))
-    (succ ?b ?a))
-
-(<= (next (pieces_left blackplayer ?a))
-    (does redplayer (move ?p ?u ?v ?x ?y))
-    (true (cell ?x ?y black))
-    (true (pieces_left blackplayer ?b))
-    (succ ?b ?a))
-
-; PIECES_LEFT STATIC
-(<= (next (pieces_left ?player ?y))
-    (does ?player (move ?piece ?x1 ?y1 ?x2 ?y2))
-    (true (pieces_left ?player ?y)))
 
 ; SCORE STATIC
 (<= (next (score ?player ?y))
@@ -121,46 +91,10 @@
     (true (control ?player))
     (true (cell ?x ?y ?p)))
 
-(<= (next (pieces_left ?player ?y))
-    (does ?player noop)
-    (true (control ?player))
-    (true (pieces_left ?player ?y)))
-
-(<= (next (pieces_left ?player ?y))
-    (does blackplayer noop)
-    (does redplayer noop)
-    (true (pieces_left ?player ?y)))
-
 ; Score can only be changed when removing piece
 (<= (next (score ?player ?y))
     (does ?player noop)
     (true (score ?player ?y)))
-
-; Noop should persist pieces_left, but only if it is not changed by opponent move
-(<= (next (pieces_left redplayer ?y))
-    (true (pieces_left redplayer ?y))
-    (does redplayer noop)
-    (does blackplayer (move black ?x1 ?y1 ?x2 ?y2))
-    (not (true (cell ?x2 ?y2 red))))
-
-(<= (next (pieces_left blackplayer ?y))
-    (true (pieces_left blackplayer ?y))
-    (does blackplayer noop)
-    (does redplayer (move red ?x1 ?y1 ?x2 ?y2))
-    (not (true (cell ?x2 ?y2 black))))
-
-(<= (next (pieces_left ?player ?y))
-    (true (pieces_left ?player ?y))
-    (does ?player noop)
-    (opponent ?player ?opponent)
-    (does ?opponent (add ?p ?x1 ?y1)))
-
-(<= (next (pieces_left ?player ?y))
-    (does ?player noop)
-    (opponent ?player ?opponent)
-    (does ?opponent (remove ?p ?x1 ?y1))
-    (true (pieces_left ?player ?y)))
-
 
 ; CONTROL TRANSFER
 (<= (next (control redplayer))
@@ -204,32 +138,6 @@
 (<= (diagonal_move blackplayer ?u ?v ?x ?y)
     (clear_diagonal_sw ?u ?v ?x ?y))
 
-;; VERTICAL MOVE
-(<= (legal_move ?player ?piece ?u ?v ?x ?y)
-    (piece_owner ?piece ?player)
-    (true (cell ?u ?v ?piece))
-    (vertical_move ?player ?u ?v ?x ?y))
-
-(<= (vertical_move redplayer ?u ?v ?x ?y)
-    (north_of ?y ?v)
-    (eq ?u ?x)
-    (true (cell ?x ?y black)))
-
-(<= (vertical_move blackplayer ?u ?v ?x ?y)
-    (south_of ?y ?v)
-    (eq ?u ?x)
-    (true (cell ?x ?y red)))
-
-; Jump over a single piece
-(<= (vertical_move redplayer ?u 3 ?x 1)
-    (eq ?u ?x)
-    (true (cell ?u 1 b))
-    (true (cell ?u 2 black)))
-
-(<= (vertical_move blackplayer ?u 1 ?x 3)
-    (eq ?u ?x)
-    (true (cell ?u 3 b))
-    (true (cell ?u 2 red)))
 
 ;; REMOVE PIECE
 
@@ -244,26 +152,10 @@
 (<= (remove_piece blackplayer ?u 3)
     (true (cell ?u 3 black)))
 
-; Jumping over enemies and removing piece
-(<= (remove_piece redplayer ?u 3)
-    (true (cell ?u 2 black))
-    (true (cell ?u 1 black)))
-
-(<= (remove_piece redplayer ?u 2)
-    (true (cell ?u 1 black)))
-
-(<= (remove_piece blackplayer ?u 1)
-    (true (cell ?u 2 red))
-    (true (cell ?u 3 red)))
-
-(<= (remove_piece blackplayer ?u 2)
-    (true (cell ?u 3 red)))
-
 ;; ADD PIECE
 
 (<= (legal_add ?player ?piece ?u ?v)
     (piece_owner ?piece ?player)
-    (not (true(pieces_left ?player 0)))
     (add_piece ?player ?u ?v))
 
 (<= (add_piece redplayer ?u 3)
@@ -424,7 +316,3 @@
 (succ 1 2)
 (succ 2 3)
 (succ 3 4)
-
-(eq 1 1)
-(eq 2 2)
-(eq 3 3)
