@@ -91,6 +91,7 @@ public class FFTManager {
         p1role = FFTManager.sm.getRoles().get(0);
         p2role = FFTManager.sm.getRoles().get(1);
         noop = new Move(GdlPool.getConstant("noop"));
+        MAX_PRECONS = sm.getInitialState().getContents().size();
     }
 
     /* BELOW FUNCTIONS SHOULD ALL BE IN A SUBCLASS OF MACHINESTATE, OR SIMILAR! */

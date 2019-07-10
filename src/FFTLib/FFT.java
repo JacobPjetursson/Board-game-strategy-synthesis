@@ -2,7 +2,10 @@ package fftlib;
 
 import fftlib.GGPAutogen.Database;
 import fftlib.GGPAutogen.GGPMapping;
+import fftlib.game.FFTMove;
+import fftlib.game.FFTState;
 import fftlib.game.FFTStateAndMove;
+import fftlib.game.FFTStateMapping;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
@@ -134,6 +137,7 @@ public class FFT {
         return true;
     }
 */
+
     public boolean verify(int team, boolean complete, HashMap<MachineState, GGPMapping> strategy) throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
         if (team == PLAYER_ANY)
             return verify(PLAYER1, complete, strategy) && verify(PLAYER2, complete, strategy);
@@ -230,6 +234,7 @@ public class FFT {
         return true;
     }
 
+
     public Move apply(MachineState state) throws MoveDefinitionException {
         for (RuleGroup ruleGroup : ruleGroups) {
             for (Rule rule : ruleGroup.rules) {
@@ -241,7 +246,19 @@ public class FFT {
         }
         return null;
     }
-
+/*
+    public FFTMove apply(FFTState state) {
+        for (RuleGroup rg : ruleGroups) {
+            for (Rule r : rg.rules) {
+                FFTMove m = r.apply(state);
+                if (m != null) {
+                    return m;
+                }
+            }
+        }
+        return null;
+    }
+    */
     public int getAmountOfRules() {
         int ruleSize = 0;
         for (RuleGroup rg : ruleGroups) {

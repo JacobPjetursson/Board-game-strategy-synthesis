@@ -83,6 +83,12 @@ public class Rule {
         actionStr = "";
     }
 
+    public Rule(Set<GdlSentence> sentences) {
+        this.multiRule = false;
+        this.sentences = sentences;
+        //this.transformedSentences = getTransformedSentences();
+    }
+
     // Duplicate constructor
     public Rule(Rule duplicate) {
         this.multiRule = duplicate.multiRule;
@@ -151,7 +157,7 @@ public class Rule {
     }
 
     public void setMove(Move m) {
-        this.move = move;
+        this.move = m;
     }
 
     public void setPreconditions(Clause c) {

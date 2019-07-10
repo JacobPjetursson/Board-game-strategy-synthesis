@@ -9,7 +9,10 @@ import misc.Config;
 import org.ggp.base.util.files.FileUtils;
 import org.ggp.base.util.game.Game;
 import org.ggp.base.util.gdl.grammar.Gdl;
+import org.ggp.base.util.gdl.grammar.GdlConstant;
+import org.ggp.base.util.gdl.grammar.GdlRule;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
+import org.ggp.base.util.prover.aima.knowledge.KnowledgeBase;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
@@ -56,7 +59,8 @@ public class Runner {
         else
             filename = "tictactoe.kif";
 
-        //filename = "kulibrat_3x3_simple.kif";
+        //filename = "kulibrat_3x3.kif";
+        //filename = "nim.kif";
         perspective = PLAYER1;
 
 
@@ -81,7 +85,7 @@ public class Runner {
         p2Role = FFTManager.p2role;
         noop = FFTManager.noop;
         System.out.println("Gdl rules validated. Autogenerating FFT");
-
+        
         setup();
     }
 
@@ -212,11 +216,6 @@ public class Runner {
     private static void makeRules() throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
         while (!states.isEmpty()) {
 
-            if (detailedDebug && !fft.verify(perspective, false)) { // TODO - ONLY FOR TESTING, remove after!
-                System.out.println("ERROR, PARTIAL VERIFICATION FAILED!");
-                return;
-            }
-
             System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + rg.rules.size());
             MachineState state = states.iterator().next();
             Rule r = addRule(state);
@@ -263,8 +262,7 @@ public class Runner {
 
         Rule r;
         if (try_all_combinations) {
-            r = new Rule();
-            r.setSentences(minSet);
+            r = new Rule(minSet);
         } else {
             r = new Rule(minSet, bestMove);
         }
@@ -344,8 +342,9 @@ public class Runner {
             it.add(s);
             r.addPrecondition(s);
 
-            if (bestPath.size() >= FFTManager.MAX_PRECONS) // Everything removed, no better path exists
+            if (bestPath.size() >= FFTManager.MAX_PRECONS) { // Everything removed, no better path exists
                 break;
+            }
         }
         return bestPath;
     }

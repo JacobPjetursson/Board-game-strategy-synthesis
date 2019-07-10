@@ -4,6 +4,7 @@ package fftlib.GGPAutogen;
 import fftlib.FFTManager;
 import kulibrat.game.State;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
+import org.ggp.base.util.prover.aima.knowledge.KnowledgeBase;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
@@ -20,7 +21,7 @@ import static misc.Config.PLAYER2;
 
 public class Solver {
     private static int CURR_MAX_DEPTH;
-    private static int unevaluatedNodes = 0;
+    private static int winNodes, drawNodes, lossNodes;
     private static HashMap<MachineState, GGPMapping> lookupTable;
     private static StateMachine sm;
     private static Role p1Role, p2Role, solverRole;
@@ -56,19 +57,22 @@ public class Solver {
         int doneCounter = 0;
         while (!done) {
             int prevSize = lookupTable.size();
-            int prevUnevaluatedNodes = unevaluatedNodes;
-            unevaluatedNodes = 0;
+            int prevWinNodes = winNodes;
+            int prevDrawNodes = drawNodes;
+            int prevLossNodes = lossNodes;
+            winNodes = 0;
+            drawNodes = 0;
+            lossNodes = 0;
             CURR_MAX_DEPTH += 1;
             System.out.println("Minimax iterative depth: " + CURR_MAX_DEPTH + ". Size of solution: " + lookupTable.size());
             MachineState initialState = sm.getInitialState();
             minimax(initialState.clone(), CURR_MAX_DEPTH);
 
 
-            if (lookupTable.size() == prevSize && unevaluatedNodes == prevUnevaluatedNodes) {
-                doneCounter++;
-            } else
-                doneCounter = 0;
-            if (doneCounter == 2) done = true;
+            if (lookupTable.size() == prevSize &&
+                    prevWinNodes == winNodes && prevDrawNodes == drawNodes && prevLossNodes == lossNodes) {
+                done = true;
+            }
         }
 
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
@@ -90,7 +94,6 @@ public class Solver {
         if (mapping != null && depth <= mapping.depth) {
             return mapping;
         }
-        boolean evaluated = true;
 
         boolean debug = false;
         if (debug) {
@@ -101,11 +104,10 @@ public class Solver {
         for (Move move : sm.getLegalMoves(state, stateRole)) {
             MachineState child = FFTManager.getNextState(state, move);
             score = minimax(child, depth - 1).score;
-            if (score > 1000) score--;
-            else {
+            if (score > 1000)
+                score--;
+            else
                 score++;
-                evaluated = false;
-            }
 
             if (stateRole.equals(solverRole)) {
                 if (score > bestScore) {
@@ -123,7 +125,14 @@ public class Solver {
             lookupTable.put(state,
                     new GGPMapping(bestMove, bestScore, depth, stateRole));
         }
-        if (!evaluated) unevaluatedNodes++;
+        if (bestScore > 1000) {
+            winNodes++;
+        } else {
+            if (bestScore < -1000)
+                lossNodes++;
+            else
+                drawNodes++;
+        }
         return new GGPMapping(bestMove, bestScore, depth, stateRole);
     }
 

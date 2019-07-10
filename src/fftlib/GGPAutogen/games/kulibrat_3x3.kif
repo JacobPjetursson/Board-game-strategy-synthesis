@@ -7,7 +7,6 @@
 
 ;*******************************************************************************
 ;* Initial state.                                                              *
-;* Letters are columns: row 3 is RED side, row 1 is BLACK                      *
 ;*******************************************************************************
 
 (init (cell 1 1 b))
@@ -244,7 +243,7 @@
 (<= (remove_piece blackplayer ?u 3)
     (true (cell ?u 3 black)))
 
-; Jumping over enemies and removing piece
+; Jumping over enemies and removing piece (hardcoded)
 (<= (remove_piece redplayer ?u 3)
     (true (cell ?u 2 black))
     (true (cell ?u 1 black)))
@@ -321,6 +320,7 @@
     (opponent ?player ?opponent)
     (piece_owner ?piece ?opponent))
 
+; HELPERS FOR CHECKING LEGALITY OF DIAGONAL MOVES
 (<= (clear_diagonal_ne ?u ?v ?x ?y)
     (north_of ?y ?v)
     (east_of ?x ?u))
@@ -341,12 +341,12 @@
 
 ;*******************************************************************************
 ;* GOALS AND TERMINAL STATES                                                   *
-;* Player gets 100 for checkmating the opponent,                               *
-;* 50 for stalemating and 0 for being checkmated.                              *
+;* Player gets 100 for winning                                                 *
+;* There is no draws in kulibrat                                               *
 ;*******************************************************************************
-(<= (scorelimit_reached ?player) ; TODO - make it configurable!
-    (true (score ?player 1)))
-
+(<= (scorelimit_reached ?player)
+    (score_limit ?x)
+    (true (score ?player ?x)))
 
 (<= (goal redplayer 100)
     (scorelimit_reached redplayer))
@@ -388,7 +388,6 @@
     (stuck redplayer)
     (stuck blackplayer))
 
-; End goals and terminals
 ;*******************************************************************************
 ;* GROUND FACTS                                                                *
 ;*******************************************************************************
@@ -419,6 +418,8 @@
 (coordinate 1)
 (coordinate 2)
 (coordinate 3)
+
+; HELPERS
 
 (succ 0 1)
 (succ 1 2)
