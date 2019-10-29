@@ -1,55 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d231265c-f2b3-434a-bf07-784b40a64813" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/FFT.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/FFT.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FFTLib/Action.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/Action.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FFTLib/Clause.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/Clause.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FFTLib/FFT.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/FFT.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FFTLib/FFTManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/FFTManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FFTLib/FFT_Follower.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/FFT_Follower.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FFTLib/Rule.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/Rule.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FFTLib/RuleGroup.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/RuleGroup.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FFTLib/gui/FFTFailurePane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/gui/FFTFailurePane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FFTLib/gui/NoSelectionModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/gui/NoSelectionModel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FFTLib/gui/ShowFFTPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/gui/ShowFFTPane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/ai/AI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/ai/AI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/ai/MCTS/MCTS.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/ai/MCTS/MCTS.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/ai/MCTS/Node.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/ai/MCTS/Node.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/ai/Minimax/LookupTableMinimax.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/ai/Minimax/LookupTableMinimax.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/ai/Minimax/Minimax.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/ai/Minimax/Minimax.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/ai/Minimax/Zobrist.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/ai/Minimax/Zobrist.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/game/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/game/Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/game/Logic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/game/Logic.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/game/Move.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/game/Move.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/game/State.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/game/State.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/game/StateAndMove.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/game/StateAndMove.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/Dialogs/ConfirmDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/Dialogs/ConfirmDialog.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/Dialogs/OverwriteDBDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/Dialogs/OverwriteDBDialog.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/Dialogs/RestartGameDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/Dialogs/RestartGameDialog.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/EndGamePane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/EndGamePane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/NavPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/NavPane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/PlayArea.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/PlayArea.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/PlayPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/PlayPane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/ReviewPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/ReviewPane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/SwapPlayerPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/SwapPlayerPane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/board/Board.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/board/Board.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/board/BoardPiece.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/board/BoardPiece.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/board/BoardTile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/board/BoardTile.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/board/Goal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/board/Goal.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/board/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/board/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/info/InfoPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/info/InfoPane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/info/ScoreBoard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/info/ScoreBoard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/menu/Arrow.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/menu/Arrow.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/menu/MenuPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/menu/MenuPane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/menu/NewGamePane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/menu/NewGamePane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/menu/ReadMePane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/menu/ReadMePane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/gui/menu/RulesPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/menu/RulesPane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/main/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/main/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Kulibrat/misc/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/misc/Database.java" afterDir="false" />
-    </list>
+    <list default="true" id="d231265c-f2b3-434a-bf07-784b40a64813" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -140,13 +92,14 @@
     </entry>
   </component>
   <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="project.structure.last.edited" value="Modules" />
-    <property name="project.structure.proportion" value="0.0" />
-    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RunDashboard">
@@ -161,7 +114,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.GGPAutogen">
+  <component name="RunManager" selected="Application.KulibratFFT">
     <configuration name="GGPAutogen" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="fftlib.GGPAutogen.Runner" />
       <module name="FFT" />
@@ -205,6 +158,16 @@
       <item itemvalue="Application.GGPAutogen" />
     </list>
   </component>
+  <component name="ServiceViewManager">
+    <option name="allServicesViewState">
+      <serviceView>
+        <treeState>
+          <expand />
+          <select />
+        </treeState>
+      </serviceView>
+    </option>
+  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -229,21 +192,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="masterDetails">
-    <states>
-      <state key="ProjectJDKs.UI">
-        <settings>
-          <last-edited>9.0</last-edited>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-    </states>
   </component>
 </project>

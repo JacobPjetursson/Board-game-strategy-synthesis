@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="JUnit">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../ggp-base-master/lib/JUnit/hamcrest-core-1.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../ggp-base-master/lib/JUnit/junit-4.11.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

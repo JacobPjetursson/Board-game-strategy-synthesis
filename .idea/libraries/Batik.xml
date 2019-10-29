@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Batik">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../ggp-base-master/lib/Batik/batik-1.7.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../ggp-base-master/lib/Batik/xml-apis-ext.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
