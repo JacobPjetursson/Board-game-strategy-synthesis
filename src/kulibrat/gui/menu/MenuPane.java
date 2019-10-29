@@ -28,7 +28,7 @@ public class MenuPane extends AnchorPane {
 
         buttons = new ArrayList<>();
 
-        Label title = new Label("Kulibrat");
+        Label title = new Label("kulibrat");
         title.setFont(Font.font("Verdana", FontWeight.BOLD, 50));
         title.setTextFill(Color.WHITE);
         title.setAlignment(Pos.CENTER);

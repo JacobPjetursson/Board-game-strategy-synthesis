@@ -14,7 +14,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Kulibrat");
+        primaryStage.setTitle("kulibrat");
         Config.CURRENT_GAME = Config.KULIBRAT;
         Scene menuScene = new Scene(new MenuPane(this), Config.WIDTH, Config.HEIGHT);
         primaryStage.setScene(menuScene);
