@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="javassist">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../ggp-base-master/lib/javassist/javassist.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

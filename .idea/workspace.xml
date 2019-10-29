@@ -2,7 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d231265c-f2b3-434a-bf07-784b40a64813" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/FFT.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/FFT.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/JFreeChart.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/JUnit.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/forms_1_2_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/gradle_wrapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/htmlparser_1_4.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/htmlparser_1_41.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/javassist.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/reflections_0_9_9_RC1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/reflections_0_9_9_RC11.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -100,7 +106,7 @@
     <property name="aspect.path.notification.shown" value="true" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.last.edited" value="Libraries" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="Errors" />
@@ -199,7 +205,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
