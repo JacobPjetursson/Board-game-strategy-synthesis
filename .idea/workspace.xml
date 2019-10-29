@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d231265c-f2b3-434a-bf07-784b40a64813" name="Default" comment="" />
+    <list default="true" id="d231265c-f2b3-434a-bf07-784b40a64813" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/FFT.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/FFT.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -114,7 +117,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.KulibratFFT">
+  <component name="RunManager" selected="Application.TicTacToeFFT">
     <configuration name="GGPAutogen" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="fftlib.GGPAutogen.Runner" />
       <module name="FFT" />
@@ -125,6 +128,14 @@
     </configuration>
     <configuration name="KulibratFFT" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="kulibrat.main.Main" />
+      <module name="FFT" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_WORKING_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TicTacToeFFT" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="tictactoe.main.Main" />
       <module name="FFT" />
       <option name="WORKING_DIRECTORY" value="$MODULE_WORKING_DIR$" />
       <method v="2">
@@ -155,6 +166,7 @@
     </configuration>
     <list>
       <item itemvalue="Application.KulibratFFT" />
+      <item itemvalue="Application.TicTacToeFFT" />
       <item itemvalue="Application.GGPAutogen" />
     </list>
   </component>
