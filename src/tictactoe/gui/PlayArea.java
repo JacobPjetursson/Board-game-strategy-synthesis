@@ -4,6 +4,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import tictactoe.game.Controller;
 import tictactoe.gui.board.PlayBox.PlayBox;
 
@@ -11,24 +13,19 @@ import static misc.Config.CLICK_DEFAULT;
 import static misc.Config.WIDTH;
 
 
-public class PlayArea extends GridPane {
+public class PlayArea extends HBox {
 
     private InfoPane info;
     private PlayBox playBox;
 
     PlayArea(Controller cont) {
         setPadding(new Insets(10, 10, 10, 10));
+        setSpacing(20);
         setAlignment(Pos.CENTER);
 
         info = new InfoPane(cont.getMode());
-
-        ColumnConstraints column = new ColumnConstraints(WIDTH / 3);
-        for (int i = 0; i < 2; i++)
-            getColumnConstraints().add(column);
-
         playBox = new PlayBox(90, CLICK_DEFAULT, cont);
-        add(playBox, 0, 0);
-        add(info, 1, 0);
+        getChildren().addAll(playBox, info);
     }
 
     public void update(Controller cont) {

@@ -3,10 +3,11 @@ package kulibrat.gui;
 import javafx.geometry.Pos;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import kulibrat.game.Controller;
 import misc.Config;
 
-public class PlayPane extends GridPane {
+public class PlayPane extends HBox {
     private PlayArea playArea;
     private NavPane navPane;
 
@@ -14,8 +15,7 @@ public class PlayPane extends GridPane {
         setup();
         playArea = new PlayArea(cont);
         navPane = new NavPane(cont);
-        add(navPane, 0, 0);
-        add(playArea, 1, 0);
+        getChildren().addAll(navPane, playArea);
     }
 
     private void setup() {
@@ -23,10 +23,6 @@ public class PlayPane extends GridPane {
         setPrefSize(Config.WIDTH, Config.HEIGHT);
         setMaxWidth(Config.WIDTH);
         setStyle("-fx-background-color: rgb(255, 255, 255);");
-        ColumnConstraints column = new ColumnConstraints(Config.WIDTH / 3);
-        ColumnConstraints column1 = new ColumnConstraints((Config.WIDTH * 2) / 3);
-        getColumnConstraints().add(column);
-        getColumnConstraints().add(column1);
     }
 
     public PlayArea getPlayArea() {

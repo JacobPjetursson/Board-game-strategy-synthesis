@@ -3,10 +3,12 @@ package tictactoe.gui;
 import javafx.geometry.Pos;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import misc.Config;
 import tictactoe.game.Controller;
 
-public class PlayPane extends GridPane {
+public class PlayPane extends HBox {
     private PlayArea playArea;
     private NavPane navPane;
 
@@ -14,18 +16,13 @@ public class PlayPane extends GridPane {
         setup();
         playArea = new PlayArea(cont);
         navPane = new NavPane(cont);
-        add(playArea, 1, 0);
-        add(navPane, 0, 0);
+        getChildren().addAll(navPane, playArea);
     }
 
     private void setup() {
         setAlignment(Pos.CENTER);
         setPrefSize(Config.WIDTH, Config.HEIGHT);
         setStyle("-fx-background-color: rgb(255, 255, 255);");
-        ColumnConstraints column = new ColumnConstraints(Config.WIDTH / 3);
-        ColumnConstraints column1 = new ColumnConstraints(Config.WIDTH * 2 / 3);
-        getColumnConstraints().add(column);
-        getColumnConstraints().add(column1);
     }
 
     public PlayArea getPlayArea() {

@@ -1,9 +1,9 @@
 package kulibrat.game;
 
+import fftlib.FFT;
 import fftlib.FFTManager;
 import fftlib.gui.FFTInteractivePane;
 import fftlib.gui.FFTOverviewPane;
-import fftlib.gui.ShowFFTPane;
 import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.scene.Scene;
@@ -54,7 +54,6 @@ public class Controller {
     private Button reviewButton;
     private Button editFFTButton;
     private Button addRuleFFTButton;
-    private Button showFFTButton;
     private CheckBox automaticFFTBox;
     private Button[] swapButtons;
     private CheckBox helpHumanBox;
@@ -72,7 +71,6 @@ public class Controller {
     private FFTManager fftManager;
     private boolean fftAutomaticMode;
     private boolean fftUserInteraction;
-    private ShowFFTPane shownFFT;
     private GameSpecifics gameSpecifics;
 
     FFTOverviewPane fftOverviewPane;
@@ -116,13 +114,13 @@ public class Controller {
 
         instantiateAI(PLAYER1);
         instantiateAI(Config.PLAYER2);
+        playArea.update(this);
 
         // Fetch all gui elements that invoke something game-related
         startAIButton = navPane.getStartAIButton();
         stopAIButton = navPane.getStopAIButton();
         helpHumanBox = navPane.getHelpHumanBox();
         reviewButton = navPane.getReviewButton();
-        showFFTButton = navPane.getShowFFTButton();
         editFFTButton = navPane.getEditFFTButton();
         addRuleFFTButton = navPane.getAddRuleFFTButton();
         automaticFFTBox = navPane.getAutomaticFFTBox();
@@ -222,16 +220,6 @@ public class Controller {
             fftAutomaticMode = newValue;
         });
 
-        // Show FFT button
-        showFFTButton.setOnAction(event -> {
-            deselect();
-            Stage newStage = new Stage();
-            shownFFT = new ShowFFTPane(fftManager, this.state);
-            newStage.setScene(new Scene(shownFFT, 700, 600));
-            newStage.show();
-            newStage.setOnHiding(otherevent -> shownFFT = null);
-
-        });
 
         if (mode == HUMAN_VS_AI && playerRedInstance != HUMAN && state.getTurn() == PLAYER1) {
             aiThread = new Thread(this::doAITurn);
@@ -321,7 +309,6 @@ public class Controller {
         deselect();
         playArea.update(this);
         checkGameOver();
-        if (shownFFT != null) shownFFT.showRuleGroups();
     }
 
     private void updatePostAITurn() {
@@ -333,7 +320,6 @@ public class Controller {
             playArea.update(this);
             checkGameOver();
         });
-        if (shownFFT != null) shownFFT.showRuleGroups();
     }
 
     // This function is called when two AI's are matched against each other. It can be interrupted by the user.
@@ -659,6 +645,10 @@ public class Controller {
 
     public InteractiveState getInteractiveState() {
         return gameSpecifics.interactiveState;
+    }
+
+    public FFT getCurrFFT() {
+        return fftManager.currFFT;
     }
 
 }

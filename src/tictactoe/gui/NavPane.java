@@ -30,7 +30,6 @@ public class NavPane extends VBox {
     private Button addRuleFFTButton;
     private HBox automaticFFTBox;
     private CheckBox automaticFFT;
-    private Button showFFTButton;
     private VBox FFTWidgets;
     private VBox AIWidgets;
     private CheckBox helpHuman;
@@ -38,7 +37,6 @@ public class NavPane extends VBox {
     private Button reviewButton;
 
     NavPane(Controller cont) {
-        setMinWidth(Config.WIDTH / 3);
         setAlignment(Pos.CENTER);
         setSpacing(40);
         buttons = new ArrayList<>();
@@ -71,9 +69,6 @@ public class NavPane extends VBox {
         buttons.add(menuButton);
         menuButton.setOnMouseClicked(event -> goToMenu());
 
-        showFFTButton = new Button("Show FFT");
-        buttons.add(showFFTButton);
-
         editFFTButton = new Button("Edit FFT");
         buttons.add(editFFTButton);
 
@@ -89,7 +84,7 @@ public class NavPane extends VBox {
         automaticFFTBox = new HBox(automaticFFT, automaticLabel);
         automaticFFTBox.setAlignment(Pos.CENTER);
 
-        FFTWidgets = new VBox(showFFTButton, editFFTButton, addRuleFFTButton, automaticFFTBox);
+        FFTWidgets = new VBox(editFFTButton, addRuleFFTButton, automaticFFTBox);
         FFTWidgets.setSpacing(10);
         FFTWidgets.setAlignment(Pos.CENTER);
 
@@ -176,10 +171,6 @@ public class NavPane extends VBox {
 
     public Button getMenuButton() {
         return menuButton;
-    }
-
-    public Button getShowFFTButton() {
-        return showFFTButton;
     }
 
     public boolean containsFFTWidgets() {

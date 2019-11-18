@@ -41,7 +41,7 @@ public class Config {
     public static int CURRENT_GAME;
 
     // BOARD CONFIG
-    public static final int kuliBHeight = 3;
+    public static final int kuliBHeight = 4;
     public static final int kuliBWidth = 3;
 
     public static boolean RANDOM_RULE_ORDERING = false;

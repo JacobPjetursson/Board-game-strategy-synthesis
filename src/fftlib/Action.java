@@ -35,7 +35,6 @@ public class Action {
         this.remClause = new Clause();
 
         for (String lStr : literals) {
-            System.out.println(lStr);
             if (lStr.startsWith("+")) {
                 lStr = lStr.substring(1);
                 Literal l = new Literal(lStr);

@@ -1,10 +1,15 @@
 package tictactoe.gui;
 
+import fftlib.FFT;
+import fftlib.game.FFTState;
+import fftlib.gui.ShowFFTPane;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.TextAlignment;
 import misc.Config;
 import tictactoe.game.Controller;
 import tictactoe.game.State;
@@ -12,51 +17,61 @@ import tictactoe.game.State;
 import static misc.Config.*;
 
 
-public class InfoPane extends VBox {
+public class InfoPane extends AnchorPane {
+    private int mode;
     private Label skippedTurn;
     private Label turnNumberLabel;
     private Label turnLabel;
+    private ShowFFTPane showFFTPane;
+
+    private FFTState state;
+    private FFT currFFT;
 
     public InfoPane(int mode) {
-        setPrefSize(Config.WIDTH / 3, Config.HEIGHT);
-        setSpacing(40);
-        setAlignment(Pos.CENTER);
+        this.mode = mode;
+
         turnLabel = new Label("Turn: Cross");
-        turnLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 22));
+        turnLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
+        turnLabel.setTextAlignment(TextAlignment.LEFT);
         turnNumberLabel = new Label("Turns Played: 0");
-        turnNumberLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 22));
+        turnNumberLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
+        turnNumberLabel.setTextAlignment(TextAlignment.LEFT);
 
         String modeText = (mode == HUMAN_VS_HUMAN) ? "Human vs. Human" :
                 (mode == HUMAN_VS_AI) ? "Human vs. AI" : "AI vs. AI";
         Label modeLabel = new Label("Mode: " + modeText);
-        modeLabel.setFont(Font.font("Verdana", 22));
+        modeLabel.setFont(Font.font("Verdana", 10));
+        modeLabel.setTextAlignment(TextAlignment.LEFT);
 
         skippedTurn = new Label();
-        skippedTurn.setFont(Font.font("Verdana", 22));
-        VBox turnBox = new VBox(turnLabel, turnNumberLabel);
-        turnBox.setAlignment(Pos.CENTER);
-        turnBox.setSpacing(15);
+        skippedTurn.setFont(Font.font("Verdana", 10));
+        VBox infoBox = new VBox(turnLabel, turnNumberLabel, modeLabel, skippedTurn);
+        infoBox.setAlignment(Pos.TOP_LEFT);
+        infoBox.setSpacing(8);
 
-        VBox infoBox = new VBox(modeLabel, skippedTurn);
-        infoBox.setAlignment(Pos.CENTER);
-        infoBox.setSpacing(15);
+        getChildren().add(infoBox);
+        AnchorPane.setBottomAnchor(infoBox, -10.0);
+        AnchorPane.setRightAnchor(infoBox, 10.0);
 
-        getChildren().addAll(turnBox, infoBox);
+        // ShowFFTPane
+        if (mode == HUMAN_VS_AI) {
+            showFFTPane = new ShowFFTPane();
+            showFFTPane.setAlignment(Pos.CENTER);
+            getChildren().add(showFFTPane);
+        }
     }
 
     public void update(Controller cont) {
-        State state = cont.getState();
-        updateTurn(state);
+        currFFT = cont.getCurrFFT();
+        state = cont.getState();
+        if (mode == HUMAN_VS_AI)
+            showFFTPane.update(currFFT, state);
         turnNumberLabel.setText("Turns Played: " + cont.getTurnNo());
         skippedTurn.setText("");
-    }
-
-    private void updateTurn(State state) {
-        if (state.getTurn() == PLAYER1) {
+        if (state.getTurn() == PLAYER1)
             turnLabel.setText("Turn: Cross");
-        } else {
+        else
             turnLabel.setText("Turn: Circle");
-        }
     }
 
     public void displaySkippedTurn(String skippedTeam) {

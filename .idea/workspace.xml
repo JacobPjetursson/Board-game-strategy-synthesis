@@ -2,14 +2,22 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d231265c-f2b3-434a-bf07-784b40a64813" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/JFreeChart.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/JUnit.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/forms_1_2_1.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/gradle_wrapper.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/htmlparser_1_4.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/htmlparser_1_41.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/javassist.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/reflections_0_9_9_RC1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/reflections_0_9_9_RC11.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/Action.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/Action.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/gui/ShowFFTPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/gui/ShowFFTPane.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/game/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/game/Controller.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/NavPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/NavPane.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/PlayArea.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/PlayArea.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/PlayPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/PlayPane.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/info/InfoPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/info/InfoPane.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/info/ScoreBoard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/gui/info/ScoreBoard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/misc/Config.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/misc/Config.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/FFT/GameSpecifics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/FFT/GameSpecifics.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/game/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/game/Controller.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/InfoPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/gui/InfoPane.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/NavPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/gui/NavPane.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/PlayArea.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/gui/PlayArea.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/PlayPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/gui/PlayPane.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,12 +28,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="13" />
-    <option name="y" value="23" />
-    <option name="width" value="1427" />
-    <option name="height" value="799" />
-  </component>
+  <component name="ProjectId" id="1SxNAdffPnSnBvi2HnF2hbvNkWG" />
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
       <profile-state>
@@ -101,14 +104,22 @@
     </entry>
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="project.structure.last.edited" value="Libraries" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
+    <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RunDashboard">
@@ -197,8 +208,14 @@
       <option name="presentableId" value="Default" />
       <updated>1541446787652</updated>
       <workItem from="1541446791639" duration="4000" />
+      <workItem from="1572501150165" duration="831000" />
+      <workItem from="1573444627818" duration="491000" />
+      <workItem from="1574045895945" duration="9487000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">

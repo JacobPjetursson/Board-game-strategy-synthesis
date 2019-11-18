@@ -1,6 +1,7 @@
 package fftlib.gui;
 
 
+import fftlib.FFT;
 import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
@@ -10,9 +11,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -21,61 +20,53 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
-public class ShowFFTPane extends BorderPane {
-    FFTManager fftManager;
+public class ShowFFTPane extends VBox {
+    Label title;
+    FFT fft;
     FFTState state;
     private ListView<VBox> lw;
 
-    public ShowFFTPane(FFTManager fftManager, FFTState state) {
-        this.state = state;
-        this.fftManager = fftManager;
-        Label title = new Label();
-        if (fftManager.currFFT == null)
-            title.setText("You do not have an FFT yet");
-        else
-            title.setText(fftManager.currFFT.name);
-        title.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+    public ShowFFTPane() {
+        setAlignment(Pos.CENTER);
+        title = new Label();
+        title.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
         title.setAlignment(Pos.CENTER);
         title.setTextAlignment(TextAlignment.CENTER);
-        title.setMinHeight(65);
-        setTop(title);
-        BorderPane.setAlignment(title, Pos.CENTER);
 
         lw = new ListView<>();
         lw.setPickOnBounds(false);
-        lw.setPrefWidth(350);
+        lw.setPrefHeight(500);
+        lw.setPrefWidth(500);
+
+
         lw.setSelectionModel(new NoSelectionModel<>());
-        BorderPane.setMargin(lw, new Insets(15));
-        setCenter(lw);
+        setMargin(lw, new Insets(10.0));
 
-        Button close = new Button("Close");
-        close.setOnMouseClicked(event -> {
-            Stage stage = (Stage) getScene().getWindow();
-            stage.close();
-        });
-        setBottom(close);
-        BorderPane.setAlignment(close, Pos.CENTER);
-        BorderPane.setMargin(close, new Insets(10));
+        getChildren().addAll(title, lw);
+    }
 
-        if (fftManager.currFFT != null)
-            showRuleGroups();
+    public void update(FFT fft, FFTState state) {
+        this.fft = fft;
+        this.state = state;
+        title.setText(fft.name);
+        showRuleGroups();
     }
 
     public void showRuleGroups() {
         ObservableList<VBox> ruleGroups = FXCollections.observableArrayList();
         boolean ruleApplied = false;
-        for (int i = 0; i < fftManager.currFFT.ruleGroups.size(); i++) {
+        for (int i = 0; i < fft.ruleGroups.size(); i++) {
             // Rule group
-            RuleGroup rg = fftManager.currFFT.ruleGroups.get(i);
+            RuleGroup rg = fft.ruleGroups.get(i);
             VBox rgVBox = new VBox(10);
             rgVBox.setAlignment(Pos.CENTER);
             Label rgLabel = new Label((i + 1) + ": " + rg.name);
-            rgLabel.setFont(Font.font("Verdana", 22));
+            rgLabel.setFont(Font.font("Verdana", 18));
             rgVBox.getChildren().add(rgLabel);
             for (int j = 0; j < rg.rules.size(); j++) {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r);
-                rLabel.setFont(Font.font("Verdana", 16));
+                rLabel.setFont(Font.font("Verdana", 13));
                 FFTMove move = r.apply(state);
                 if (!ruleApplied && move != null) {
                     rLabel.setTextFill(Color.BLUE);

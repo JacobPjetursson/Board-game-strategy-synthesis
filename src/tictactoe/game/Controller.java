@@ -1,9 +1,9 @@
 package tictactoe.game;
 
+import fftlib.FFT;
 import fftlib.FFTManager;
 import fftlib.gui.FFTInteractivePane;
 import fftlib.gui.FFTOverviewPane;
-import fftlib.gui.ShowFFTPane;
 import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.scene.Scene;
@@ -42,7 +42,6 @@ public class Controller {
     private Button startAIButton;
     private Button stopAIButton;
     private Button editFFTButton;
-    private Button showFFTButton;
     private Button reviewButton;
     private Button addRuleFFTButton;
     private CheckBox automaticFFTBox;
@@ -56,7 +55,6 @@ public class Controller {
     private FFTManager fftManager;
     private boolean fftAutomaticMode;
     private boolean fftUserInteraction;
-    private ShowFFTPane shownFFT;
     private GameSpecifics gameSpecifics;
     private CheckBox helpHumanBox;
 
@@ -100,7 +98,6 @@ public class Controller {
         // Fetch all gui elements that invoke something game-related
         startAIButton = navPane.getStartAIButton();
         stopAIButton = navPane.getStopAIButton();
-        showFFTButton = navPane.getShowFFTButton();
         editFFTButton = navPane.getEditFFTButton();
         addRuleFFTButton = navPane.getAddRuleFFTButton();
         reviewButton = navPane.getReviewButton();
@@ -111,6 +108,8 @@ public class Controller {
         new Scene(fftInteractivePane, Config.WIDTH, Config.HEIGHT);
         FFTOverviewPane fftOverviewPane = new FFTOverviewPane(primaryStage, fftManager, fftInteractivePane);
         new Scene(fftOverviewPane, Config.WIDTH, Config.HEIGHT);
+        
+        playArea.update(this);
 
         showNavButtons();
 
@@ -163,18 +162,6 @@ public class Controller {
             if (fftAutomaticMode && (state.getTurn() == PLAYER2 && player2Instance == FFT) ||
                     (state.getTurn() == PLAYER1 && player1Instance == FFT))
                 doAITurn();
-        });
-
-        // Show FFT button
-        showFFTButton.setOnAction(event -> {
-            Stage newStage = new Stage();
-            newStage.setOnHiding(otherevent -> shownFFT = null);
-            System.out.println(this.state);
-            shownFFT = new ShowFFTPane(fftManager, this.state);
-            newStage.setScene(new Scene(shownFFT, 700, 700));
-            newStage.show();
-
-
         });
 
         if (mode == HUMAN_VS_AI && player1Instance != HUMAN && state.getTurn() == PLAYER1) {
@@ -254,7 +241,6 @@ public class Controller {
         turnNo++;
         playArea.update(this);
         checkGameOver();
-        if (shownFFT != null) shownFFT.showRuleGroups();
     }
 
     private void updatePostAITurn() {
@@ -264,7 +250,6 @@ public class Controller {
             playArea.update(this);
             checkGameOver();
         });
-        if (shownFFT != null) shownFFT.showRuleGroups();
     }
 
     // This function is called when two AI's are matched against each other. It can be interrupted by the user.
@@ -479,6 +464,10 @@ public class Controller {
 
     public PlayArea getPlayArea() {
         return playArea;
+    }
+
+    public FFT getCurrFFT() {
+        return fftManager.currFFT;
     }
 
 }
