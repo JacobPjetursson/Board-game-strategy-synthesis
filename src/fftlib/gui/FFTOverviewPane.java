@@ -172,14 +172,12 @@ public class FFTOverviewPane extends VBox {
         teamChoice.setValue(playerNames[0]);
         teamChoice.setItems(FXCollections.observableArrayList(playerNames[0], playerNames[1], "Both"));
 
-        Label forLabel = new Label(" for: ");
-        forLabel.setFont(Font.font("Verdana", 16));
         ChoiceBox<String> verificationChoice = new ChoiceBox<>();
         verificationChoice.setMinWidth(textFieldWidth);
         verificationChoice.setMaxWidth(textFieldWidth);
-        verificationChoice.setValue("Whole FFT");
+        verificationChoice.setValue("Completely");
         verificationChoice.setStyle("-fx-font: 16px \"Verdana\";");
-        verificationChoice.setItems(FXCollections.observableArrayList("Whole FFT", "Existing Rules"));
+        verificationChoice.setItems(FXCollections.observableArrayList("Completely", "Partially"));
 
         verifyBtn = new Button("Verify FFT");
         verifyBtn.setFont(Font.font("Verdana", 16));
@@ -227,10 +225,11 @@ public class FFTOverviewPane extends VBox {
 
             }
         });
+
         HBox verifyBox = new HBox();
         verifyBox.setAlignment(Pos.CENTER);
         verifyBox.setSpacing(10);
-        verifyBox.getChildren().addAll(verifyBtn, teamChoice, forLabel, verificationChoice);
+        verifyBox.getChildren().addAll(verifyBtn, teamChoice, verificationChoice);
 
         Button intEditBtn = new Button("Interactive Editing Mode");
         intEditBtn.setFont(Font.font("Verdana", 16));
@@ -301,11 +300,13 @@ public class FFTOverviewPane extends VBox {
             this.idx = idx;
             RuleGroup rg = fftManager.currFFT.ruleGroups.get(idx);
             rgVBox = new VBox(10);
-            rgVBox.setAlignment(Pos.CENTER);
+            rgVBox.setAlignment(Pos.CENTER_LEFT);
 
+            /* Uncomment for RG name
             Label rgLabel = new Label((idx + 1) + ": " + rg.name);
             rgLabel.setFont(Font.font("Verdana", 18));
             rgVBox.getChildren().add(rgLabel);
+            */
 
             for (int j = 0; j < rg.rules.size(); j++) {
                 Rule r = rg.rules.get(j);

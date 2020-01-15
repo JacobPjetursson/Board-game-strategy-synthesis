@@ -1,5 +1,6 @@
 package tictactoe.gui;
 
+import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -8,14 +9,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import misc.Config;
 import tictactoe.game.Controller;
 import tictactoe.game.State;
 import tictactoe.gui.menu.MenuPane;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Config.*;
 
 
 public class EndGamePane extends VBox {
@@ -53,5 +54,22 @@ public class EndGamePane extends VBox {
         restartGameBtn.setPrefWidth(110);
         hBox.getChildren().add(restartGameBtn);
         getChildren().add(hBox);
+
+        Button reviewGameBtn = new Button("Review Game");
+        reviewGameBtn.setFont(Font.font("Verdana", 16));
+        reviewGameBtn.setOnMouseClicked(event -> {
+            Stage stage = (Stage) getScene().getWindow();
+            stage.close();
+            Stage newStage = new Stage();
+            newStage.setScene(new Scene(new ReviewPane(primaryStage, cont), 325, Config.HEIGHT - 50));
+            newStage.initModality(Modality.APPLICATION_MODAL);
+            newStage.initOwner(cont.getWindow());
+            newStage.setOnCloseRequest(Event::consume);
+            newStage.show();
+
+        });
+        reviewGameBtn.setPrefWidth(180);
+        if (cont.getMode() == HUMAN_VS_AI)
+            getChildren().add(reviewGameBtn);
     }
 }

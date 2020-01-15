@@ -2,10 +2,12 @@ package tictactoe.FFT;
 
 import fftlib.Action;
 import fftlib.Literal;
+import fftlib.Rule;
 import fftlib.game.*;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 import misc.Config;
+import org.ggp.base.util.gdl.grammar.GdlSentence;
 import tictactoe.game.Controller;
 import tictactoe.game.Logic;
 import tictactoe.game.Move;
@@ -13,6 +15,9 @@ import tictactoe.game.State;
 import tictactoe.misc.Database;
 
 import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static fftlib.Literal.PIECEOCC_ANY;
 import static fftlib.Literal.PIECEOCC_PLAYER;
@@ -60,7 +65,43 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
+    public Rule gdlToRule(String precons, String action) {
+        HashSet<Literal> literals = new HashSet<>();
+        Action a = new Action();
+        if (!precons.isEmpty() && !precons.equals("∅")) {
+            for (String precon : precons.split("∧")) {
+                String t = precon.split("cell\\(")[1];
+                String[] tok = t.split(",");
+                int col = Integer.parseInt(tok[0].substring(0, 1)) - 1;
+                int row = Integer.parseInt(tok[1].substring(0, 1)) - 1;
+                String o = tok[2].substring(0, 1);
+                int occ = o.equals("x") ? PLAYER1 : PLAYER2;
+                boolean neg = false;
+                if (o.equals("b")) {
+                    occ = PLAYER_ANY;
+                    neg = true;
+                }
+                Literal l = new Literal(row, col, occ, neg);
+                l.name = precon;
+                literals.add(l);
+            }
+        }
+        String t = action.split("mark\\(")[1];
+        String[] tok = t.split(",");
+        int col = Integer.parseInt(tok[0].substring(0, 1)) - 1;
+        int row = Integer.parseInt(tok[1].substring(0, 1)) - 1;
+        int occ = tok[2].substring(0,1).equals("x") ? PLAYER1 : PLAYER2;
+        Literal l = new Literal(row, col, occ, false);
+        l.name = action;
+        a.addClause.add(l);
+        Rule r = new Rule(literals, a);
+        return new Rule(literals, a);
+    }
+
+    @Override
     public String getFFTFilePath() {
+        if (USE_GGP_PARSER)
+            return "tictactoe_GGP_FFT.txt";
         return "tictactoeFFT.txt";
     }
 
@@ -71,7 +112,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public String[] getPlayerNames() {
-        return new String[]{"Cross", "Circle"};
+        return new String[]{"Cross", "Nought"};
     }
 
     @Override

@@ -33,10 +33,11 @@ public class LookupTableMinimax implements AI {
         State key = new State(state);
         StateMapping mapping = lookupTable.get(key);
         Move move = mapping.move;
-        String winner = (mapping.score >= 1000) ? "PLAYER1" : (mapping.score == 0) ? "DRAW" : "PLAYER2";
+        String winner = (mapping.score >= 1000) ? "PLAYER1" : (mapping.score <= -1000) ? "PLAYER2" : "DRAW";
         System.out.print("BEST PLAY:  " + "row: " + move.row + ", col: " + move.col +
                 ", WINNER IS: " + winner);
-        System.out.println(" in " + (mapping.score >= 1000 ? 2000 - mapping.score : (mapping.score == 0) ? "∞" : 2000 + mapping.score) + " moves!");
+        System.out.println(" in " + (mapping.score >= 1000 ? 2000 - mapping.score :
+                (mapping.score <= -1000) ? 2000 + mapping.score : mapping.score) + " moves!");
         return move;
     }
 

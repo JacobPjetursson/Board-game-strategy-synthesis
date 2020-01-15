@@ -1,11 +1,7 @@
 package fftlib.game;
 
-import org.ggp.base.util.statemachine.MachineState;
-import org.ggp.base.util.statemachine.Move;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 
 public interface FFTDatabase {
 

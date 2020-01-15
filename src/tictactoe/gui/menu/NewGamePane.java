@@ -86,7 +86,7 @@ public class NewGamePane extends AnchorPane {
                 finalBox.getChildren().remove(autogenBox);
         });
 
-        Label circleLabel = new Label("Circle");
+        Label circleLabel = new Label("Nought");
         circleLabel.setFont(Font.font("Verdana", 20));
         circleLabel.setPadding(new Insets(0, 10, 0, 0));
         circleLabel.setTextFill(Color.WHITE);
@@ -112,7 +112,7 @@ public class NewGamePane extends AnchorPane {
         ChoiceBox<String> autogenChoices = new ChoiceBox<>();
         autogenChoices.setValue("Cross");
         autogenChoices.setStyle("-fx-font: 20px \"Verdana\";");
-        autogenChoices.setItems(FXCollections.observableArrayList("Cross", "Circle", "Both"));
+        autogenChoices.setItems(FXCollections.observableArrayList("Cross", "Nought", "Both"));
         autogenChoices.setMinWidth(200);
         autogenChoices.setMaxWidth(200);
         autogenChoices.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldValue, newValue) -> {
@@ -121,7 +121,7 @@ public class NewGamePane extends AnchorPane {
                 case "Cross":
                     Config.AUTOGEN_PERSPECTIVE = PLAYER1;
                     break;
-                case "Circle":
+                case "Nought":
                     Config.AUTOGEN_PERSPECTIVE = PLAYER2;
                     break;
                 default:

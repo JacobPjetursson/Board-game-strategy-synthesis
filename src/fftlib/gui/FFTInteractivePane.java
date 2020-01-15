@@ -39,11 +39,10 @@ import java.util.Stack;
 import java.util.function.Function;
 
 import static fftlib.FFTManager.*;
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
-import static misc.Config.PLAYER_ANY;
+import static misc.Config.*;
 
 public class FFTInteractivePane extends BorderPane {
+    private int textFieldWidth = 150;
     private FFTManager fftManager;
     private int perspective = PLAYER1;
     private ListView<RulePane> lw;
@@ -58,11 +57,11 @@ public class FFTInteractivePane extends BorderPane {
     private Button deleteRgBtn;
     private Button renameRgBtn;
     private Button saveToDiskBtn;
-    private HBox ruleBox;
-    private HBox ruleBtnBox;
-    private HBox rgBtnBox;
+    private HBox ruleBox, ruleBtnBox, rgBtnBox;
+    private HBox verifyBox;
     private VBox bottomBox;
 
+    private Button verifyBtn;
     private Button undoBtn;
     private Stack<UndoItem> undoStack;
     private boolean changes;
@@ -72,6 +71,8 @@ public class FFTInteractivePane extends BorderPane {
 
 
     private int[] selectedIndices; // rgIdx, rIdx
+
+    private static final int ROW_SIZE = 25;
 
     public FFTInteractivePane(FFTManager fftManager) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
@@ -113,10 +114,11 @@ public class FFTInteractivePane extends BorderPane {
         lw = new ListView<>();
         lw.setPickOnBounds(false);
         lw.setPrefHeight(520);
-        lw.setMinWidth(600);
+        lw.setMinWidth(400);
         lw.setCellFactory(param -> new RuleCell());
         showRuleGroups();
         BorderPane.setMargin(lw, new Insets(15));
+        BorderPane.setAlignment(lw, Pos.CENTER_LEFT);
         setRight(lw);
 
         bottomBox = new VBox(15);
@@ -132,9 +134,78 @@ public class FFTInteractivePane extends BorderPane {
         Label label3 = new Label("Set game perspective:");
         label3.setFont(Font.font("Verdana", 16));
 
-        p1Btn = new RadioButton("Player 1");
+        // VERIFICATION
+        Label teamLabel = new Label(" as team: ");
+        teamLabel.setFont(Font.font("Verdana", 15));
+        ChoiceBox<String> teamChoice = new ChoiceBox<>();
+        teamChoice.setMinWidth(textFieldWidth);
+        teamChoice.setMaxWidth(textFieldWidth);
+        teamChoice.setStyle("-fx-font: 16px \"Verdana\";");
+        String[] playerNames = FFTManager.playerNames;
+        teamChoice.setValue(playerNames[0]);
+        teamChoice.setItems(FXCollections.observableArrayList(playerNames[0], playerNames[1], "Both"));
+
+        ChoiceBox<String> verificationChoice = new ChoiceBox<>();
+        verificationChoice.setMinWidth(textFieldWidth);
+        verificationChoice.setMaxWidth(textFieldWidth);
+        verificationChoice.setValue("Completely");
+        verificationChoice.setStyle("-fx-font: 16px \"Verdana\";");
+        verificationChoice.setItems(FXCollections.observableArrayList("Completely", "Partially"));
+
+        verifyBtn = new Button("Verify FFT");
+        verifyBtn.setFont(Font.font("Verdana", 16));
+        verifyBtn.setTooltip(new Tooltip("Checks if the current FFT is a winning strategy,\n" +
+                "or if given rules are part of winning strategy"));
+        verifyBtn.setOnMouseClicked(event -> {
+            if (!FFTManager.db.connectAndVerify())
+                return;
+            int team = teamChoice.getSelectionModel().getSelectedIndex() + 1;
+            boolean wholeFFT = verificationChoice.getSelectionModel().getSelectedIndex() == 0;
+            boolean verified = false;
+            try {
+                verified = fftManager.currFFT.verify(team, wholeFFT);
+            } catch (TransitionDefinitionException e) {
+                e.printStackTrace();
+            } catch (MoveDefinitionException e) {
+                e.printStackTrace();
+            } catch (GoalDefinitionException e) {
+                e.printStackTrace();
+            }
+            if (!verified) {
+                if (fftManager.currFFT.failingPoint == null) {
+                    Label verifiedLabel = new Label("Always loses to perfect player");
+                    verifiedLabel.setFont(Font.font("Verdana", 16));
+                    getChildren().add(4, verifiedLabel);
+
+                    Timeline timeline = new Timeline(new KeyFrame(
+                            Duration.millis(2500),
+                            ae -> getChildren().remove(verifiedLabel)));
+                    timeline.play();
+                } else {
+                    Stage stage = (Stage) getScene().getWindow();
+                    Scene scene = stage.getScene();
+                    stage.setScene(new Scene(new FFTFailurePane(scene, fftManager, this), WIDTH, Config.HEIGHT));
+                }
+            } else {
+                Label verifiedLabel = new Label("The FFT was successfully verified");
+                verifiedLabel.setFont(Font.font("Verdana", 16));
+                bottomBox.getChildren().add(verifiedLabel);
+
+                Timeline timeline = new Timeline(new KeyFrame(
+                        Duration.millis(2500),
+                        ae -> bottomBox.getChildren().remove(verifiedLabel)));
+                timeline.play();
+            }
+        });
+
+        verifyBox = new HBox();
+        verifyBox.setAlignment(Pos.CENTER);
+        verifyBox.setSpacing(10);
+        verifyBox.getChildren().addAll(verifyBtn, teamChoice, verificationChoice);
+
+        p1Btn = new RadioButton(playerNames[0]);
         p1Btn.setFont(Font.font("Verdana", 16));
-        p2Btn = new RadioButton("Player 2");
+        p2Btn = new RadioButton(playerNames[1]);
         p2Btn.setFont(Font.font("Verdana", 16));
         ToggleGroup toggleGrp = new ToggleGroup();
         p1Btn.setToggleGroup(toggleGrp);
@@ -354,7 +425,7 @@ public class FFTInteractivePane extends BorderPane {
         rulePane.setRight(backBox);
 
 
-        bottomBox.getChildren().addAll(infoBox, topBtnBox, rulePane);
+        bottomBox.getChildren().addAll(infoBox, verifyBox, topBtnBox, rulePane);
         setBottom(bottomBox);
         BorderPane.setAlignment(bottomBox, Pos.CENTER);
 
@@ -452,12 +523,13 @@ public class FFTInteractivePane extends BorderPane {
         for (int i = 0; i < fftManager.currFFT.ruleGroups.size(); i++) {
             // Rule group
             RuleGroup rg = fftManager.currFFT.ruleGroups.get(i);
-            rules.add(new RulePane(i));
+            //rules.add(new RulePane(i));
             for (int j = 0; j < rg.rules.size(); j++) {
                 rules.add(new RulePane(i, j));
             }
         }
         lw.setItems(rules);
+        lw.setMaxHeight(rules.size() * ROW_SIZE);
 
     }
 
@@ -468,7 +540,7 @@ public class FFTInteractivePane extends BorderPane {
 
         RulePane(int rgIdx) { // Rulegroup entry
             super();
-            setAlignment(Pos.CENTER);
+            setAlignment(Pos.CENTER_LEFT);
             this.isRuleGroup = true;
             this.rgIdx = rgIdx;
 
@@ -480,6 +552,7 @@ public class FFTInteractivePane extends BorderPane {
 
         RulePane(int rgIdx, int rIdx) { // rule entry
             super();
+            setAlignment(Pos.CENTER_LEFT);
             this.isRuleGroup = false;
             this.rgIdx = rgIdx;
             this.rIdx = rIdx;
@@ -522,7 +595,7 @@ public class FFTInteractivePane extends BorderPane {
             });
 
             setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-            setAlignment(Pos.CENTER);
+            setAlignment(Pos.CENTER_LEFT);
 
             setOnDragDetected(event -> {
                 if (isEmpty() || getItem().isRuleGroup)

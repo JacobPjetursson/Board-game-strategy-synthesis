@@ -1,9 +1,9 @@
 package fftlib;
 
+import fftlib.GGPAutogen.GGPManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import fftlib.game.Transform;
-import org.ggp.base.util.gdl.grammar.GdlLiteral;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
@@ -13,15 +13,15 @@ import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import java.util.*;
 
 import static fftlib.Literal.*;
-import static misc.Config.*;
+import static misc.Config.USE_GGP;
+import static misc.Config.USE_GGP_PARSER;
 
 
 public class Rule {
     private static final ArrayList<String> separators = new ArrayList<>(
             Arrays.asList("and", "And", "AND", "&", "∧"));
-    private HashSet<Clause> transformedPrecons;
-    //private HashSet<Clause> transformedSentences;
     public Clause preconditions;
+    private HashSet<Clause> transformedPrecons;
     public Action action;
     private String actionStr, preconStr;
 
@@ -33,21 +33,29 @@ public class Rule {
 
     // General game playing
     public Set<GdlSentence> sentences;
+    //private HashSet<Clause> transformedSentences;
     private Move move;
 
     // parsing constructor
     public Rule(String preconStr, String actionStr) {
-        this.multiRule = isMultiRule(preconStr, actionStr);
-        if (multiRule) {
-            rules = new HashSet<>();
-            replaceWildcards(preconStr, actionStr, rules);
-            // TODO - format this shit
-            this.preconStr = preconStr;
-            this.actionStr = actionStr;
-        } else {
-            this.action = getAction(actionStr);
-            this.preconditions = getPreconditions(preconStr);
+        if (USE_GGP_PARSER) {
+            Rule r = FFTManager.gdlToRule.apply(preconStr, actionStr);
+            this.action = r.action;
+            this.preconditions = r.preconditions;
             this.transformedPrecons = getTransformedPreconditions();
+        } else {
+            this.multiRule = isMultiRule(preconStr, actionStr);
+            if (multiRule) {
+                rules = new HashSet<>();
+                replaceWildcards(preconStr, actionStr, rules);
+                // TODO - format this shit
+                this.preconStr = preconStr;
+                this.actionStr = actionStr;
+            } else {
+                this.action = getAction(actionStr);
+                this.preconditions = getPreconditions(preconStr);
+                this.transformedPrecons = getTransformedPreconditions();
+            }
         }
         errors = !isValidRuleFormat(this);
     }
@@ -125,6 +133,7 @@ public class Rule {
         this.sentences.remove(s);
         //this.transformedSentences = getTransformedSentences();
     }
+
 
     public void removeLiterals(int row, int col) {
         ArrayList<Literal> removeList = new ArrayList<>();
@@ -330,6 +339,13 @@ public class Rule {
             cStr = preconStr;
             aStr = actionStr;
         }
+        if (USE_GGP_PARSER) {
+            if (cStr.isEmpty())
+                cStr = "∅";
+            return "IF: [" + cStr + "] THEN: [" +
+                    action.addClause.getFormattedString() + " " + action.remClause.getFormattedString() + "]";
+        }
+
         return "IF [" + cStr + "] THEN [" + aStr + "]";
     }
 
@@ -371,42 +387,51 @@ public class Rule {
             return null;
         }
         HashSet<Literal> stLiterals = state.getLiterals();
+        FFTMove m = match(preconditions, state, stLiterals);
+        if (m != null) return m;
         for (Clause clause : transformedPrecons) { // TODO - possible to optimize here by only including unique clauses
-            boolean match = true;
-            for (Literal l : clause.literals) {
-                if (l.pieceOcc == PIECEOCC_ANY) {
-                    Literal temp = new Literal(l);
-                    temp.pieceOcc = PIECEOCC_PLAYER;
-                    temp.format();
-                    match = matchLiteral(temp, stLiterals);
-                    if (!match)
-                        break;
+            if (clause.equals(preconditions))
+                continue;
+            m = match(clause, state, stLiterals);
+            if (m != null) return m;
+        }
+        return null;
+    }
 
-                    temp.pieceOcc = PIECEOCC_ENEMY;
-                    temp.format();
-                    match = matchLiteral(temp, stLiterals);
-                } else {
-                    match = matchLiteral(l, stLiterals);
-                }
+    private FFTMove match(Clause preconditions, FFTState state, HashSet<Literal> stLiterals) {
+        boolean match = true;
+        for (Literal l : preconditions.literals) {
+            if (l.pieceOcc == PIECEOCC_ANY) {
+                Literal temp = new Literal(l);
+                temp.pieceOcc = PIECEOCC_PLAYER;
+                temp.format();
+                match = matchLiteral(temp, stLiterals);
                 if (!match)
                     break;
 
+                temp.pieceOcc = PIECEOCC_ENEMY;
+                temp.format();
+                match = matchLiteral(temp, stLiterals);
+            } else {
+                match = matchLiteral(l, stLiterals);
             }
-            if (match) {
-                Action a = action.transform(clause.transformations);
-                FFTMove move = a.getMove(state.getTurn());
-                if (FFTManager.logic.isLegalMove(state, move)) {
-                    return move;
-                }
+            if (!match)
+                break;
+
+        }
+        if (match) {
+            Action a = action.transform(preconditions.transformations);
+            FFTMove move = a.getMove(state.getTurn());
+            if (FFTManager.logic.isLegalMove(state, move)) {
+                return move;
             }
         }
         return null;
     }
 
-    public Move apply(MachineState state) throws MoveDefinitionException {
-        Set<GdlSentence> stSentences = state.getContents();
+    public Move apply(MachineState ms) throws MoveDefinitionException {
+        Set<GdlSentence> stSentences = ms.getContents();
         // TODO - transformations of sentences
-        //for (Clause clause : transformedSentences) {
             boolean match = true;
             for (GdlSentence s : sentences) {
                 match = matchSentence(s, stSentences);
@@ -418,12 +443,11 @@ public class Rule {
             if (match) {
                 // todo - transform move
                 //Move m = FFTManager.transformMove(move, transformations);
-                Role r = FFTManager.getStateRole(state);
-                if (FFTManager.sm.getLegalMoves(state, r).contains(move)) {
+                Role r = GGPManager.getRole(ms);
+                if (GGPManager.getLegalMoves(ms, r).contains(move)) {
                     return move;
                 }
             }
-        //}
 
         return null;
     }

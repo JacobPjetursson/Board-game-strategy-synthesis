@@ -55,9 +55,12 @@ public class Player extends VBox {
         for (int i = 0; i < 3; i++) {
             gridPaneDisplay.getColumnConstraints().add(column1);
         }
+
+        /* Uncomment for agent type information
         gridPaneDisplay.add(imgPane, 1, 0);
         gridPaneDisplay.add(typeLabel, 2, 0);
         if (clickMode == CLICK_DEFAULT) getChildren().add(gridPaneDisplay);
+         */
     }
 
 

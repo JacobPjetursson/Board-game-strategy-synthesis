@@ -46,6 +46,8 @@ public class BoardTile extends StackPane {
     public static final  String grayStr = "-fx-background-color: rgb(150,150,150);";
     public static final String greenStr = "-fx-background-color: rgb(0, 225, 0);";
     public static final String blueStr = "-fx-background-color: rgb(0, 0, 225);";
+    public static final String redStr = "-fx-background-color: rgb(255, 0, 0);";
+    public static final String yellowStr = "-fx-background-color: rgb(255, 255, 0);";
 
     public BoardTile(int row, int col, int tilesize, int clickMode, Controller cont) {
         this.row = row;
@@ -106,12 +108,24 @@ public class BoardTile extends StackPane {
                 (cont.getPlayerInstance(cont.getState().getTurn()) == FFT && cont.getFFTAllowInteraction()));
     }
 
-    public void setBest(boolean best) {
-        if (best) {
-            addHighlight(greenStr, team);
-        } else {
-            addHighlight(whiteStr, team);
-        }
+    public void setGreen() {
+        addHighlight(greenStr, team);
+    }
+
+    public void setYellow() {
+        addHighlight(yellowStr, team);
+    }
+
+    public void setRed() {
+        addHighlight(redStr, team);
+    }
+
+    public void removeColor() {
+        addHighlight(whiteStr, team);
+    }
+
+    public void setFFTChosen() {
+        addHighlight(blueStr, team);
     }
 
     public void setTurnsToTerminal(String turns) {

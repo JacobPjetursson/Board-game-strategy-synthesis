@@ -134,6 +134,11 @@ public class Literal {
     }
 
     @Override
+    public Literal clone() {
+        return new Literal(this);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Literal)) return false;
 
@@ -146,5 +151,10 @@ public class Literal {
     @Override
     public int hashCode() {
         return 31 * Objects.hashCode(name);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

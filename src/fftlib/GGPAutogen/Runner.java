@@ -5,26 +5,14 @@ import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
 import misc.Config;
-
-import org.ggp.base.util.files.FileUtils;
-import org.ggp.base.util.game.Game;
-import org.ggp.base.util.gdl.grammar.Gdl;
-import org.ggp.base.util.gdl.grammar.GdlConstant;
-import org.ggp.base.util.gdl.grammar.GdlRule;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
-import org.ggp.base.util.prover.aima.knowledge.KnowledgeBase;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
-import org.ggp.base.util.statemachine.StateMachine;
 import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
-import org.ggp.base.validator.StaticValidator;
-import org.ggp.base.validator.ValidatorException;
 
-
-import java.io.File;
 import java.util.*;
 
 import static misc.Config.*;
@@ -39,7 +27,6 @@ public class Runner {
     private static RuleGroup rg;
     private static Role p1Role, p2Role;
     private static Move noop;
-    private static StateMachine sm;
 
     // CONFIGURATION
     private static int perspective;
@@ -51,39 +38,13 @@ public class Runner {
 
     public static void main(String[] args) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
 
-        String filename;
-        // TODO - input to program
+        USE_GGP = true;
         String base_path = "src/fftlib/GGPAutogen/games/";
-        if (simpleTicTacToe)
-            filename = "tictactoe_simple.kif";
-        else
-            filename = "tictactoe.kif";
-
-        //filename = "kulibrat_3x3.kif";
-        //filename = "nim.kif";
-        perspective = PLAYER1;
-
-
-        String rawSheet = FileUtils.readFileAsString(new File(base_path + filename));
-        Game theGame = Game.createEphemeralGame(Game.preprocessRulesheet(rawSheet));
-        if (theGame.getRules() == null || theGame.getRules().size() == 0) {
-            System.err.println("Problem reading the file " + filename + " or parsing the GDL.");
-            return;
-        }
-
-        try {
-            new StaticValidator().checkValidity(theGame);
-        } catch (ValidatorException e) {
-            System.err.println("GDL validation error: " + e.toString());
-            return;
-        }
-
-        List<Gdl> rules = theGame.getRules();
-        FFTManager.initialize(rules);
-        sm = FFTManager.sm;
-        p1Role = FFTManager.p1role;
-        p2Role = FFTManager.p2role;
-        noop = FFTManager.noop;
+        String game_path = base_path + (simpleTicTacToe ? "tictactoe_simple.kif" : "tictactoe.kif");
+        GGPManager.loadGDL(game_path);
+        p1Role = GGPManager.p1role;
+        p2Role = GGPManager.p2role;
+        noop = GGPManager.noop;
         System.out.println("Gdl rules validated. Autogenerating FFT");
         
         setup();
@@ -95,7 +56,7 @@ public class Runner {
         fft = new FFT("Autogen");
         rg = new RuleGroup("Autogen");
         fft.addRuleGroup(rg);
-        MachineState initialState = FFTManager.sm.getInitialState();
+        MachineState initialState = GGPManager.getInitialState();
 
         Solver solver = new Solver();
         lookupTable = solver.solve();
@@ -108,7 +69,7 @@ public class Runner {
         System.out.println("Solution size: " + lookupTable.size());
 
 
-        states = new PriorityQueue<>(new StateComparator());
+        states = new PriorityQueue<MachineState>(new StateComparator());
 
         System.out.println("Filtering...");
         if (verify_single_strategy) {
@@ -125,10 +86,10 @@ public class Runner {
         makeRules();
 
         System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
-        System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfSentences());
+        System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
         int it = fft.minimize(perspective, Config.MINIMIZE_PRECONDITIONS);
         System.out.println("Amount of rules after " + it + " minimize iterations: " + fft.getAmountOfRules());
-        System.out.println("Amount of preconditions after " + it + " minimize iterations: " + fft.getAmountOfSentences());
+        System.out.println("Amount of preconditions after " + it + " minimize iterations: " + fft.getAmountOfPreconditions());
 
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
         System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
@@ -174,10 +135,10 @@ public class Runner {
     private static void deleteIrrelevantStates() throws MoveDefinitionException, TransitionDefinitionException, GoalDefinitionException {
         Iterator<MachineState> itr = states.iterator();
         while (itr.hasNext()) {
-            MachineState s = itr.next();
-            Set<Move> nonLosingMoves = Database.nonLosingMoves(s);
-            Role r = FFTManager.getStateRole(s);
-            if (nonLosingMoves.size() == sm.getLegalMoves(s, r).size()) {
+            MachineState ms = itr.next();
+            Set<Move> nonLosingMoves = Database.nonLosingMoves(ms);
+            Role r = GGPManager.getRole(ms);
+            if (nonLosingMoves.size() == GGPManager.getLegalMoves(ms, r).size()) {
                 itr.remove();
             }
         }
@@ -186,25 +147,25 @@ public class Runner {
     private static void filterToSingleStrat() throws MoveDefinitionException, TransitionDefinitionException {
         LinkedList<MachineState> frontier = new LinkedList<>();
         HashSet<MachineState> closedSet = new HashSet<>();
-        MachineState initialState = sm.getInitialState();
+        MachineState initialState = (MachineState) GGPManager.getInitialState();
         frontier.add(initialState);
         while (!frontier.isEmpty()) {
-            MachineState state = frontier.pop();
-            Role r = FFTManager.getStateRole(state);
-            if (sm.isTerminal(state))
+            MachineState ms = frontier.pop();
+            Role r = GGPManager.getRole(ms);
+            if (GGPManager.isTerminal(ms))
                 continue;
-            if (perspective != FFTManager.roleToPlayer(r)) {
-                for (MachineState child : sm.getNextStates(state))
+            if (perspective != GGPManager.roleToPlayer(r)) {
+                for (MachineState child : GGPManager.getNextStates(ms))
                     if (!closedSet.contains(child)) {
                         closedSet.add(child);
                         frontier.add(child);
                     }
             } else {
-                states.add(state);
-                GGPMapping mapping = lookupTable.get(state);
-                strategy.put(state, mapping);
+                states.add(ms);
+                GGPMapping mapping = lookupTable.get(ms);
+                strategy.put(ms, mapping);
                 Move m = mapping.getMove();
-                MachineState nextState = FFTManager.getNextState(state, m);
+                MachineState nextState = GGPManager.getNextState(ms, m);
                 if (!closedSet.contains(nextState)) {
                     closedSet.add(nextState);
                     frontier.add(nextState);

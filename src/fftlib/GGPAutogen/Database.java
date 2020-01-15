@@ -27,8 +27,7 @@ public class Database {
 
     public static Set<Move> nonLosingMoves(MachineState ms) throws MoveDefinitionException, TransitionDefinitionException, GoalDefinitionException {
         Set<Move> nonLosingMoves = new HashSet<>();
-        StateMachine sm = FFTManager.sm;
-        if (sm.isTerminal(ms)) {
+        if (GGPManager.isTerminal(ms)) {
             return nonLosingMoves;
         }
 
@@ -37,19 +36,19 @@ public class Database {
             return nonLosingMoves;
         }
 
-        Role stateRole = FFTManager.getStateRole(ms);
-        MachineState next = FFTManager.getNextState(ms, mapping.move);
+        Role r = GGPManager.getRole(ms);
+        MachineState next = GGPManager.getNextState(ms, mapping.move);
 
         // In case of game over in next state
-        if (sm.isTerminal(next)) {
-            List<Integer> winners = FFTManager.getPlayerWinners(next);
+        if (GGPManager.isTerminal(next)) {
+            List<Integer> winners = GGPManager.getPlayerWinners(next);
             if (winners == null) { // should not happen
                 return nonLosingMoves;
             }
 
-            for (Move m : sm.getLegalMoves(ms, stateRole)) {
-                MachineState child = FFTManager.getNextState(ms, m);
-                List<Integer> childWinners = FFTManager.getPlayerWinners(child);
+            for (Move m : GGPManager.getLegalMoves(ms, r)) {
+                MachineState child = GGPManager.getNextState(ms, m);
+                List<Integer> childWinners = GGPManager.getPlayerWinners(child);
                 if (childWinners == null) { // game is still going
                     if (winners.contains(queryState(child).getWinner()))
                         nonLosingMoves.add(m);
@@ -62,10 +61,10 @@ public class Database {
         }
 
         int bestMoveWinner = queryState(next).getWinner();
-        int team = FFTManager.roleToPlayer(stateRole);
-        for (Move m : sm.getLegalMoves(ms, stateRole)) {
-            MachineState child = FFTManager.getNextState(ms, m);
-            if (sm.isTerminal(child)) { // Game is stuck
+        int team = GGPManager.roleToPlayer(r);
+        for (Move m : GGPManager.getLegalMoves(ms, r)) {
+            MachineState child = GGPManager.getNextState(ms, m);
+            if (GGPManager.isTerminal(child)) { // Game is stuck
                 if (team == PLAYER1 && bestMoveWinner == PLAYER2)
                     nonLosingMoves.add(m);
                 else if (team == PLAYER2 && bestMoveWinner == PLAYER1)

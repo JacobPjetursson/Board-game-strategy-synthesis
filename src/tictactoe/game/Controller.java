@@ -21,10 +21,12 @@ import tictactoe.FFT.InteractiveState;
 import tictactoe.ai.AI;
 import tictactoe.ai.FFTFollower;
 import tictactoe.ai.LookupTableMinimax;
+import tictactoe.ai.StateMapping;
 import tictactoe.gui.*;
 import tictactoe.gui.board.BoardTile;
 import tictactoe.misc.Database;
 
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -177,11 +179,11 @@ public class Controller {
             navPane.addAIWidgets();
         if (mode == HUMAN_VS_AI && !navPane.containsReviewButton())
             navPane.addReviewButton();
-        if ((mode != AI_VS_AI || player1Instance == FFT || player2Instance == FFT)) {
+        if ((mode != AI_VS_AI)) {
             if (!navPane.containsHelpBox())
                 navPane.addHelpHumanBox();
         }
-        if ((player2Instance == FFT || player1Instance == FFT) && !navPane.containsFFTWidgets())
+        if (!navPane.containsFFTWidgets())
             navPane.addFFTWidgets();
 
     }
@@ -211,7 +213,7 @@ public class Controller {
         updatePostHumanTurn();
         if (Logic.gameOver(state)) return;
         if (state.getTurn() == move.team) {
-            String skipped = (state.getTurn() == PLAYER1) ? "Circle" : "Cross";
+            String skipped = (state.getTurn() == PLAYER1) ? "Nought" : "Cross";
             System.out.println(skipped + "'s turn has been skipped!");
             playArea.getInfoPane().displaySkippedTurn(skipped);
             if (player1Instance == FFT && state.getTurn() == PLAYER1 ||
@@ -313,7 +315,7 @@ public class Controller {
         if (Logic.gameOver(state)) return;
         if (mode == HUMAN_VS_AI) {
             if (turn == state.getTurn()) {
-                String skipped = (turn == PLAYER1) ? "Circle" : "Cross";
+                String skipped = (turn == PLAYER1) ? "Nought" : "Cross";
                 System.out.println(skipped + "'s turn has been skipped!");
                 playArea.getInfoPane().displaySkippedTurn(skipped);
                 doAITurn();
@@ -329,26 +331,47 @@ public class Controller {
 
     private void highlightHelp(boolean highlight) {
         State n = new State(state);
-        ArrayList<Move> bestMoves = null;
-        if (highlight)
-            bestMoves = Database.bestMoves(n);
+        Move fftChosenMove = null;
+        ArrayList<Move> moves = Logic.legalMoves(state.getTurn(), state);
+        if (highlight) {
+            if (fftManager.currFFT != null)
+                fftChosenMove = (Move) fftManager.currFFT.apply(state);
+        }
         BoardTile[][] tiles = playArea.getPlayBox().getBoard().getTiles();
 
         for (BoardTile[] tile : tiles) {
             for (BoardTile aTile : tile) {
-                aTile.setBest(false);
+                aTile.removeColor();
                 aTile.setTurnsToTerminal("");
                 if (!highlight)
                     continue;
-                for (Move m : bestMoves) {
-                    if (m.col == aTile.getCol() && m.row == aTile.getRow())
-                        aTile.setBest(true);
+                for (Move m : moves) {
+                    if (m.col == aTile.getCol() && m.row == aTile.getRow()) {
+                        State next = n.getNextState(m);
+                        StateMapping sm = Database.queryState(next);
+                        if (sm == null) {
+                            if (Logic.getWinner(next) == n.getTurn())
+                                aTile.setGreen();
+                            else if (Logic.getWinner(next) == PLAYER_NONE)
+                                aTile.setYellow();
+                            else
+                                aTile.setRed();
+                        } else {
+                            if (sm.getWinner() == n.getTurn())
+                                aTile.setGreen();
+                            else if (sm.getWinner() == PLAYER_NONE)
+                                aTile.setYellow();
+                            else
+                                aTile.setRed();
+                        }
+                    }
                 }
+                if (fftChosenMove != null && fftChosenMove.col == aTile.getCol() && fftChosenMove.row == aTile.getRow())
+                    aTile.setFFTChosen();
             }
         }
 
         // Turns to terminal
-        ArrayList<Move> moves = Logic.legalMoves(state.getTurn(), state);
         ArrayList<String> turnsToTerminalList = getScores(moves);
 
         for (int i = 0; i < moves.size(); i++) {
@@ -367,7 +390,8 @@ public class Controller {
             State s = new State(state).getNextState(m);
             if (Logic.gameOver(s)) {
                 turnsToTerminalList.add("0");
-            } else turnsToTerminalList.add(Database.turnsToTerminal(state.getTurn(), s));
+            } else
+                turnsToTerminalList.add(Database.turnsToTerminal(state.getTurn(), s));
         }
         return turnsToTerminalList;
     }

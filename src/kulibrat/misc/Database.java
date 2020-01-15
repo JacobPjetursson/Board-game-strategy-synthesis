@@ -16,7 +16,6 @@ import kulibrat.game.Move;
 import kulibrat.game.State;
 import kulibrat.gui.Dialogs.OverwriteDBDialog;
 import misc.Config;
-import org.ggp.base.util.statemachine.MachineState;
 
 import java.sql.*;
 import java.util.*;

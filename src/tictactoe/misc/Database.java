@@ -4,7 +4,6 @@ import fftlib.game.FFTDatabase;
 import fftlib.game.FFTStateMapping;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
-import org.ggp.base.util.statemachine.MachineState;
 import tictactoe.ai.StateMapping;
 import tictactoe.game.Logic;
 import tictactoe.game.Move;
@@ -12,7 +11,6 @@ import tictactoe.game.State;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 
 import static misc.Config.PLAYER1;
 import static misc.Config.PLAYER2;
@@ -47,6 +45,8 @@ public class Database implements FFTDatabase {
 
     // Outputs a string which is the amount of turns to a terminal node, based on a score from the database entry
     public static String turnsToTerminal(int turn, State n) {
+        if (queryState(n) == null)
+            return "0";
         int score = queryState(n).score;
 
         if (score > 0 && score < 1000) { // Draw
@@ -112,7 +112,7 @@ public class Database implements FFTDatabase {
     }
 
     // Fetches the best play corresponding to the input node
-    private static StateMapping queryState(State n) {
+    public static StateMapping queryState(State n) {
         return (StateMapping) lookupTable.get(n);
     }
 

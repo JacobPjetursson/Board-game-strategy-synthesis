@@ -25,6 +25,7 @@ public class ShowFFTPane extends VBox {
     FFT fft;
     FFTState state;
     private ListView<VBox> lw;
+    private static final int ROW_SIZE = 25;
 
     public ShowFFTPane() {
         setAlignment(Pos.CENTER);
@@ -36,7 +37,7 @@ public class ShowFFTPane extends VBox {
         lw = new ListView<>();
         lw.setPickOnBounds(false);
         lw.setPrefHeight(500);
-        lw.setPrefWidth(500);
+        lw.setPrefWidth(400);
 
 
         lw.setSelectionModel(new NoSelectionModel<>());
@@ -57,12 +58,14 @@ public class ShowFFTPane extends VBox {
         boolean ruleApplied = false;
         for (int i = 0; i < fft.ruleGroups.size(); i++) {
             // Rule group
-            RuleGroup rg = fft.ruleGroups.get(i);
             VBox rgVBox = new VBox(10);
-            rgVBox.setAlignment(Pos.CENTER);
+            rgVBox.setAlignment(Pos.CENTER_LEFT);
+            RuleGroup rg = fft.ruleGroups.get(i);
+            /* Uncomment for RG name being shown
             Label rgLabel = new Label((i + 1) + ": " + rg.name);
             rgLabel.setFont(Font.font("Verdana", 18));
             rgVBox.getChildren().add(rgLabel);
+            */
             for (int j = 0; j < rg.rules.size(); j++) {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r);
@@ -78,5 +81,9 @@ public class ShowFFTPane extends VBox {
             ruleGroups.add(rgVBox);
         }
         lw.setItems(ruleGroups);
+        int rows = 0;
+        for (int i = 0; i < ruleGroups.size(); i++)
+            rows += ruleGroups.get(0).getChildren().size() + 1;
+        lw.setPrefHeight(rows * ROW_SIZE);
     }
 }

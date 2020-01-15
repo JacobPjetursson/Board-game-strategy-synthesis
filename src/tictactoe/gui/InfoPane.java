@@ -46,7 +46,7 @@ public class InfoPane extends AnchorPane {
         skippedTurn = new Label();
         skippedTurn.setFont(Font.font("Verdana", 10));
         VBox infoBox = new VBox(turnLabel, turnNumberLabel, modeLabel, skippedTurn);
-        infoBox.setAlignment(Pos.TOP_LEFT);
+        infoBox.setAlignment(Pos.CENTER_LEFT);
         infoBox.setSpacing(8);
 
         getChildren().add(infoBox);
@@ -54,17 +54,17 @@ public class InfoPane extends AnchorPane {
         AnchorPane.setRightAnchor(infoBox, 10.0);
 
         // ShowFFTPane
-        if (mode == HUMAN_VS_AI) {
-            showFFTPane = new ShowFFTPane();
-            showFFTPane.setAlignment(Pos.CENTER);
-            getChildren().add(showFFTPane);
-        }
+        showFFTPane = new ShowFFTPane();
+        showFFTPane.setAlignment(Pos.CENTER);
+        AnchorPane.setTopAnchor(showFFTPane, 0.0);
+        AnchorPane.setBottomAnchor(showFFTPane, 0.0);
+        getChildren().add(showFFTPane);
     }
 
     public void update(Controller cont) {
         currFFT = cont.getCurrFFT();
         state = cont.getState();
-        if (mode == HUMAN_VS_AI)
+        if (mode != AI_VS_AI)
             showFFTPane.update(currFFT, state);
         turnNumberLabel.setText("Turns Played: " + cont.getTurnNo());
         skippedTurn.setText("");

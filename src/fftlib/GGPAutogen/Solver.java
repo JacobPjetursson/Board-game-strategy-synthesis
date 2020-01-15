@@ -23,7 +23,6 @@ public class Solver {
     private static int CURR_MAX_DEPTH;
     private static int winNodes, drawNodes, lossNodes;
     private static HashMap<MachineState, GGPMapping> lookupTable;
-    private static StateMachine sm;
     private static Role p1Role, p2Role, solverRole;
     private static Move noop;
 
@@ -31,17 +30,16 @@ public class Solver {
 
 
     public Solver() {
-        this.sm = FFTManager.sm;
         lookupTable = new HashMap<>();
-        p1Role = FFTManager.p1role;
-        p2Role = FFTManager.p2role;
+        p1Role = GGPManager.p1role;
+        p2Role = GGPManager.p2role;
         solverRole = p1Role; // role needs to be consistent when solving, doesn't matter which is chosen
-        noop = FFTManager.noop;
+        noop = GGPManager.noop;
     }
 
     private Role getStateRole(MachineState ms) {
         try {
-            List<Move> moves = sm.getLegalMoves(ms, p1Role);
+            List<Move> moves = GGPManager.getLegalMoves(ms, p1Role);
             return (moves.size() == 1 && moves.get(0).equals(noop)) ? p2Role : p1Role;
         } catch(MoveDefinitionException e) {
             return p2Role;
@@ -53,7 +51,7 @@ public class Solver {
         System.out.println("Solving the game");
         long timeStart = System.currentTimeMillis();
         boolean done = false;
-        maxSentences = sm.getInitialState().getContents().size();
+        maxSentences = GGPManager.getInitialState().getContents().size();
         int doneCounter = 0;
         while (!done) {
             int prevSize = lookupTable.size();
@@ -65,7 +63,7 @@ public class Solver {
             lossNodes = 0;
             CURR_MAX_DEPTH += 1;
             System.out.println("Minimax iterative depth: " + CURR_MAX_DEPTH + ". Size of solution: " + lookupTable.size());
-            MachineState initialState = sm.getInitialState();
+            MachineState initialState = GGPManager.getInitialState();
             minimax(initialState.clone(), CURR_MAX_DEPTH);
 
 
@@ -81,28 +79,28 @@ public class Solver {
     }
 
     // Is called for every depth limit of the iterative deepening function. Classic minimax with no pruning
-    private GGPMapping minimax(MachineState state, int depth) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
+    private GGPMapping minimax(MachineState ms, int depth) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
         // TODO - crucial to speed up this process
         Move bestMove = null;
-        Role stateRole = getStateRole(state); // TODO - scale to other games and more than 2 players
+        Role stateRole = getStateRole(ms); // TODO - scale to other games and more than 2 players
         int bestScore = (stateRole.equals(solverRole)) ? Integer.MIN_VALUE : Integer.MAX_VALUE; // TODO - same as above
         int score;
-        if (sm.isTerminal(state) || depth == 0) {
-            return new GGPMapping(bestMove, heuristic(state), depth, stateRole);
+        if (GGPManager.isTerminal(ms) || depth == 0) {
+            return new GGPMapping(bestMove, heuristic(ms), depth, stateRole);
         }
-        GGPMapping mapping = lookupTable.get(state);
+        GGPMapping mapping = lookupTable.get(ms);
         if (mapping != null && depth <= mapping.depth) {
             return mapping;
         }
 
         boolean debug = false;
         if (debug) {
-            testGameRules(state);
+            testGameRules(ms);
         }
 
 
-        for (Move move : sm.getLegalMoves(state, stateRole)) {
-            MachineState child = FFTManager.getNextState(state, move);
+        for (Move move : GGPManager.getLegalMoves(ms, stateRole)) {
+            MachineState child = GGPManager.getNextState(ms, move);
             score = minimax(child, depth - 1).score;
             if (score > 1000)
                 score--;
@@ -122,7 +120,7 @@ public class Solver {
             }
         }
         if (mapping == null || depth > mapping.depth) {
-            lookupTable.put(state,
+            lookupTable.put(ms,
                     new GGPMapping(bestMove, bestScore, depth, stateRole));
         }
         if (bestScore > 1000) {
@@ -137,10 +135,10 @@ public class Solver {
     }
 
     // Heuristic function which values a win with 2000, and -2000 for a loss. All other nodes are 0
-    private int heuristic(MachineState state) throws GoalDefinitionException {
-        if (sm.isTerminal(state)) {
-            List<Role> winners = FFTManager.getWinners(state);
-            if (winners.size() == sm.getRoles().size())
+    private int heuristic(MachineState ms) throws GoalDefinitionException {
+        if (GGPManager.isTerminal(ms)) {
+            List<Role> winners = GGPManager.getWinners(ms);
+            if (winners.size() == GGPManager.getRoles().size())
                 return 0;
             if (winners.contains(solverRole)) // TODO - scale to several players
                 return 2000;
@@ -150,9 +148,9 @@ public class Solver {
         return 0;
     }
 
-    private boolean testGameRules(MachineState state) throws MoveDefinitionException {
+    private boolean testGameRules(MachineState ms) throws MoveDefinitionException {
         State testState = new State();
-        for (GdlSentence sentence : state.getContents()) {
+        for (GdlSentence sentence : ms.getContents()) {
             String s = sentence.toString();
             if (s.contains("pieces_left redplayer ")) {
                 String pieces_red = Character.toString(s.split("pieces_left redplayer ")[1].charAt(0));
@@ -187,7 +185,7 @@ public class Solver {
                     testState.setBoardEntry(Integer.parseInt(row) - 1, Integer.parseInt(col) - 1, PLAYER2);
             }
         }
-        List<Move> legalMoves = sm.getLegalMoves(state, FFTManager.getStateRole(state));
+        List<Move> legalMoves = GGPManager.getLegalMoves(ms, GGPManager.getRole(ms));
         Set<kulibrat.game.Move> kMoves = new HashSet<>();
         for (Move move : legalMoves) {
             String m = move.toString();
@@ -232,9 +230,9 @@ public class Solver {
             }
         }
         HashSet<kulibrat.game.Move> moveSet = new HashSet<>(testState.getLegalMoves());
-        if (maxSentences != state.getContents().size() || !kMoves.equals(moveSet)) {
+        if (maxSentences != ms.getContents().size() || !kMoves.equals(moveSet)) {
             System.out.println("ERROR");
-            System.out.println("MACHINESTATE: " + state);
+            System.out.println("MACHINESTATE: " + ms);
             System.out.println("TESTSTATE: " + testState);
             System.out.println("TESTSTATE PIECES LEFT: " + testState.getUnplaced(PLAYER1) + " " + testState.getUnplaced(PLAYER2));
             System.out.println("MACHINESTATE MOVES: " + legalMoves);

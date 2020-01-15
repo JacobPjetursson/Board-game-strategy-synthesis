@@ -25,7 +25,6 @@ public class FFTAutoGen {
     private static int winner;
     private static boolean detailedDebug = false;
     private static boolean fullRules = false; // mainly for debug
-    private static boolean try_all_combinations = false;
     public static boolean verify_single_strategy = false; // build fft for specific strategy
 
     public static FFT generateFFT(int perspective_, int winner_) throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
@@ -167,7 +166,7 @@ public class FFTAutoGen {
 
     }
 
-    private static Rule addRule(FFTState s) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
+    private static Rule addRule(FFTState s) {
         HashSet<Literal> minSet = new HashSet<>();
         HashSet<Literal> literals = s.getAllLiterals();
         ArrayList<Action> actions = new ArrayList<>();
@@ -186,7 +185,7 @@ public class FFTAutoGen {
             return new Rule(minSet, actions.get(0));
 
         Rule r;
-        if (try_all_combinations) {
+        if (NONGREEDY_AUTOGEN) {
             r = new Rule();
             r.setPreconditions(new Clause(minSet));
         } else {
@@ -206,7 +205,7 @@ public class FFTAutoGen {
             System.out.println("ORIGINAL SCORE: " + mapping.getScore());
         }
 
-        if (try_all_combinations) {
+        if (NONGREEDY_AUTOGEN) {
             LinkedList<Literal> copy = new LinkedList<>(literals);
             LinkedList<Literal> bestPath = new LinkedList<>();
             Action chosenAction = null;
@@ -248,7 +247,7 @@ public class FFTAutoGen {
         return r;
     }
 
-    private static LinkedList<Literal> getBestRemovalPath(LinkedList<Literal> literals, Rule r, LinkedList<Literal> path) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
+    private static LinkedList<Literal> getBestRemovalPath(LinkedList<Literal> literals, Rule r, LinkedList<Literal> path) {
         ListIterator<Literal> it = literals.listIterator();
         LinkedList<Literal> bestPath = path;
 

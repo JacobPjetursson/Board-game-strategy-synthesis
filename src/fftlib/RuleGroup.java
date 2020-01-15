@@ -2,6 +2,8 @@ package fftlib;
 
 import java.util.ArrayList;
 
+import static misc.Config.USE_GGP;
+
 public class RuleGroup {
     public ArrayList<Rule> rules;
     public String name;
@@ -36,20 +38,12 @@ public class RuleGroup {
         sb.append("-----------------\n");
         return sb.toString();
     }
-/*
+
     int getAmountOfPreconditions() {
         int precons = 0;
         for (Rule r : rules) {
             if (r.multiRule) continue; // TODO - fuck this shit
-            precons += r.preconditions.size();
-        }
-        return precons;
-    }
-    */
-    int getAmountOfPreconditions() {
-        int precons = 0;
-        for (Rule r : rules) {
-            precons += r.sentences.size();
+            precons += (USE_GGP) ? r.sentences.size() : r.preconditions.size();
         }
         return precons;
     }

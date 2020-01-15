@@ -2,6 +2,7 @@ package kulibrat.FFT;
 
 import fftlib.Action;
 import fftlib.Literal;
+import fftlib.Rule;
 import fftlib.game.*;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
@@ -11,8 +12,10 @@ import kulibrat.game.Move;
 import kulibrat.game.State;
 import kulibrat.misc.Database;
 import misc.Config;
+import org.ggp.base.util.gdl.grammar.GdlSentence;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import static fftlib.Literal.PIECEOCC_ANY;
 import static fftlib.game.Transform.TRANS_HREF;
@@ -76,6 +79,14 @@ public class GameSpecifics implements FFTGameSpecifics {
             }
         }
         return s;
+    }
+
+    @Override
+    public Rule gdlToRule(String precons, String action) {
+
+        HashSet<Literal> literals = new HashSet<>();
+        Action a = new Action();
+        return null;
     }
 
     @Override

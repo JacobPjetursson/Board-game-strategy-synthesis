@@ -21,6 +21,7 @@ public class PlayPane extends HBox {
 
     private void setup() {
         setAlignment(Pos.CENTER);
+        setSpacing(15);
         setPrefSize(Config.WIDTH, Config.HEIGHT);
         setStyle("-fx-background-color: rgb(255, 255, 255);");
     }

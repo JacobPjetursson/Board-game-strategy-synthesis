@@ -1,6 +1,7 @@
 package fftlib;
 
 import fftlib.GGPAutogen.Database;
+import fftlib.GGPAutogen.GGPManager;
 import fftlib.GGPAutogen.GGPMapping;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
@@ -44,9 +45,9 @@ public class FFT {
     }
 
     public boolean verify(int team, boolean complete) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
-        return verify(team, complete, null);
+        return (USE_GGP) ? verifyGGP(team, complete, null) : verify(team, complete, null);
     }
-/*
+
     public boolean verify(int team, boolean complete, HashMap<FFTState, FFTStateMapping> strategy) {
         if (team == PLAYER_ANY)
             return verify(PLAYER1, complete, strategy) && verify(PLAYER2, complete, strategy);
@@ -84,7 +85,6 @@ public class FFT {
                 ArrayList<? extends FFTMove> nonLosingMoves = FFTManager.db.nonLosingMoves(state);
                 // If move is null, check that all possible (random) moves are ok
                 if (move == null) {
-
                     if (!complete && strategy != null) { // only expand on move from strategy
                         FFTStateMapping info = strategy.get(state);
                         if (info == null) {
@@ -136,12 +136,12 @@ public class FFT {
         }
         return true;
     }
-*/
 
-    public boolean verify(int team, boolean complete, HashMap<MachineState, GGPMapping> strategy) throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
+
+    public boolean verifyGGP(int team, boolean complete, HashMap<MachineState, GGPMapping> strategy) throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
         if (team == PLAYER_ANY)
-            return verify(PLAYER1, complete, strategy) && verify(PLAYER2, complete, strategy);
-        MachineState initialState = FFTManager.sm.getInitialState();
+            return verifyGGP(PLAYER1, complete, strategy) && verifyGGP(PLAYER2, complete, strategy);
+        MachineState initialState = GGPManager.getInitialState();
         LinkedList<MachineState> frontier = new LinkedList<>();
         HashSet<MachineState> closedSet = new HashSet<>();
         frontier.add(initialState);
@@ -157,11 +157,11 @@ public class FFT {
         }
 
         while (!frontier.isEmpty()) {
-            MachineState state = frontier.pop();
-            Role currRole = FFTManager.getStateRole(state);
-            int currTurn = FFTManager.roleToPlayer(currRole);
-            if (FFTManager.sm.isTerminal(state)) {
-                List<Integer> winners = FFTManager.getPlayerWinners(state);
+            MachineState ms = frontier.pop();
+            Role currRole = GGPManager.getRole(ms);
+            int currTurn = GGPManager.roleToPlayer(currRole);
+            if (GGPManager.isTerminal(ms)) {
+                List<Integer> winners = GGPManager.getPlayerWinners(ms);
                 if (winners == null) {// should not happen
                     return false;
                 }
@@ -172,48 +172,46 @@ public class FFT {
                     return false;
                 }
             } else if (team != currTurn) {
-                for (MachineState child : FFTManager.sm.getNextStates(state))
+                for (MachineState child : GGPManager.getNextStates(ms))
                     if (!closedSet.contains(child)) {
                         closedSet.add(child);
                         frontier.add(child);
                     }
             } else {
-                Move move = apply(state);
-                Set<Move> nonLosingMoves = Database.nonLosingMoves(state);
+                Move move = apply(ms);
+                Set<Move> nonLosingMoves = Database.nonLosingMoves(ms);
                 // If move is null, check that all possible (random) moves are ok
                 if (move == null) {
 
                     if (!complete && strategy != null) { // only expand on move from strategy
-                        GGPMapping mapping = strategy.get(state);
+                        GGPMapping mapping = strategy.get(ms);
                         if (mapping == null) {
                             System.out.println("Given strategy is not a winning strategy");
                             return false;
                         }
-                        MachineState nextState = FFTManager.getNextState(state, mapping.getMove());
+                        MachineState nextState = GGPManager.getNextState(ms, mapping.getMove());
                         if (!closedSet.contains(nextState)) {
                             closedSet.add(nextState);
                             frontier.add(nextState);
                         }
                         continue;
                     }
-                    for (Move m : FFTManager.sm.getLegalMoves(state, currRole)) {
+                    for (Move m : GGPManager.getLegalMoves(ms, currRole)) {
                         if (nonLosingMoves.contains(m)) {
-                            MachineState nextState = FFTManager.getNextState(state, m);
+                            MachineState nextState = GGPManager.getNextState(ms, m);
                             if (!closedSet.contains(nextState)) {
                                 closedSet.add(nextState);
                                 frontier.add(nextState);
                             }
                         } else if (complete) {
-                            //failingPoint = new FFTStateAndMove(state, m, true);
                             return false;
                         }
                     }
                 } else if (!nonLosingMoves.contains(move)) {
-                    //failingPoint = new FFTStateAndMove(state, move, false);
                     return false;
                 } else {
                     if (!complete && strategy != null) { // check that move is same as from strategy
-                        GGPMapping mapping = strategy.get(state);
+                        GGPMapping mapping = strategy.get(ms);
                         if (mapping == null) {
                             System.out.println("Given strategy is not a winning strategy");
                             return false;
@@ -223,7 +221,7 @@ public class FFT {
                         }
 
                     }
-                    MachineState nextState = FFTManager.getNextState(state, move);
+                    MachineState nextState = GGPManager.getNextState(ms, move);
                     if (!closedSet.contains(nextState)) {
                         closedSet.add(nextState);
                         frontier.add(nextState);
@@ -246,7 +244,7 @@ public class FFT {
         }
         return null;
     }
-/*
+
     public FFTMove apply(FFTState state) {
         for (RuleGroup rg : ruleGroups) {
             for (Rule r : rg.rules) {
@@ -258,7 +256,7 @@ public class FFT {
         }
         return null;
     }
-    */
+
     public int getAmountOfRules() {
         int ruleSize = 0;
         for (RuleGroup rg : ruleGroups) {
@@ -268,14 +266,6 @@ public class FFT {
     }
 
     public int getAmountOfPreconditions() {
-        int precSize = 0;
-        for (RuleGroup rg : ruleGroups) {
-            precSize += rg.getAmountOfPreconditions();
-        }
-        return precSize;
-    }
-
-    public int getAmountOfSentences() {
         int precSize = 0;
         for (RuleGroup rg : ruleGroups) {
             precSize += rg.getAmountOfPreconditions();
@@ -334,35 +324,31 @@ public class FFT {
         }
         return redundantRules;
     }
-/*
+    // TODO - fix this ugly beast, either by making common type for precons and sentences or by typecasting
     private void minimizePreconditions(int team) throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
         for (RuleGroup rg : ruleGroups) {
             for(Rule r : rg.rules) {
                 if (r.multiRule) continue; // TODO - support multirule when minimizing?
-                ArrayList<Literal> literals = new ArrayList<>();
-                for (Literal l : r.preconditions.literals)
-                    literals.add(new Literal(l));
+                if (USE_GGP) {
+                    Set<GdlSentence> sentences = new HashSet<>();
+                    for (GdlSentence s : r.sentences)
+                        sentences.add(s.clone());
 
-                for (Literal l : literals) {
-                    r.removePrecondition(l);
-                    if (!verify(team, true))
-                        r.addPrecondition(l);
-                }
-            }
-        }
-    }
-*/
-    private void minimizePreconditions(int team) throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
-        for (RuleGroup rg : ruleGroups) {
-            for(Rule r : rg.rules) {
-                Set<GdlSentence> sentences = new HashSet<>();
-                for (GdlSentence s : r.sentences)
-                    sentences.add(s.clone());
+                    for (GdlSentence s : sentences) {
+                        r.removePrecondition(s);
+                        if (!verify(team, true))
+                            r.addPrecondition(s);
+                    }
+                } else {
+                    ArrayList<Literal> literals = new ArrayList<>();
+                    for (Literal l : r.preconditions.literals)
+                        literals.add(l.clone());
 
-                for (GdlSentence s : sentences) {
-                    r.removePrecondition(s);
-                    if (!verify(team, true))
-                        r.addPrecondition(s);
+                    for (Literal l : literals) {
+                        r.removePrecondition(l);
+                        if (!verify(team, true))
+                            r.addPrecondition(l);
+                    }
                 }
             }
         }

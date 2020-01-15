@@ -28,13 +28,19 @@ public class Config {
     public static final int CLICK_DISABLED = 1;
     public static final int CLICK_DEFAULT = 2;
 
+    // Changed by program
+    public static int SCORELIMIT = 1;
+    public static boolean USE_GGP = false;
+    public static boolean USE_AUTOGEN = true;
+    public static int AUTOGEN_PERSPECTIVE = PLAYER1;
+    public static boolean RANDOM_RULE_ORDERING = false;
+    public static boolean MINIMIZE_PRECONDITIONS = true;
+
     // PREFERENCES / CUSTOMIZATION
     // GAMES
     public static final int KULIBRAT = 0;
-    public static int SCORELIMIT = 1; // Set by player once (kulibrat)
-    public static boolean USE_AUTOGEN = true;
-    public static int AUTOGEN_PERSPECTIVE = PLAYER1;
     public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";
+    public static final boolean USE_GGP_PARSER = true;
 
     public static final int TICTACTOE = 1;
     public static final boolean simpleTicTacToe = false;
@@ -44,7 +50,7 @@ public class Config {
     public static final int kuliBHeight = 4;
     public static final int kuliBWidth = 3;
 
-    public static boolean RANDOM_RULE_ORDERING = false;
-    public static boolean MINIMIZE_PRECONDITIONS = true;
+    public static final boolean NONGREEDY_AUTOGEN = true;
     public static final int ZOBRIST_SEED = 0; // 0 is required for database
+    public static final boolean RANDOM_SEED = true;
 }

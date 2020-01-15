@@ -17,10 +17,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import tictactoe.ai.StateMapping;
 import tictactoe.game.*;
 import tictactoe.gui.board.PlayBox.PlayBox;
 import tictactoe.misc.Database;
 
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 
 import static misc.Config.*;
@@ -30,7 +32,7 @@ import static tictactoe.gui.board.BoardTile.greenStr;
 public class ReviewPane extends VBox {
     private ListView<HBox> lw;
 
-    public ReviewPane(Stage primaryStage, Controller currCont) {
+    public ReviewPane(Stage primaryStage, Controller cont) {
         HBox bottomBox = new HBox(10);
         VBox.setMargin(bottomBox, new Insets(10));
         bottomBox.setAlignment(Pos.BOTTOM_RIGHT);
@@ -44,12 +46,12 @@ public class ReviewPane extends VBox {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
 
-            if (Logic.gameOver(currCont.getState())) {
+            if (Logic.gameOver(cont.getState())) {
                 Stage newStage = new Stage();
-                newStage.setScene(new Scene(new EndGamePane(primaryStage, Logic.getWinner(currCont.getState()),
-                        currCont), 500, 300));
+                newStage.setScene(new Scene(new EndGamePane(primaryStage, Logic.getWinner(cont.getState()),
+                        cont), 500, 300));
                 newStage.initModality(Modality.APPLICATION_MODAL);
-                newStage.initOwner(currCont.getWindow());
+                newStage.initOwner(cont.getWindow());
                 newStage.setOnCloseRequest(Event::consume);
                 newStage.show();
             }
@@ -58,14 +60,20 @@ public class ReviewPane extends VBox {
         lw = new ListView<>();
         lw.setPickOnBounds(false);
         ObservableList<HBox> prevStateBoxes = FXCollections.observableArrayList();
-        for (StateAndMove ps : currCont.getPreviousStates()) {
+        for (StateAndMove ps : cont.getPreviousStates()) {
+            State n = new State(ps.getState());
+            Move m = ps.getMove();
+            State next = n.getNextState(m);
+            ArrayList<Move> nonLosingMoves = Database.nonLosingMoves(n);
+            StateMapping sm = Database.queryState(next);
+            int winner = (sm == null) ? Logic.getWinner(next) : sm.getWinner();
+            String winnerStr = (winner == n.getTurn()) ? "win" : (winner == PLAYER_NONE) ? "draw" : "loss";
+
+            PlayBox playBox = getPlayBox(cont, ps, nonLosingMoves);
             HBox h = new HBox(35);
             VBox vBox = new VBox(18);
             vBox.setAlignment(Pos.CENTER);
             vBox.setFillWidth(true);
-            State n = new State(ps.getState());
-            ArrayList<Move> bestMoves = Database.bestMoves(n);
-            PlayBox playBox = getPlayBox(currCont, ps, bestMoves);
             Label turnL = new Label("Turns Played: " + (ps.getTurnNo()));
             turnL.setFont(Font.font("Verdana", 14));
             turnL.setAlignment(Pos.TOP_CENTER);
@@ -73,11 +81,14 @@ public class ReviewPane extends VBox {
 
             String moveStr = String.format("Add piece at (row, col):\n" +
                             "         (%d, %d)", ps.getMove().row + 1, ps.getMove().col + 1);
+            if (USE_GGP_PARSER)
+                moveStr = String.format("Set mark at (x,y):\n" +
+                            "        (%d, %d)", ps.getMove().col + 1, ps.getMove().row + 1);
             Label moveL = new Label(moveStr);
             vBox.getChildren().add(moveL);
 
             Label performance;
-            if (bestMoves.contains(ps.getMove())) {
+            if (nonLosingMoves.contains(ps.getMove())) {
                 h.setStyle("-fx-background-color: rgba(0, 255, 0, 0.5);");
                 performance = new Label("Perfect move");
             } else {
@@ -87,18 +98,11 @@ public class ReviewPane extends VBox {
             performance.setAlignment(Pos.CENTER);
             vBox.getChildren().add(performance);
 
-            State nextState = n.getNextState(ps.getMove());
-            String scoreStr;
-            if (Logic.gameOver(nextState)) {
-                scoreStr = "0";
-            } else {
-                scoreStr = Database.turnsToTerminal(currCont.getState().getTurn(), nextState);
-            }
-            int score;
-            if (scoreStr.equals("DRAW")) score = 0;
-            else score = Integer.parseInt(scoreStr);
-            Label turnsToTerminal = new Label("Turns to " + ((score >= 0) ?
-                    "win " : "loss ") + "\nafter move: " + scoreStr);
+            String turnsToTerminalStr = Database.turnsToTerminal(cont.getState().getTurn(), next);
+            if (turnsToTerminalStr.startsWith("-"))
+                turnsToTerminalStr = turnsToTerminalStr.substring(1);
+            Label turnsToTerminal = new Label("Turns to " + winnerStr +
+                    "\nafter move: " + turnsToTerminalStr);
             turnsToTerminal.setAlignment(Pos.CENTER);
             vBox.getChildren().add(turnsToTerminal);
 
@@ -114,15 +118,15 @@ public class ReviewPane extends VBox {
             stage.close();
 
             int index = lw.getSelectionModel().getSelectedIndex();
-            StateAndMove selected = currCont.getPreviousStates().get(index);
-            Controller selectedCont = new Controller(primaryStage, currCont.getPlayerInstance(PLAYER1),
-                    currCont.getPlayerInstance(PLAYER2), selected.getState());
+            StateAndMove selected = cont.getPreviousStates().get(index);
+            Controller selectedCont = new Controller(primaryStage, cont.getPlayerInstance(PLAYER1),
+                    cont.getPlayerInstance(PLAYER2), selected.getState());
 
             selectedCont.setTurnNo(selected.getTurnNo());
             selectedCont.getPlayArea().update(selectedCont);
 
             ArrayList<StateAndMove> stateAndMoves = new ArrayList<>();
-            for (StateAndMove ps : currCont.getPreviousStates()) {
+            for (StateAndMove ps : cont.getPreviousStates()) {
                 if (ps.getTurnNo() < selectedCont.getTurnNo()) {
                     stateAndMoves.add(ps);
                 }
