@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="JGoodiesForms">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/ggp-base/lib/JGoodiesForms" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/ggp-base/lib/JGoodiesForms" recursive="false" />
+  </library>
+</component>

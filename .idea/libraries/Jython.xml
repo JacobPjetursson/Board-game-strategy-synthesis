@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Jython">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/ggp-base/lib/Jython" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/ggp-base/lib/Jython" recursive="false" />
+  </library>
+</component>

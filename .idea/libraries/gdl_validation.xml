@@ -1,11 +1,13 @@
 <component name="libraryTable">
   <library name="gdl-validation">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../ggp-base-master/lib/gdl-validation/java-cup-11b-runtime-2015.03.26.jar!/" />
-      <root url="jar://$PROJECT_DIR$/../ggp-base-master/lib/gdl-validation/gdl-validation-0.2.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/../ggp-base-master/lib/gdl-validation/gdl-validation-0.2.2-sources.jar!/" />
+      <root url="file://$PROJECT_DIR$/ggp-base/lib/gdl-validation" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/ggp-base/lib/gdl-validation" />
+    </SOURCES>
+    <jarDirectory url="file://$PROJECT_DIR$/ggp-base/lib/gdl-validation" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/ggp-base/lib/gdl-validation" recursive="false" type="SOURCES" />
   </library>
 </component>

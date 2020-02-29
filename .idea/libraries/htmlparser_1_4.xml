@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="htmlparser-1.4">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../ggp-base-master/lib/Htmlparser/htmlparser-1.4.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

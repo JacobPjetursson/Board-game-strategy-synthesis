@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/FFT.iml" filepath="$PROJECT_DIR$/.idea/FFT.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../ggp-base-master/src/main/ggp-base.iml" filepath="$PROJECT_DIR$/../ggp-base-master/src/main/ggp-base.iml" />
     </modules>
   </component>
 </project>

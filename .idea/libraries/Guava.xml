@@ -1,10 +1,13 @@
 <component name="libraryTable">
   <library name="Guava">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../ggp-base-master/lib/Guava/guava-14.0.1-sources.jar!/" />
-      <root url="jar://$PROJECT_DIR$/../ggp-base-master/lib/Guava/guava-14.0.1.jar!/" />
+      <root url="file://$PROJECT_DIR$/ggp-base/lib/Guava" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/ggp-base/lib/Guava" />
+    </SOURCES>
+    <jarDirectory url="file://$PROJECT_DIR$/ggp-base/lib/Guava" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/ggp-base/lib/Guava" recursive="false" type="SOURCES" />
   </library>
 </component>

@@ -5,9 +5,22 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/ggp-base/src/main/java" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="ggp-base" />
+    <orderEntry type="library" name="Batik" level="project" />
+    <orderEntry type="library" name="Clojure" level="project" />
+    <orderEntry type="library" name="FlyingSaucer" level="project" />
+    <orderEntry type="library" name="gdl-validation" level="project" />
+    <orderEntry type="library" name="Guava" level="project" />
+    <orderEntry type="library" name="Htmlparser" level="project" />
+    <orderEntry type="library" name="javassist" level="project" />
+    <orderEntry type="library" name="JFreeChart" level="project" />
+    <orderEntry type="library" name="JGoodiesForms" level="project" />
+    <orderEntry type="library" name="JUnit" level="project" />
+    <orderEntry type="library" name="Jython" level="project" />
+    <orderEntry type="library" name="reflections" level="project" />
+    <orderEntry type="library" name="derby" level="project" />
   </component>
 </module>

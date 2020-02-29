@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="core-renderer">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../ggp-base-master/lib/FlyingSaucer/core-renderer.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

@@ -2,43 +2,54 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d231265c-f2b3-434a-bf07-784b40a64813" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/fftlib/GGPAutogen/GGPManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Clojure.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/FlyingSaucer.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Htmlparser.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/JFreeChart.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/JGoodiesForms.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/JUnit.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Jython.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/javassist.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/reflections.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/external/Base64Coder/Base64Coder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/external/JSON/JSONArray.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/external/JSON/JSONException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/external/JSON/JSONObject.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/external/JSON/JSONString.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/external/JSON/JSONTokener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/external/JSON/README" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/GameServer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/event/ServerAbortedMatchEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/event/ServerCompletedMatchEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/event/ServerConnectionErrorEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/event/ServerIllegalMoveEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/event/ServerMatchUpdatedEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/event/ServerNewGameStateEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/event/ServerNewMatchEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/event/ServerNewMovesEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/event/ServerTimeEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/event/ServerTimeoutEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/request/RequestBuilder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/threads/AbortRequestThread.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/threads/PlayRequestThread.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/threads/PreviewRequestThread.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/threads/RandomPlayRequestThread.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/threads/RequestThread.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/threads/StartRequestThread.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ggp-base/src/main/java/org/ggp/base/server/threads/StopRequestThread.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/FFT.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/FFT.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Batik.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Batik.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Guava.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Guava.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/clojure.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/core_renderer.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/gdl_validation.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/gdl_validation.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/htmlparser_1_4.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/jython.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/reflections_0_9_9_RC1.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fftlib/FFT.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/FFT.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fftlib/FFTManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/FFTManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/GGPAutogen/Database.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/Runner.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/GGPAutogen/Runner.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/Solver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/GGPAutogen/Solver.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fftlib/Literal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/Literal.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fftlib/Rule.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/Rule.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fftlib/RuleGroup.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/RuleGroup.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fftlib/game/FFTAutoGen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/game/FFTAutoGen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fftlib/game/FFTDatabase.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/game/FFTDatabase.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fftlib/game/FFTGameSpecifics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/game/FFTGameSpecifics.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fftlib/gui/FFTInteractivePane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/gui/FFTInteractivePane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fftlib/gui/FFTOverviewPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/gui/FFTOverviewPane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fftlib/gui/ShowFFTPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fftlib/gui/ShowFFTPane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kulibrat/FFT/GameSpecifics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/FFT/GameSpecifics.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kulibrat/ai/Minimax/Zobrist.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/ai/Minimax/Zobrist.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kulibrat/misc/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/kulibrat/misc/Database.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FFT.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/misc/Config.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/misc/Config.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tictactoe/FFT/GameSpecifics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/FFT/GameSpecifics.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tictactoe/ai/LookupTableMinimax.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/ai/LookupTableMinimax.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tictactoe/ai/Zobrist.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/ai/Zobrist.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tictactoe/game/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/game/Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/EndGamePane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/gui/EndGamePane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/InfoPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/gui/InfoPane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/PlayPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/gui/PlayPane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/ReviewPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/gui/ReviewPane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/board/BoardTile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/gui/board/BoardTile.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/board/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/gui/board/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/menu/NewGamePane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/gui/menu/NewGamePane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tictactoe/misc/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/tictactoe/misc/Database.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tictactoeFFT.txt" beforeDir="false" afterPath="$PROJECT_DIR$/tictactoeFFT.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tictactoe_GGP_FFT.txt" beforeDir="false" afterPath="$PROJECT_DIR$/tictactoe_GGP_FFT.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -131,6 +142,9 @@
       </profile-state>
     </entry>
   </component>
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -144,7 +158,7 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.last.edited" value="Libraries" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -245,6 +259,7 @@
       <workItem from="1574217274939" duration="3005000" />
       <workItem from="1574226765436" duration="13456000" />
       <workItem from="1574920388778" duration="1235000" />
+      <workItem from="1582971107615" duration="4206000" />
     </task>
     <servers />
   </component>
@@ -263,5 +278,26 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/fftlib/FFTManager.java</url>
+          <line>107</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/fftlib/Rule.java</url>
+          <line>41</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/kulibrat/misc/Database.java</url>
+          <line>39</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
