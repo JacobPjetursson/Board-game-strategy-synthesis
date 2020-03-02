@@ -5,8 +5,8 @@ import javafx.stage.Stage;
 import tictactoe.game.Controller;
 import tictactoe.game.State;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 
 public class RestartGameDialog extends ConfirmDialog {

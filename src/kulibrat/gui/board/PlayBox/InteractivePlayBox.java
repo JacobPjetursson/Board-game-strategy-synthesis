@@ -17,8 +17,8 @@ import kulibrat.gui.board.BoardTile;
 import java.util.HashSet;
 
 import static fftlib.Literal.*;
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class InteractivePlayBox extends PlayBox {
 

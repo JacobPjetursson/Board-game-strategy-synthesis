@@ -14,7 +14,7 @@ import tictactoe.game.Controller;
 
 import java.net.URL;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 
 public class Player extends VBox {

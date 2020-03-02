@@ -16,7 +16,7 @@ import tictactoe.gui.board.PlayBox.InteractivePlayBox;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 import static tictactoe.gui.board.BoardTile.blueStr;
 
 public class InteractiveState implements InteractiveFFTState {

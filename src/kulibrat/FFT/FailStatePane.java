@@ -13,7 +13,7 @@ import kulibrat.gui.board.PlayBox.StaticPlayBox;
 
 import java.util.ArrayList;
 
-import static misc.Config.CLICK_DISABLED;
+import static misc.Globals.CLICK_DISABLED;
 
 public class FailStatePane implements FFTFailState {
 

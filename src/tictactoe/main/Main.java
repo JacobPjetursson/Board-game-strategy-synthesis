@@ -3,7 +3,7 @@ package tictactoe.main;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import misc.Config;
+import misc.Globals;
 import tictactoe.gui.menu.MenuPane;
 
 public class Main extends Application {
@@ -15,8 +15,8 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Tic Tac Toe");
-        Config.CURRENT_GAME = Config.TICTACTOE;
-        Scene menuScene = new Scene(new MenuPane(this), Config.WIDTH, Config.HEIGHT);
+        Globals.CURRENT_GAME = Globals.TICTACTOE;
+        Scene menuScene = new Scene(new MenuPane(this), Globals.WIDTH, Globals.HEIGHT);
         primaryStage.setScene(menuScene);
 
         primaryStage.show();

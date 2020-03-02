@@ -20,8 +20,8 @@ import kulibrat.gui.menu.Arrow;
 import java.util.ArrayList;
 
 import static kulibrat.game.Logic.POS_NONBOARD;
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class PlayBox extends Group {
     Board board;

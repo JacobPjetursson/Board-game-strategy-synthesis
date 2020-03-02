@@ -7,6 +7,7 @@ import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import fftlib.game.FFTStateAndMove;
 import fftlib.game.FFTStateMapping;
+import misc.Config;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
@@ -18,7 +19,7 @@ import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import java.util.*;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 
 public class FFT {
@@ -45,7 +46,7 @@ public class FFT {
     }
 
     public boolean verify(int team, boolean complete) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
-        return (USE_GGP) ? verifyGGP(team, complete, null) : verify(team, complete, null);
+        return (Config.ENABLE_GGP) ? verifyGGP(team, complete, null) : verify(team, complete, null);
     }
 
     public boolean verify(int team, boolean complete, HashMap<FFTState, FFTStateMapping> strategy) {
@@ -329,7 +330,7 @@ public class FFT {
         for (RuleGroup rg : ruleGroups) {
             for(Rule r : rg.rules) {
                 if (r.multiRule) continue; // TODO - support multirule when minimizing?
-                if (USE_GGP) {
+                if (Config.ENABLE_GGP) {
                     Set<GdlSentence> sentences = new HashSet<>();
                     for (GdlSentence s : r.sentences)
                         sentences.add(s.clone());

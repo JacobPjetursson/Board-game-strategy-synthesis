@@ -21,9 +21,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import misc.Config;
 
-import static misc.Config.PLAYER_ANY;
+import static misc.Globals.PLAYER_ANY;
 
 
 public class FFTFailurePane extends BorderPane {

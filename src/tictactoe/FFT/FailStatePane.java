@@ -13,7 +13,7 @@ import tictactoe.gui.board.PlayBox.PlayBox;
 
 import java.util.ArrayList;
 
-import static misc.Config.CLICK_DISABLED;
+import static misc.Globals.CLICK_DISABLED;
 
 public class FailStatePane implements FFTFailState {
 

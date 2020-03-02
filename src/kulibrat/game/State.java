@@ -5,6 +5,7 @@ import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import kulibrat.ai.Minimax.Zobrist;
 import misc.Config;
+import misc.Globals;
 
 import java.awt.*;
 import java.io.Serializable;
@@ -13,7 +14,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import static kulibrat.game.Logic.POS_NONBOARD;
-import static misc.Config.*;
+import static misc.Config.BHEIGHT;
+import static misc.Config.BWIDTH;
+import static misc.Globals.*;
 
 public class State implements Serializable, FFTState {
     private int[][] board;
@@ -29,14 +32,14 @@ public class State implements Serializable, FFTState {
 
     // Starting Root state
     public State() {
-        board = new int[Config.kuliBHeight][Config.kuliBWidth];
+        board = new int[BHEIGHT][BWIDTH];
         redScore = 0;
         blackScore = 0;
         unplacedRed = 4;
         unplacedBlack = 4;
 
         turn = PLAYER1;
-        scoreLimit = Config.SCORELIMIT;
+        scoreLimit = Globals.SCORELIMIT;
         this.zobrist_key = initZobrist();
     }
 

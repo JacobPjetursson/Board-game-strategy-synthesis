@@ -7,8 +7,8 @@ import fftlib.game.FFTState;
 import java.awt.*;
 import java.util.ArrayList;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class Logic implements FFTLogic {
     public static final int POS_NONBOARD = -1;

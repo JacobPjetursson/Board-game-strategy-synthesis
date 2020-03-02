@@ -16,13 +16,14 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import misc.Config;
+import misc.Globals;
 import tictactoe.game.Controller;
 import tictactoe.game.State;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 public class NewGamePane extends AnchorPane {
-    private int choiceWidth = Config.WIDTH / 3;
+    private int choiceWidth = Globals.WIDTH / 3;
     private String human = "Human";
     private String lookup = "Lookup Table";
     private String fft = "Fast and Frugal Tree";
@@ -34,7 +35,7 @@ public class NewGamePane extends AnchorPane {
     private VBox autogenExtraBox;
 
     NewGamePane() {
-        setPrefSize(Config.WIDTH, Config.HEIGHT);
+        setPrefSize(Globals.WIDTH, Globals.HEIGHT);
         setPadding(new Insets(30, 0, 0, 0));
         setStyle("-fx-background-color: black;");
 
@@ -100,7 +101,7 @@ public class NewGamePane extends AnchorPane {
         autogenCheck.setFont(Font.font("Verdana", 20));
         autogenCheck.setSelected(true);
         autogenCheck.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
-            Config.USE_AUTOGEN = newValue;
+            Config.ENABLE_AUTOGEN = newValue;
 
             if (newValue && !autogenBox.getChildren().contains(autogenExtraBox))
                 autogenBox.getChildren().add(autogenExtraBox);
@@ -163,30 +164,30 @@ public class NewGamePane extends AnchorPane {
         autogenBox.setAlignment(Pos.CENTER);
 
         Button startGame = new Button("Start Game");
-        startGame.setMinWidth(Config.WIDTH / 4);
+        startGame.setMinWidth(Globals.WIDTH / 4);
         startGame.setFont(Font.font("Verdana", 20));
         startGame.setOnMouseClicked(event -> {
             String crossValue = crossChoices.getValue();
             String circleValue = circleChoices.getValue();
             Stage stage = (Stage) getScene().getWindow();
 
-            int playerCrossMode = (crossValue.equals(human)) ? Config.HUMAN :
-                    (crossValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
-            int playerCircleMode = (circleValue.equals(human)) ? Config.HUMAN :
-                    (circleValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
-            if (playerCrossMode != Config.FFT && playerCircleMode != Config.FFT)
-                Config.USE_AUTOGEN = false;
+            int playerCrossMode = (crossValue.equals(human)) ? Globals.HUMAN :
+                    (crossValue.equals(fft)) ? Globals.FFT : Globals.LOOKUP_TABLE;
+            int playerCircleMode = (circleValue.equals(human)) ? Globals.HUMAN :
+                    (circleValue.equals(fft)) ? Globals.FFT : Globals.LOOKUP_TABLE;
+            if (playerCrossMode != Globals.FFT && playerCircleMode != Globals.FFT)
+                Config.ENABLE_AUTOGEN = false;
             new Controller(stage, playerCrossMode,
                     playerCircleMode, new State());
         });
 
         Button back = new Button("Back");
         back.setFont(Font.font("Verdana", 20));
-        back.setMinWidth(Config.WIDTH / 6);
+        back.setMinWidth(Globals.WIDTH / 6);
         back.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
             stage.setScene(new Scene(new MenuPane(),
-                    Config.WIDTH, Config.HEIGHT));
+                    Globals.WIDTH, Globals.HEIGHT));
         });
 
         HBox btnBox = new HBox(startGame, back);

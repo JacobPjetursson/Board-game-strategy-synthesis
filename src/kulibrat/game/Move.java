@@ -5,6 +5,7 @@ import fftlib.Clause;
 import fftlib.Literal;
 import fftlib.game.FFTMove;
 import misc.Config;
+import misc.Globals;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -88,13 +89,13 @@ public class Move implements FFTMove {
     }
 
     public Move reflect() {
-        int[][] board = new int[Config.kuliBWidth][Config.kuliBHeight];
+        int[][] board = new int[Config.BWIDTH][Config.BHEIGHT];
         if (oldCol != POS_NONBOARD)
             board[oldRow][oldCol] = -team;
         if (newCol != POS_NONBOARD)
             board[newRow][newCol] = team;
 
-        int[][] ref = new int[Config.kuliBWidth][Config.kuliBHeight];
+        int[][] ref = new int[Config.BWIDTH][Config.BHEIGHT];
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 ref[i][j] = board[i][board.length - 1 - j];

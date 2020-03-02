@@ -10,11 +10,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
-import misc.Config;
 import tictactoe.game.Controller;
-import tictactoe.game.State;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 
 public class InfoPane extends AnchorPane {

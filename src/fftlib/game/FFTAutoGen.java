@@ -3,13 +3,15 @@ package fftlib.game;
 import fftlib.*;
 import fftlib.FFT;
 import misc.Config;
+import misc.Globals;
 import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import java.util.*;
 
-import static misc.Config.*;
+import static misc.Config.RANDOM_RULE_ORDERING;
+import static misc.Globals.*;
 
 public class FFTAutoGen {
     private static HashMap<? extends FFTState, ? extends FFTStateMapping> lookupTable;
@@ -185,7 +187,7 @@ public class FFTAutoGen {
             return new Rule(minSet, actions.get(0));
 
         Rule r;
-        if (NONGREEDY_AUTOGEN) {
+        if (!Config.GREEDY_AUTOGEN) {
             r = new Rule();
             r.setPreconditions(new Clause(minSet));
         } else {
@@ -205,7 +207,7 @@ public class FFTAutoGen {
             System.out.println("ORIGINAL SCORE: " + mapping.getScore());
         }
 
-        if (NONGREEDY_AUTOGEN) {
+        if (!Config.GREEDY_AUTOGEN) {
             LinkedList<Literal> copy = new LinkedList<>(literals);
             LinkedList<Literal> bestPath = new LinkedList<>();
             Action chosenAction = null;

@@ -7,8 +7,8 @@ import tictactoe.game.Move;
 import tictactoe.gui.board.BoardTile;
 
 import static fftlib.Literal.*;
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 import static tictactoe.gui.board.BoardTile.blueStr;
 
 public class InteractivePlayBox extends PlayBox {

@@ -1,6 +1,7 @@
 package kulibrat.ai.Minimax;
 
 import misc.Config;
+import misc.Globals;
 
 import java.util.Random;
 
@@ -13,13 +14,13 @@ public class Zobrist {
     static {
         Random r = new Random();
         long range = Long.MAX_VALUE;
-        int seed = (Config.USE_AUTOGEN && Config.RANDOM_SEED) ? r.nextInt() : Config.ZOBRIST_SEED;
+        int seed = (Config.ENABLE_AUTOGEN && Config.RANDOM_SEED) ? r.nextInt() : Config.SEED;
         r.setSeed(seed);
         System.out.println("Zobrist seed: " + seed);
 
         // board keys
-        int rows = Config.kuliBHeight;
-        int cols = Config.kuliBWidth;
+        int rows = Config.BHEIGHT;
+        int cols = Config.BWIDTH;
         int unique_pieces = 3;
         board = new long[rows][cols][unique_pieces];
         for (int i = 0; i < board.length; i++) {

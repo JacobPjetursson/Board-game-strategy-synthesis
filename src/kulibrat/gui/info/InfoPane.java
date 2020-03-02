@@ -13,9 +13,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import kulibrat.game.Controller;
 import kulibrat.game.State;
-import misc.Config;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 
 public class InfoPane extends AnchorPane {

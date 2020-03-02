@@ -5,10 +5,11 @@ import javafx.scene.layout.GridPane;
 import kulibrat.game.Controller;
 import kulibrat.game.State;
 import misc.Config;
+import misc.Globals;
 
 public class Board extends GridPane {
-    private static final int boardRows = Config.kuliBHeight;
-    private static final int boardColumns = Config.kuliBWidth;
+    private static final int boardRows = Config.BHEIGHT;
+    private static final int boardColumns = Config.BWIDTH;
     private BoardTile[][] tiles;
     private int pieceRadius;
     private int clickMode;

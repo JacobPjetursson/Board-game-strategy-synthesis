@@ -17,14 +17,15 @@ import javafx.stage.Stage;
 import kulibrat.game.Controller;
 import kulibrat.game.State;
 import misc.Config;
+import misc.Globals;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
-import static misc.Config.PLAYER_ANY;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
+import static misc.Globals.PLAYER_ANY;
 
 
 public class NewGamePane extends AnchorPane {
-    private int choiceWidth = Config.WIDTH / 3;
+    private int choiceWidth = Globals.WIDTH / 3;
     private int textFieldWidth = choiceWidth - 125;
     private String human = "Human";
     private String mcts = "Monte Carlo Tree Search";
@@ -46,7 +47,7 @@ public class NewGamePane extends AnchorPane {
     private VBox autogenBox;
 
     NewGamePane() {
-        setPrefSize(Config.WIDTH, Config.HEIGHT);
+        setPrefSize(Globals.WIDTH, Globals.HEIGHT);
         setPadding(new Insets(30, 0, 0, 0));
         setStyle("-fx-background-color: black;");
 
@@ -232,7 +233,7 @@ public class NewGamePane extends AnchorPane {
         autogenCheck.setFont(Font.font("Verdana", 20));
         autogenCheck.setSelected(true);
         autogenCheck.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
-            Config.USE_AUTOGEN = newValue;
+            Config.ENABLE_AUTOGEN = newValue;
 
             if (newValue && !autogenBox.getChildren().contains(autogenExtraBox))
                 autogenBox.getChildren().add(autogenExtraBox);
@@ -296,23 +297,23 @@ public class NewGamePane extends AnchorPane {
 
         Button startGame = new Button("Start Game");
         startGame.setFont(Font.font("Verdana", 20));
-        startGame.setMinWidth(Config.WIDTH / 4);
+        startGame.setMinWidth(Globals.WIDTH / 4);
         startGame.setOnMouseClicked(event -> {
             String blackValue = playerBlackChoices.getValue();
             String redValue = playerRedChoices.getValue();
             Stage stage = (Stage) getScene().getWindow();
 
-            int playerBlackMode = (blackValue.equals(human)) ? Config.HUMAN :
-                    (blackValue.equals(minimax)) ? Config.MINIMAX :
-                            (blackValue.equals(mcts)) ? Config.MONTE_CARLO :
-                                    (blackValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
-            int playerRedMode = (redValue.equals(human)) ? Config.HUMAN :
-                    (redValue.equals(minimax)) ? Config.MINIMAX :
-                            (redValue.equals(mcts)) ? Config.MONTE_CARLO :
-                                    (redValue.equals(fft)) ? Config.FFT : Config.LOOKUP_TABLE;
-            Config.SCORELIMIT = scoreLimitChoices.getValue();
-            if (playerBlackMode != Config.FFT && playerRedMode != Config.FFT)
-                Config.USE_AUTOGEN = false;
+            int playerBlackMode = (blackValue.equals(human)) ? Globals.HUMAN :
+                    (blackValue.equals(minimax)) ? Globals.MINIMAX :
+                            (blackValue.equals(mcts)) ? Globals.MONTE_CARLO :
+                                    (blackValue.equals(fft)) ? Globals.FFT : Globals.LOOKUP_TABLE;
+            int playerRedMode = (redValue.equals(human)) ? Globals.HUMAN :
+                    (redValue.equals(minimax)) ? Globals.MINIMAX :
+                            (redValue.equals(mcts)) ? Globals.MONTE_CARLO :
+                                    (redValue.equals(fft)) ? Globals.FFT : Globals.LOOKUP_TABLE;
+            Globals.SCORELIMIT = scoreLimitChoices.getValue();
+            if (playerBlackMode != Globals.FFT && playerRedMode != Globals.FFT)
+                Config.ENABLE_AUTOGEN = false;
 
             new Controller(stage, playerRedMode,
                     playerBlackMode, new State(),
@@ -322,11 +323,11 @@ public class NewGamePane extends AnchorPane {
 
         Button back = new Button("Back");
         back.setFont(Font.font("Verdana", 20));
-        back.setMinWidth(Config.WIDTH / 6);
+        back.setMinWidth(Globals.WIDTH / 6);
         back.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
             stage.setScene(new Scene(new MenuPane(),
-                    Config.WIDTH, Config.HEIGHT));
+                    Globals.WIDTH, Globals.HEIGHT));
         });
 
         HBox btnBox = new HBox(startGame, back);

@@ -16,12 +16,13 @@ import kulibrat.game.Move;
 import kulibrat.game.State;
 import kulibrat.gui.Dialogs.OverwriteDBDialog;
 import misc.Config;
+import misc.Globals;
 
 import java.sql.*;
 import java.util.*;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 
 public class Database implements FFTDatabase {
@@ -45,7 +46,7 @@ public class Database implements FFTDatabase {
         }
         System.out.println("Connection successful");
 
-        String tableName = "plays_" + Config.SCORELIMIT;
+        String tableName = "plays_" + Globals.SCORELIMIT;
         long key = new State(new State()).getZobristKey();
         boolean error = false;
         // Try query to check for table existance
@@ -171,7 +172,7 @@ public class Database implements FFTDatabase {
             return lookupTable.get(n);
 
         StateMapping play = null;
-        String tableName = "plays_" + Config.SCORELIMIT;
+        String tableName = "plays_" + Globals.SCORELIMIT;
         Long key = n.getZobristKey();
         try {
             Statement statement = dbConnection.createStatement();
@@ -227,7 +228,7 @@ public class Database implements FFTDatabase {
 
     public static void fillLookupTable(HashMap<Long, StateMapping> lookupTable) throws SQLException {
         System.out.println("Inserting data into table. This will take some time");
-        String tableName = "plays_" + Config.SCORELIMIT;
+        String tableName = "plays_" + Globals.SCORELIMIT;
         long startTime = System.currentTimeMillis();
         dbConnection.createStatement().execute("truncate table " + tableName);
 
@@ -261,7 +262,7 @@ public class Database implements FFTDatabase {
         if (!connect())
             return;
         // Creating the table, if it does not exist already
-        String tableName = "plays_" + Config.SCORELIMIT;
+        String tableName = "plays_" + Globals.SCORELIMIT;
         try {
             dbConnection.createStatement().execute("create table " + tableName +
                     "(id bigint primary key, oldRow smallint, oldCol smallint, newRow smallint, newCol smallint, team smallint, score smallint)");

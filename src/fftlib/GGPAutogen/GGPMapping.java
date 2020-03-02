@@ -3,7 +3,7 @@ package fftlib.GGPAutogen;
 import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 // Class binds a move to a score for the minimax algorithm
 public class GGPMapping {

@@ -15,12 +15,12 @@ import javafx.stage.Stage;
 import kulibrat.game.Controller;
 import kulibrat.gui.Dialogs.RestartGameDialog;
 import kulibrat.gui.menu.MenuPane;
-import misc.Config;
+import misc.Globals;
 
 import java.util.ArrayList;
 
 public class NavPane extends VBox {
-    private int buttonWidth = Config.WIDTH / 6 + 40;
+    private int buttonWidth = Globals.WIDTH / 6 + 40;
     private ArrayList<Button> buttons;
     private Button startAIButton;
     private Button stopAIButton;
@@ -37,8 +37,8 @@ public class NavPane extends VBox {
     private VBox AIWidgets;
 
     NavPane(Controller cont) {
-        setMinWidth(Config.WIDTH / 3);
-        setMaxWidth(Config.WIDTH / 3);
+        setMinWidth(Globals.WIDTH / 3);
+        setMaxWidth(Globals.WIDTH / 3);
         setAlignment(Pos.CENTER);
         setSpacing(40);
         buttons = new ArrayList<>();
@@ -112,7 +112,7 @@ public class NavPane extends VBox {
 
     private void goToMenu() {
         Stage stage = (Stage) getScene().getWindow();
-        stage.setScene(new Scene(new MenuPane(getScene()), Config.WIDTH, Config.HEIGHT));
+        stage.setScene(new Scene(new MenuPane(getScene()), Globals.WIDTH, Globals.HEIGHT));
     }
 
     public void addAIWidgets() {

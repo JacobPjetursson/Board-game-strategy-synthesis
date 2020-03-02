@@ -12,7 +12,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import misc.Config;
+import misc.Globals;
 import tictactoe.game.Controller;
 import tictactoe.gui.dialog.RestartGameDialog;
 import tictactoe.gui.menu.MenuPane;
@@ -20,7 +20,7 @@ import tictactoe.gui.menu.MenuPane;
 import java.util.ArrayList;
 
 public class NavPane extends VBox {
-    private int buttonWidth = Config.WIDTH / 6 + 40;
+    private int buttonWidth = Globals.WIDTH / 6 + 40;
     private ArrayList<Button> buttons;
     private Button startAIButton;
     private Button stopAIButton;
@@ -110,7 +110,7 @@ public class NavPane extends VBox {
 
     private void goToMenu() {
         Stage stage = (Stage) getScene().getWindow();
-        stage.setScene(new Scene(new MenuPane(getScene()), Config.WIDTH, Config.HEIGHT));
+        stage.setScene(new Scene(new MenuPane(getScene()), Globals.WIDTH, Globals.HEIGHT));
     }
 
     public void addAIWidgets() {

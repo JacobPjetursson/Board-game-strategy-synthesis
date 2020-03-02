@@ -16,7 +16,7 @@ import kulibrat.game.State;
 import java.net.URL;
 import java.util.ArrayList;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 
 public class Player extends VBox {

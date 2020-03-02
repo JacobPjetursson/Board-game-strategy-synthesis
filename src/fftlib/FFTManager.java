@@ -6,8 +6,7 @@ import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
 import javafx.scene.input.DataFormat;
 import misc.Config;
-import org.ggp.base.util.gdl.grammar.GdlSentence;
-import org.ggp.base.util.statemachine.Move;
+import misc.Globals;
 import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
@@ -21,11 +20,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BiFunction;
-
-import static misc.Config.AUTOGEN_PERSPECTIVE;
-import static misc.Config.USE_AUTOGEN;
 
 
 public class FFTManager {
@@ -170,12 +165,12 @@ public class FFTManager {
     }
 
     public void autogenFFT() throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
-        if (Config.USE_AUTOGEN) {
-            FFT fft = FFTAutoGen.generateFFT(AUTOGEN_PERSPECTIVE, gameWinner);
+        if (Config.ENABLE_AUTOGEN) {
+            FFT fft = FFTAutoGen.generateFFT(Config.AUTOGEN_PERSPECTIVE, gameWinner);
             ffts.add(0, fft);
             currFFT = fft;
         }
-        USE_AUTOGEN = false;
+        Config.ENABLE_AUTOGEN = false;
     }
 
 }

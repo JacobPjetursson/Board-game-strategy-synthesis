@@ -9,8 +9,8 @@ import kulibrat.misc.Database;
 import java.sql.SQLException;
 import java.util.HashMap;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 
 public class LookupTableMinimax extends AI {

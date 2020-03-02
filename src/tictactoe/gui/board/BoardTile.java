@@ -20,7 +20,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import tictactoe.game.Controller;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 public class BoardTile extends StackPane {
     private int row;

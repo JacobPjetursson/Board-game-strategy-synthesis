@@ -1,7 +1,6 @@
 package kulibrat.gui.info;
 
 
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -10,8 +9,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import kulibrat.game.State;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class ScoreBoard extends VBox {
     private Label redLabel;

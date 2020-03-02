@@ -3,7 +3,7 @@ package kulibrat.ai.Minimax;
 import fftlib.game.FFTStateMapping;
 import kulibrat.game.Move;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 // Class binds a move to a score for the minimax algorithm
 public class StateMapping implements FFTStateMapping {

@@ -9,7 +9,7 @@ import kulibrat.game.Controller;
 import kulibrat.game.Move;
 
 import static kulibrat.game.Logic.POS_NONBOARD;
-import static misc.Config.CLICK_INTERACTIVE;
+import static misc.Globals.CLICK_INTERACTIVE;
 
 public class Goal extends StackPane {
     private boolean highlight;

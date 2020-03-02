@@ -12,7 +12,7 @@ import javafx.scene.control.CheckBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import misc.Config;
+import misc.Globals;
 import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
@@ -26,11 +26,10 @@ import tictactoe.gui.*;
 import tictactoe.gui.board.BoardTile;
 import tictactoe.misc.Database;
 
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 
 public class Controller {
@@ -89,7 +88,7 @@ public class Controller {
 
         PlayPane playPane = new PlayPane(this);
         primaryStage.setScene(new Scene(playPane,
-                Config.WIDTH, Config.HEIGHT));
+                Globals.WIDTH, Globals.HEIGHT));
         navPane = playPane.getNavPane();
         playArea = playPane.getPlayArea();
         window = playArea.getScene().getWindow();
@@ -107,9 +106,9 @@ public class Controller {
         helpHumanBox = navPane.getHelpHumanBox();
 
         FFTInteractivePane fftInteractivePane = new FFTInteractivePane(fftManager);
-        new Scene(fftInteractivePane, Config.WIDTH, Config.HEIGHT);
+        new Scene(fftInteractivePane, Globals.WIDTH, Globals.HEIGHT);
         FFTOverviewPane fftOverviewPane = new FFTOverviewPane(primaryStage, fftManager, fftInteractivePane);
-        new Scene(fftOverviewPane, Config.WIDTH, Config.HEIGHT);
+        new Scene(fftOverviewPane, Globals.WIDTH, Globals.HEIGHT);
         
         playArea.update(this);
 
@@ -436,7 +435,7 @@ public class Controller {
     // Opens the review pane
     private void reviewGame() {
         Stage newStage = new Stage();
-        newStage.setScene(new Scene(new ReviewPane(primaryStage, this), 325, Config.HEIGHT - 50));
+        newStage.setScene(new Scene(new ReviewPane(primaryStage, this), 325, Globals.HEIGHT - 50));
         newStage.initModality(Modality.APPLICATION_MODAL);
         newStage.initOwner(window);
         newStage.setOnCloseRequest(Event::consume);

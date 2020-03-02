@@ -1,11 +1,8 @@
 package tictactoe.gui;
 
 import javafx.geometry.Pos;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import misc.Config;
+import misc.Globals;
 import tictactoe.game.Controller;
 
 public class PlayPane extends HBox {
@@ -22,7 +19,7 @@ public class PlayPane extends HBox {
     private void setup() {
         setAlignment(Pos.CENTER);
         setSpacing(15);
-        setPrefSize(Config.WIDTH, Config.HEIGHT);
+        setPrefSize(Globals.WIDTH, Globals.HEIGHT);
         setStyle("-fx-background-color: rgb(255, 255, 255);");
     }
 

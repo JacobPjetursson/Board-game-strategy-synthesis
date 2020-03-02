@@ -4,7 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import kulibrat.gui.menu.MenuPane;
-import misc.Config;
+import misc.Globals;
 
 public class Main extends Application {
 
@@ -15,8 +15,8 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("kulibrat");
-        Config.CURRENT_GAME = Config.KULIBRAT;
-        Scene menuScene = new Scene(new MenuPane(this), Config.WIDTH, Config.HEIGHT);
+        Globals.CURRENT_GAME = Globals.KULIBRAT;
+        Scene menuScene = new Scene(new MenuPane(this), Globals.WIDTH, Globals.HEIGHT);
         primaryStage.setScene(menuScene);
         primaryStage.show();
     }

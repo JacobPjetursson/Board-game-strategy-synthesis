@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import static kulibrat.game.Logic.POS_NONBOARD;
-import static misc.Config.*;
+import static misc.Globals.*;
 
 
 public class InteractiveState implements InteractiveFFTState {

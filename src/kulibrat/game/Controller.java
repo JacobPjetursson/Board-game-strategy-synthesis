@@ -26,7 +26,7 @@ import kulibrat.gui.board.BoardTile;
 import kulibrat.gui.board.Goal;
 import kulibrat.gui.board.Player;
 import kulibrat.misc.Database;
-import misc.Config;
+import misc.Globals;
 import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
@@ -36,7 +36,7 @@ import java.util.HashSet;
 import java.util.Random;
 
 import static kulibrat.game.Logic.POS_NONBOARD;
-import static misc.Config.*;
+import static misc.Globals.*;
 
 public class Controller {
     public Stage primaryStage;
@@ -107,13 +107,13 @@ public class Controller {
 
         PlayPane playPane = new PlayPane(this);
         primaryStage.setScene(new Scene(playPane,
-                Config.WIDTH, Config.HEIGHT));
+                Globals.WIDTH, Globals.HEIGHT));
         navPane = playPane.getNavPane();
         playArea = playPane.getPlayArea();
         window = playArea.getScene().getWindow();
 
         instantiateAI(PLAYER1);
-        instantiateAI(Config.PLAYER2);
+        instantiateAI(Globals.PLAYER2);
         playArea.update(this);
 
         // Fetch all gui elements that invoke something game-related
@@ -129,8 +129,8 @@ public class Controller {
 
         fftInteractivePane = new FFTInteractivePane(fftManager);
         fftOverviewPane = new FFTOverviewPane(primaryStage, this.fftManager, fftInteractivePane);
-        new Scene(fftInteractivePane, Config.WIDTH, Config.HEIGHT);
-        new Scene(fftOverviewPane, Config.WIDTH, Config.HEIGHT);
+        new Scene(fftInteractivePane, Globals.WIDTH, Globals.HEIGHT);
+        new Scene(fftOverviewPane, Globals.WIDTH, Globals.HEIGHT);
 
         showNavButtons();
 
@@ -559,7 +559,7 @@ public class Controller {
     // Opens the review pane
     private void reviewGame() {
         Stage newStage = new Stage();
-        newStage.setScene(new Scene(new ReviewPane(primaryStage, this), 550, Config.HEIGHT - 50));
+        newStage.setScene(new Scene(new ReviewPane(primaryStage, this), 550, Globals.HEIGHT - 50));
         newStage.initModality(Modality.APPLICATION_MODAL);
         newStage.initOwner(window);
         newStage.setOnCloseRequest(Event::consume);

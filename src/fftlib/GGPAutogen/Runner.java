@@ -5,6 +5,7 @@ import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
 import misc.Config;
+import misc.Globals;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
@@ -15,7 +16,7 @@ import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import java.util.*;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 public class Runner {
     private static HashMap<MachineState, GGPMapping> lookupTable;
@@ -38,9 +39,8 @@ public class Runner {
 
     public static void main(String[] args) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
 
-        USE_GGP = true;
         String base_path = "src/fftlib/GGPAutogen/games/";
-        String game_path = base_path + (simpleTicTacToe ? "tictactoe_simple.kif" : "tictactoe.kif");
+        String game_path = base_path + (Config.SIMPLE_RULES ? "tictactoe_simple.kif" : "tictactoe.kif");
         GGPManager.loadGDL(game_path);
         p1Role = GGPManager.p1role;
         p2Role = GGPManager.p2role;
@@ -313,7 +313,7 @@ public class Runner {
     private static class StateComparator implements Comparator<MachineState>{
         @Override
         public int compare(MachineState s1, MachineState s2) {
-            if (RANDOM_RULE_ORDERING)
+            if (Config.RANDOM_RULE_ORDERING)
                 return 0;
             int s1_score = lookupTable.get(s1).getScore();
             int s2_score = lookupTable.get(s2).getScore();

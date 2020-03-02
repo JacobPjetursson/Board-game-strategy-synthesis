@@ -22,8 +22,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class GGPManager {
 

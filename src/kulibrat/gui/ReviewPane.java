@@ -25,7 +25,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 public class ReviewPane extends VBox {
     private ListView<HBox> lw;

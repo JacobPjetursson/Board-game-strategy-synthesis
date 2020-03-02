@@ -12,9 +12,8 @@ import tictactoe.gui.board.Player;
 
 import java.util.ArrayList;
 
-import static misc.Config.CLICK_INTERACTIVE;
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class PlayBox extends Group {
     Board board;

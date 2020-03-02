@@ -1,56 +1,75 @@
 package misc;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
 public class Config {
-    // TEAMS
-    public static final int PLAYER_NONE = 0;
-    public static final int PLAYER1 = 1;
-    public static final int PLAYER2 = 2;
-    public static final int PLAYER_ANY = 3;
 
-    // PLAYER INSTANCES
-    public static final int HUMAN = 1;
-    public static final int MINIMAX = 2;
-    public static final int MONTE_CARLO = 3;
-    public static final int LOOKUP_TABLE = 4;
-    public static final int FFT = 5;
+    // GLOBAL PROPERTIES
+    public static boolean ENABLE_AUTOGEN;
+    public static int AUTOGEN_PERSPECTIVE;
+    public static boolean GREEDY_AUTOGEN;
+    public static boolean RANDOM_SEED;
+    public static int SEED;
+    public static boolean ENABLE_GGP;
+    public static boolean ENABLE_GGP_PARSER;
+    public static boolean RANDOM_RULE_ORDERING;
+    public static boolean MINIMIZE_PRECONDITIONS;
 
-    // GAME MODES
-    public static final int HUMAN_VS_HUMAN = 1;
-    public static final int HUMAN_VS_AI = 2;
-    public static final int AI_VS_AI = 3;
+    // KULIBRAT PROPERTIES
+    public static int BWIDTH;
+    public static int BHEIGHT;
+    public static String DB_PATH;
 
-    // WINDOW DIMENSIONS
-    public static final int WIDTH = 1250;
-    public static final int HEIGHT = 700;
+    // TIC TAC TOE PROPERTIES
+    public static boolean SIMPLE_RULES;
 
-    // MISC STATIC VARIABLES
-    public static final int CLICK_INTERACTIVE = 0;
-    public static final int CLICK_DISABLED = 1;
-    public static final int CLICK_DEFAULT = 2;
+    static {
+        try {
+            loadProperties();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-    // Changed by program
-    public static int SCORELIMIT = 1;
-    public static boolean USE_GGP = false;
-    public static boolean USE_AUTOGEN = true;
-    public static int AUTOGEN_PERSPECTIVE = PLAYER1;
-    public static boolean RANDOM_RULE_ORDERING = false;
-    public static boolean MINIMIZE_PRECONDITIONS = true;
+    private static void loadProperties() throws IOException {
+        Properties global = new Properties();
+        Properties tictactoe = new Properties();
+        Properties kulibrat = new Properties();
 
-    // PREFERENCES / CUSTOMIZATION
-    // GAMES
-    public static final int KULIBRAT = 0;
-    public static final String DB_PATH = "jdbc:derby:KulibratDB;create=true";
-    public static final boolean USE_GGP_PARSER = false;
+        global.load(new FileInputStream("config.properties"));
+        tictactoe.load(new FileInputStream("tictactoe.properties"));
+        kulibrat.load(new FileInputStream("kulibrat.properties"));
 
-    public static final int TICTACTOE = 1;
-    public static final boolean simpleTicTacToe = false;
-    public static int CURRENT_GAME;
+        // GLOBAL CONFIG
+        String perspective = global.getProperty("autogen_perspective", "player1");
+        switch(perspective) {
+            case "player2":
+                AUTOGEN_PERSPECTIVE = Globals.PLAYER2;
+            case "both":
+                AUTOGEN_PERSPECTIVE = Globals.PLAYER_ANY;
+            default:
+                AUTOGEN_PERSPECTIVE = Globals.PLAYER1;
+        }
 
-    // BOARD CONFIG
-    public static final int kuliBHeight = 3;
-    public static final int kuliBWidth = 3;
+        ENABLE_AUTOGEN = Boolean.getBoolean(global.getProperty("enable_autogen"));
+        GREEDY_AUTOGEN = Boolean.getBoolean(global.getProperty("greedy_autogen"));
+        RANDOM_SEED = Boolean.getBoolean(global.getProperty("random_seed"));
+        SEED = Integer.parseInt(global.getProperty("seed"));
+        ENABLE_GGP = Boolean.getBoolean(global.getProperty("enable_ggp"));
+        ENABLE_GGP_PARSER = Boolean.getBoolean(global.getProperty("enable_ggp_parser"));
+        RANDOM_RULE_ORDERING = Boolean.getBoolean(global.getProperty("random_rule_ordering"));
+        MINIMIZE_PRECONDITIONS = Boolean.getBoolean(global.getProperty("minimize_preconditions"));
 
-    public static final boolean NONGREEDY_AUTOGEN = true;
-    public static final int ZOBRIST_SEED = 0; // 0 is required for database
-    public static final boolean RANDOM_SEED = true;
+        // KULIBRAT
+        BWIDTH = Integer.parseInt(kulibrat.getProperty("boardWidth"));
+        BHEIGHT = Integer.parseInt(kulibrat.getProperty("boardHeight"));
+        DB_PATH = kulibrat.getProperty("db_path");
+
+        // TIC TAC TOE
+        SIMPLE_RULES = Boolean.getBoolean(tictactoe.getProperty("simple_rules"));
+
+
+    }
 }

@@ -7,8 +7,8 @@ import tictactoe.misc.Database;
 
 import java.util.HashMap;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class LookupTableMinimax implements AI {
     private int CURR_MAX_DEPTH;

@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 import kulibrat.game.Controller;
 import kulibrat.game.Move;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 public class BoardTile extends StackPane {
     private int row;

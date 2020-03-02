@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Objects;
 
 import static fftlib.Literal.PIECEOCC_PLAYER;
-import static misc.Config.PLAYER_NONE;
+import static misc.Globals.PLAYER_NONE;
 
 public class Move implements FFTMove {
     public int row;

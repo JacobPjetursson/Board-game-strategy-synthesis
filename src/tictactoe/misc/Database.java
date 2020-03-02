@@ -12,8 +12,8 @@ import tictactoe.game.State;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class Database implements FFTDatabase {
     private static HashMap<? extends FFTState, ? extends FFTStateMapping> lookupTable;

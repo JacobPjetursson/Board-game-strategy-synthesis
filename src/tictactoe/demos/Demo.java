@@ -5,7 +5,7 @@ import tictactoe.FFT.GameSpecifics;
 import tictactoe.ai.LookupTableMinimax;
 import tictactoe.game.State;
 
-import static misc.Config.PLAYER1;
+import static misc.Globals.PLAYER1;
 
 public class Demo {
 

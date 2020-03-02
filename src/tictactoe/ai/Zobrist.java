@@ -1,6 +1,7 @@
 package tictactoe.ai;
 
 import misc.Config;
+import misc.Globals;
 
 import java.util.Random;
 
@@ -11,7 +12,7 @@ public class Zobrist {
     static {
         long range = Long.MAX_VALUE;
         Random r = new Random();
-        int seed = (Config.USE_AUTOGEN && Config.RANDOM_SEED) ? r.nextInt() : Config.ZOBRIST_SEED;
+        int seed = (Config.ENABLE_AUTOGEN && Config.RANDOM_SEED) ? r.nextInt() : Config.SEED;
         r.setSeed(seed);
         System.out.println("Zobrist seed: " + seed);
 

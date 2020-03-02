@@ -17,15 +17,15 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import misc.Config;
 import tictactoe.ai.StateMapping;
 import tictactoe.game.*;
 import tictactoe.gui.board.PlayBox.PlayBox;
 import tictactoe.misc.Database;
 
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 import static tictactoe.gui.board.BoardTile.blueStr;
 import static tictactoe.gui.board.BoardTile.greenStr;
 
@@ -81,7 +81,7 @@ public class ReviewPane extends VBox {
 
             String moveStr = String.format("Add piece at (row, col):\n" +
                             "         (%d, %d)", ps.getMove().row + 1, ps.getMove().col + 1);
-            if (USE_GGP_PARSER)
+            if (Config.ENABLE_GGP_PARSER)
                 moveStr = String.format("Set mark at (x,y):\n" +
                             "        (%d, %d)", ps.getMove().col + 1, ps.getMove().row + 1);
             Label moveL = new Label(moveStr);

@@ -13,8 +13,7 @@ import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import java.util.*;
 
 import static fftlib.Literal.*;
-import static misc.Config.USE_GGP;
-import static misc.Config.USE_GGP_PARSER;
+import static misc.Config.ENABLE_GGP_PARSER;
 
 
 public class Rule {
@@ -38,7 +37,7 @@ public class Rule {
 
     // parsing constructor
     public Rule(String preconStr, String actionStr) {
-        if (USE_GGP_PARSER) {
+        if (ENABLE_GGP_PARSER) {
             Rule r = FFTManager.gdlToRule.apply(preconStr, actionStr);
             this.action = r.action;
             this.preconditions = r.preconditions;
@@ -339,7 +338,7 @@ public class Rule {
             cStr = preconStr;
             aStr = actionStr;
         }
-        if (USE_GGP_PARSER) {
+        if (ENABLE_GGP_PARSER) {
             if (cStr.isEmpty())
                 cStr = "∅";
             return "IF: [" + cStr + "] THEN: [" +

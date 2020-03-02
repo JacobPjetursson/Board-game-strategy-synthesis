@@ -29,17 +29,16 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import misc.Config;
+import misc.Globals;
 import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import java.util.ArrayList;
 import java.util.Stack;
-import java.util.function.Function;
 
 import static fftlib.FFTManager.*;
-import static misc.Config.*;
+import static misc.Globals.*;
 
 public class FFTInteractivePane extends BorderPane {
     private int textFieldWidth = 150;
@@ -76,8 +75,8 @@ public class FFTInteractivePane extends BorderPane {
 
     public FFTInteractivePane(FFTManager fftManager) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
-        setMaxHeight(Config.HEIGHT);
-        setMaxWidth(Config.WIDTH);
+        setMaxHeight(Globals.HEIGHT);
+        setMaxWidth(Globals.WIDTH);
         this.fftManager = fftManager;
         undoStack = new Stack<>();
 
@@ -184,7 +183,7 @@ public class FFTInteractivePane extends BorderPane {
                 } else {
                     Stage stage = (Stage) getScene().getWindow();
                     Scene scene = stage.getScene();
-                    stage.setScene(new Scene(new FFTFailurePane(scene, fftManager, this), WIDTH, Config.HEIGHT));
+                    stage.setScene(new Scene(new FFTFailurePane(scene, fftManager, this), WIDTH, Globals.HEIGHT));
                 }
             } else {
                 Label verifiedLabel = new Label("The FFT was successfully verified");

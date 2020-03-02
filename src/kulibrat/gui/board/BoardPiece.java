@@ -6,7 +6,7 @@ import javafx.scene.shape.Circle;
 import kulibrat.game.Controller;
 
 import static kulibrat.game.Logic.POS_NONBOARD;
-import static misc.Config.*;
+import static misc.Globals.*;
 
 
 public class BoardPiece extends Circle {

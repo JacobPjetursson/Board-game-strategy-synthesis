@@ -1,8 +1,8 @@
 package fftlib;
 
-import java.util.ArrayList;
+import misc.Config;
 
-import static misc.Config.USE_GGP;
+import java.util.ArrayList;
 
 public class RuleGroup {
     public ArrayList<Rule> rules;
@@ -43,7 +43,7 @@ public class RuleGroup {
         int precons = 0;
         for (Rule r : rules) {
             if (r.multiRule) continue; // TODO - fuck this shit
-            precons += (USE_GGP) ? r.sentences.size() : r.preconditions.size();
+            precons += (Config.ENABLE_GGP) ? r.sentences.size() : r.preconditions.size();
         }
         return precons;
     }

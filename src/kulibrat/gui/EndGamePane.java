@@ -14,9 +14,9 @@ import javafx.stage.Stage;
 import kulibrat.game.Controller;
 import kulibrat.game.State;
 import kulibrat.gui.menu.MenuPane;
-import misc.Config;
+import misc.Globals;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 
 public class EndGamePane extends VBox {
@@ -40,7 +40,7 @@ public class EndGamePane extends VBox {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
             primaryStage.setScene(new Scene(new MenuPane(),
-                    Config.WIDTH, Config.HEIGHT));
+                    Globals.WIDTH, Globals.HEIGHT));
         });
         menuBtn.setPrefWidth(150);
         hBox.getChildren().add(menuBtn);
@@ -62,7 +62,7 @@ public class EndGamePane extends VBox {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
             Stage newStage = new Stage();
-            newStage.setScene(new Scene(new ReviewPane(primaryStage, cont), 325, Config.HEIGHT - 50));
+            newStage.setScene(new Scene(new ReviewPane(primaryStage, cont), 325, Globals.HEIGHT - 50));
             newStage.initModality(Modality.APPLICATION_MODAL);
             newStage.initOwner(cont.getWindow());
             newStage.setOnCloseRequest(Event::consume);

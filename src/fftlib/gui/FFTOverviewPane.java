@@ -25,13 +25,13 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import misc.Config;
+import misc.Globals;
 import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import static fftlib.FFTManager.*;
-import static misc.Config.WIDTH;
+import static misc.Globals.WIDTH;
 
 public class FFTOverviewPane extends VBox {
     private int textFieldWidth = 150;
@@ -210,7 +210,7 @@ public class FFTOverviewPane extends VBox {
                     timeline.play();
                 } else {
                     Scene scene = primaryStage.getScene();
-                    primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager, interactivePane), WIDTH, Config.HEIGHT));
+                    primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager, interactivePane), WIDTH, Globals.HEIGHT));
                 }
             } else {
                 Label verifiedLabel = new Label("The FFT was successfully verified");

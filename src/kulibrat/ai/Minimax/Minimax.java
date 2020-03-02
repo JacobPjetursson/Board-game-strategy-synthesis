@@ -8,8 +8,8 @@ import kulibrat.game.State;
 import java.util.HashMap;
 import java.util.Random;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class Minimax extends AI {
     private long calculationTime;

@@ -12,7 +12,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import misc.Config;
+import misc.Globals;
 
 import java.util.ArrayList;
 
@@ -22,7 +22,7 @@ public class MenuPane extends AnchorPane {
     private Application app;
 
     public MenuPane() {
-        setPrefSize(Config.WIDTH, Config.HEIGHT);
+        setPrefSize(Globals.WIDTH, Globals.HEIGHT);
         setPadding(new Insets(30, 0, 0, 0));
         setStyle("-fx-background-color: black;");
 
@@ -40,7 +40,7 @@ public class MenuPane extends AnchorPane {
         buttons.add(newGame);
         newGame.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
-            stage.setScene(new Scene(new NewGamePane(), Config.WIDTH, Config.HEIGHT));
+            stage.setScene(new Scene(new NewGamePane(), Globals.WIDTH, Globals.HEIGHT));
         });
 
         continueGame = new Button("Continue Game");
@@ -51,7 +51,7 @@ public class MenuPane extends AnchorPane {
         buttons.add(exit);
         exit.setOnMouseClicked(event -> System.exit(0));
         for (Button button : buttons) {
-            button.setMinWidth(Config.WIDTH / 4);
+            button.setMinWidth(Globals.WIDTH / 4);
             button.setFont(Font.font("Verdana", 20));
         }
         VBox box = new VBox(newGame, continueGame, exit);

@@ -11,12 +11,12 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import misc.Config;
+import misc.Globals;
 import tictactoe.game.Controller;
 import tictactoe.game.State;
 import tictactoe.gui.menu.MenuPane;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 
 public class EndGamePane extends VBox {
@@ -40,7 +40,7 @@ public class EndGamePane extends VBox {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
             primaryStage.setScene(new Scene(new MenuPane(),
-                    Config.WIDTH, Config.HEIGHT));
+                    Globals.WIDTH, Globals.HEIGHT));
         });
         menuBtn.setPrefWidth(110);
         hBox.getChildren().add(menuBtn);
@@ -61,7 +61,7 @@ public class EndGamePane extends VBox {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
             Stage newStage = new Stage();
-            newStage.setScene(new Scene(new ReviewPane(primaryStage, cont), 325, Config.HEIGHT - 50));
+            newStage.setScene(new Scene(new ReviewPane(primaryStage, cont), 325, Globals.HEIGHT - 50));
             newStage.initModality(Modality.APPLICATION_MODAL);
             newStage.initOwner(cont.getWindow());
             newStage.setOnCloseRequest(Event::consume);

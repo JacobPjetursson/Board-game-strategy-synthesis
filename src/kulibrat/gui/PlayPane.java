@@ -1,11 +1,9 @@
 package kulibrat.gui;
 
 import javafx.geometry.Pos;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import kulibrat.game.Controller;
-import misc.Config;
+import misc.Globals;
 
 public class PlayPane extends HBox {
     private PlayArea playArea;
@@ -20,8 +18,8 @@ public class PlayPane extends HBox {
 
     private void setup() {
         setAlignment(Pos.CENTER);
-        setPrefSize(Config.WIDTH, Config.HEIGHT);
-        setMaxWidth(Config.WIDTH);
+        setPrefSize(Globals.WIDTH, Globals.HEIGHT);
+        setMaxWidth(Globals.WIDTH);
         setStyle("-fx-background-color: rgb(255, 255, 255);");
     }
 

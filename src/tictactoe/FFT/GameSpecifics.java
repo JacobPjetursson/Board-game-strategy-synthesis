@@ -7,7 +7,7 @@ import fftlib.game.*;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 import misc.Config;
-import org.ggp.base.util.gdl.grammar.GdlSentence;
+import misc.Globals;
 import tictactoe.game.Controller;
 import tictactoe.game.Logic;
 import tictactoe.game.Move;
@@ -15,14 +15,11 @@ import tictactoe.game.State;
 import tictactoe.misc.Database;
 
 import java.util.HashSet;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static fftlib.Literal.PIECEOCC_ANY;
 import static fftlib.Literal.PIECEOCC_PLAYER;
 import static fftlib.game.Transform.*;
-import static misc.Config.*;
+import static misc.Globals.*;
 
 
 public class GameSpecifics implements FFTGameSpecifics {
@@ -100,9 +97,9 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public String getFFTFilePath() {
-        if (USE_GGP_PARSER)
-            return "tictactoe_GGP_FFT.txt";
-        return "tictactoeFFT.txt";
+        if (Config.ENABLE_GGP_PARSER)
+            return "FFTs/tictactoe_GGP_FFT.txt";
+        return "FFTs/tictactoeFFT.txt";
     }
 
     @Override
@@ -155,7 +152,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public int getGameWinner() {
-        if (Config.simpleTicTacToe)
+        if (Config.SIMPLE_RULES)
             return PLAYER1;
         return PLAYER_NONE;
     }

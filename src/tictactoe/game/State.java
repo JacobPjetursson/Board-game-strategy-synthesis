@@ -10,8 +10,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import static fftlib.game.Transform.*;
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER_ANY;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER_ANY;
 
 
 public class State implements FFTState {

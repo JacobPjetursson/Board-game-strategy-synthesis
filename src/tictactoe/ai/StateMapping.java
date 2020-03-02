@@ -3,7 +3,7 @@ package tictactoe.ai;
 import fftlib.game.FFTStateMapping;
 import tictactoe.game.Move;
 
-import static misc.Config.*;
+import static misc.Globals.*;
 
 // Class binds a move to a score for the minimax algorithm
 public class StateMapping implements FFTStateMapping {

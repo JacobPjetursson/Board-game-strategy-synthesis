@@ -8,8 +8,8 @@ import javafx.scene.text.Font;
 import kulibrat.game.Controller;
 import kulibrat.game.State;
 
-import static misc.Config.PLAYER1;
-import static misc.Config.PLAYER2;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class StaticPlayBox extends PlayBox {
 

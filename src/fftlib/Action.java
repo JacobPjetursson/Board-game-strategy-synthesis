@@ -2,7 +2,7 @@ package fftlib;
 
 import fftlib.game.FFTMove;
 import fftlib.game.Transform;
-import misc.Config;
+import misc.Globals;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -63,7 +63,7 @@ public class Action {
             actionErr = true;
             return;
         }
-        if (Config.CURRENT_GAME == Config.KULIBRAT) {
+        if (Globals.CURRENT_GAME == Globals.KULIBRAT) {
             if(addClause.size() > 1 || remClause.size() > 1) {
                 System.err.println("Only moves with a single add literal and/or a single remove literal is allowed in this game");
                 actionErr = true;

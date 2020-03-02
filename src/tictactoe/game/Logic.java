@@ -6,7 +6,8 @@ import fftlib.game.FFTState;
 
 import java.util.ArrayList;
 
-import static misc.Config.*;
+import static misc.Config.SIMPLE_RULES;
+import static misc.Globals.*;
 
 
 public class Logic implements FFTLogic {
@@ -55,7 +56,7 @@ public class Logic implements FFTLogic {
     public static int getWinner(State state) {
         int[][] board = state.getBoard();
         for (int team = 1; team < 3; team++) {
-            if (simpleTicTacToe) {
+            if (SIMPLE_RULES) {
                 if (board[0][0] == team && board[1][1] == team) {
                     return team;
                 } else if (board[0][0] == team && board[0][1] == team) {

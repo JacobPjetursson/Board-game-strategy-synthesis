@@ -12,15 +12,14 @@ import kulibrat.game.Move;
 import kulibrat.game.State;
 import kulibrat.misc.Database;
 import misc.Config;
-import org.ggp.base.util.gdl.grammar.GdlSentence;
+import misc.Globals;
 
 import java.util.HashSet;
-import java.util.Set;
 
 import static fftlib.Literal.PIECEOCC_ANY;
 import static fftlib.game.Transform.TRANS_HREF;
 import static kulibrat.game.Logic.POS_NONBOARD;
-import static misc.Config.*;
+import static misc.Globals.*;
 
 public class GameSpecifics implements FFTGameSpecifics {
     private Controller cont;
@@ -91,12 +90,12 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public String getFFTFilePath() {
-        return "kulibratFFT.txt";
+        return "FFTs/kulibratFFT.txt";
     }
 
     @Override
     public int[] getBoardDim() {
-        return new int[] {Config.kuliBHeight, Config.kuliBWidth};
+        return new int[] {Config.BHEIGHT, Config.BWIDTH};
     }
 
     @Override
@@ -144,7 +143,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public int getGameWinner() {
-        if (Config.kuliBHeight == 3 || Config.SCORELIMIT < 8)
+        if (Config.BHEIGHT == 3 || Globals.SCORELIMIT < 8)
             return PLAYER1;
         return PLAYER_NONE;
     }
