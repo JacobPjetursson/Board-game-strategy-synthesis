@@ -1,8 +1,8 @@
-#Synthesis of winning strategies for board games
+# Synthesis of winning strategies for board games
 
-\* Insert introduction to project here *
+Insert introduction to project here
 
-##Project Setup:
+## Project Setup:
 
 1. Install [Java 8](https://www.oracle.com/java/technologies/javase-jdk8-downloads.html) (Might work with newer versions but untested)
 2. Install [Maven 3.6.3](https://maven.apache.org/download.cgi) (Likely to work with older/newer versions)
