@@ -25,3 +25,10 @@ These programs can be run with the following commands:
 2. `mvn exec:java@kulibrat`
 3. `mvn exec:java@GGP-FFT`
 
+## Configuration
+
+There are 4 configuration files in total that can alter the way the strategy is generated. There is a file for each type of program plus a global config file, which are called:
+1. *global.properties*: In this file it is, among other things, possible to change between running a greedy strategy autogeneration or not, which is determined by the *greedy_autogen* property.
+2. *tictactoe.properties*: In this file it is possible to choose between regular or simple rules, where simple rules require 2-in-a-row for winning
+3. *kulibrat.properties*: In this file the board size can be altered, and the name of the database is specified.
+4. *ggp.properties*: The ggp game file path should be specified here.
