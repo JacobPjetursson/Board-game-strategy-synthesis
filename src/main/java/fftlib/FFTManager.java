@@ -165,12 +165,12 @@ public class FFTManager {
     }
 
     public void autogenFFT() throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
-        if (Config.ENABLE_AUTOGEN) {
+        if (Globals.ENABLE_AUTOGEN) {
             FFT fft = FFTAutoGen.generateFFT(Config.AUTOGEN_PERSPECTIVE, gameWinner);
             ffts.add(0, fft);
             currFFT = fft;
         }
-        Config.ENABLE_AUTOGEN = false;
+        Globals.ENABLE_AUTOGEN = false;
     }
 
 }

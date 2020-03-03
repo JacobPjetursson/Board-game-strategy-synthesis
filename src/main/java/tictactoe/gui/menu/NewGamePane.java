@@ -101,7 +101,7 @@ public class NewGamePane extends AnchorPane {
         autogenCheck.setFont(Font.font("Verdana", 20));
         autogenCheck.setSelected(true);
         autogenCheck.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
-            Config.ENABLE_AUTOGEN = newValue;
+            Globals.ENABLE_AUTOGEN = newValue;
 
             if (newValue && !autogenBox.getChildren().contains(autogenExtraBox))
                 autogenBox.getChildren().add(autogenExtraBox);
@@ -176,7 +176,7 @@ public class NewGamePane extends AnchorPane {
             int playerCircleMode = (circleValue.equals(human)) ? Globals.HUMAN :
                     (circleValue.equals(fft)) ? Globals.FFT : Globals.LOOKUP_TABLE;
             if (playerCrossMode != Globals.FFT && playerCircleMode != Globals.FFT)
-                Config.ENABLE_AUTOGEN = false;
+                Globals.ENABLE_AUTOGEN = false;
             new Controller(stage, playerCrossMode,
                     playerCircleMode, new State());
         });

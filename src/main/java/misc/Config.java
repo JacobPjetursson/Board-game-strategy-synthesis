@@ -7,7 +7,6 @@ import java.util.Properties;
 public class Config {
 
     // GLOBAL PROPERTIES
-    public static boolean ENABLE_AUTOGEN;
     public static int AUTOGEN_PERSPECTIVE;
     public static boolean GREEDY_AUTOGEN;
     public static boolean RANDOM_SEED;
@@ -61,7 +60,6 @@ public class Config {
                 AUTOGEN_PERSPECTIVE = Globals.PLAYER1;
         }
 
-        ENABLE_AUTOGEN = Boolean.getBoolean(global.getProperty("enable_autogen"));
         GREEDY_AUTOGEN = Boolean.getBoolean(global.getProperty("greedy_autogen"));
         RANDOM_SEED = Boolean.getBoolean(global.getProperty("random_seed"));
         SEED = Integer.parseInt(global.getProperty("seed"));

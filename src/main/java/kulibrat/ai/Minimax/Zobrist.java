@@ -14,7 +14,7 @@ public class Zobrist {
     static {
         Random r = new Random();
         long range = Long.MAX_VALUE;
-        int seed = (Config.ENABLE_AUTOGEN && Config.RANDOM_SEED) ? r.nextInt() : Config.SEED;
+        int seed = (Globals.ENABLE_AUTOGEN && Config.RANDOM_SEED) ? r.nextInt() : Config.SEED;
         r.setSeed(seed);
         System.out.println("Zobrist seed: " + seed);
 

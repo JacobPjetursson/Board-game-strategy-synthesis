@@ -33,7 +33,6 @@ public class GGPManager {
     public static Move noop;
 
     public static void loadGDL(String filepath) {
-        System.out.println(filepath);
         String rawSheet = FileUtils.readFileAsString(new File(filepath));
         Game theGame = Game.createEphemeralGame(Game.preprocessRulesheet(rawSheet));
         if (theGame.getRules() == null || theGame.getRules().size() == 0) {

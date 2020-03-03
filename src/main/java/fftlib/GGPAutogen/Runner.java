@@ -35,6 +35,9 @@ public class Runner {
 
         String base_path = "src/main/java/fftlib/GGPAutogen/games/";
         String game_path = base_path + Config.GGP_GAME;
+        // Set default properties
+        Config.ENABLE_GGP = true;
+
         GGPManager.loadGDL(game_path);
         p1Role = GGPManager.p1role;
         p2Role = GGPManager.p2role;

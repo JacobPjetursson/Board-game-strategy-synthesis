@@ -233,7 +233,7 @@ public class NewGamePane extends AnchorPane {
         autogenCheck.setFont(Font.font("Verdana", 20));
         autogenCheck.setSelected(true);
         autogenCheck.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
-            Config.ENABLE_AUTOGEN = newValue;
+            Globals.ENABLE_AUTOGEN = newValue;
 
             if (newValue && !autogenBox.getChildren().contains(autogenExtraBox))
                 autogenBox.getChildren().add(autogenExtraBox);
@@ -313,7 +313,7 @@ public class NewGamePane extends AnchorPane {
                                     (redValue.equals(fft)) ? Globals.FFT : Globals.LOOKUP_TABLE;
             Globals.SCORELIMIT = scoreLimitChoices.getValue();
             if (playerBlackMode != Globals.FFT && playerRedMode != Globals.FFT)
-                Config.ENABLE_AUTOGEN = false;
+                Globals.ENABLE_AUTOGEN = false;
 
             new Controller(stage, playerRedMode,
                     playerBlackMode, new State(),
