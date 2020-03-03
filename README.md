@@ -1,6 +1,6 @@
 #Synthesis of winning strategies for board games
 
-* Insert introduction to project here *
+\* Insert introduction to project here *
 
 ##Project Setup:
 
@@ -8,7 +8,7 @@
 2. Install [Maven 3.6.3](https://maven.apache.org/download.cgi) (Likely to work with older/newer versions)
 3. Open the Terminal and navigate to project root
 4. Run `mvn verify`
-..* Check that build was run successfully and the */target* folder is created in the project root
+   - Check that build was run successfully and the */target* folder is created in the project root
 
 ## Project Execution
 

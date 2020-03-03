@@ -25,6 +25,12 @@ public class Config {
     // TIC TAC TOE PROPERTIES
     public static boolean SIMPLE_RULES;
 
+    // GGP-FFT PROPERTIES
+    public static boolean DETAILED_DEBUG;
+    public static boolean FULL_RULES;
+    public static boolean VERIFY_SINGLE_STRATEGY;
+    public static String GGP_GAME;
+
     static {
         try {
             loadProperties();
@@ -37,10 +43,12 @@ public class Config {
         Properties global = new Properties();
         Properties tictactoe = new Properties();
         Properties kulibrat = new Properties();
+        Properties ggp = new Properties();
 
-        global.load(new FileInputStream("config.properties"));
+        global.load(new FileInputStream("global.properties"));
         tictactoe.load(new FileInputStream("tictactoe.properties"));
         kulibrat.load(new FileInputStream("kulibrat.properties"));
+        ggp.load(new FileInputStream("ggp.properties"));
 
         // GLOBAL CONFIG
         String perspective = global.getProperty("autogen_perspective", "player1");
@@ -61,6 +69,10 @@ public class Config {
         ENABLE_GGP_PARSER = Boolean.getBoolean(global.getProperty("enable_ggp_parser"));
         RANDOM_RULE_ORDERING = Boolean.getBoolean(global.getProperty("random_rule_ordering"));
         MINIMIZE_PRECONDITIONS = Boolean.getBoolean(global.getProperty("minimize_preconditions"));
+        // DEBUG AND TEST
+        DETAILED_DEBUG = Boolean.getBoolean(global.getProperty("detailedDebug"));
+        FULL_RULES = Boolean.getBoolean(global.getProperty("fullRules"));
+        VERIFY_SINGLE_STRATEGY = Boolean.getBoolean(global.getProperty("verify_single_strategy"));
 
         // KULIBRAT
         BWIDTH = Integer.parseInt(kulibrat.getProperty("boardWidth"));
@@ -70,6 +82,7 @@ public class Config {
         // TIC TAC TOE
         SIMPLE_RULES = Boolean.getBoolean(tictactoe.getProperty("simple_rules"));
 
-
+        // GGP
+        GGP_GAME = ggp.getProperty("ggp_game");
     }
 }

@@ -16,6 +16,7 @@ import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import java.util.*;
 
+import static misc.Config.*;
 import static misc.Globals.*;
 
 public class Runner {
@@ -28,19 +29,12 @@ public class Runner {
     private static RuleGroup rg;
     private static Role p1Role, p2Role;
     private static Move noop;
-
-    // CONFIGURATION
-    private static int perspective;
     private static int winner;
-    private static boolean detailedDebug = true;
-    private static boolean fullRules = false; // mainly for debug
-    private static boolean try_all_combinations = false;
-    public static boolean verify_single_strategy = false; // build fft for specific strategy
 
     public static void main(String[] args) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
 
         String base_path = "src/main/java/fftlib/GGPAutogen/games/";
-        String game_path = base_path + (Config.SIMPLE_RULES ? "tictactoe_simple.kif" : "tictactoe.kif");
+        String game_path = base_path + Config.GGP_GAME;
         GGPManager.loadGDL(game_path);
         p1Role = GGPManager.p1role;
         p2Role = GGPManager.p2role;
@@ -72,7 +66,7 @@ public class Runner {
         states = new PriorityQueue<MachineState>(new StateComparator());
 
         System.out.println("Filtering...");
-        if (verify_single_strategy) {
+        if (VERIFY_SINGLE_STRATEGY) {
             strategy = new HashMap<>();
             System.out.println("Filtering for single strategy");
             filterToSingleStrat();
@@ -87,7 +81,7 @@ public class Runner {
 
         System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
-        int it = fft.minimize(perspective, Config.MINIMIZE_PRECONDITIONS);
+        int it = fft.minimize(AUTOGEN_PERSPECTIVE, Config.MINIMIZE_PRECONDITIONS);
         System.out.println("Amount of rules after " + it + " minimize iterations: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions after " + it + " minimize iterations: " + fft.getAmountOfPreconditions());
 
@@ -103,13 +97,13 @@ public class Runner {
         for (Map.Entry<MachineState, GGPMapping> entry : lookupTable.entrySet()) {
             MachineState state = entry.getKey();
             GGPMapping mapping = entry.getValue();
-            if (perspective == PLAYER1 && !mapping.getRole().equals(p1Role))
+            if (AUTOGEN_PERSPECTIVE == PLAYER1 && !mapping.getRole().equals(p1Role))
                 continue;
-            else if (perspective == PLAYER2 && !mapping.getRole().equals(p2Role))
+            else if (AUTOGEN_PERSPECTIVE == PLAYER2 && !mapping.getRole().equals(p2Role))
                 continue;
 
             boolean threshold = false;
-            switch(perspective) {
+            switch(AUTOGEN_PERSPECTIVE) {
                 case PLAYER1:
                     threshold = mapping.getWinner() == PLAYER1 || winner == mapping.getWinner();
                     break;
@@ -154,7 +148,7 @@ public class Runner {
             Role r = GGPManager.getRole(ms);
             if (GGPManager.isTerminal(ms))
                 continue;
-            if (perspective != GGPManager.roleToPlayer(r)) {
+            if (AUTOGEN_PERSPECTIVE != GGPManager.roleToPlayer(r)) {
                 for (MachineState child : GGPManager.getNextStates(ms))
                     if (!closedSet.contains(child)) {
                         closedSet.add(child);
@@ -181,12 +175,12 @@ public class Runner {
             MachineState state = states.iterator().next();
             Rule r = addRule(state);
             states.remove(state);
-            if (detailedDebug) System.out.println("FINAL RULE: " + r);
+            if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
             System.out.println();
 
 
 
-            if (fft.verify(perspective, true)) {
+            if (fft.verify(AUTOGEN_PERSPECTIVE, true)) {
                 System.out.println("FFT verified before empty statespace");
                 return;
             }
@@ -218,11 +212,11 @@ public class Runner {
         ArrayList<Move> moves = new ArrayList<>(Database.nonLosingMoves(ms));
         ArrayList<Move> movesCopy = new ArrayList<>(moves);
 
-        if (fullRules)
+        if (FULL_RULES)
             return new Rule(minSet, moves.get(0));
 
         Rule r;
-        if (try_all_combinations) {
+        if (!GREEDY_AUTOGEN) {
             r = new Rule(minSet);
         } else {
             r = new Rule(minSet, bestMove);
@@ -231,13 +225,13 @@ public class Runner {
         rg.rules.add(r);
 
         // DEBUG
-        if (detailedDebug) {
+        if (DETAILED_DEBUG) {
             System.out.println("ORIGINAL STATE: " + ms);
             System.out.println("ORIGINAL MOVE: " + mapping.getMove());
             System.out.println("ORIGINAL SCORE: " + mapping.getScore());
         }
 
-        if (try_all_combinations) {
+        if (!GREEDY_AUTOGEN) {
             LinkedList<GdlSentence> copy = new LinkedList<>(sentences);
             LinkedList<GdlSentence> bestPath = new LinkedList<>();
             Move chosenMove = null;
@@ -252,7 +246,7 @@ public class Runner {
                     break;
             }
             r.setMove(chosenMove);
-            if (detailedDebug) {
+            if (DETAILED_DEBUG) {
                 System.out.println("Best removal path (removed " + bestPath.size() + "): ");
                 for (GdlSentence s : bestPath)
                     System.out.print(s + " ");
@@ -264,14 +258,14 @@ public class Runner {
         }
         else {
             for (GdlSentence s : sentences) {
-                if (detailedDebug) System.out.println("INSPECTING: " + s);
+                if (DETAILED_DEBUG) System.out.println("INSPECTING: " + s);
                 r.removePrecondition(s);
 
-                boolean verify = fft.verify(perspective, false, null); // strategy is null if VERIFY_SINGLE_STRAT is false
+                boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false, null); // strategy is null if VERIFY_SINGLE_STRAT is false
                 if (!verify) {
-                    if (detailedDebug) System.out.println("FAILED TO VERIFY RULE!");
+                    if (DETAILED_DEBUG) System.out.println("FAILED TO VERIFY RULE!");
                     r.addPrecondition(s);
-                } else if (detailedDebug)
+                } else if (DETAILED_DEBUG)
                     System.out.println("REMOVING: " + s);
             }
         }
@@ -286,7 +280,7 @@ public class Runner {
         while(it.hasNext()) {
             GdlSentence s = it.next();
             r.removePrecondition(s);
-            boolean verify = fft.verify(perspective, false, null);
+            boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false, null);
             if (!verify) {
                 r.addPrecondition(s);
                 continue;
