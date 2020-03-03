@@ -11,14 +11,13 @@
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.release>8</maven.compiler.release>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
-            <version>10.14.2.0</version>
+            <version>10.11.1.1</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-controls -->
@@ -130,7 +129,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <release>8</release>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
@@ -140,6 +138,12 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.6.0</version>
                 <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <configuration>
+                            <mainClass>tictactoe.main.Main</mainClass>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>tictactoe</id>
                         <configuration>

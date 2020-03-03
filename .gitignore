@@ -2,4 +2,5 @@ derby.log
 KulibratDB/*
 out/*
 target/*
-.idea/libraries/*
+.idea/*
+.DS_Store
