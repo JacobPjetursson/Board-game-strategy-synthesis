@@ -257,7 +257,6 @@ public class Runner {
             }
             for (GdlSentence s : bestPath)
                 r.removePrecondition(s);
-            System.out.println();
         }
         else {
             for (GdlSentence s : sentences) {
