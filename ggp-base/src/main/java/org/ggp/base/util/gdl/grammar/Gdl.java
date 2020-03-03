@@ -12,6 +12,15 @@ public abstract class Gdl implements Serializable
     @Override
     public abstract String toString();
 
+    @Override
+    public abstract boolean equals(Object obj);
+
+    @Override
+    public abstract int hashCode();
+
+    @Override
+    public abstract Gdl clone();
+
     /**
      * This method is used by deserialization to ensure that Gdl objects
      * loaded from an ObjectInputStream or a remote method invocation

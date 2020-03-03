@@ -1,6 +1,7 @@
 package org.ggp.base.util.gdl.grammar;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.google.common.collect.ImmutableList;
 
@@ -78,4 +79,22 @@ public final class GdlRule extends Gdl
         return sb.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GdlRule gdlRule = (GdlRule) o;
+        return Objects.equals(body, gdlRule.body) &&
+                Objects.equals(head, gdlRule.head);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(body, head);
+    }
+
+    @Override
+    public GdlRule clone() {
+        return new GdlRule(head, body);
+    }
 }

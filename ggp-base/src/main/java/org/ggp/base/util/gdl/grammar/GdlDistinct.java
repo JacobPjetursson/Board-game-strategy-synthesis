@@ -1,5 +1,7 @@
 package org.ggp.base.util.gdl.grammar;
 
+import java.util.Objects;
+
 @SuppressWarnings("serial")
 public final class GdlDistinct extends GdlLiteral
 {
@@ -42,4 +44,22 @@ public final class GdlDistinct extends GdlLiteral
         return "( distinct " + arg1 + " " + arg2 + " )";
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GdlDistinct that = (GdlDistinct) o;
+        return Objects.equals(arg1, that.arg1) &&
+                Objects.equals(arg2, that.arg2);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(arg1, arg2);
+    }
+
+    @Override
+    public GdlDistinct clone() {
+        return new GdlDistinct(arg1, arg2);
+    }
 }

@@ -264,7 +264,7 @@ public class Runner {
                 if (DETAILED_DEBUG) System.out.println("INSPECTING: " + s);
                 r.removePrecondition(s);
 
-                boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false, null); // strategy is null if VERIFY_SINGLE_STRAT is false
+                boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false); // strategy is null if VERIFY_SINGLE_STRAT is false
                 if (!verify) {
                     if (DETAILED_DEBUG) System.out.println("FAILED TO VERIFY RULE!");
                     r.addPrecondition(s);
@@ -283,7 +283,7 @@ public class Runner {
         while(it.hasNext()) {
             GdlSentence s = it.next();
             r.removePrecondition(s);
-            boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false, null);
+            boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false);
             if (!verify) {
                 r.addPrecondition(s);
                 continue;

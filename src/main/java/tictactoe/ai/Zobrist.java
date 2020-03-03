@@ -12,7 +12,7 @@ public class Zobrist {
     static {
         long range = Long.MAX_VALUE;
         Random r = new Random();
-        int seed = (Globals.ENABLE_AUTOGEN && Config.RANDOM_SEED) ? r.nextInt() : Config.SEED;
+        int seed = (Config.RANDOM_SEED) ? r.nextInt() : Config.SEED;
         r.setSeed(seed);
         System.out.println("Zobrist seed: " + seed);
 

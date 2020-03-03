@@ -1,6 +1,7 @@
 package org.ggp.base.util.gdl.grammar;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.google.common.collect.ImmutableList;
 
@@ -70,4 +71,21 @@ public final class GdlOr extends GdlLiteral
         return sb.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GdlOr gdlOr = (GdlOr) o;
+        return Objects.equals(disjuncts, gdlOr.disjuncts);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(disjuncts);
+    }
+
+    @Override
+    public GdlOr clone() {
+        return new GdlOr(disjuncts);
+    }
 }

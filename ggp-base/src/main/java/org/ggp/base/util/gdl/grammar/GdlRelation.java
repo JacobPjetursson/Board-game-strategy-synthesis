@@ -1,6 +1,7 @@
 package org.ggp.base.util.gdl.grammar;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.google.common.collect.ImmutableList;
 
@@ -17,6 +18,20 @@ public final class GdlRelation extends GdlSentence
         this.name = name;
         this.body = body;
         ground = null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GdlRelation that = (GdlRelation) o;
+        return Objects.equals(body, that.body) &&
+                Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(body, name);
     }
 
     @Override
@@ -89,7 +104,7 @@ public final class GdlRelation extends GdlSentence
     }
 
     @Override
-    public GdlSentence clone() {
+    public GdlRelation clone() {
         return new GdlRelation(name, body);
     }
 }

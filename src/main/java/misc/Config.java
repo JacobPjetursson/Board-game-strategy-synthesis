@@ -60,17 +60,17 @@ public class Config {
                 AUTOGEN_PERSPECTIVE = Globals.PLAYER1;
         }
 
-        GREEDY_AUTOGEN = Boolean.getBoolean(global.getProperty("greedy_autogen"));
-        RANDOM_SEED = Boolean.getBoolean(global.getProperty("random_seed"));
+        GREEDY_AUTOGEN = Boolean.parseBoolean(global.getProperty("greedy_autogen"));
+        RANDOM_SEED = Boolean.parseBoolean(global.getProperty("random_seed"));
         SEED = Integer.parseInt(global.getProperty("seed"));
-        ENABLE_GGP = Boolean.getBoolean(global.getProperty("enable_ggp"));
-        ENABLE_GGP_PARSER = Boolean.getBoolean(global.getProperty("enable_ggp_parser"));
-        RANDOM_RULE_ORDERING = Boolean.getBoolean(global.getProperty("random_rule_ordering"));
-        MINIMIZE_PRECONDITIONS = Boolean.getBoolean(global.getProperty("minimize_preconditions"));
+        ENABLE_GGP = Boolean.parseBoolean(global.getProperty("enable_ggp"));
+        ENABLE_GGP_PARSER = Boolean.parseBoolean(global.getProperty("enable_ggp_parser"));
+        RANDOM_RULE_ORDERING = Boolean.parseBoolean(global.getProperty("random_rule_ordering"));
+        MINIMIZE_PRECONDITIONS = Boolean.parseBoolean(global.getProperty("minimize_preconditions"));
         // DEBUG AND TEST
-        DETAILED_DEBUG = Boolean.getBoolean(global.getProperty("detailedDebug"));
-        FULL_RULES = Boolean.getBoolean(global.getProperty("fullRules"));
-        VERIFY_SINGLE_STRATEGY = Boolean.getBoolean(global.getProperty("verify_single_strategy"));
+        DETAILED_DEBUG = Boolean.parseBoolean(global.getProperty("detailedDebug"));
+        FULL_RULES = Boolean.parseBoolean(global.getProperty("fullRules"));
+        VERIFY_SINGLE_STRATEGY = Boolean.parseBoolean(global.getProperty("verify_single_strategy"));
 
         // KULIBRAT
         BWIDTH = Integer.parseInt(kulibrat.getProperty("boardWidth"));
@@ -78,7 +78,7 @@ public class Config {
         DB_PATH = kulibrat.getProperty("db_path");
 
         // TIC TAC TOE
-        SIMPLE_RULES = Boolean.getBoolean(tictactoe.getProperty("simple_rules"));
+        SIMPLE_RULES = Boolean.parseBoolean(tictactoe.getProperty("simple_rules"));
 
         // GGP
         GGP_GAME = ggp.getProperty("ggp_game");

@@ -35,7 +35,7 @@ public class Globals {
     // Changed by program
     public static int CURRENT_GAME;
     public static int SCORELIMIT;
-    public static boolean ENABLE_AUTOGEN;
+    public static boolean ENABLE_AUTOGEN = true;
 
 
 }
