@@ -39,7 +39,7 @@ public class Runner {
 
     public static void main(String[] args) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
 
-        String base_path = "src/fftlib/GGPAutogen/games/";
+        String base_path = "src/main/java/fftlib/GGPAutogen/games/";
         String game_path = base_path + (Config.SIMPLE_RULES ? "tictactoe_simple.kif" : "tictactoe.kif");
         GGPManager.loadGDL(game_path);
         p1Role = GGPManager.p1role;

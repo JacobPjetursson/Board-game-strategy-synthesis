@@ -2,7 +2,136 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d231265c-f2b3-434a-bf07-784b40a64813" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/FFT.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/FFT.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Resources/circle.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Resources/cross.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Resources/kulibrat_rules.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Resources/playerIconBlack.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Resources/playerIconRed.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/Action.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/Clause.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/FFT.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/FFTManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/FFT_Follower.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/Database.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/GGPManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/GGPMapping.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/Runner.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/Solver.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/games/battle.kif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/games/breakthrough_small.kif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/games/chess.kif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/games/kalaha.kif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/games/kulibrat_3x3.kif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/games/kulibrat_3x3_simple.kif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/games/kulibrat_3x4.kif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/games/nim.kif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/games/nine_mens_morris.kif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/games/sim.kif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/games/sum15.kif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/games/tictactoe.kif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/GGPAutogen/games/tictactoe_simple.kif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/Literal.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/Rule.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/RuleGroup.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/game/FFTAutoGen.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/game/FFTDatabase.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/game/FFTGameSpecifics.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/game/FFTLogic.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/game/FFTMove.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/game/FFTState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/game/FFTStateAndMove.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/game/FFTStateMapping.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/game/Transform.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/gui/ConfirmDialog.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/gui/DeleteFFTDialog.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/gui/FFTFailState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/gui/FFTFailurePane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/gui/FFTInteractivePane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/gui/FFTOverviewPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/gui/InputPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/gui/InteractiveFFTState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/gui/NoSelectionModel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fftlib/gui/ShowFFTPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/FFT/AutoGen/LookupSimple.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/FFT/FFTFollower.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/FFT/FailStatePane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/FFT/GameSpecifics.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/FFT/InteractiveState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/ai/AI.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/ai/MCTS/MCTS.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/ai/MCTS/Node.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/ai/Minimax/LookupTableMinimax.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/ai/Minimax/Minimax.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/ai/Minimax/StateMapping.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/ai/Minimax/Zobrist.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/game/Controller.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/game/Logic.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/game/Move.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/game/State.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/game/StateAndMove.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/Dialogs/ConfirmDialog.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/Dialogs/OverwriteDBDialog.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/Dialogs/RestartGameDialog.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/EndGamePane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/NavPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/PlayArea.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/PlayPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/ReviewPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/SwapPlayerPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/board/Board.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/board/BoardPiece.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/board/BoardTile.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/board/Goal.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/board/PlayBox/InteractivePlayBox.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/board/PlayBox/PlayBox.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/board/PlayBox/StaticPlayBox.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/board/Player.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/info/InfoPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/info/ScoreBoard.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/menu/Arrow.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/menu/MenuPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/menu/NewGamePane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/menu/ReadMePane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/gui/menu/RulesPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/main/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kulibrat/misc/Database.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/misc/Config.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/misc/Globals.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/FFT/FailStatePane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/FFT/GameSpecifics.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/FFT/InteractiveState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/ai/AI.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/ai/FFTFollower.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/ai/LookupTableMinimax.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/ai/StateMapping.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/ai/Zobrist.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/demos/Demo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/game/Controller.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/game/Logic.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/game/Move.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/game/State.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/game/StateAndMove.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/EndGamePane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/InfoPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/NavPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/PlayArea.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/PlayPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/ReviewPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/board/Board.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/board/BoardTile.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/board/PlayBox/InteractivePlayBox.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/board/PlayBox/PlayBox.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/board/Player.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/dialog/ConfirmDialog.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/dialog/RestartGameDialog.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/menu/MenuPane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/gui/menu/NewGamePane.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/main/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tictactoe/misc/Database.java" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,6 +148,13 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="importAutomatically" value="true" />
+      </MavenImportingSettings>
+    </option>
   </component>
   <component name="ProjectId" id="1SxNAdffPnSnBvi2HnF2hbvNkWG" />
   <component name="ProjectInspectionProfilesVisibleTreeState">
@@ -119,6 +255,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/resources" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/src/FFTs" />
     </key>
@@ -135,7 +272,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.KulibratFFT">
+  <component name="RunManager" selected="Application.TicTacToeFFT">
     <configuration name="GGPAutogen" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="fftlib.GGPAutogen.Runner" />
       <module name="FFT" />
@@ -219,6 +356,9 @@
       <workItem from="1574226765436" duration="13456000" />
       <workItem from="1574920388778" duration="1235000" />
       <workItem from="1582971107615" duration="16221000" />
+      <workItem from="1583154203262" duration="505000" />
+      <workItem from="1583156077586" duration="596000" />
+      <workItem from="1583157288484" duration="7348000" />
     </task>
     <servers />
   </component>
@@ -242,16 +382,19 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/fftlib/FFTManager.java</url>
+          <url>file://$PROJECT_DIR$/src/main/java/fftlib/FFTManager.java</url>
           <line>103</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/misc/Config.java</url>
+          <url>file://$PROJECT_DIR$/src/main/java/misc/Config.java</url>
           <line>36</line>
           <option name="timeStamp" value="12" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/Board_game_strategy_synthesis$KulibratFFT.ic" NAME="KulibratFFT Coverage Results" MODIFIED="1583230931378" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
 </project>
