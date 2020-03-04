@@ -73,11 +73,8 @@ public class FFT {
             System.out.println("A perfect player 1 has won from the start of the game");
             return false;
         }
-        System.out.println(forkJoinPool.getActiveThreadCount());
-        boolean result = forkJoinPool.invoke(new VerificationTask(initialState, team, complete, strategy));
-        forkJoinPool.shutdown();
-        System.out.println(forkJoinPool.getActiveThreadCount());
-        return result;
+
+        return forkJoinPool.invoke(new VerificationTask(initialState, team, complete, strategy));
     }
 
 
