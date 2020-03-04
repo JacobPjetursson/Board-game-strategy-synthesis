@@ -188,16 +188,7 @@ public class FFTOverviewPane extends VBox {
                 return;
             int team = teamChoice.getSelectionModel().getSelectedIndex() + 1;
             boolean wholeFFT = verificationChoice.getSelectionModel().getSelectedIndex() == 0;
-            boolean verified = false;
-            try {
-                verified = fftManager.currFFT.verify(team, wholeFFT);
-            } catch (TransitionDefinitionException e) {
-                e.printStackTrace();
-            } catch (MoveDefinitionException e) {
-                e.printStackTrace();
-            } catch (GoalDefinitionException e) {
-                e.printStackTrace();
-            }
+            boolean verified = fftManager.currFFT.verify(team, wholeFFT);
             if (!verified) {
                 if (fftManager.currFFT.failingPoint == null) {
                     Label verifiedLabel = new Label("Always loses to perfect player");

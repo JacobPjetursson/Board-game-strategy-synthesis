@@ -54,7 +54,6 @@ public class Runner {
         rg = new RuleGroup("Autogen");
         fft.addRuleGroup(rg);
         MachineState initialState = GGPManager.getInitialState();
-
         Solver solver = new Solver();
         lookupTable = solver.solve();
 
