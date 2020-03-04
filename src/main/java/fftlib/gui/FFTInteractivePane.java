@@ -812,16 +812,8 @@ public class FFTInteractivePane extends BorderPane {
             pushUndoStack();
             int ruleSize = fftManager.currFFT.getAmountOfRules();
             int precSize = fftManager.currFFT.getAmountOfPreconditions();
-            int iterations = 0;
-            try {
-                iterations = fftManager.currFFT.minimize(perspective, minimizeBox.isSelected());
-            } catch (GoalDefinitionException e) {
-                e.printStackTrace();
-            } catch (MoveDefinitionException e) {
-                e.printStackTrace();
-            } catch (TransitionDefinitionException e) {
-                e.printStackTrace();
-            }
+            int iterations = fftManager.currFFT.minimize(perspective, minimizeBox.isSelected());
+
             int diffRules = ruleSize - fftManager.currFFT.getAmountOfRules();
             int diffPrecs = precSize - fftManager.currFFT.getAmountOfPreconditions();
             String msg;

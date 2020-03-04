@@ -30,11 +30,10 @@ public class FFT {
     public FFTStateAndMove failingPoint = null;
 
     // For concurrency purposes
-    private static int nThreads = Runtime.getRuntime().availableProcessors();
-    private static ForkJoinPool forkJoinPool = new ForkJoinPool(nThreads);
+    private static ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
     private static ConcurrentHashMap<FFTState, Boolean> closedMap = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<MachineState, Boolean> closedMapGGP = new ConcurrentHashMap<>();
-    private static boolean failed; // failed set to true if verification failed
+    private static boolean failed; // failed is set to true if verification failed
 
     public FFT(String name) {
         this.name = name;
@@ -82,7 +81,7 @@ public class FFT {
         if (team == PLAYER_ANY)
             return verifyGGP(PLAYER1, complete, strategy) && verifyGGP(PLAYER2, complete, strategy);
         MachineState initialState = GGPManager.getInitialState();
-        closedMap.clear();
+        closedMapGGP.clear();
         failed = false;
         // Check if win or draw is even possible
         int winner = Database.queryState(initialState).getWinner();
@@ -95,7 +94,6 @@ public class FFT {
         }
         return forkJoinPool.invoke(new GGPVerificationTask(initialState, team, complete, strategy));
     }
-
 
     public Move apply(MachineState state) throws MoveDefinitionException {
         for (RuleGroup ruleGroup : ruleGroups) {
@@ -242,7 +240,6 @@ public class FFT {
             this.team = team;
             this.complete = complete;
             this.strategy = strategy;
-
             forks = new LinkedList<>();
             this.opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
 

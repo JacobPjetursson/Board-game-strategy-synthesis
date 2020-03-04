@@ -180,8 +180,6 @@ public class Runner {
             if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
             System.out.println();
 
-
-
             if (fft.verify(AUTOGEN_PERSPECTIVE, true)) {
                 System.out.println("FFT verified before empty statespace");
                 return;
@@ -196,9 +194,7 @@ public class Runner {
                     return false;
                 }
             });
-
         }
-
     }
 
     private static Rule addRule(MachineState ms) throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
