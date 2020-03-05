@@ -4,8 +4,8 @@ Insert introduction to project here
 
 ## Project Setup:
 
-1. Install [Java 8](https://www.oracle.com/java/technologies/javase-jdk8-downloads.html) (Might work with newer versions but untested)
-2. Install [Maven 3.6.3](https://maven.apache.org/download.cgi) (Likely to work with older/newer versions)
+1. Install Java8 or newer (Might work with older versions but untested)
+2. Install [Maven 3](https://maven.apache.org/download.cgi)
 3. Open the Terminal and navigate to project root
 4. Run `mvn verify`
    - Check that build was run successfully and the */target* folder is created in the project root

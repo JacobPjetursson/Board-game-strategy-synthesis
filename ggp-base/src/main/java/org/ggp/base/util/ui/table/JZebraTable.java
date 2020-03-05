@@ -1,5 +1,7 @@
 package org.ggp.base.util.ui.table;
 
+import java.util.Vector;
+
 @SuppressWarnings("serial")
 public class JZebraTable extends javax.swing.JTable
 {
@@ -17,7 +19,7 @@ public class JZebraTable extends javax.swing.JTable
 
     public JZebraTable(java.util.Vector<?> rowData, java.util.Vector<?> columnNames)
     {
-        super(rowData, columnNames);
+        super((Vector<? extends Vector>) rowData, columnNames);
     }
 
     public JZebraTable(javax.swing.table.TableModel dataModel)
