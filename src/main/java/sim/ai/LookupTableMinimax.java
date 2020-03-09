@@ -12,7 +12,6 @@ import static misc.Globals.PLAYER2;
 
 public class LookupTableMinimax{
     private int CURR_MAX_DEPTH;
-    private int unevaluatedNodes = 0;
     private int team;
     private HashMap<State, StateMapping> lookupTable;
 
@@ -26,6 +25,8 @@ public class LookupTableMinimax{
 
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
         System.out.println("Time spent on solving game: " + timeSpent);
+        String winner = lookupTable.get(state).getWinner() == PLAYER1 ? "Player 1" : "Player 2";
+        System.out.println("Winner is " + winner);
     }
 
     // This function fetches the best move from lookuptable, if it exists
@@ -46,21 +47,14 @@ public class LookupTableMinimax{
         CURR_MAX_DEPTH = 0;
         boolean done = false;
         StateMapping mapping = null;
-        int doneCounter = 0;
+
         while (!done) {
             State simState = new State(state); // Start from fresh (Don't reuse previous game tree in new iterations)
-            int prevSize = lookupTable.size();
-            int prevUnevaluatedNodes = unevaluatedNodes;
-            unevaluatedNodes = 0;
             CURR_MAX_DEPTH += 1;
             mapping = minimax(simState, CURR_MAX_DEPTH);
-            System.out.println("CURRENT MAX DEPTH: " + CURR_MAX_DEPTH + ", LOOKUP TABLE SIZE: " + lookupTable.size() + ", UNEVALUATED NODES: " + unevaluatedNodes);
-            if (lookupTable.size() == prevSize && unevaluatedNodes == prevUnevaluatedNodes) {
-                //System.out.println("State space explored, and unevaluated nodes unchanged between runs. I'm done");
-                doneCounter++;
-            } else
-                doneCounter = 0;
-            if (doneCounter == 2) done = true;
+            System.out.println("CURRENT MAX DEPTH: " + CURR_MAX_DEPTH + ", LOOKUP TABLE SIZE: " + lookupTable.size());
+            if (CURR_MAX_DEPTH == 15)
+                done = true;
         }
         return mapping;
     }
