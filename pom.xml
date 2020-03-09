@@ -157,6 +157,12 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>sim</id>
+                        <configuration>
+                            <mainClass>sim.Main</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>GGP-FFT</id>
                         <configuration>
                             <mainClass>fftlib.GGPAutogen.Runner</mainClass>
