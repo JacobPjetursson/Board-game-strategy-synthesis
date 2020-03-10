@@ -7,6 +7,7 @@ import sim.ai.Zobrist;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 import static misc.Globals.PLAYER1;
 
@@ -15,33 +16,13 @@ public class State implements FFTState {
     private int turn;
     private ArrayList<Move> legalMoves;
     private long zobrist_key;
-    ArrayList<Line> lines;
+
+    LinkedList<Line> lines;
 
     // initial state
     public State () {
         turn = PLAYER1;
-
-        lines = new ArrayList<>();
-
-        lines.add(new Line(0, 1));
-        lines.add(new Line(0, 2));
-        lines.add(new Line(0, 3));
-        lines.add(new Line(0, 4));
-        lines.add(new Line(0, 5));
-
-        lines.add(new Line(1, 2));
-        lines.add(new Line(1, 3));
-        lines.add(new Line(1, 4));
-        lines.add(new Line(1, 5));
-
-        lines.add(new Line(2, 3));
-        lines.add(new Line(2, 4));
-        lines.add(new Line(2, 5));
-
-        lines.add(new Line(3, 4));
-        lines.add(new Line(3, 5));
-
-        lines.add(new Line(4, 5));
+        this.lines = new LinkedList<>();
         this.zobrist_key = initZobrist();
     }
 
@@ -55,7 +36,7 @@ public class State implements FFTState {
 
     // Duplicate constructor, for "root" state
     public State(State state) {
-        lines = new ArrayList<>();
+        lines = new LinkedList<>();
         for (Line l : state.lines)
             lines.add(new Line(l));
 
@@ -111,9 +92,6 @@ public class State implements FFTState {
         zobrist_key ^= Zobrist.turn[turn];
 
         Line l = move.line;
-        long z1_parent = Zobrist.points[l.n1][Line.NO_COLOR];
-        long z2_parent = Zobrist.points[l.n2][Line.NO_COLOR];
-        zobrist_key ^= (z1_parent + z2_parent);
 
         long z1 = Zobrist.points[l.n1][move.team];
         long z2 = Zobrist.points[l.n2][move.team];

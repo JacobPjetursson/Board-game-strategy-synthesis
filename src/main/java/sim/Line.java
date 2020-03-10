@@ -6,7 +6,7 @@ import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 
 public class Line {
-    public static final int NO_COLOR = 0;
+    private static final int NO_COLOR = 0;
 
     int n1, n2;
     int color;
