@@ -70,7 +70,7 @@ public class Database implements FFTDatabase {
             return nonLosingMoves;
         StateMapping mapping = queryState(state);
         State next = state.getNextState(mapping.move);
-
+        // Cant assume that best move will end the game, in fact its the opposite
         // In case of game over
         if (Logic.gameOver(next)) {
             int winner = Logic.getWinner(next);
@@ -92,6 +92,13 @@ public class Database implements FFTDatabase {
 
         for (State child : state.getChildren()) {
             Move m = child.getMove();
+            if (Logic.gameOver(child)) {
+                if (team == PLAYER1 && bestMoveWinner == PLAYER2)
+                    nonLosingMoves.add(m);
+                else if (team == PLAYER2 && bestMoveWinner == PLAYER1)
+                    nonLosingMoves.add(m);
+                continue;
+            }
             int childWinner = queryState(child).getWinner();
             if (team == PLAYER1) {
                 if (bestMoveWinner == childWinner)

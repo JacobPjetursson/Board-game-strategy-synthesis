@@ -25,6 +25,7 @@ public class Logic implements FFTLogic {
 
     public static boolean gameOver(State state) {
         // SMALLER STATESPACE FOR DEBUGGING
+
         int p1_count = 0;
         int p2_count = 0;
         for (Line l : state.lines) {
@@ -35,6 +36,7 @@ public class Logic implements FFTLogic {
         }
         if (p1_count > 3 || p2_count > 3)
             return true;
+
 
         for (Line l : state.lines) {
             if (l.color == Line.NO_COLOR)
