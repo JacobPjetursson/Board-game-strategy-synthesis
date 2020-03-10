@@ -54,7 +54,7 @@ public class LookupTableMinimax{
             int prevSize = lookupTable.size();
             mapping = minimax(simState, CURR_MAX_DEPTH);
             System.out.println("CURRENT MAX DEPTH: " + CURR_MAX_DEPTH + ", LOOKUP TABLE SIZE: " + lookupTable.size());
-            if (CURR_MAX_DEPTH == 15)
+            if (CURR_MAX_DEPTH == 15 || lookupTable.size() == prevSize)
                 done = true;
         }
         return mapping;

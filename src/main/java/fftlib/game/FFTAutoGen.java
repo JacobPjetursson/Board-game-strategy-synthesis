@@ -66,6 +66,7 @@ public class FFTAutoGen {
 
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
         System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
+        System.out.println("Final rules: \n" + fft);
     }
 
 
@@ -146,16 +147,15 @@ public class FFTAutoGen {
             System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + rg.rules.size());
             FFTState state = states.iterator().next();
 
-            Rule r = addRule(state);
-            states.remove(state);
-            if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
-            System.out.println();
-
-
             if (fft.verify(AUTOGEN_PERSPECTIVE, true)) {
                 System.out.println("FFT verified before empty statespace");
                 return;
             }
+
+            Rule r = addRule(state);
+            states.remove(state);
+            if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
+            System.out.println();
 
             // Delete states that apply
             states.removeIf(s -> r.apply(s) != null);

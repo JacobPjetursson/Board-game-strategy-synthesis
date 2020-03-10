@@ -12,6 +12,7 @@ import java.util.HashSet;
 
 import static fftlib.Literal.PIECEOCC_ANY;
 import static fftlib.Literal.PIECEOCC_PLAYER;
+import static fftlib.game.Transform.*;
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 
@@ -72,7 +73,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public int[] getAllowedTransformations() {
-        return new int[0];
+        return new int[]{TRANS_HREF, TRANS_VREF, TRANS_ROT};
     }
 
     @Override
