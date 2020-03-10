@@ -6,7 +6,7 @@ import misc.Globals;
 import java.util.Random;
 
 public class Zobrist {
-    public static long[][][] points;
+    public static long[][] points;
     public static long[] turn;
 
     static {
@@ -17,19 +17,17 @@ public class Zobrist {
         System.out.println("Zobrist seed: " + seed);
 
         // line keys
-        int width = 2;
-        int height = 3;
+        int nodes = 6;
         int colors = 3;
 
 
-        points = new long[height][width][colors];
+        points = new long[nodes][colors];
         for (int i = 0; i < points.length; i++) {
-            for (int j = 0; j < points[j].length; j++) {
-                for (int k = 0; k < colors; k++) {
-                    long rLong = (long) (r.nextDouble() * range);
-                    points[i][j][k] = rLong;
-                }
+            for (int j = 0; j < colors; j++) {
+                long rLong = (long) (r.nextDouble() * range);
+                points[i][j] = rLong;
             }
+
         }
         // turn keys
         turn = new long[3];

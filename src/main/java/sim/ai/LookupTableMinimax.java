@@ -51,6 +51,7 @@ public class LookupTableMinimax{
         while (!done) {
             State simState = new State(state); // Start from fresh (Don't reuse previous game tree in new iterations)
             CURR_MAX_DEPTH += 1;
+            int prevSize = lookupTable.size();
             mapping = minimax(simState, CURR_MAX_DEPTH);
             System.out.println("CURRENT MAX DEPTH: " + CURR_MAX_DEPTH + ", LOOKUP TABLE SIZE: " + lookupTable.size());
             if (CURR_MAX_DEPTH == 15)

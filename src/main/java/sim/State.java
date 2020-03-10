@@ -5,10 +5,8 @@ import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import sim.ai.Zobrist;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Objects;
 
 import static misc.Globals.PLAYER1;
 
@@ -17,42 +15,33 @@ public class State implements FFTState {
     private int turn;
     private ArrayList<Move> legalMoves;
     private long zobrist_key;
-
     ArrayList<Line> lines;
 
     // initial state
     public State () {
         turn = PLAYER1;
 
-
-        Point p1 = new Point(0, 0);
-        Point p2 = new Point(1,0);
-        Point p3 = new Point(0, 1);
-        Point p4 = new Point(1, 1);
-        Point p5 = new Point(0, 2);
-        Point p6 = new Point(1, 2);
-
         lines = new ArrayList<>();
 
-        lines.add(new Line(p1, p2, 1));
-        lines.add(new Line(p1, p3, 2));
-        lines.add(new Line(p1, p4, 3));
-        lines.add(new Line(p1, p5, 4));
-        lines.add(new Line(p1, p6, 5));
+        lines.add(new Line(0, 1));
+        lines.add(new Line(0, 2));
+        lines.add(new Line(0, 3));
+        lines.add(new Line(0, 4));
+        lines.add(new Line(0, 5));
 
-        lines.add(new Line(p2, p3, 6));
-        lines.add(new Line(p2, p4, 7));
-        lines.add(new Line(p2, p5, 8));
-        lines.add(new Line(p2, p6, 9));
+        lines.add(new Line(1, 2));
+        lines.add(new Line(1, 3));
+        lines.add(new Line(1, 4));
+        lines.add(new Line(1, 5));
 
-        lines.add(new Line(p3, p4, 9));
-        lines.add(new Line(p3, p5, 10));
-        lines.add(new Line(p3, p6, 11));
+        lines.add(new Line(2, 3));
+        lines.add(new Line(2, 4));
+        lines.add(new Line(2, 5));
 
-        lines.add(new Line(p4, p5, 12));
-        lines.add(new Line(p4, p6, 13));
+        lines.add(new Line(3, 4));
+        lines.add(new Line(3, 5));
 
-        lines.add(new Line(p5, p6, 14));
+        lines.add(new Line(4, 5));
         this.zobrist_key = initZobrist();
     }
 
@@ -109,11 +98,11 @@ public class State implements FFTState {
     private long initZobrist() {
         long hash = 0L;
         for (Line l : lines) {
-            long z1 = Zobrist.points[l.p1.y][l.p1.x][l.color];
-            long z2 = Zobrist.points[l.p2.y][l.p2.x][l.color];
+            long z1 = Zobrist.points[l.n1][l.color];
+            long z2 = Zobrist.points[l.n2][l.color];
             hash ^= (z1 + z2);
         }
-        hash = hash ^ Zobrist.turn[turn];
+        hash ^= Zobrist.turn[turn];
         return hash;
     }
 
@@ -122,13 +111,13 @@ public class State implements FFTState {
         zobrist_key ^= Zobrist.turn[turn];
 
         Line l = move.line;
-        long z1_parent = Zobrist.points[l.p1.y][l.p1.x][Line.NO_COLOR];
-        long z2_parent = Zobrist.points[l.p2.y][l.p2.x][Line.NO_COLOR];
-        long z1 = Zobrist.points[l.p1.y][l.p1.x][move.team];
-        long z2 = Zobrist.points[l.p2.y][l.p2.x][move.team];
+        long z1_parent = Zobrist.points[l.n1][Line.NO_COLOR];
+        long z2_parent = Zobrist.points[l.n2][Line.NO_COLOR];
         zobrist_key ^= (z1_parent + z2_parent);
-        zobrist_key ^= (z1 + z2);
 
+        long z1 = Zobrist.points[l.n1][move.team];
+        long z2 = Zobrist.points[l.n2][move.team];
+        zobrist_key ^= (z1 + z2);
     }
 
     @Override
@@ -174,7 +163,7 @@ public class State implements FFTState {
 
     public String toString() {
         StringBuilder s = new StringBuilder();
-        s.append("TURN: ").append(turn).append("\t");
+        s.append("TURN:").append(turn).append("\t");
         for (Line l : lines)
             s.append(l.toString()).append(";\t");
         return s.toString();

@@ -47,6 +47,6 @@ public class Move implements FFTMove {
 
     public String toString() {
         String colorStr = (team == PLAYER1) ? "P1: " : "P2: ";
-        return colorStr + "(" + line.p1.x + "," + line.p1.y + ")," + "(" + line.p2.x + "," + line.p2.y + ");";
+        return colorStr + "(" + line.n1 + "," +line.n2 + ");";
     }
 }
