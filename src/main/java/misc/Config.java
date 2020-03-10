@@ -54,8 +54,10 @@ public class Config {
         switch(perspective) {
             case "player2":
                 AUTOGEN_PERSPECTIVE = Globals.PLAYER2;
+                break;
             case "both":
                 AUTOGEN_PERSPECTIVE = Globals.PLAYER_ANY;
+                break;
             default:
                 AUTOGEN_PERSPECTIVE = Globals.PLAYER1;
         }

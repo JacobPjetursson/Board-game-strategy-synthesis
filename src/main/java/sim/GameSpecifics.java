@@ -10,17 +10,42 @@ import misc.Config;
 
 import java.util.HashSet;
 
+import static fftlib.Literal.PIECEOCC_ANY;
+import static fftlib.Literal.PIECEOCC_PLAYER;
+import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 
 public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public FFTMove actionToMove(Action a, int team) {
-        return null;
+        if (a == null || (a.addClause.isEmpty() && a.remClause.isEmpty()))
+            return null;
+        int n1 = -1;
+        int n2 = -1;
+        for (Literal l : a.addClause.literals) {
+            n1 = l.row;
+            n2 = l.col;
+        }
+        return new Move(team, new Line(n1, n2));
     }
 
     @Override
     public FFTState preconsToState(HashSet<Literal> precons, int team) {
-        return null;
+        State s = new State();
+        int opponent = team == PLAYER1 ? PLAYER2 : PLAYER1;
+        for (Literal l : precons) {
+            if (l.boardPlacement && !l.negation && l.pieceOcc != PIECEOCC_ANY) {
+                int entry;
+                if (l.pieceOcc == PIECEOCC_PLAYER)
+                    entry = team;
+                else
+                    entry = opponent;
+
+                s.setLine(l.row, l.col, entry);
+            }
+        }
+        s.setTurn(team);
+        return s;
     }
 
     @Override
@@ -37,7 +62,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public int[] getBoardDim() {
-        return new int[] {14, 1};
+        return new int[] {6, 6};
     }
 
     @Override
@@ -77,8 +102,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public int getMaxPrecons() {
-        int[] dim = getBoardDim();
-        return dim[0] * dim[1];
+        return 15;
     }
 
     @Override

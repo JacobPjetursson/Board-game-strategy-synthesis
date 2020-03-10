@@ -1,10 +1,14 @@
 package sim;
 
 import fftlib.Action;
+import fftlib.Clause;
+import fftlib.Literal;
 import fftlib.game.FFTMove;
 
+import java.util.HashSet;
 import java.util.Objects;
 
+import static fftlib.Literal.PIECEOCC_PLAYER;
 import static misc.Globals.PLAYER1;
 
 public class Move implements FFTMove {
@@ -24,7 +28,13 @@ public class Move implements FFTMove {
 
     @Override
     public Action getAction() {
-        return null;
+        HashSet<Literal> addLits = new HashSet<>();
+        addLits.add(new Literal(line.n1, line.n2, PIECEOCC_PLAYER, false));
+        HashSet<Literal> remLits = new HashSet<>();
+
+        Clause addClause = new Clause(addLits);
+        Clause remClause = new Clause(remLits);
+        return new Action(addClause, remClause);
     }
 
     @Override

@@ -1,5 +1,9 @@
 package sim;
 
+import fftlib.FFTManager;
+import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
+import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
+import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 import sim.ai.LookupTableMinimax;
 
 import static misc.Globals.PLAYER1;
@@ -44,21 +48,17 @@ public class Main {
         System.out.println(ss4.hashCode());
         State ss5 = ss4.getNextState(m4);
         System.out.println(ss5.hashCode());
-
-
 */
 
         new LookupTableMinimax(PLAYER1, s);
-        /*
 
         GameSpecifics specs = new GameSpecifics();
         FFTManager fftManager = new FFTManager(specs);
+
         try {
             fftManager.autogenFFT();
         } catch (TransitionDefinitionException | MoveDefinitionException | GoalDefinitionException e) {
             e.printStackTrace();
         }
-
-         */
     }
 }

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-import static misc.Globals.PLAYER1;
+import static misc.Globals.*;
 
 public class State implements FFTState {
     private Move move;
@@ -23,6 +23,25 @@ public class State implements FFTState {
     public State () {
         turn = PLAYER1;
         this.lines = new LinkedList<>();
+        lines.add(new Line(0, 1));
+        lines.add(new Line(0, 2));
+        lines.add(new Line(0, 3));
+        lines.add(new Line(0, 4));
+        lines.add(new Line(0, 5));
+
+        lines.add(new Line(1, 2));
+        lines.add(new Line(1, 3));
+        lines.add(new Line(1, 4));
+        lines.add(new Line(1, 5));
+
+        lines.add(new Line(2, 3));
+        lines.add(new Line(2, 4));
+        lines.add(new Line(2, 5));
+
+        lines.add(new Line(3, 4));
+        lines.add(new Line(3, 5));
+
+        lines.add(new Line(4, 5));
         this.zobrist_key = initZobrist();
     }
 
@@ -63,12 +82,28 @@ public class State implements FFTState {
 
     @Override
     public HashSet<Literal> getLiterals() {
-        return null;
+        HashSet<Literal> literals = new HashSet<>();
+        for (Line l : lines) {
+            if (l.color == PLAYER1)
+                literals.add(new Literal(l.n1, l.n2, PLAYER1, false));
+            else if (l.color == PLAYER2)
+                literals.add(new Literal(l.n1, l.n2, PLAYER2, false));
+        }
+        return literals;
     }
 
     @Override
     public HashSet<Literal> getAllLiterals() {
-        return null;
+        HashSet<Literal> literals = new HashSet<>();
+        for (Line l : lines) {
+            if (l.color == PLAYER1)
+                literals.add(new Literal(l.n1, l.n2, PLAYER1, false));
+            else if (l.color == PLAYER2)
+                literals.add(new Literal(l.n1, l.n2, PLAYER2, false));
+            else
+                literals.add(new Literal(l.n1, l.n2, PLAYER_ANY, true));
+        }
+        return literals;
     }
 
     @Override
@@ -125,6 +160,13 @@ public class State implements FFTState {
 
     public State getNextState(Move m) {
         return new State(this, m);
+    }
+
+    void setLine(int n1, int n2, int color) {
+        for (Line l : lines) {
+            if (l.n1 == n1 && l.n2 == n2)
+                l.color = color;
+        }
     }
 
     // Creates and/or returns a list of new state objects which correspond to the children of the given state.

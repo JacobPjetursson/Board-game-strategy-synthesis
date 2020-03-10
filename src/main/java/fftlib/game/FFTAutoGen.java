@@ -51,7 +51,7 @@ public class FFTAutoGen {
         } else {
             System.out.println("Filtering for all strategies");
             filterSolution();
-            deleteIrrelevantStates();
+            //deleteIrrelevantStates();
         }
         System.out.println("Amount of states after filtering: " + states.size());
 
