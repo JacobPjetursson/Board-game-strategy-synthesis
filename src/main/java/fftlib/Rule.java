@@ -14,13 +14,15 @@ import java.util.*;
 
 import static fftlib.Literal.*;
 import static misc.Config.ENABLE_GGP_PARSER;
+import static misc.Globals.CURRENT_GAME;
+import static misc.Globals.SIM;
 
 
 public class Rule {
     private static final ArrayList<String> separators = new ArrayList<>(
             Arrays.asList("and", "And", "AND", "&", "∧"));
     public Clause preconditions;
-    private HashSet<Clause> transformedPrecons;
+    public HashSet<Rule> symmetryRules;
     public Action action;
     private String actionStr, preconStr;
 
@@ -32,7 +34,6 @@ public class Rule {
 
     // General game playing
     public Set<GdlSentence> sentences;
-    //private HashSet<Clause> transformedSentences;
     private Move move;
 
     // parsing constructor
@@ -41,21 +42,11 @@ public class Rule {
             Rule r = FFTManager.gdlToRule.apply(preconStr, actionStr);
             this.action = r.action;
             this.preconditions = r.preconditions;
-            this.transformedPrecons = getTransformedPreconditions();
         } else {
-            this.multiRule = isMultiRule(preconStr, actionStr);
-            if (multiRule) {
-                rules = new HashSet<>();
-                replaceWildcards(preconStr, actionStr, rules);
-                // TODO - format this shit
-                this.preconStr = preconStr;
-                this.actionStr = actionStr;
-            } else {
-                this.action = getAction(actionStr);
-                this.preconditions = getPreconditions(preconStr);
-                this.transformedPrecons = getTransformedPreconditions();
-            }
+            this.action = getAction(actionStr);
+            this.preconditions = getPreconditions(preconStr);
         }
+        setTransformedRules();
         errors = !isValidRuleFormat(this);
     }
 
@@ -63,14 +54,14 @@ public class Rule {
         this.multiRule = false;
         this.action = action;
         this.preconditions = new Clause(precons);
-        this.transformedPrecons = getTransformedPreconditions();
+        this.symmetryRules = new HashSet<>();
     }
 
     public Rule(Clause precons, Action action) {
         this.multiRule = false;
         this.action = action;
         this.preconditions = precons;
-        this.transformedPrecons = getTransformedPreconditions();
+        this.symmetryRules = new HashSet<>();
     }
 
     // GDL Constructor
@@ -78,14 +69,13 @@ public class Rule {
         this.multiRule = false;
         this.sentences = sentences;
         this.move = move;
-        //this.transformedSentences = getTransformedSentences();
     }
 
     // Empty constructor to allow rule buildup
     public Rule() {
         this.preconditions = new Clause();
         this.action = new Action();
-        this.transformedPrecons = getTransformedPreconditions();
+        this.symmetryRules = new HashSet<>();
         preconStr = "";
         actionStr = "";
     }
@@ -93,44 +83,34 @@ public class Rule {
     public Rule(Set<GdlSentence> sentences) {
         this.multiRule = false;
         this.sentences = sentences;
-        //this.transformedSentences = getTransformedSentences();
     }
 
     // Duplicate constructor
     public Rule(Rule duplicate) {
-        this.multiRule = duplicate.multiRule;
-        if (multiRule) {
-            rules = new HashSet<>(duplicate.rules);
-            this.preconStr = duplicate.preconStr;
-            this.actionStr = duplicate.actionStr;
-        } else {
-            this.action = new Action(duplicate.action);
-            this.preconditions = new Clause(duplicate.preconditions);
-            this.transformedPrecons = getTransformedPreconditions();
-        }
+        this.action = new Action(duplicate.action);
+        this.preconditions = new Clause(duplicate.preconditions);
         this.errors = duplicate.errors;
+        this.symmetryRules = new HashSet<>();
 
     }
 
     public void addPrecondition(Literal l) {
         if (!preconditions.literals.contains(l))
             preconditions.add(l);
-        this.transformedPrecons = getTransformedPreconditions();
+        setTransformedRules();
     }
 
     public void addPrecondition(GdlSentence s) {
         this.sentences.add(s);
-        //this.transformedSentences = getTransformedSentences();
     }
 
     public void removePrecondition(Literal l) {
         this.preconditions.remove(l);
-        this.transformedPrecons = getTransformedPreconditions();
+        setTransformedRules();
     }
 
     public void removePrecondition(GdlSentence s) {
         this.sentences.remove(s);
-        //this.transformedSentences = getTransformedSentences();
     }
 
 
@@ -154,7 +134,7 @@ public class Rule {
         }
         action.remClause.literals.removeAll(removeList);
 
-        this.transformedPrecons = getTransformedPreconditions();
+        setTransformedRules();
     }
 
     public void setAction(Action a) {
@@ -173,7 +153,7 @@ public class Rule {
             this.preconditions = new Clause();
         else
             this.preconditions = c;
-        this.transformedPrecons = getTransformedPreconditions();
+        setTransformedRules();
     }
 
     public void setSentences(Set<GdlSentence> sentences) {
@@ -362,44 +342,33 @@ public class Rule {
             return actionStr;
     }
 
-    private HashSet<Clause> getTransformedPreconditions() {
-        HashSet<Clause> transformedPrecons = new HashSet<>();
-        HashSet<Literal> nonBoardPlacements = preconditions.extractNonBoardPlacements();
-        int[][] cBoard = preconsToBoard(preconditions);
-        HashSet<Transform.TransformedArray> tSet = Transform.applyAll(FFTManager.gameSymmetries, cBoard);
-        for (Transform.TransformedArray tArr : tSet) {
-            transformedPrecons.add(boardToPrecons(tArr, nonBoardPlacements));
-        }
+    public void setTransformedRules() {
 
-        return transformedPrecons;
+        if (CURRENT_GAME != SIM) {
+            //return Transform.applyAll(FFTManager.gameSymmetries, this);
+        }
+        else {
+            symmetryRules = Transform.findAutomorphisms(this);
+        }
     }
 
 
     public FFTMove apply(FFTState state) {
-        if (multiRule) {
-            // If first rule applies, it doesn't matter if rest is incorrect, since it's a prioritized list
-            for (Rule rule : rules) {
-                FFTMove move = rule.apply(state);
-                if (move != null)
-                    return move;
-            }
-            return null;
-        }
         HashSet<Literal> stLiterals = state.getLiterals();
-        FFTMove m = match(preconditions, state, stLiterals);
+        FFTMove m = match(this, state, stLiterals);
         if (m != null) return m;
-        for (Clause clause : transformedPrecons) { // TODO - possible to optimize here by only including unique clauses
-            if (clause.equals(preconditions))
+        for (Rule rule : symmetryRules) { // TODO - possible to optimize here by only including unique clauses
+            if (rule.preconditions.equals(preconditions))
                 continue;
-            m = match(clause, state, stLiterals);
+            m = match(rule, state, stLiterals);
             if (m != null) return m;
         }
         return null;
     }
 
-    private FFTMove match(Clause preconditions, FFTState state, HashSet<Literal> stLiterals) {
+    private FFTMove match(Rule rule, FFTState state, HashSet<Literal> stLiterals) {
         boolean match = true;
-        for (Literal l : preconditions.literals) {
+        for (Literal l : rule.preconditions.literals) {
             if (l.pieceOcc == PIECEOCC_ANY) {
                 Literal temp = new Literal(l);
                 temp.pieceOcc = PIECEOCC_PLAYER;
@@ -419,7 +388,7 @@ public class Rule {
 
         }
         if (match) {
-            Action a = action.transform(preconditions.transformations);
+            Action a = rule.action;
             FFTMove move = a.getMove(state.getTurn());
             if (FFTManager.logic.isLegalMove(state, move)) {
                 return move;
@@ -467,39 +436,6 @@ public class Rule {
         return stSentences.contains(s);
     }
 
-    // Returns a board with the literals on it, the value equals to the piece occ.
-    public static int[][] preconsToBoard(Clause clause) {
-        int height = FFTManager.gameBoardHeight;
-        int width = FFTManager.gameBoardWidth;
-        int[][] preconBoard = new int[height][width];
-
-        for (Literal l : clause.literals) {
-            if (l.boardPlacement && l.row >= 0 && l.col >= 0 && l.row <= height-1 && l.col <= width-1) {
-                if (l.negation)
-                    preconBoard[l.row][l.col] = -l.pieceOcc;
-                else
-                    preconBoard[l.row][l.col] = l.pieceOcc;
-            }
-        }
-        return preconBoard;
-    }
-
-    // returns preconditions derives from transformed integer matrix and non-boardplacement literals
-    private static Clause boardToPrecons(Transform.TransformedArray tArr, HashSet<Literal> nonBoardPlacements) {
-        HashSet<Literal> literals = new HashSet<>();
-        for (int i = 0; i < tArr.board.length; i++) {
-            for (int j = 0; j < tArr.board[i].length; j++) {
-                int val = tArr.board[i][j];
-                if (val < 0)
-                    literals.add(new Literal(i, j, -val, true));
-                else if (val > 0)
-                    literals.add(new Literal(i, j, val, false));
-            }
-        }
-        literals.addAll(nonBoardPlacements);
-        return new Clause(tArr.transformations, literals);
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Rule)) return false;
@@ -507,17 +443,12 @@ public class Rule {
         Rule rule = (Rule) obj;
         if (this == rule)
             return true;
-        if (this.multiRule != rule.multiRule)
-            return false;
-        if (this.multiRule)
-            return this.rules.equals(rule.rules);
-        return (this.transformedPrecons.equals(rule.transformedPrecons) &&
-                        (this.action.equals(rule.action)));
+
+        return this.preconditions.equals(rule.preconditions) && this.action.equals(rule.action);
     }
 
     @Override
     public int hashCode() {
-        int hash = Objects.hash(this.transformedPrecons, this.action);
-        return 31 * hash;
+        return 31 * Objects.hash(preconditions, action);
     }
 }

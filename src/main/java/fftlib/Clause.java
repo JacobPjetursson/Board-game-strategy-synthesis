@@ -1,21 +1,17 @@
 package fftlib;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
 
 public class Clause{
     public HashSet<Literal> literals;
-    ArrayList<Integer> transformations;
 
     public Clause() {
         this.literals = new HashSet<>();
-        this.transformations = new ArrayList<>();
     }
 
     public Clause(HashSet<Literal> literals) {
         this.literals = literals;
-        this.transformations = new ArrayList<>();
     }
 
     public Clause(Clause duplicate) {
@@ -24,16 +20,14 @@ public class Clause{
             Literal copy = new Literal(l);
             literals.add(copy);
         }
-        this.transformations = new ArrayList<>(duplicate.transformations);
-    }
-
-    Clause(ArrayList<Integer> transformations, HashSet<Literal> literals) {
-        this.transformations = transformations;
-        this.literals = literals;
     }
 
     public void add(Literal l) {
         this.literals.add(l);
+    }
+
+    public void addAll(HashSet<Literal> literals) {
+        this.literals.addAll(literals);
     }
 
     public void remove(Literal l) {
@@ -59,7 +53,7 @@ public class Clause{
     }
 
 
-    public HashSet<Literal> extractNonBoardPlacements() {
+    public HashSet<Literal> nonBoardPlacements() {
         HashSet<Literal> nonBoardPlacements = new HashSet<>();
         for (Literal l : literals)
             if (!l.boardPlacement)
@@ -73,14 +67,20 @@ public class Clause{
 
         Clause list = (Clause) obj;
         return this == list ||
-                (this.literals.equals(list.literals) && this.transformations.equals(list.transformations));
+                (this.literals.equals(list.literals));
     }
 
     @Override
     public int hashCode() {
         int hashCode = 0;
         hashCode += Objects.hashCode(this.literals);
-        hashCode += Objects.hashCode(this.transformations);
         return 31 * hashCode;
+    }
+
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        for (Literal l : literals)
+            s.append(l).append(", ");
+        return s.toString();
     }
 }

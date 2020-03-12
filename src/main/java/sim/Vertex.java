@@ -2,12 +2,12 @@ package sim;
 
 import java.util.Objects;
 
+// Purpose of this class is to create a mutable int for the lines
 public class Vertex {
-    private int x, y;
+    private int id;
 
-    public Vertex(int x, int y) {
-        this.x = x;
-        this.y = y;
+    public Vertex(int id) {
+        this.id = id;
     }
 
     @Override
@@ -15,12 +15,11 @@ public class Vertex {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Vertex vertex = (Vertex) o;
-        return x == vertex.x &&
-                y == vertex.y;
+        return id == vertex.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y);
+        return Objects.hash(id);
     }
 }

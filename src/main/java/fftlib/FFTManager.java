@@ -28,7 +28,8 @@ public class FFTManager {
     public static FFTDatabase db;
     public static FFTLogic logic;
     static int [] gameSymmetries;
-    static int gameBoardWidth, gameBoardHeight;
+    public static int gameBoardWidth;
+    public static int gameBoardHeight;
     private static String path;
     public static FFTState initialFFTState;
     public FFT currFFT;

@@ -26,6 +26,7 @@ public class Globals {
     // GAMES
     public static final int KULIBRAT = 0;
     public static final int TICTACTOE = 1;
+    public static final int SIM = 2;
 
     // MISC VARIABLES
     public static final int CLICK_INTERACTIVE = 0;

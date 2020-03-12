@@ -2,6 +2,9 @@ package fftlib;
 
 import java.util.Objects;
 
+import static misc.Globals.CURRENT_GAME;
+import static misc.Globals.SIM;
+
 public class Literal {
     public static final int NOT_A_PIECE = -1;
     public static final int PIECEOCC_NONE = 0;
@@ -145,12 +148,28 @@ public class Literal {
         Literal literal = (Literal) obj;
         if (this == literal)
             return true;
-        return this.name.equals(literal.name);
+
+        if (this.name.equals(literal.name))
+            return true;
+        // TODO - fix this approach with standardized stuff
+        if (CURRENT_GAME == SIM && boardPlacement && literal.boardPlacement &&
+                pieceOcc == literal.pieceOcc  && negation == literal.negation) {
+            return ((this.row == literal.row && this.col == literal.col) ||
+                    (this.row == literal.col && this.col == literal.row));
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return 31 * Objects.hashCode(name);
+        if (CURRENT_GAME != SIM || !boardPlacement) {
+            return 31 * Objects.hashCode(name);
+        } else {
+            int hash = 0;
+            hash += Objects.hashCode(row);
+            hash += Objects.hashCode(col);
+            return 31 * Objects.hash(hash, pieceOcc, negation);
+        }
     }
 
     @Override

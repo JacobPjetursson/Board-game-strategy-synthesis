@@ -2,6 +2,7 @@ package kulibrat.gui.board.PlayBox;
 
 import fftlib.Literal;
 import fftlib.Rule;
+import fftlib.game.Transform;
 import javafx.geometry.Pos;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -152,8 +153,8 @@ public class InteractivePlayBox extends PlayBox {
 
 
     public void update(Rule r, int perspective) {
-        HashSet<Literal> nonBoardLits = r.preconditions.extractNonBoardPlacements();
-        int[][] preconBoard = Rule.preconsToBoard(r.preconditions);
+        HashSet<Literal> nonBoardLits = r.preconditions.nonBoardPlacements();
+        int[][] preconBoard = Transform.preconsToBoard(r.preconditions);
         Move m = (Move) r.action.getMove(perspective);
 
 

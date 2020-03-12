@@ -129,7 +129,7 @@ public class InteractiveState implements InteractiveFFTState {
         if (this.perspective != team)
             return;
         if (highlight) {
-            int[][] board = setTeamForBoard(Rule.preconsToBoard(rule.preconditions), perspective);
+            int[][] board = setTeamForBoard(Transform.preconsToBoard(rule.preconditions), perspective);
             curHighLights = Logic.legalMovesFromPiece(row, col, team, board);
         }
         for (Move m : curHighLights) {

@@ -24,6 +24,12 @@ public class Action {
         this.remClause = new Clause();
     }
 
+    public Action(int row, int col, int occ, boolean neg) {
+        this.addClause = new Clause();
+        this.remClause = new Clause();
+        this.addClause.add(new Literal(row, col, occ, neg));
+    }
+
     public Action(Action duplicate) {
         this.addClause = new Clause(duplicate.addClause);
         this.remClause = new Clause(duplicate.remClause);
@@ -84,30 +90,6 @@ public class Action {
         this.remClause = new Clause(remClause);
     }
 
-    Action transform(ArrayList<Integer> transformations) {
-        HashSet<Literal> addLits = new HashSet<>();
-        HashSet<Literal> remLits = new HashSet<>();
-        for (Literal l : addClause.literals) {
-            if (l.row != POS_NONBOARD) {
-                int[] pos = Transform.apply(transformations, l.row, l.col, gameBoardWidth, gameBoardHeight);
-                addLits.add(new Literal(pos[0], pos[1], l.pieceOcc, l.negation));
-            }
-        }
-        for (Literal l : remClause.literals) {
-            if (l.row != POS_NONBOARD) {
-                int[] pos = Transform.apply(transformations, l.row, l.col, gameBoardWidth, gameBoardHeight);
-                remLits.add(new Literal(pos[0], pos[1], l.pieceOcc, l.negation));
-            }
-        }
-        Clause addC = new Clause(transformations, addLits);
-        Clause remC = new Clause(transformations, remLits);
-        return new Action(addC, remC);
-
-        //int[][] aBoard = actionToBoard();
-        //int[][] tBoard = Transform.apply(transformations, aBoard);
-        //return boardToAction(transformations, tBoard);
-    }
-
     public FFTMove getMove(int team) {
         return FFTManager.actionToMove.apply(this, team);
     }
@@ -125,43 +107,6 @@ public class Action {
             actionMsg.append("-").append(literal.name);
         }
         return actionMsg.toString();
-    }
-
-    // Takes empty addClause and remClause lists (except for constants),
-    // and fill them up with the rotated pieces from the cb array.
-    private Action boardToAction(ArrayList<Integer> transformations, int[][] cb) {
-        HashSet<Literal> addLits = new HashSet<>();
-        HashSet<Literal> remLits = new HashSet<>();
-        // Add back to list
-        for (int i = 0; i < cb.length; i++) {
-            for (int j = 0; j < cb[i].length; j++) {
-                int val = cb[i][j];
-                if (val < 0)
-                    remLits.add(new Literal(i, j, val, false));
-                else if (val > 0)
-                    addLits.add(new Literal(i, j, val, false));
-            }
-        }
-        Clause addC = new Clause(transformations, addLits);
-        Clause remC = new Clause(transformations, remLits);
-        return new Action(addC, remC);
-    }
-
-    // Takes as input copies of the addClause, remClause lists and removes all the literals that are board placements
-    // It returns a board with the literals on it, the value equals to the piece occ.
-    private int[][] actionToBoard() {
-        int[][] clauseBoard = new int[gameBoardHeight][gameBoardWidth];
-
-        for (Literal l : addClause.literals) {
-            if (l.row != POS_NONBOARD)
-                clauseBoard[l.row][l.col] = l.pieceOcc;
-        }
-        for (Literal l : remClause.literals) {
-            if (l.row != POS_NONBOARD)
-                clauseBoard[l.row][l.col] = -l.pieceOcc;
-        }
-
-        return clauseBoard;
     }
 
     @Override

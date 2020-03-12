@@ -1,6 +1,7 @@
 package tictactoe.gui.board.PlayBox;
 
 import fftlib.Rule;
+import fftlib.game.Transform;
 import javafx.application.Platform;
 import tictactoe.game.Controller;
 import tictactoe.game.Move;
@@ -18,7 +19,7 @@ public class InteractivePlayBox extends PlayBox {
     }
 
     public void update(Rule r, int perspective) {
-        int[][] preconBoard = Rule.preconsToBoard(r.preconditions);
+        int[][] preconBoard = Transform.preconsToBoard(r.preconditions);
         Move m = (Move) r.action.getMove(perspective);
 
         int enemy = (perspective == PLAYER1) ? PLAYER2 : PLAYER1;
