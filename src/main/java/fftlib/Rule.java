@@ -272,7 +272,7 @@ public class Rule {
     public void setTransformedRules() {
 
         if (CURRENT_GAME != SIM) {
-            //return Transform.applyAll(FFTManager.gameSymmetries, this);
+            symmetryRules = Transform.getSymmetryRules(FFTManager.gameSymmetries, this);
         }
         else {
             symmetryRules = Transform.findAutomorphisms(this);

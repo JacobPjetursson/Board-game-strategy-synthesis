@@ -5,6 +5,7 @@ import fftlib.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 import static fftlib.FFTManager.gameBoardHeight;
 import static fftlib.FFTManager.gameBoardWidth;
@@ -45,7 +46,7 @@ public class Transform {
         return rot;
     }
 
-    public static HashSet<int[][]> applyAll(int[] transformations, int[][] board) {
+    public static HashSet<SymmetryRule> getSymmetryRules(int[] transformations, Rule rule) {
         boolean rotate = false;
         boolean refH = false;
         boolean refV = false;
@@ -57,20 +58,35 @@ public class Transform {
             else if (transformation == TRANS_VREF)
                 refV = true;
         }
-        HashSet<int[][]> symmetryBoards = new HashSet<>(reflectAll(refH, refV, board));
+        HashSet<SymmetryRule> symmetryRules = new HashSet<>();
+        int [][] pBoard = preconsToBoard(rule.preconditions);
+        int [][] aBoard = actionToBoard(rule.action);
+        ArrayList<int[][]> pBoards = applyAll(refH, refV, rotate, pBoard);
+        ArrayList<int[][]> aBoards = applyAll(refH, refV, rotate, aBoard);
+        for (int i = 0; i < pBoards.size(); i++) {
+            Clause precon = boardToPrecons(pBoards.get(i));
+            Action action = boardToAction(aBoards.get(i));
+            symmetryRules.add(new SymmetryRule(precon, action));
+        }
+
+        return symmetryRules;
+    }
+
+    private static ArrayList<int[][]> applyAll(boolean refH, boolean refV, boolean rotate, int[][] board) {
+        ArrayList<int[][]> boards = new ArrayList<>(reflectAll(refH, refV, board));
         int[][] copy = copyArray(board);
         if (rotate) {
             // Rotate 3 times
             for (int i = 0; i < 3; i++) {
                 copy = rotate(copy);
-                symmetryBoards.addAll(reflectAll(refH, refV, copy));
+                boards.addAll(reflectAll(refH, refV, copy));
             }
         }
-        return symmetryBoards;
+        return boards;
     }
 
-    private static HashSet<int[][]> reflectAll(boolean refH, boolean refV, int[][] board) {
-        HashSet<int[][]> reflectedRules = new HashSet<>();
+    private static ArrayList<int[][]> reflectAll(boolean refH, boolean refV, int[][] board) {
+        ArrayList<int[][]> reflectedRules = new ArrayList<>();
         int[][] copy = copyArray(board);
         reflectedRules.add(copyArray(copy));
         if (refH) {
