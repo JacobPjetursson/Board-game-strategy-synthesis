@@ -47,21 +47,21 @@ public class Rule {
             this.preconditions = getPreconditions(preconStr);
         }
         errors = !isValidRuleFormat(this);
-        setTransformedRules();
+        this.symmetryRules = getTransformedRules();
     }
 
     public Rule(HashSet<Literal> precons, Action action) {
         this.multiRule = false;
         this.action = action;
         this.preconditions = new Clause(precons);
-        setTransformedRules();
+        this.symmetryRules = getTransformedRules();
     }
 
     public Rule(Clause precons, Action action) {
         this.multiRule = false;
         this.action = action;
         this.preconditions = precons;
-        setTransformedRules();
+        this.symmetryRules = getTransformedRules();
     }
 
     // GDL Constructor
@@ -75,7 +75,6 @@ public class Rule {
     public Rule() {
         this.preconditions = new Clause();
         this.action = new Action();
-        this.symmetryRules = new HashSet<>();
         preconStr = "";
         actionStr = "";
     }
@@ -90,14 +89,14 @@ public class Rule {
         this.action = new Action(duplicate.action);
         this.preconditions = new Clause(duplicate.preconditions);
         this.errors = duplicate.errors;
-        this.symmetryRules = duplicate.symmetryRules;
+        this.symmetryRules = new HashSet<>(duplicate.symmetryRules);
 
     }
 
     public void addPrecondition(Literal l) {
         if (!preconditions.literals.contains(l))
             preconditions.add(l);
-        setTransformedRules();
+        this.symmetryRules = getTransformedRules();
     }
 
     public void addPrecondition(GdlSentence s) {
@@ -106,7 +105,7 @@ public class Rule {
 
     public void removePrecondition(Literal l) {
         this.preconditions.remove(l);
-        setTransformedRules();
+        this.symmetryRules = getTransformedRules();
     }
 
     public void removePrecondition(GdlSentence s) {
@@ -134,7 +133,7 @@ public class Rule {
         }
         action.remClause.literals.removeAll(removeList);
 
-        setTransformedRules();
+        this.symmetryRules = getTransformedRules();
     }
 
     public void setAction(Action a) {
@@ -142,6 +141,7 @@ public class Rule {
             this.action = new Action();
         else
             this.action = a;
+        this.symmetryRules = getTransformedRules();
     }
 
     public void setMove(Move m) {
@@ -153,7 +153,7 @@ public class Rule {
             this.preconditions = new Clause();
         else
             this.preconditions = c;
-        setTransformedRules();
+        this.symmetryRules = getTransformedRules();
     }
 
     public void setSentences(Set<GdlSentence> sentences) {
@@ -269,13 +269,13 @@ public class Rule {
             return actionStr;
     }
 
-    public void setTransformedRules() {
+    public HashSet<SymmetryRule> getTransformedRules() {
 
         if (CURRENT_GAME != SIM) {
-            symmetryRules = Transform.getSymmetryRules(FFTManager.gameSymmetries, this);
+            return Transform.getSymmetryRules(FFTManager.gameSymmetries, this);
         }
         else {
-            symmetryRules = Transform.findAutomorphisms(this);
+            return Transform.findAutomorphisms(this);
         }
     }
 
