@@ -25,14 +25,14 @@ public class FFTAutoGen {
     // CONFIGURATION
     private static int winner;
 
-    public static FFT generateFFT(int perspective_, int winner_) throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
+    public static FFT generateFFT(int perspective_, int winner_) {
         AUTOGEN_PERSPECTIVE = perspective_;
         winner = winner_;
         setup();
         return fft;
     }
 
-    private static void setup() throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
+    private static void setup() {
         long timeStart = System.currentTimeMillis();
         fft = new FFT("Autogen");
         rg = new RuleGroup("Autogen");
@@ -51,7 +51,7 @@ public class FFTAutoGen {
         } else {
             System.out.println("Filtering for all strategies");
             filterSolution();
-            //deleteIrrelevantStates();
+            deleteIrrelevantStates();
         }
         System.out.println("Amount of states after filtering: " + states.size());
 
@@ -142,7 +142,7 @@ public class FFTAutoGen {
         }
     }
 
-    private static void makeRules() throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
+    private static void makeRules() {
         while (!states.isEmpty()) {
             System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + rg.rules.size());
             FFTState state = states.iterator().next();
@@ -161,7 +161,6 @@ public class FFTAutoGen {
             states.removeIf(s -> r.apply(s) != null);
 
         }
-
     }
 
     private static Rule addRule(FFTState s) {
@@ -233,7 +232,7 @@ public class FFTAutoGen {
                 if (DETAILED_DEBUG) System.out.println("INSPECTING: " + l.name);
                 r.removePrecondition(l);
 
-                boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false, null); // strategy is null if VERIFY_SINGLE_STRAT is false
+                boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false); // strategy is null if VERIFY_SINGLE_STRAT is false
                 if (!verify) {
                     if (DETAILED_DEBUG) System.out.println("FAILED TO VERIFY RULE!");
                     r.addPrecondition(l);
@@ -252,7 +251,7 @@ public class FFTAutoGen {
         while(it.hasNext()) {
             Literal l = it.next();
             r.removePrecondition(l);
-            boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false, null);
+            boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false);
             if (!verify) {
                 r.addPrecondition(l);
                 continue;

@@ -15,6 +15,7 @@ public class Config {
     public static boolean ENABLE_GGP_PARSER;
     public static boolean RANDOM_RULE_ORDERING;
     public static boolean MINIMIZE_PRECONDITIONS;
+    public static boolean SINGLE_THREAD;
 
     // KULIBRAT PROPERTIES
     public static int BWIDTH;
@@ -73,6 +74,7 @@ public class Config {
         DETAILED_DEBUG = Boolean.parseBoolean(global.getProperty("detailedDebug"));
         FULL_RULES = Boolean.parseBoolean(global.getProperty("fullRules"));
         VERIFY_SINGLE_STRATEGY = Boolean.parseBoolean(global.getProperty("verify_single_strategy"));
+        SINGLE_THREAD = Boolean.parseBoolean(global.getProperty("single_thread"));
 
         // KULIBRAT
         BWIDTH = Integer.parseInt(kulibrat.getProperty("boardWidth"));
