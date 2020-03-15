@@ -178,13 +178,13 @@ public class Transform {
         return copy;
     }
 
-    public static HashSet<Rule> findAutomorphisms(Rule rule) {
+    public static HashSet<SymmetryRule> findAutomorphisms(Rule rule) {
         int [] vertices = new int[gameBoardHeight];
         for (int i = 0; i < gameBoardHeight; i++) {
             vertices[i] = i;
         }
         ArrayList<int[]> permutations = findPermutations(vertices);
-        HashSet<Rule> transformations = new HashSet<>();
+        HashSet<SymmetryRule> transformations = new HashSet<>();
         for(int[] arr : permutations) {
 
             Clause precons = new Clause();
@@ -195,7 +195,7 @@ public class Transform {
             for (Literal lit : rule.preconditions.literals) {
                 precons.add(new Literal(arr[lit.row], arr[lit.col], lit.pieceOcc, lit.negation));
             }
-            transformations.add(new Rule(precons, action));
+            transformations.add(new SymmetryRule(precons, action));
         }
         return transformations;
     }

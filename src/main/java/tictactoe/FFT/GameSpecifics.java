@@ -7,7 +7,6 @@ import fftlib.game.*;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 import misc.Config;
-import misc.Globals;
 import tictactoe.game.Controller;
 import tictactoe.game.Logic;
 import tictactoe.game.Move;
@@ -152,7 +151,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public int getGameWinner() {
-        if (Config.SIMPLE_RULES)
+        if (Config.TIC_TAC_TOE_SIMPLE_RULES)
             return PLAYER1;
         return PLAYER_NONE;
     }

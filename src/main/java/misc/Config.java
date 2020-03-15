@@ -23,7 +23,10 @@ public class Config {
     public static String DB_PATH;
 
     // TIC TAC TOE PROPERTIES
-    public static boolean SIMPLE_RULES;
+    public static boolean TIC_TAC_TOE_SIMPLE_RULES;
+
+    // SIM
+    public static boolean SIM_SIMPLE_RULES;
 
     // GGP-FFT PROPERTIES
     public static boolean DETAILED_DEBUG;
@@ -43,11 +46,13 @@ public class Config {
         Properties global = new Properties();
         Properties tictactoe = new Properties();
         Properties kulibrat = new Properties();
+        Properties sim = new Properties();
         Properties ggp = new Properties();
 
         global.load(new FileInputStream("global.properties"));
         tictactoe.load(new FileInputStream("tictactoe.properties"));
         kulibrat.load(new FileInputStream("kulibrat.properties"));
+        sim.load(new FileInputStream("sim.properties"));
         ggp.load(new FileInputStream("ggp.properties"));
 
         // GLOBAL CONFIG
@@ -82,7 +87,10 @@ public class Config {
         DB_PATH = kulibrat.getProperty("db_path");
 
         // TIC TAC TOE
-        SIMPLE_RULES = Boolean.parseBoolean(tictactoe.getProperty("simple_rules"));
+        TIC_TAC_TOE_SIMPLE_RULES = Boolean.parseBoolean(tictactoe.getProperty("simple_rules"));
+
+        // SIM
+        SIM_SIMPLE_RULES = Boolean.parseBoolean(sim.getProperty("simple_rules"));
 
         // GGP
         GGP_GAME = ggp.getProperty("ggp_game");

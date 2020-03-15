@@ -22,7 +22,7 @@ public class Rule {
     private static final ArrayList<String> separators = new ArrayList<>(
             Arrays.asList("and", "And", "AND", "&", "∧"));
     public Clause preconditions;
-    public HashSet<Rule> symmetryRules;
+    public HashSet<SymmetryRule> symmetryRules;
     public Action action;
     private String actionStr, preconStr;
 
@@ -46,22 +46,22 @@ public class Rule {
             this.action = getAction(actionStr);
             this.preconditions = getPreconditions(preconStr);
         }
-        setTransformedRules();
         errors = !isValidRuleFormat(this);
+        setTransformedRules();
     }
 
     public Rule(HashSet<Literal> precons, Action action) {
         this.multiRule = false;
         this.action = action;
         this.preconditions = new Clause(precons);
-        this.symmetryRules = new HashSet<>();
+        setTransformedRules();
     }
 
     public Rule(Clause precons, Action action) {
         this.multiRule = false;
         this.action = action;
         this.preconditions = precons;
-        this.symmetryRules = new HashSet<>();
+        setTransformedRules();
     }
 
     // GDL Constructor
@@ -90,7 +90,7 @@ public class Rule {
         this.action = new Action(duplicate.action);
         this.preconditions = new Clause(duplicate.preconditions);
         this.errors = duplicate.errors;
-        this.symmetryRules = new HashSet<>();
+        this.symmetryRules = duplicate.symmetryRules;
 
     }
 
@@ -233,79 +233,6 @@ public class Rule {
         return true;
     }
 
-    private static boolean isMultiRule(String preconStr, String actionStr) {
-        ArrayList<String> prepLiteralStr = prepPreconditions(preconStr);
-        ArrayList<String> prepActionStr = prepAction(actionStr);
-        for (String lStr : prepLiteralStr) {
-            String[] coords = Literal.getCoords(lStr);
-            if (coords == null)
-                return false;
-
-            if (!Character.isDigit(coords[0].charAt(0)))
-                return true;
-            if (!Character.isDigit(coords[1].charAt(0)))
-                return true;
-
-        }
-        for (String aStr : prepActionStr) {
-            String[] coords = Literal.getCoords(aStr);
-            if (coords == null)
-                return false;
-
-            if (!Character.isDigit(coords[0].charAt(0)))
-                return true;
-            if (!Character.isDigit(coords[1].charAt(0)))
-                return true;
-        }
-        return false;
-    }
-
-    private static void replaceWildcards(String preconStr, String actionStr, HashSet<Rule> rules) {
-        ArrayList<String> prepLiteralStr = prepPreconditions(preconStr);
-        ArrayList<String> prepActionStr = prepAction(actionStr);
-        HashSet<String> wildCardsRow = new HashSet<>();
-        HashSet<String> wildCardsCol = new HashSet<>();
-        for (String lStr : prepLiteralStr) {
-            String[] coords = Literal.getCoords(lStr);
-            if (coords == null)
-                continue;
-            if (!Character.isDigit(coords[0].charAt(0)))
-                wildCardsRow.add(coords[0]);
-            if (!Character.isDigit(coords[1].charAt(0)))
-                wildCardsCol.add(coords[1]);
-
-        }
-        for (String aStr : prepActionStr) {
-            String[] coords = Literal.getCoords(aStr);
-            if (coords == null)
-                continue;
-            if (!Character.isDigit(coords[0].charAt(0)))
-                wildCardsRow.add(coords[0]);
-            if (!Character.isDigit(coords[1].charAt(0)))
-                wildCardsCol.add(coords[1]);
-        }
-        if (wildCardsCol.isEmpty() && wildCardsRow.isEmpty()) {
-            rules.add(new Rule(preconStr, actionStr));
-            return;
-        }
-
-        for (String wc : wildCardsRow) {
-            for (int i = 0; i < FFTManager.gameBoardHeight; i++) {
-                String finalCStr = preconStr.replace(wc, Integer.toString(i));
-                String finalAStr = actionStr.replace(wc, Integer.toString(i));
-                replaceWildcards(finalCStr, finalAStr, rules);
-            }
-        }
-
-        for (String wc : wildCardsCol) {
-            for (int i = 0; i < FFTManager.gameBoardWidth; i++) {
-                String finalCStr = preconStr.replace(wc, Integer.toString(i));
-                String finalAStr = actionStr.replace(wc, Integer.toString(i));
-                replaceWildcards(finalCStr, finalAStr, rules);
-            }
-        }
-    }
-
     public String toString() {
         if (sentences != null || move != null) { // ggp
             return "IF: " + sentences + " THEN: " + move;
@@ -351,7 +278,6 @@ public class Rule {
             symmetryRules = Transform.findAutomorphisms(this);
         }
     }
-
 
     public FFTMove apply(FFTState state) {
         HashSet<Literal> stLiterals = state.getLiterals();
@@ -444,11 +370,12 @@ public class Rule {
         if (this == rule)
             return true;
 
-        return this.preconditions.equals(rule.preconditions) && this.action.equals(rule.action);
+        return this.symmetryRules.equals(rule.symmetryRules);
     }
 
     @Override
     public int hashCode() {
-        return 31 * Objects.hash(preconditions, action);
+        return 31 * Objects.hashCode(symmetryRules);
     }
+
 }

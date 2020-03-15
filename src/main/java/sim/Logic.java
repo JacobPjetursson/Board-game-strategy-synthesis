@@ -7,6 +7,7 @@ import fftlib.game.FFTState;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import static misc.Config.SIM_SIMPLE_RULES;
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 import static sim.Line.NO_COLOR;
@@ -25,18 +26,19 @@ public class Logic implements FFTLogic {
 
     public static boolean gameOver(State state) {
         // SMALLER STATESPACE FOR DEBUGGING
-/*
-        int p1_count = 0;
-        int p2_count = 0;
-        for (Line l : state.lines) {
-            if (l.color == PLAYER1)
-                p1_count++;
-            else if (l.color == PLAYER2)
-                p2_count++;
+        if (SIM_SIMPLE_RULES) {
+            int p1_count = 0;
+            int p2_count = 0;
+            for (Line l : state.lines) {
+                if (l.color == PLAYER1)
+                    p1_count++;
+                else if (l.color == PLAYER2)
+                    p2_count++;
+            }
+            if (p1_count > 3 || p2_count > 3)
+                return true;
         }
-        if (p1_count > 3 || p2_count > 3)
-            return true;
-*/
+
 
         for (Line l : state.lines) {
             if (l.color == Line.NO_COLOR)
