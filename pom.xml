@@ -145,17 +145,6 @@
                 <version>1.6.0</version>
                 <executions>
                     <execution>
-                        <id>create-config-files</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>bash</executable>
-                            <commandlineArgs>create_config_files.sh</commandlineArgs>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>tictactoe.main.Main</mainClass>
