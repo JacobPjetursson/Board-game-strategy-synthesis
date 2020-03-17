@@ -311,6 +311,10 @@ public class FFT {
         }
     }
 
+    public void shutDownThreadPool() {
+        forkJoinPool.shutdown();
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (RuleGroup rg : ruleGroups) {

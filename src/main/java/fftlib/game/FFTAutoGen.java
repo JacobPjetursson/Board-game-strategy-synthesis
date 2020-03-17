@@ -67,6 +67,7 @@ public class FFTAutoGen {
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
         System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
         System.out.println("Final rules: \n" + fft);
+        fft.shutDownThreadPool(); // to avoid warnings in end of output
     }
 
 
