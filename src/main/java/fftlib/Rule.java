@@ -14,6 +14,7 @@ import java.util.*;
 
 import static fftlib.Literal.*;
 import static misc.Config.ENABLE_GGP_PARSER;
+import static misc.Config.SYMMETRY_DETECTION;
 import static misc.Globals.CURRENT_GAME;
 import static misc.Globals.SIM;
 
@@ -282,7 +283,7 @@ public class Rule {
     public FFTMove apply(FFTState state) {
         HashSet<Literal> stLiterals = state.getLiterals();
         FFTMove m = match(this, state, stLiterals);
-        if (m != null) return m;
+        if (m != null || !SYMMETRY_DETECTION) return m;
         for (Rule rule : symmetryRules) {
             if (rule.preconditions.equals(preconditions))
                 continue;

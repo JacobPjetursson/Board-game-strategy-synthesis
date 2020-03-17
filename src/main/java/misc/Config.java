@@ -15,6 +15,7 @@ public class Config {
     public static boolean ENABLE_GGP_PARSER;
     public static boolean RANDOM_RULE_ORDERING;
     public static boolean MINIMIZE_PRECONDITIONS;
+    public static boolean SYMMETRY_DETECTION;
     public static boolean SINGLE_THREAD;
 
     // KULIBRAT PROPERTIES
@@ -75,6 +76,7 @@ public class Config {
         ENABLE_GGP_PARSER = Boolean.parseBoolean(global.getProperty("enable_ggp_parser"));
         RANDOM_RULE_ORDERING = Boolean.parseBoolean(global.getProperty("random_rule_ordering"));
         MINIMIZE_PRECONDITIONS = Boolean.parseBoolean(global.getProperty("minimize_preconditions"));
+        SYMMETRY_DETECTION = Boolean.parseBoolean(global.getProperty("symmetry_detection"));
         // DEBUG AND TEST
         DETAILED_DEBUG = Boolean.parseBoolean(global.getProperty("detailedDebug"));
         FULL_RULES = Boolean.parseBoolean(global.getProperty("fullRules"));
