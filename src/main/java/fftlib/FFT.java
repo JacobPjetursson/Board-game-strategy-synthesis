@@ -71,7 +71,6 @@ public class FFT {
         HashSet<FFTState> closedSet = new HashSet<>();
         frontier.add(initialState);
         int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
-        closedSet.clear();
         // Check if win or draw is even possible
         int winner = FFTManager.db.queryState(initialState).getWinner();
         if (team == PLAYER1 && winner == PLAYER2) {

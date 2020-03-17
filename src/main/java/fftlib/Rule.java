@@ -283,7 +283,7 @@ public class Rule {
         HashSet<Literal> stLiterals = state.getLiterals();
         FFTMove m = match(this, state, stLiterals);
         if (m != null) return m;
-        for (Rule rule : symmetryRules) { // TODO - possible to optimize here by only including unique clauses
+        for (Rule rule : symmetryRules) {
             if (rule.preconditions.equals(preconditions))
                 continue;
             m = match(rule, state, stLiterals);

@@ -37,7 +37,7 @@ public class Line {
     }
 
     public String toString() {
-        String colorStr = (color == PLAYER1) ? "P1:" : (color == PLAYER2) ? "P2:" : "NO COLOR:";
+        String colorStr = (color == PLAYER1) ? "P1:" : (color == PLAYER2) ? "P2:" : "B:";
         return colorStr + "(" + n1 + "," + n2 + ")";
     }
 
