@@ -3,10 +3,6 @@ package fftlib.game;
 import fftlib.*;
 import fftlib.FFT;
 import misc.Config;
-import misc.Globals;
-import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
-import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
-import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import java.util.*;
 
@@ -14,11 +10,11 @@ import static misc.Config.*;
 import static misc.Globals.*;
 
 public class FFTAutoGen {
-    private static HashMap<? extends FFTState, ? extends FFTStateMapping> lookupTable;
+    private static HashMap<? extends FFTState, ? extends StateMapping> lookupTable;
 
     private static PriorityQueue<FFTState> states;
 
-    private static HashMap<FFTState, FFTStateMapping> strategy;
+    private static HashMap<FFTState, StateMapping> strategy;
     private static FFT fft;
     private static RuleGroup rg;
 
@@ -37,7 +33,7 @@ public class FFTAutoGen {
         fft = new FFT("Autogen");
         rg = new RuleGroup("Autogen");
         fft.addRuleGroup(rg);
-        lookupTable = FFTManager.db.getSolution();
+        lookupTable = FFTSolution.getLookupTable();
 
         System.out.println("Solution size: " + lookupTable.size());
 
@@ -72,9 +68,9 @@ public class FFTAutoGen {
 
 
     private static void filterSolution() {
-        for (Map.Entry<? extends FFTState, ? extends FFTStateMapping> entry : lookupTable.entrySet()) {
+        for (Map.Entry<? extends FFTState, ? extends StateMapping> entry : lookupTable.entrySet()) {
             FFTState state = entry.getKey();
-            FFTStateMapping play = entry.getValue();
+            StateMapping play = entry.getValue();
             if (AUTOGEN_PERSPECTIVE == PLAYER1 && play.getMove().getTeam() != PLAYER1)
                 continue;
             else if (AUTOGEN_PERSPECTIVE == PLAYER2 && play.getMove().getTeam() != PLAYER2)
@@ -108,7 +104,7 @@ public class FFTAutoGen {
         Iterator<FFTState> itr = states.iterator();
         while (itr.hasNext()) {
             FFTState s = itr.next();
-            ArrayList<? extends FFTMove> nonLosingMoves = FFTManager.db.nonLosingMoves(s);
+            ArrayList<? extends FFTMove> nonLosingMoves = FFTSolution.nonLosingMoves(s);
             if (nonLosingMoves.size() == s.getLegalMoves().size()) {
                 itr.remove();
             }
@@ -132,7 +128,7 @@ public class FFTAutoGen {
                     }
             } else {
                 states.add(state);
-                FFTStateMapping info = lookupTable.get(state);
+                StateMapping info = lookupTable.get(state);
                 strategy.put(state, info);
                 FFTState nextState = state.getNextState(info.getMove());
                 if (!closedSet.contains(nextState)) {
@@ -169,13 +165,13 @@ public class FFTAutoGen {
         HashSet<Literal> literals = s.getAllLiterals();
         ArrayList<Action> actions = new ArrayList<>();
         ArrayList<Action> actionsCopy;
-        FFTStateMapping mapping = lookupTable.get(s);
+        StateMapping mapping = lookupTable.get(s);
         Action bestAction = mapping.getMove().getAction();
 
         for (Literal l : literals)
             minSet.add(new Literal(l));
 
-        for (FFTMove m : FFTManager.db.nonLosingMoves(s))
+        for (FFTMove m : FFTSolution.nonLosingMoves(s))
             actions.add(m.getAction());
         actionsCopy = new ArrayList<>(actions);
 

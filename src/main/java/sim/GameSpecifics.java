@@ -87,11 +87,6 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public FFTDatabase getDatabase() {
-        return new Database();
-    }
-
-    @Override
     public FFTFailState getFailState() {
         return null;
     }

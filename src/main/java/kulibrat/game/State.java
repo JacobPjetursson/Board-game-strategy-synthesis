@@ -148,6 +148,11 @@ public class State implements Serializable, FFTState {
         return move;
     }
 
+    @Override
+    public FFTState clone() {
+        return new State(this);
+    }
+
     public void setMove(Move move) {
         this.move = move;
     }

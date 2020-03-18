@@ -21,6 +21,7 @@ public class Config {
     // KULIBRAT PROPERTIES
     public static int BWIDTH;
     public static int BHEIGHT;
+    public static boolean USE_DB;
     public static String DB_PATH;
 
     // TIC TAC TOE PROPERTIES
@@ -86,6 +87,7 @@ public class Config {
         // KULIBRAT
         BWIDTH = Integer.parseInt(kulibrat.getProperty("boardWidth"));
         BHEIGHT = Integer.parseInt(kulibrat.getProperty("boardHeight"));
+        USE_DB = Boolean.parseBoolean(kulibrat.getProperty("use_db"));
         DB_PATH = kulibrat.getProperty("db_path");
 
         // TIC TAC TOE

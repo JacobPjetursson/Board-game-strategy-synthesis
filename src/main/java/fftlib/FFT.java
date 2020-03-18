@@ -3,10 +3,7 @@ package fftlib;
 import fftlib.GGPAutogen.Database;
 import fftlib.GGPAutogen.GGPManager;
 import fftlib.GGPAutogen.GGPMapping;
-import fftlib.game.FFTMove;
-import fftlib.game.FFTState;
-import fftlib.game.FFTStateAndMove;
-import fftlib.game.FFTStateMapping;
+import fftlib.game.*;
 import misc.Config;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
@@ -63,7 +60,7 @@ public class FFT {
         }
     }
 
-    public boolean verifySingleThread(int team, boolean complete, HashMap<FFTState, FFTStateMapping> strategy) {
+    public boolean verifySingleThread(int team, boolean complete, HashMap<FFTState, StateMapping> strategy) {
         if (team == PLAYER_ANY)
             return verifySingleThread(PLAYER1, complete, strategy) && verifySingleThread(PLAYER2, complete, strategy);
         FFTState initialState = FFTManager.initialFFTState;
@@ -72,7 +69,7 @@ public class FFT {
         frontier.add(initialState);
         int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
         // Check if win or draw is even possible
-        int winner = FFTManager.db.queryState(initialState).getWinner();
+        int winner = FFTSolution.queryState(initialState).getWinner();
         if (team == PLAYER1 && winner == PLAYER2) {
             System.out.println("A perfect player 2 has won from start of the game");
             return false;
@@ -97,11 +94,11 @@ public class FFT {
                     }
             } else {
                 FFTMove move = apply(state);
-                ArrayList<? extends FFTMove> nonLosingMoves = FFTManager.db.nonLosingMoves(state);
+                ArrayList<? extends FFTMove> nonLosingMoves = FFTSolution.nonLosingMoves(state);
                 // If move is null, check that all possible (random) moves are ok
                 if (move == null) {
                     if (!complete && strategy != null) { // only expand on move from strategy
-                        FFTStateMapping info = strategy.get(state);
+                        StateMapping info = strategy.get(state);
                         if (info == null) {
                             System.out.println("Given strategy is not a winning strategy");
                             return false;
@@ -131,7 +128,7 @@ public class FFT {
                     return false;
                 } else {
                     if (!complete && strategy != null) { // check that move is same as from strategy
-                        FFTStateMapping info = strategy.get(state);
+                        StateMapping info = strategy.get(state);
                         if (info == null) {
                             System.out.println("Given strategy is not a winning strategy");
                             return false;
@@ -152,14 +149,14 @@ public class FFT {
         return true;
     }
 
-    public boolean verify(int team, boolean complete, HashMap<FFTState, FFTStateMapping> strategy) {
+    public boolean verify(int team, boolean complete, HashMap<FFTState, StateMapping> strategy) {
         if (team == PLAYER_ANY)
             return verify(PLAYER1, complete, strategy) && verify(PLAYER2, complete, strategy);
         FFTState initialState = FFTManager.initialFFTState;
         closedMap.clear();
         failed = false;
         // Check if win or draw is even possible
-        int winner = FFTManager.db.queryState(initialState).getWinner();
+        int winner = FFTSolution.queryState(initialState).getWinner();
         if (team == PLAYER1 && winner == PLAYER2) {
             System.out.println("A perfect player 2 has won from start of the game");
             return false;
@@ -332,9 +329,9 @@ public class FFT {
         List<RecursiveTask<Boolean>> forks;
 
         boolean complete;
-        HashMap<FFTState, FFTStateMapping> strategy;
+        HashMap<FFTState, StateMapping> strategy;
 
-        VerificationTask(FFTState state, int team, boolean complete, HashMap<FFTState, FFTStateMapping> strategy) {
+        VerificationTask(FFTState state, int team, boolean complete, HashMap<FFTState, StateMapping> strategy) {
             this.state = state;
             this.team = team;
             this.complete = complete;
@@ -361,11 +358,11 @@ public class FFT {
                 }
             } else {
                 FFTMove move = apply(state);
-                ArrayList<? extends FFTMove> nonLosingMoves = FFTManager.db.nonLosingMoves(state);
+                ArrayList<? extends FFTMove> nonLosingMoves = FFTSolution.nonLosingMoves(state);
                 // If move is null, check that all possible (random) moves are ok
                 if (move == null) {
                     if (!complete && strategy != null) { // only expand on move from strategy
-                        FFTStateMapping info = strategy.get(state);
+                        StateMapping info = strategy.get(state);
                         if (info == null) {
                             System.out.println("Given strategy is not a winning strategy");
                             failed = true;
@@ -394,7 +391,7 @@ public class FFT {
                     return false;
                 } else {
                     if (!complete && strategy != null) { // check that move is same as from strategy
-                        FFTStateMapping info = strategy.get(state);
+                        StateMapping info = strategy.get(state);
                         if (info == null) {
                             System.out.println("Given strategy is not a winning strategy");
                             failed = true;

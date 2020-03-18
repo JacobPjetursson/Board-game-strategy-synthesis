@@ -34,7 +34,7 @@ public class ReviewPane extends VBox {
     public ReviewPane(Stage primaryStage, Controller currCont) {
         try {
             if (Database.dbConnection == null || Database.dbConnection.isClosed()) {
-                Database.connectwithVerification();
+                Database.connectAndVerify();
                 connected = true;
             }
         } catch (SQLException e) {
@@ -79,7 +79,7 @@ public class ReviewPane extends VBox {
             vBox.setAlignment(Pos.CENTER);
             vBox.setFillWidth(true);
             State n = new State(ps.getState());
-            HashSet<Move> bestMoves = Database.bestMoves(n);
+            ArrayList<Move> bestMoves = (ArrayList<Move>) Database.bestMoves(n);
             PlayBox playBox = getPlayBox(currCont, ps, bestMoves);
             Label turnL = new Label("Turns Played: " + (ps.getTurnNo()));
             turnL.setFont(Font.font("Verdana", 20));
@@ -153,7 +153,7 @@ public class ReviewPane extends VBox {
         getChildren().addAll(lw, bottomBox);
     }
 
-    private PlayBox getPlayBox(Controller cont, StateAndMove ps, HashSet<Move> bestMoves) {
+    private PlayBox getPlayBox(Controller cont, StateAndMove ps, ArrayList<Move> bestMoves) {
 
         PlayBox pb = new PlayBox(50, CLICK_DISABLED, cont);
         pb.update(ps.getState());

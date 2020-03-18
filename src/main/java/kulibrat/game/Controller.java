@@ -2,6 +2,9 @@ package kulibrat.game;
 
 import fftlib.FFT;
 import fftlib.FFTManager;
+import fftlib.game.FFTMove;
+import fftlib.game.FFTSolver;
+import fftlib.game.StateMapping;
 import fftlib.gui.FFTInteractivePane;
 import fftlib.gui.FFTOverviewPane;
 import javafx.application.Platform;
@@ -20,6 +23,7 @@ import kulibrat.ai.AI;
 import kulibrat.ai.MCTS.MCTS;
 import kulibrat.ai.Minimax.LookupTableMinimax;
 import kulibrat.ai.Minimax.Minimax;
+import kulibrat.ai.Minimax.PerfectPlayer;
 import kulibrat.gui.*;
 import kulibrat.gui.board.BoardPiece;
 import kulibrat.gui.board.BoardTile;
@@ -31,11 +35,13 @@ import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Random;
 
 import static kulibrat.game.Logic.POS_NONBOARD;
+import static misc.Config.USE_DB;
 import static misc.Globals.*;
 
 public class Controller {
@@ -91,9 +97,31 @@ public class Controller {
         this.curHighLights = new ArrayList<>();
         this.previousStates = new ArrayList<>();
 
+        instantiateAI(PLAYER1);
+        instantiateAI(Globals.PLAYER2);
+
         // Prepare the FFT Stuff
         gameSpecifics = new GameSpecifics(this);
         this.fftManager = new FFTManager(gameSpecifics);
+
+        // Do database stuff
+        if (USE_DB) {
+            if (overwriteDB) {
+                System.out.println("Rebuilding lookup table. This will take some time.");
+                try {
+                    Database.createLookupTable();
+                    HashMap<Long, StateMapping> solution = LookupTableMinimax.solveGame(state);
+                    Database.fillLookupTable(solution);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Database.connectAndVerify();
+            }
+        } else if (aiRed instanceof PerfectPlayer || aiBlack instanceof PerfectPlayer) {
+            FFTSolver.solveGame(state);
+        }
+
         // Autogenerate
         try {
             fftManager.autogenFFT();
@@ -112,8 +140,6 @@ public class Controller {
         playArea = playPane.getPlayArea();
         window = playArea.getScene().getWindow();
 
-        instantiateAI(PLAYER1);
-        instantiateAI(Globals.PLAYER2);
         playArea.update(this);
 
         // Fetch all gui elements that invoke something game-related
@@ -177,7 +203,7 @@ public class Controller {
         });
         // Review button
         reviewButton.setOnAction(event -> {
-            if (Database.connectwithVerification()) {
+            if (Database.connectAndVerify()) {
                 reviewGame();
             }
         });
@@ -187,7 +213,7 @@ public class Controller {
             helpHumanBox.setDisable(true);
             deselect();
             if (newValue) {
-                if (Database.connectwithVerification()) {
+                if (Database.connectAndVerify()) {
                     helpHumanBox.setSelected(true);
                     highlightBestPieces(true);
                 } else {
@@ -247,7 +273,7 @@ public class Controller {
             if (playerRedInstance == MINIMAX) {
                 aiRed = new Minimax(PLAYER1, redTime);
             } else if (playerRedInstance == LOOKUP_TABLE) {
-                aiRed = new LookupTableMinimax(PLAYER1, state, overwriteDB);
+                aiRed = new PerfectPlayer(PLAYER1);
             } else if (playerRedInstance == MONTE_CARLO) {
                 aiRed = new MCTS(state, PLAYER1, redTime);
             } else if (playerRedInstance == FFT) {
@@ -260,7 +286,7 @@ public class Controller {
                 if (playerRedInstance == LOOKUP_TABLE) {
                     overwriteDB = false;
                 }
-                aiBlack = new LookupTableMinimax(PLAYER2, state, overwriteDB);
+                aiBlack = new PerfectPlayer(PLAYER2);
             } else if (playerBlackInstance == MONTE_CARLO) {
                 aiBlack = new MCTS(state, PLAYER2, blackTime);
             } else if (playerBlackInstance == FFT) {
@@ -447,7 +473,7 @@ public class Controller {
     private void highlightMoves(int row, int col, int team, boolean highlight) {
         if (highlight) curHighLights = Logic.legalMovesFromPiece(row,
                 col, team, state.getBoard());
-        HashSet<Move> bestMoves = null;
+        ArrayList<? extends FFTMove> bestMoves = null;
         if (highlight && helpHumanBox.isSelected()) {
             bestMoves = Database.bestMoves(new State(state));
         }
@@ -479,8 +505,8 @@ public class Controller {
     // Highlights the best pieces found above
     private void highlightBestPieces(boolean highlight) {
         State n = new State(state);
-        HashSet<Move> bestMoves = null;
-        if (highlight) bestMoves = Database.bestMoves(n);
+        ArrayList<Move> bestMoves = null;
+        if (highlight) bestMoves = (ArrayList<Move>) Database.bestMoves(n);
         BoardTile[][] tiles = playArea.getPlayBox().getBoard().getTiles();
 
         for (BoardTile[] tile : tiles) {

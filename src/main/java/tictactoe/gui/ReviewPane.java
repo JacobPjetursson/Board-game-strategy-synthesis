@@ -1,6 +1,8 @@
 package tictactoe.gui;
 
 
+import fftlib.game.FFTSolution;
+import fftlib.game.StateMapping;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,10 +20,8 @@ import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import misc.Config;
-import tictactoe.ai.StateMapping;
 import tictactoe.game.*;
 import tictactoe.gui.board.PlayBox.PlayBox;
-import tictactoe.misc.Database;
 
 import java.util.ArrayList;
 
@@ -64,8 +64,8 @@ public class ReviewPane extends VBox {
             State n = new State(ps.getState());
             Move m = ps.getMove();
             State next = n.getNextState(m);
-            ArrayList<Move> nonLosingMoves = Database.nonLosingMoves(n);
-            StateMapping sm = Database.queryState(next);
+            ArrayList<Move> nonLosingMoves = (ArrayList<Move>) FFTSolution.nonLosingMoves(n);
+            StateMapping sm = FFTSolution.queryState(next);
             int winner = (sm == null) ? Logic.getWinner(next) : sm.getWinner();
             String winnerStr = (winner == n.getTurn()) ? "win" : (winner == PLAYER_NONE) ? "draw" : "loss";
 
@@ -98,7 +98,7 @@ public class ReviewPane extends VBox {
             performance.setAlignment(Pos.CENTER);
             vBox.getChildren().add(performance);
 
-            String turnsToTerminalStr = Database.turnsToTerminal(cont.getState().getTurn(), next);
+            String turnsToTerminalStr = FFTSolution.turnsToTerminal(cont.getState().getTurn(), next);
             if (turnsToTerminalStr.startsWith("-"))
                 turnsToTerminalStr = turnsToTerminalStr.substring(1);
             Label turnsToTerminal = new Label("Turns to " + winnerStr +

@@ -11,7 +11,6 @@ import tictactoe.game.Controller;
 import tictactoe.game.Logic;
 import tictactoe.game.Move;
 import tictactoe.game.State;
-import tictactoe.misc.Database;
 
 import java.util.HashSet;
 
@@ -124,11 +123,6 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public FFTLogic getLogic() {
         return new Logic();
-    }
-
-    @Override
-    public FFTDatabase getDatabase() {
-        return new Database();
     }
 
     @Override

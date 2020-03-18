@@ -25,7 +25,6 @@ import java.util.function.BiFunction;
 
 public class FFTManager {
     public static ArrayList<FFT> ffts;
-    public static FFTDatabase db;
     public static FFTLogic logic;
     static int [] gameSymmetries;
     public static int gameBoardWidth;
@@ -55,7 +54,6 @@ public class FFTManager {
 
         initialFFTState = gameSpecifics.getInitialState();
         logic = gameSpecifics.getLogic();
-        db = gameSpecifics.getDatabase();
         path = gameSpecifics.getFFTFilePath();
         gameSymmetries = gameSpecifics.getAllowedTransformations();
         int[] dim = gameSpecifics.getBoardDim();
@@ -161,7 +159,7 @@ public class FFTManager {
     public Node getFailState() {
         FFTStateAndMove ps = currFFT.failingPoint;
         FFTState s = ps.getState();
-        ArrayList<? extends FFTMove> nonLosingMoves = FFTManager.db.nonLosingMoves(s);
+        ArrayList<? extends FFTMove> nonLosingMoves = FFTSolution.nonLosingMoves(s);
         return failState.getFailState(ps, nonLosingMoves);
     }
 

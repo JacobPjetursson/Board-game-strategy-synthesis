@@ -1,8 +1,8 @@
 package tictactoe.demos;
 
 import fftlib.*;
+import fftlib.game.FFTSolver;
 import tictactoe.FFT.GameSpecifics;
-import tictactoe.ai.LookupTableMinimax;
 import tictactoe.game.State;
 
 import static misc.Globals.PLAYER1;
@@ -12,7 +12,7 @@ public class Demo {
     public static void main(String[] args) {
         GameSpecifics gs = new GameSpecifics(null);
         new FFTManager(gs);
-        new LookupTableMinimax(PLAYER1, new State());
+        FFTSolver.solveGame(new State());
 
 
         Clause lits = new Clause();

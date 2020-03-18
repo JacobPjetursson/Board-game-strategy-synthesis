@@ -1,76 +1,28 @@
 package kulibrat.ai.Minimax;
 
-import kulibrat.ai.AI;
+import fftlib.game.StateMapping;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
 import kulibrat.game.State;
-import kulibrat.misc.Database;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 
 
-public class LookupTableMinimax extends AI {
-    private boolean useDB = true;
-    private int CURR_MAX_DEPTH;
-    private int unevaluatedNodes = 0;
-    private HashMap<Long, StateMapping> lookupTable;
-
-
-    public LookupTableMinimax(int team, State state, boolean overwriteDB) {
-        super(team);
-        lookupTable = new HashMap<>();
-        if (useDB && overwriteDB) {
-            this.team = PLAYER1;
-            System.out.println("Rebuilding lookup table. This will take some time.");
-            buildLookupTable(state);
-            try {
-                Database.fillLookupTable(lookupTable);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            this.team = team;
-        } else if (useDB) {
-            Database.connectwithVerification();
-        }
-    }
-
-    // This function fetches the best move from the DB, if it exists
-    public Move makeMove(State state) {
-        String teamstr = (team == PLAYER2) ? "BLACK" : "RED";
-        System.out.println("Finding best play for " + teamstr);
-        if (state.getLegalMoves().size() == 1) {
-            return state.getLegalMoves().get(0);
-        }
-        // table lookup
-        State simState = new State(state);
-        StateMapping mapping;
-        if (useDB) {
-            mapping = Database.queryState(simState);
-        } else {
-            mapping = iterativeDeepeningMinimax(state);
-        }
-        if (mapping == null) {
-            System.err.println("DB Table is empty and needs to be rebuilt. Exiting");
-            System.exit(0);
-        }
-        Move move = mapping.move;
-        String winner = (mapping.score >= 1000) ? "RED" : (mapping.score == 0) ? "DRAW" : "BLACK";
-        System.out.print("BEST PLAY:  " + "oldRow: " + move.oldRow +
-                ", oldCol: " + move.oldCol + ", row: " + move.newRow + ", col: " + move.newCol +
-                ", WINNER IS: " + winner);
-        System.out.println(" in " + (mapping.score >= 1000 ? 2000 - mapping.score : (mapping.score == 0) ? "∞" : 2000 + mapping.score) + " moves!");
-        return move;
-    }
+public class LookupTableMinimax {
+    private static int team = PLAYER1;
+    private static int CURR_MAX_DEPTH;
+    private static int unevaluatedNodes = 0;
+    private static HashMap<Long, StateMapping> lookupTable;
 
     // Runs an iterative deepening minimax as the exhaustive brute-force for the lookupDB. The data is saved in the transpo table
-    private StateMapping iterativeDeepeningMinimax(State state) {
+    public static HashMap<Long, StateMapping> solveGame(State state) {
         CURR_MAX_DEPTH = 0;
+        lookupTable = new HashMap<>();
         boolean done = false;
-        StateMapping play = null;
+        StateMapping play;
         int doneCounter = 0;
         while (!done) {
             State simState = new State(state); // Start from fresh (Don't reuse previous game tree in new iterations)
@@ -94,11 +46,11 @@ public class LookupTableMinimax extends AI {
                 System.out.println("A SOLUTION HAS BEEN FOUND, WINNING STRAT GOES TO: " + winner);
             }
         }
-        return play;
+        return lookupTable;
     }
 
     // Is called for every depth limit of the iterative deepening function. Classic minimax with no pruning
-    private StateMapping minimax(State state, int depth) {
+    private static StateMapping minimax(State state, int depth) {
         Move bestMove = null;
         int bestScore = (state.getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int score;
@@ -137,7 +89,7 @@ public class LookupTableMinimax extends AI {
     }
 
     // Heuristic function which values red with 2000 for a win, and -2000 for a loss. All other nodes are 0
-    private int heuristic(State state) {
+    private static int heuristic(State state) {
         int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
         if (Logic.gameOver(state)) {
             int winner = Logic.getWinner(state);
@@ -147,13 +99,5 @@ public class LookupTableMinimax extends AI {
                 return -2000;
         }
         return 0;
-    }
-
-    // This function builds the lookup table from scratch
-    private void buildLookupTable(State state) {
-        Database.createLookupTable();
-        long startTime = System.currentTimeMillis();
-        iterativeDeepeningMinimax(state);
-        System.out.println("Lookup table successfully built. Time spent: " + (System.currentTimeMillis() - startTime));
     }
 }

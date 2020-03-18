@@ -22,4 +22,6 @@ public interface FFTState {
     FFTState getNextState(FFTMove move);
 
     FFTMove getMove();
+
+    FFTState clone();
 }

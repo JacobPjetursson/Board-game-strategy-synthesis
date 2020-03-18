@@ -1,20 +1,26 @@
-package tictactoe.ai;
-
-import fftlib.game.FFTStateMapping;
-import tictactoe.game.Move;
+package fftlib.game;
 
 import static misc.Globals.*;
 
 // Class binds a move to a score for the minimax algorithm
-public class StateMapping implements FFTStateMapping {
+public class StateMapping {
     public int score;
-    public Move move;
+    public FFTMove move;
     public int depth;
+    boolean evaluated;
 
-    public StateMapping(Move move, int score, int depth) {
+    public StateMapping(FFTMove move, int score, int depth) {
         this.move = move;
         this.score = score;
         this.depth = depth;
+        this.evaluated = false;
+    }
+
+    public StateMapping(FFTMove move, int score, int depth, boolean evaluated) {
+        this.move = move;
+        this.score = score;
+        this.depth = depth;
+        this.evaluated = evaluated;
     }
 
     public int getScore() {
@@ -25,7 +31,7 @@ public class StateMapping implements FFTStateMapping {
         return depth;
     }
 
-    public Move getMove() {
+    public FFTMove getMove() {
         return move;
     }
 

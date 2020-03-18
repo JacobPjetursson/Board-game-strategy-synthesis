@@ -181,6 +181,11 @@ public class State implements FFTState {
         return move;
     }
 
+    @Override
+    public FFTState clone() {
+        return new State(this);
+    }
+
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append("TURN:").append(turn).append("\t");

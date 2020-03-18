@@ -2,10 +2,6 @@ package sim;
 
 import fftlib.*;
 import fftlib.game.Transform;
-import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
-import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
-import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
-import sim.ai.LookupTableMinimax;
 
 import java.util.ArrayList;
 import java.util.HashSet;

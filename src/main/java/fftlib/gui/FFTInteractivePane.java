@@ -156,8 +156,6 @@ public class FFTInteractivePane extends BorderPane {
         verifyBtn.setTooltip(new Tooltip("Checks if the current FFT is a winning strategy,\n" +
                 "or if given rules are part of winning strategy"));
         verifyBtn.setOnMouseClicked(event -> {
-            if (!FFTManager.db.connectAndVerify())
-                return;
             int team = teamChoice.getSelectionModel().getSelectedIndex() + 1;
             boolean wholeFFT = verificationChoice.getSelectionModel().getSelectedIndex() == 0;
             boolean verified =  fftManager.currFFT.verify(team, wholeFFT);

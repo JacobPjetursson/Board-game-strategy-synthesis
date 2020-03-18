@@ -102,6 +102,11 @@ public class State implements FFTState {
         return move;
     }
 
+    @Override
+    public FFTState clone() {
+        return new State(this);
+    }
+
     public void setMove(Move move) {
         this.move = move;
     }

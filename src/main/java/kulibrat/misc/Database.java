@@ -1,16 +1,18 @@
+// This file provides additional functionality to the FFTSolution class
+// The solution can be stored and retrieved from a database
+
 package kulibrat.misc;
 
-import fftlib.game.FFTDatabase;
-import fftlib.game.FFTStateMapping;
+import fftlib.FFTManager;
 import fftlib.game.FFTMove;
+import fftlib.game.FFTSolution;
 import fftlib.game.FFTState;
+import fftlib.game.StateMapping;
 import javafx.event.Event;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import kulibrat.FFT.AutoGen.LookupSimple;
 import kulibrat.ai.Minimax.LookupTableMinimax;
-import kulibrat.ai.Minimax.StateMapping;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
 import kulibrat.game.State;
@@ -19,24 +21,19 @@ import misc.Config;
 import misc.Globals;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 
 
-public class Database implements FFTDatabase {
+public class Database extends FFTSolution {
     public static Connection dbConnection;
 
-    // Only used for autogen
-    private static HashMap<? extends FFTState, ? extends StateMapping> lookupTable;
-
-    public boolean connectAndVerify() {
-        return connectwithVerification();
-    }
-
     // Connects to the database. If the table in question is incomplete or missing, show a pane to allow creating the DB on the spot.
-    public static boolean connectwithVerification() {
+    public static boolean connectAndVerify() {
         System.out.println("Connecting to database. This might take some time");
         try {
             dbConnection = DriverManager.getConnection(
@@ -93,83 +90,34 @@ public class Database implements FFTDatabase {
 
     // Outputs a list of the best plays from a given node. Checks through the children of a node to find the ones
     // which have the least amount of turns to terminal for win, or most for loss.
-    public static HashSet<Move> bestMoves(State n) {
-        HashSet<Move> bestMoves = new HashSet<>();
+    public static ArrayList<Move> bestMoves(State n) {
+        ArrayList<Move> bestMoves = new ArrayList<>();
+        if (Logic.gameOver(n))
+            return bestMoves;
         StateMapping mapping = queryState(n);
         int bestScore = 0;
-        if (!Logic.gameOver(n.getNextState(mapping.move))) {
-            bestScore = queryState(n.getNextState(mapping.move)).score;
+        if (!Logic.gameOver((State)n.getNextState(mapping.getMove()))) {
+            bestScore = queryState((State)n.getNextState(mapping.getMove())).getScore();
         }
-        for (State child : n.getChildren()) {
-            Move m = child.getMove();
-            State state = n.getNextState(m);
-            if (Logic.gameOver(state)) {
-                if (Logic.getWinner(state) == m.team) bestMoves.add(m);
-            } else if (queryState(child).score == bestScore) {
-                bestMoves.add(m);
+        for (FFTState child : n.getChildren()) {
+            FFTMove m = child.getMove();
+
+            FFTState state = n.getNextState(m);
+            if (Logic.gameOver((State)state)) {
+                if (Logic.getWinner((State)state) == m.getTeam())
+                    bestMoves.add((Move)m);
+            } else if (queryState((State)child).getScore() == bestScore) {
+                bestMoves.add((Move)m);
             }
         }
         return bestMoves;
     }
 
-    private static ArrayList<Move> nonLosingMoves(State n) {
-        ArrayList<Move> nonLosingMoves = new ArrayList<>();
-        if (Logic.gameOver(n))
-            return nonLosingMoves;
-
-        StateMapping mapping = queryState(n);
-        if (mapping.move == null) // There is no moves in this state
-            return nonLosingMoves;
-        State next = n.getNextState(mapping.move);
-
-        // In case of game over
-        if (Logic.gameOver(next)) {
-            int winner = Logic.getWinner(next);
-            for (State child : n.getChildren()) {
-                Move m = child.getMove();
-                int childWinner = Logic.getWinner(child);
-                if (childWinner == winner)
-                        nonLosingMoves.add(m);
-                else if (childWinner == 0) { // Game still going
-                    if (queryState(child).getWinner() == winner)
-                        nonLosingMoves.add(m);
-                }
-            }
-            return nonLosingMoves;
-        }
-
-        int bestMoveWinner = queryState(next).getWinner();
-        int team = n.getTurn();
-
-        for (State child : n.getChildren()) {
-            Move m = child.getMove();
-            if (Logic.gameOver(child)) { // Game is stuck
-                if (team == PLAYER1 && bestMoveWinner == PLAYER2)
-                    nonLosingMoves.add(m);
-                else if (team == PLAYER2 && bestMoveWinner == PLAYER1)
-                    nonLosingMoves.add(m);
-                continue;
-            }
-            int childWinner = queryState(child).getWinner();
-            if (team == PLAYER1) {
-                if (bestMoveWinner == childWinner)
-                    nonLosingMoves.add(m);
-                else if (bestMoveWinner == PLAYER2)
-                    nonLosingMoves.add(m);
-            } else {
-                if (bestMoveWinner == childWinner)
-                    nonLosingMoves.add(m);
-                else if (bestMoveWinner == PLAYER1)
-                    nonLosingMoves.add(m);
-            }
-        }
-        return nonLosingMoves;
-    }
-
     // Fetches the best play corresponding to the input node
     public static StateMapping queryState(State n) {
-        if (lookupTable != null)
-            return lookupTable.get(n);
+        HashMap<State, StateMapping> table = (HashMap<State, StateMapping>) FFTSolution.getLookupTable();
+        if (table != null && !table.isEmpty())
+            return table.get(n);
 
         StateMapping play = null;
         String tableName = "plays_" + Globals.SCORELIMIT;
@@ -238,12 +186,13 @@ public class Database implements FFTDatabase {
         for (Map.Entry<Long, StateMapping> entry : lookupTable.entrySet()) {
             Long key = entry.getKey();
             StateMapping value = entry.getValue();
+            Move move = (Move) value.getMove();
             stmt.setLong(1, key);
-            stmt.setInt(2, value.move.oldRow);
-            stmt.setInt(3, value.move.oldCol);
-            stmt.setInt(4, value.move.newRow);
-            stmt.setInt(5, value.move.newCol);
-            stmt.setInt(6, value.move.team);
+            stmt.setInt(2, move.oldRow);
+            stmt.setInt(3, move.oldCol);
+            stmt.setInt(4, move.newRow);
+            stmt.setInt(5, move.newCol);
+            stmt.setInt(6, move.team);
             stmt.setInt(7, value.score);
 
             stmt.addBatch();
@@ -274,26 +223,11 @@ public class Database implements FFTDatabase {
     // Builds the DB
     public static void buildLookupDB() {
         State state = new State();
-        new LookupTableMinimax(PLAYER1, state, true);
+        createLookupTable();
+        try {
+            fillLookupTable(LookupTableMinimax.solveGame(state));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
-
-    public static void setLookupTable(HashMap<State, StateMapping> inputTable) {
-        lookupTable = inputTable;
-    }
-
-    public HashMap<? extends FFTState, ? extends StateMapping> getSolution() {
-        new LookupSimple(PLAYER1, new State());
-        return lookupTable;
-    }
-
-    @Override
-    public ArrayList<? extends FFTMove> nonLosingMoves(FFTState n) {
-        return nonLosingMoves((State) n);
-    }
-
-    public FFTStateMapping queryState(FFTState n) {
-        return queryState((State) n);
-    }
-
-
 }

@@ -1,11 +1,11 @@
 package sim;
 
 import fftlib.*;
+import fftlib.game.FFTSolver;
 import fftlib.game.Transform;
 import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
-import sim.ai.LookupTableMinimax;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,10 +18,9 @@ public class Main {
     public static void main(String[] args) {
         CURRENT_GAME = SIM;
         State s = new State();
-        new LookupTableMinimax(PLAYER1, s);
-
         GameSpecifics specs = new GameSpecifics();
         FFTManager fftManager = new FFTManager(specs);
+        FFTSolver.solveGame(s);
 
         try {
             fftManager.autogenFFT();

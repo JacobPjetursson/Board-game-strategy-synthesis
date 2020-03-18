@@ -5,11 +5,8 @@ import fftlib.Literal;
 import fftlib.Rule;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
-import org.ggp.base.util.gdl.grammar.GdlSentence;
-import org.ggp.base.util.statemachine.Move;
 
 import java.util.HashSet;
-import java.util.Set;
 
 public interface FFTGameSpecifics {
 
@@ -30,8 +27,6 @@ public interface FFTGameSpecifics {
     FFTState getInitialState();
 
     FFTLogic getLogic();
-
-    FFTDatabase getDatabase();
 
     FFTFailState getFailState(); // VISUAL
 

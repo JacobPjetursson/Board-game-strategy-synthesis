@@ -1,5 +1,6 @@
 package kulibrat.ai.Minimax;
 
+import fftlib.game.StateMapping;
 import kulibrat.ai.AI;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
@@ -27,13 +28,13 @@ public class Minimax extends AI {
     }
 
     // Runs the iterative deepening minimax with a set timelimit
-    public Move makeMove(kulibrat.game.State state) {
+    public Move makeMove(State state) {
         long startTime = System.currentTimeMillis();
         if (state.getLegalMoves().size() == 1) {
             chill(startTime);
             return state.getLegalMoves().get(0);
         }
-        Move move = iterativeDeepeningMinimax(state, startTime).move;
+        Move move = (Move) iterativeDeepeningMinimax(state, startTime).move;
         // This happens when the minimax returns faster after having found a winning move
         chill(startTime);
         return move;
@@ -56,8 +57,7 @@ public class Minimax extends AI {
             int r = new Random().nextInt(state.getLegalMoves().size());
             info = new StateMapping(state.getLegalMoves().get(r), Integer.MIN_VALUE, 0);
         }
-        System.out.println("Score: " + info.score + ", Depth: " + CURR_MAX_DEPTH + ", Play:  oldRow: " + info.move.oldRow + ", oldCol: " +
-                info.move.oldCol + ", row: " + info.move.newRow + ", col: " + info.move.newCol + ", team: " + info.move.team);
+        System.out.println(info);
         return info;
     }
 

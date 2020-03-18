@@ -61,7 +61,7 @@ public class MCTS extends AI {
                     // Shallow minimax search as rollout
                     minimax.setTeam(sim_node.getState().getTurn());
                     State state = new State(sim_node.getState());
-                    Move move = minimax.minimax(state, minimaxDepth, Integer.MIN_VALUE,
+                    Move move = (Move)minimax.minimax(state, minimaxDepth, Integer.MIN_VALUE,
                             Integer.MAX_VALUE, System.currentTimeMillis()).move;
 
                     sim_node = sim_node.getNextNode(move);

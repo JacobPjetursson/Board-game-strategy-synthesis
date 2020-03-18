@@ -2,6 +2,9 @@ package tictactoe.game;
 
 import fftlib.FFT;
 import fftlib.FFTManager;
+import fftlib.game.FFTSolution;
+import fftlib.game.FFTSolver;
+import fftlib.game.StateMapping;
 import fftlib.gui.FFTInteractivePane;
 import fftlib.gui.FFTOverviewPane;
 import javafx.application.Platform;
@@ -20,11 +23,9 @@ import tictactoe.FFT.GameSpecifics;
 import tictactoe.FFT.InteractiveState;
 import tictactoe.ai.AI;
 import tictactoe.ai.FFTFollower;
-import tictactoe.ai.LookupTableMinimax;
-import tictactoe.ai.StateMapping;
+import tictactoe.ai.PerfectPlayer;
 import tictactoe.gui.*;
 import tictactoe.gui.board.BoardTile;
-import tictactoe.misc.Database;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -70,11 +71,10 @@ public class Controller {
         this.primaryStage = primaryStage;
         this.endGamePopup = false;
         this.previousStates = new ArrayList<>();
-        // fills up the "database"
-        new LookupTableMinimax(PLAYER1, state);
 
         gameSpecifics = new GameSpecifics(this);
         this.fftManager = new FFTManager(gameSpecifics);
+        FFTSolver.solveGame(state);
         // Autogenerate
         try {
             fftManager.autogenFFT();
@@ -190,13 +190,13 @@ public class Controller {
     private void instantiateAI(int team) {
         if (team == PLAYER1) {
             if (player1Instance == LOOKUP_TABLE) {
-                aiCross = new LookupTableMinimax(PLAYER1, state);
+                aiCross = new PerfectPlayer(PLAYER1);
             } else if (player1Instance == FFT) {
                 aiCross = new FFTFollower(PLAYER1, fftManager);
             }
         } else {
             if (player2Instance == LOOKUP_TABLE) {
-                aiCircle = new LookupTableMinimax(PLAYER2, state);
+                aiCircle = new PerfectPlayer(PLAYER2);
             } else if (player2Instance == FFT) {
                 aiCircle = new FFTFollower(PLAYER2, fftManager);
             }
@@ -347,7 +347,7 @@ public class Controller {
                 for (Move m : moves) {
                     if (m.col == aTile.getCol() && m.row == aTile.getRow()) {
                         State next = n.getNextState(m);
-                        StateMapping sm = Database.queryState(next);
+                        StateMapping sm = FFTSolution.queryState(next);
                         if (sm == null) {
                             if (Logic.getWinner(next) == n.getTurn())
                                 aTile.setGreen();
@@ -390,7 +390,7 @@ public class Controller {
             if (Logic.gameOver(s)) {
                 turnsToTerminalList.add("0");
             } else
-                turnsToTerminalList.add(Database.turnsToTerminal(state.getTurn(), s));
+                turnsToTerminalList.add(FFTSolution.turnsToTerminal(state.getTurn(), s));
         }
         return turnsToTerminalList;
     }
