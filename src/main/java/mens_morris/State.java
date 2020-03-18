@@ -57,8 +57,6 @@ public class State implements FFTState {
         zobrist_key = state.zobrist_key;
     }
 
-
-
     @Override
     public int hashCode() {
         return (int) zobrist_key;
@@ -93,6 +91,7 @@ public class State implements FFTState {
         String removeStr = (canRemove) ? "" : "!";
         literals.add(new Literal(phaseStr + "phase2"));
         literals.add(new Literal(removeStr + "canRemove"));
+        this.literals = literals;
         return literals;
     }
 
