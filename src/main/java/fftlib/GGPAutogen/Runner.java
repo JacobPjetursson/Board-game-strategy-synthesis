@@ -5,7 +5,6 @@ import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
 import misc.Config;
-import misc.Globals;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
@@ -132,9 +131,9 @@ public class Runner {
         Iterator<MachineState> itr = states.iterator();
         while (itr.hasNext()) {
             MachineState ms = itr.next();
-            Set<Move> nonLosingMoves = Database.nonLosingMoves(ms);
+            Set<Move> optimalMoves = Database.optimalMoves(ms);
             Role r = GGPManager.getRole(ms);
-            if (nonLosingMoves.size() == GGPManager.getLegalMoves(ms, r).size()) {
+            if (optimalMoves.size() == GGPManager.getLegalMoves(ms, r).size()) {
                 itr.remove();
             }
         }
@@ -207,7 +206,7 @@ public class Runner {
         Move bestMove = mapping.getMove();
 
 
-        ArrayList<Move> moves = new ArrayList<>(Database.nonLosingMoves(ms));
+        ArrayList<Move> moves = new ArrayList<>(Database.optimalMoves(ms));
         ArrayList<Move> movesCopy = new ArrayList<>(moves);
 
         if (FULL_RULES)

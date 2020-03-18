@@ -64,12 +64,12 @@ public class ReviewPane extends VBox {
             State n = new State(ps.getState());
             Move m = ps.getMove();
             State next = n.getNextState(m);
-            ArrayList<Move> nonLosingMoves = (ArrayList<Move>) FFTSolution.nonLosingMoves(n);
+            ArrayList<Move> optimalMoves = (ArrayList<Move>) FFTSolution.optimalMoves(n);
             StateMapping sm = FFTSolution.queryState(next);
             int winner = (sm == null) ? Logic.getWinner(next) : sm.getWinner();
             String winnerStr = (winner == n.getTurn()) ? "win" : (winner == PLAYER_NONE) ? "draw" : "loss";
 
-            PlayBox playBox = getPlayBox(cont, ps, nonLosingMoves);
+            PlayBox playBox = getPlayBox(cont, ps, optimalMoves);
             HBox h = new HBox(35);
             VBox vBox = new VBox(18);
             vBox.setAlignment(Pos.CENTER);
@@ -88,7 +88,7 @@ public class ReviewPane extends VBox {
             vBox.getChildren().add(moveL);
 
             Label performance;
-            if (nonLosingMoves.contains(ps.getMove())) {
+            if (optimalMoves.contains(ps.getMove())) {
                 h.setStyle("-fx-background-color: rgba(0, 255, 0, 0.5);");
                 performance = new Label("Perfect move");
             } else {

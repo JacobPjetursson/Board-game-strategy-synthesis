@@ -10,7 +10,7 @@ import static misc.Globals.PLAYER2;
 public class FFTSolver{
     private static boolean solved = false;
     private static int CURR_MAX_DEPTH;
-    private static int unevaluatedNodes = 0;
+    private static int unexploredNodes = 0;
     private static int team = PLAYER1; // Always from player1 perspective
     private static HashMap<FFTState, StateMapping> lookupTable;
 
@@ -30,12 +30,13 @@ public class FFTSolver{
             initialState = initialState.clone(); // Start from fresh (Don't reuse previous game tree in new iterations)
             CURR_MAX_DEPTH += 1;
             int prevSize = lookupTable.size();
-            int prevUnevaluatedNodes = unevaluatedNodes;
-            unevaluatedNodes = 0;
+            int prevvUnexploredNodes = unexploredNodes;
+            unexploredNodes = 0;
             minimax(initialState, CURR_MAX_DEPTH);
-            System.out.println("CURRENT MAX DEPTH: " + CURR_MAX_DEPTH + ", LOOKUP TABLE SIZE: " + lookupTable.size());
+            System.out.println("CURRENT MAX DEPTH: " + CURR_MAX_DEPTH + ", LOOKUP TABLE SIZE: " + lookupTable.size()
+                    + ", UNEVALUATED NODES: " + unexploredNodes);
 
-            if (lookupTable.size() == prevSize && unevaluatedNodes == prevUnevaluatedNodes) {
+            if (lookupTable.size() == prevSize && unexploredNodes == prevvUnexploredNodes) {
                 System.out.println("State space explored, and unevaluated nodes unchanged between runs");
                 doneCounter++;
             } else {
@@ -68,12 +69,12 @@ public class FFTSolver{
         if (mapping != null && depth <= mapping.getDepth()) {
             return mapping;
         }
-        boolean evaluated = true;
+        boolean explored = true;
         for (FFTState child : state.getChildren()) {
             StateMapping childMapping = minimax(child, depth - 1);
             score = childMapping.getScore();
-            if (!childMapping.evaluated)
-                evaluated = false;
+            if (!childMapping.explored)
+                explored = false;
             if (childMapping.getWinner() == PLAYER1) score--;
             else score++;
             if (state.getTurn() == team) {
@@ -90,11 +91,11 @@ public class FFTSolver{
         }
         if (mapping == null || depth > mapping.getDepth()) {
             lookupTable.put(state,
-                    new StateMapping(bestMove, bestScore, depth, evaluated));
+                    new StateMapping(bestMove, bestScore, depth, explored));
         }
-        if (!evaluated)
-            unevaluatedNodes++;
-        return new StateMapping(bestMove, bestScore, depth, evaluated);
+        if (!explored)
+            unexploredNodes++;
+        return new StateMapping(bestMove, bestScore, depth, explored);
     }
 
     // Heuristic function which values player1 with 2000 for a win, and -2000 for a loss. All other nodes are 0

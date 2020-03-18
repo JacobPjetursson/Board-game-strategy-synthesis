@@ -39,7 +39,6 @@ public class FFTAutoGen {
 
         states = new PriorityQueue<>(new StateComparator());
 
-        System.out.println("Filtering...");
         if (VERIFY_SINGLE_STRATEGY) {
             strategy = new HashMap<>();
             System.out.println("Filtering for single strategy");
@@ -75,7 +74,6 @@ public class FFTAutoGen {
                 continue;
             else if (AUTOGEN_PERSPECTIVE == PLAYER2 && play.getMove().getTeam() != PLAYER2)
                 continue;
-
             boolean threshold = false;
             switch(AUTOGEN_PERSPECTIVE) {
                 case PLAYER1:
@@ -104,8 +102,8 @@ public class FFTAutoGen {
         Iterator<FFTState> itr = states.iterator();
         while (itr.hasNext()) {
             FFTState s = itr.next();
-            ArrayList<? extends FFTMove> nonLosingMoves = FFTSolution.nonLosingMoves(s);
-            if (nonLosingMoves.size() == s.getLegalMoves().size()) {
+            ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(s);
+            if (optimalMoves.size() == s.getLegalMoves().size()) {
                 itr.remove();
             }
         }
@@ -171,7 +169,7 @@ public class FFTAutoGen {
         for (Literal l : literals)
             minSet.add(new Literal(l));
 
-        for (FFTMove m : FFTSolution.nonLosingMoves(s))
+        for (FFTMove m : FFTSolution.optimalMoves(s))
             actions.add(m.getAction());
         actionsCopy = new ArrayList<>(actions);
 

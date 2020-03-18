@@ -94,7 +94,7 @@ public class FFT {
                     }
             } else {
                 FFTMove move = apply(state);
-                ArrayList<? extends FFTMove> nonLosingMoves = FFTSolution.nonLosingMoves(state);
+                ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(state);
                 // If move is null, check that all possible (random) moves are ok
                 if (move == null) {
                     if (!complete && strategy != null) { // only expand on move from strategy
@@ -112,7 +112,7 @@ public class FFT {
                     }
 
                     for (FFTMove m : state.getLegalMoves()) {
-                        if (nonLosingMoves.contains(m)) {
+                        if (optimalMoves.contains(m)) {
                             FFTState nextState = state.getNextState(m);
                             if (!closedSet.contains(nextState)) {
                                 closedSet.add(nextState);
@@ -123,7 +123,7 @@ public class FFT {
                             return false;
                         }
                     }
-                } else if (!nonLosingMoves.contains(move)) {
+                } else if (!optimalMoves.contains(move)) {
                     failingPoint = new FFTStateAndMove(state, move, false);
                     return false;
                 } else {
@@ -358,7 +358,7 @@ public class FFT {
                 }
             } else {
                 FFTMove move = apply(state);
-                ArrayList<? extends FFTMove> nonLosingMoves = FFTSolution.nonLosingMoves(state);
+                ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(state);
                 // If move is null, check that all possible (random) moves are ok
                 if (move == null) {
                     if (!complete && strategy != null) { // only expand on move from strategy
@@ -377,7 +377,7 @@ public class FFT {
                     }
 
                     for (FFTMove m : state.getLegalMoves()) {
-                        if (nonLosingMoves.contains(m)) {
+                        if (optimalMoves.contains(m)) {
                             addTask(state.getNextState(m));
                         } else if (complete) {
                             failingPoint = new FFTStateAndMove(state, m, true);
@@ -385,7 +385,7 @@ public class FFT {
                             return false;
                         }
                     }
-                } else if (!nonLosingMoves.contains(move)) {
+                } else if (!optimalMoves.contains(move)) {
                     failingPoint = new FFTStateAndMove(state, move, false);
                     failed = true;
                     return false;
@@ -468,7 +468,7 @@ public class FFT {
                         addTask(child);
                 } else {
                     Move move = apply(ms);
-                    Set<Move> nonLosingMoves = Database.nonLosingMoves(ms);
+                    Set<Move> optimalMoves = Database.optimalMoves(ms);
                     // If move is null, check that all possible (random) moves are ok
                     if (move == null) {
                         if (!complete && strategy != null) { // only expand on move from strategy
@@ -486,14 +486,14 @@ public class FFT {
                             return result;
                         }
                         for (Move m : GGPManager.getLegalMoves(ms, currRole)) {
-                            if (nonLosingMoves.contains(m)) {
+                            if (optimalMoves.contains(m)) {
                                 addTask(GGPManager.getNextState(ms, m));
                             } else if (complete) {
                                 failed = true;
                                 return false;
                             }
                         }
-                    } else if (!nonLosingMoves.contains(move)) {
+                    } else if (!optimalMoves.contains(move)) {
                         failed = true;
                         return false;
                     } else {

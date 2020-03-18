@@ -8,5 +8,5 @@ import java.util.ArrayList;
 
 public interface FFTFailState {
 
-    Node getFailState(FFTStateAndMove ps, ArrayList<? extends FFTMove> nonLosingMoves);
+    Node getFailState(FFTStateAndMove ps, ArrayList<? extends FFTMove> optimalMoves);
 }

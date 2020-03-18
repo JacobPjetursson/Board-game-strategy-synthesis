@@ -51,11 +51,11 @@ public class Config {
         Properties sim = new Properties();
         Properties ggp = new Properties();
 
-        global.load(new FileInputStream("propertiers/global.properties"));
-        tictactoe.load(new FileInputStream("propertiers/tictactoe.properties"));
-        kulibrat.load(new FileInputStream("propertiers/kulibrat.properties"));
-        sim.load(new FileInputStream("propertiers/sim.properties"));
-        ggp.load(new FileInputStream("propertiers/ggp.properties"));
+        global.load(new FileInputStream("properties/global.properties"));
+        tictactoe.load(new FileInputStream("properties/tictactoe.properties"));
+        kulibrat.load(new FileInputStream("properties/kulibrat.properties"));
+        sim.load(new FileInputStream("properties/sim.properties"));
+        ggp.load(new FileInputStream("properties/ggp.properties"));
 
         // GLOBAL CONFIG
         String perspective = global.getProperty("autogen_perspective", "player1");

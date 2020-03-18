@@ -159,8 +159,8 @@ public class FFTManager {
     public Node getFailState() {
         FFTStateAndMove ps = currFFT.failingPoint;
         FFTState s = ps.getState();
-        ArrayList<? extends FFTMove> nonLosingMoves = FFTSolution.nonLosingMoves(s);
-        return failState.getFailState(ps, nonLosingMoves);
+        ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(s);
+        return failState.getFailState(ps, optimalMoves);
     }
 
     public void autogenFFT() throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {

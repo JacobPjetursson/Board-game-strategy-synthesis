@@ -102,6 +102,7 @@ public class Rule {
 
     public void addPrecondition(GdlSentence s) {
         this.sentences.add(s);
+        //this.transformedSentences = getTransformedSentences();
     }
 
     public void removePrecondition(Literal l) {
@@ -111,6 +112,8 @@ public class Rule {
 
     public void removePrecondition(GdlSentence s) {
         this.sentences.remove(s);
+        //this.transformedSentences = getTransformedSentences();
+
     }
 
 
@@ -147,6 +150,7 @@ public class Rule {
 
     public void setMove(Move m) {
         this.move = m;
+        this.symmetryRules = getTransformedRules();
     }
 
     public void setPreconditions(Clause c) {
@@ -283,12 +287,16 @@ public class Rule {
     public FFTMove apply(FFTState state) {
         HashSet<Literal> stLiterals = state.getLiterals();
         FFTMove m = match(this, state, stLiterals);
-        if (m != null || !SYMMETRY_DETECTION) return m;
+        if (m != null || !SYMMETRY_DETECTION) {
+            return m;
+        }
         for (Rule rule : symmetryRules) {
             if (rule.preconditions.equals(preconditions))
                 continue;
             m = match(rule, state, stLiterals);
-            if (m != null) return m;
+            if (m != null) {
+                return m;
+            }
         }
         return null;
     }

@@ -7,6 +7,7 @@ import tictactoe.ai.Zobrist;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import static fftlib.game.Transform.*;
@@ -17,10 +18,15 @@ import static misc.Globals.PLAYER_ANY;
 public class State implements FFTState {
     private int[][] board;
     private int turn;
-    private ArrayList<Move> legalMoves;
     private Move move;
     private long zobrist_key;
     private static int[] transformations = {TRANS_HREF, TRANS_VREF, TRANS_ROT};
+
+    // save results if already computed once (e.g. several verifications)
+    private ArrayList<Move> legalMoves;
+    private ArrayList<State> children;
+    private HashMap<Move, State> nextStates = new HashMap<>();
+    private HashSet<Literal> literals;
 
     // Starting state
     public State() {
@@ -78,15 +84,21 @@ public class State implements FFTState {
     }
 
     public State getNextState(Move m) {
+        if (nextStates.get(m) != null)
+            return nextStates.get(m);
+        nextStates.put(m, new State(this, m));
         return new State(this, m);
     }
 
     public ArrayList<State> getChildren() {
+        if (children != null)
+            return children;
         ArrayList<State> children = new ArrayList<>();
         for (Move m : getLegalMoves()) {
             State child = new State(this, m);
             children.add(child);
         }
+        this.children = children;
         return children;
     }
 
@@ -112,6 +124,8 @@ public class State implements FFTState {
     }
 
     public HashSet<Literal> getLiterals() {
+        if (literals != null)
+            return literals;
         HashSet<Literal> literals = new HashSet<>();
 
         for (int i = 0; i < board.length; i++) {
@@ -127,6 +141,7 @@ public class State implements FFTState {
                 }
             }
         }
+        this.literals = literals;
         return literals;
     }
 
@@ -169,7 +184,8 @@ public class State implements FFTState {
 
     // Creates and/or returns a list of new state objects which correspond to the children of the given state.
     public ArrayList<Move> getLegalMoves() {
-        if (legalMoves != null) return legalMoves;
+        if (legalMoves != null)
+            return legalMoves;
         legalMoves = Logic.legalMoves(turn, this);
         return legalMoves;
     }

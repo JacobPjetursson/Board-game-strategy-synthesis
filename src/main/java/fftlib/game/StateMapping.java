@@ -7,20 +7,20 @@ public class StateMapping {
     public int score;
     public FFTMove move;
     public int depth;
-    boolean evaluated;
+    boolean explored;
 
     public StateMapping(FFTMove move, int score, int depth) {
         this.move = move;
         this.score = score;
         this.depth = depth;
-        this.evaluated = false;
+        this.explored = false;
     }
 
-    public StateMapping(FFTMove move, int score, int depth, boolean evaluated) {
+    public StateMapping(FFTMove move, int score, int depth, boolean explored) {
         this.move = move;
         this.score = score;
         this.depth = depth;
-        this.evaluated = evaluated;
+        this.explored = explored;
     }
 
     public int getScore() {

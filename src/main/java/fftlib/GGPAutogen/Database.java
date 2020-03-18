@@ -1,5 +1,7 @@
 package fftlib.GGPAutogen;
 
+import fftlib.game.FFTMove;
+import fftlib.game.FFTState;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
@@ -14,6 +16,7 @@ import static misc.Globals.PLAYER2;
 
 public class Database {
     private static HashMap<MachineState, GGPMapping> lookupTable;
+    private static HashMap<MachineState, Set<Move>> optimalMovesTable = new HashMap<>();
 
     static void initialize(HashMap<MachineState, GGPMapping> solution) {
         lookupTable = solution;
@@ -23,15 +26,19 @@ public class Database {
         return lookupTable.get(ms);
     }
 
-    public static Set<Move> nonLosingMoves(MachineState ms) throws MoveDefinitionException, TransitionDefinitionException, GoalDefinitionException {
-        Set<Move> nonLosingMoves = new HashSet<>();
+    public static Set<Move> optimalMoves(MachineState ms) throws MoveDefinitionException, TransitionDefinitionException, GoalDefinitionException {
+        if (optimalMovesTable.get(ms) != null)
+            return optimalMovesTable.get(ms);
+        Set<Move> optimalMoves = new HashSet<>();
         if (GGPManager.isTerminal(ms)) {
-            return nonLosingMoves;
+            optimalMovesTable.put(ms, optimalMoves);
+            return optimalMoves;
         }
 
         GGPMapping mapping = queryState(ms);
         if (mapping.move == null) { // There is no moves in this state
-            return nonLosingMoves;
+            optimalMovesTable.put(ms, optimalMoves);
+            return optimalMoves;
         }
 
         Role r = GGPManager.getRole(ms);
@@ -41,7 +48,8 @@ public class Database {
         if (GGPManager.isTerminal(next)) {
             List<Integer> winners = GGPManager.getPlayerWinners(next);
             if (winners == null) { // should not happen
-                return nonLosingMoves;
+                optimalMovesTable.put(ms, optimalMoves);
+                return optimalMoves;
             }
 
             for (Move m : GGPManager.getLegalMoves(ms, r)) {
@@ -49,13 +57,14 @@ public class Database {
                 List<Integer> childWinners = GGPManager.getPlayerWinners(child);
                 if (childWinners == null) { // game is still going
                     if (winners.contains(queryState(child).getWinner()))
-                        nonLosingMoves.add(m);
+                        optimalMoves.add(m);
                     continue;
                 }
                 if (winners.equals(childWinners))
-                    nonLosingMoves.add(m);
+                    optimalMoves.add(m);
             }
-            return nonLosingMoves;
+            optimalMovesTable.put(ms, optimalMoves);
+            return optimalMoves;
         }
 
         int bestMoveWinner = queryState(next).getWinner();
@@ -64,24 +73,25 @@ public class Database {
             MachineState child = GGPManager.getNextState(ms, m);
             if (GGPManager.isTerminal(child)) { // Game is stuck
                 if (team == PLAYER1 && bestMoveWinner == PLAYER2)
-                    nonLosingMoves.add(m);
+                    optimalMoves.add(m);
                 else if (team == PLAYER2 && bestMoveWinner == PLAYER1)
-                    nonLosingMoves.add(m);
+                    optimalMoves.add(m);
                 continue;
             }
             int childWinner = queryState(child).getWinner();
             if (team == PLAYER1) {
                 if (bestMoveWinner == childWinner)
-                    nonLosingMoves.add(m);
+                    optimalMoves.add(m);
                 else if (bestMoveWinner == PLAYER2)
-                    nonLosingMoves.add(m);
+                    optimalMoves.add(m);
             } else {
                 if (bestMoveWinner == childWinner)
-                    nonLosingMoves.add(m);
+                    optimalMoves.add(m);
                 else if (bestMoveWinner == PLAYER1)
-                    nonLosingMoves.add(m);
+                    optimalMoves.add(m);
             }
         }
-        return nonLosingMoves;
+        optimalMovesTable.put(ms, optimalMoves);
+        return optimalMoves;
     }
 }

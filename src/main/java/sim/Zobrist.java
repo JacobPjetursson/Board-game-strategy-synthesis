@@ -1,4 +1,4 @@
-package sim.ai;
+package sim;
 
 import misc.Config;
 import misc.Globals;

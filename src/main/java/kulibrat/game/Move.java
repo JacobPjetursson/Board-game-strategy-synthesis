@@ -87,43 +87,4 @@ public class Move implements FFTMove {
         return String.format("(OLDROW: %s, OLDCOL: %s, NEWROW: %s, NEWCOL: %s, TEAM: %s)",
                 oldRow, oldCol, newRow, newCol, team);
     }
-
-    public Move reflect() {
-        int[][] board = new int[Config.BWIDTH][Config.BHEIGHT];
-        if (oldCol != POS_NONBOARD)
-            board[oldRow][oldCol] = -team;
-        if (newCol != POS_NONBOARD)
-            board[newRow][newCol] = team;
-
-        int[][] ref = new int[Config.BWIDTH][Config.BHEIGHT];
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                ref[i][j] = board[i][board.length - 1 - j];
-            }
-        }
-        Move refMove = new Move(team);
-        boolean oldSet = false;
-        boolean newSet = false;
-        for (int i = 0; i < ref.length; i++) {
-            for (int j = 0; j < ref[i].length; j++) {
-                if (ref[i][j] == team) {
-                    refMove.newRow = i;
-                    refMove.newCol = j;
-                    newSet = true;
-                } else if (ref[i][j] == -team) {
-                    refMove.oldRow = i;
-                    refMove.oldCol = j;
-                    oldSet = true;
-                }
-            }
-        }
-        if (!newSet) {
-            refMove.newRow = POS_NONBOARD;
-            refMove.newCol = POS_NONBOARD;
-        } else if (!oldSet) {
-            refMove.oldCol = POS_NONBOARD;
-            refMove.oldRow = POS_NONBOARD;
-        }
-        return refMove;
-    }
 }

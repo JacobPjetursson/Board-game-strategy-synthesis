@@ -169,6 +169,12 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>morris</id>
+                        <configuration>
+                            <mainClass>mens_morris.Main</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>GGP-FFT</id>
                         <configuration>
                             <mainClass>fftlib.GGPAutogen.Runner</mainClass>

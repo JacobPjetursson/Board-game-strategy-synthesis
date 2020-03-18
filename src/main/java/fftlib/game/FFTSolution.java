@@ -11,6 +11,7 @@ import static misc.Globals.PLAYER2;
 
 public class FFTSolution{
     private static HashMap<? extends FFTState, StateMapping> lookupTable;
+    private static HashMap<FFTState, ArrayList<FFTMove>> optimalMovesTable = new HashMap<>();
 
     // Outputs a string which is the amount of turns to a terminal node, based on a score from the database entry
     public static String turnsToTerminal(int turn, FFTState n) {
@@ -36,13 +37,15 @@ public class FFTSolution{
         }
     }
 
-    public static ArrayList<? extends FFTMove> nonLosingMoves(FFTState state) {
-        ArrayList<FFTMove> nonLosingMoves = new ArrayList<>();
+    public static ArrayList<? extends FFTMove> optimalMoves(FFTState state) {
+        ArrayList<FFTMove> optimalMoves = new ArrayList<>();
         if (FFTManager.logic.gameOver(state))
-            return nonLosingMoves;
+            return optimalMoves;
         StateMapping mapping = queryState(state);
-        if (mapping.getMove() == null)
-            return nonLosingMoves;
+        if (mapping.getMove() == null) {
+            optimalMovesTable.put(state, optimalMoves);
+            return optimalMoves;
+        }
         FFTState next = state.getNextState(mapping.getMove());
         // Cant assume that best move will end the game, in fact its the opposite
         // In case of game over
@@ -52,13 +55,14 @@ public class FFTSolution{
                 FFTMove m = child.getMove();
                 if (FFTManager.logic.gameOver(child)) {
                     if (FFTManager.logic.getWinner(child) == winner)
-                        nonLosingMoves.add(m);
+                        optimalMoves.add(m);
                 } else {
                     if (winner == queryState(child).getWinner())
-                        nonLosingMoves.add(m);
+                        optimalMoves.add(m);
                 }
             }
-            return nonLosingMoves;
+            optimalMovesTable.put(state, optimalMoves);
+            return optimalMoves;
         }
 
         int bestMoveWinner = queryState(next).getWinner();
@@ -68,25 +72,26 @@ public class FFTSolution{
             FFTMove m = child.getMove();
             if (FFTManager.logic.gameOver(child)) {
                 if (team == PLAYER1 && bestMoveWinner == PLAYER2)
-                    nonLosingMoves.add(m);
+                    optimalMoves.add(m);
                 else if (team == PLAYER2 && bestMoveWinner == PLAYER1)
-                    nonLosingMoves.add(m);
+                    optimalMoves.add(m);
                 continue;
             }
             int childWinner = queryState(child).getWinner();
             if (team == PLAYER1) {
                 if (bestMoveWinner == childWinner)
-                    nonLosingMoves.add(m);
+                    optimalMoves.add(m);
                 else if (bestMoveWinner == PLAYER2)
-                    nonLosingMoves.add(m);
+                    optimalMoves.add(m);
             } else {
                 if (bestMoveWinner == childWinner)
-                    nonLosingMoves.add(m);
+                    optimalMoves.add(m);
                 else if (bestMoveWinner == PLAYER1)
-                    nonLosingMoves.add(m);
+                    optimalMoves.add(m);
             }
         }
-        return nonLosingMoves;
+        optimalMovesTable.put(state, optimalMoves);
+        return optimalMoves;
     }
 
     // Fetches the best play corresponding to the input node
