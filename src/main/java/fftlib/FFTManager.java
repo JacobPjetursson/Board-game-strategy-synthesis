@@ -37,7 +37,6 @@ public class FFTManager {
     public static BiFunction<Action, Integer, FFTMove> actionToMove;
     public static BiFunction<HashSet<Literal>, Integer, FFTState> preconsToState;
     public static BiFunction<String, String, Rule> gdlToRule;
-    public static int gameWinner;
     public static int MAX_PRECONS;
     public static String[] playerNames;
     private static int fft_index = 0;
@@ -64,7 +63,6 @@ public class FFTManager {
         gdlToRule = gameSpecifics::gdlToRule;
         failState = gameSpecifics.getFailState();
         interactiveState = gameSpecifics.getInteractiveState();
-        gameWinner = gameSpecifics.getGameWinner();
         playerNames = gameSpecifics.getPlayerNames();
         MAX_PRECONS = gameSpecifics.getMaxPrecons();
 
@@ -163,9 +161,9 @@ public class FFTManager {
         return failState.getFailState(ps, optimalMoves);
     }
 
-    public void autogenFFT() throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
+    public void autogenFFT() {
         if (Globals.ENABLE_AUTOGEN) {
-            FFT fft = FFTAutoGen.generateFFT(Config.AUTOGEN_PERSPECTIVE, gameWinner);
+            FFT fft = FFTAutoGen.generateFFT(Config.AUTOGEN_PERSPECTIVE);
             ffts.add(0, fft);
             currFFT = fft;
         }

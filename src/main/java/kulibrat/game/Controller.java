@@ -123,15 +123,8 @@ public class Controller {
         }
 
         // Autogenerate
-        try {
-            fftManager.autogenFFT();
-        } catch (TransitionDefinitionException e) {
-            e.printStackTrace();
-        } catch (MoveDefinitionException e) {
-            e.printStackTrace();
-        } catch (GoalDefinitionException e) {
-            e.printStackTrace();
-        }
+        fftManager.autogenFFT();
+
 
         PlayPane playPane = new PlayPane(this);
         primaryStage.setScene(new Scene(playPane,

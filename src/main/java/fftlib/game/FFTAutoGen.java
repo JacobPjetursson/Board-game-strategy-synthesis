@@ -21,9 +21,8 @@ public class FFTAutoGen {
     // CONFIGURATION
     private static int winner;
 
-    public static FFT generateFFT(int perspective_, int winner_) {
+    public static FFT generateFFT(int perspective_) {
         AUTOGEN_PERSPECTIVE = perspective_;
-        winner = winner_;
         setup();
         return fft;
     }
@@ -34,6 +33,7 @@ public class FFTAutoGen {
         rg = new RuleGroup("Autogen");
         fft.addRuleGroup(rg);
         lookupTable = FFTSolution.getLookupTable();
+        winner = FFTSolution.getWinner();
 
         System.out.println("Solution size: " + lookupTable.size());
 

@@ -107,4 +107,8 @@ public class FFTSolution{
         return lookupTable;
     }
 
+    public static int getWinner() {
+        return lookupTable.get(FFTManager.initialFFTState).getWinner();
+    }
+
 }

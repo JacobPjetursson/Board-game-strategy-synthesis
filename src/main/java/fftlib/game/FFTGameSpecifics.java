@@ -33,6 +33,4 @@ public interface FFTGameSpecifics {
     InteractiveFFTState getInteractiveState(); // VISUAL
 
     int getMaxPrecons();
-
-    int getGameWinner();
 }

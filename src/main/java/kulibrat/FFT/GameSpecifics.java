@@ -135,11 +135,4 @@ public class GameSpecifics implements FFTGameSpecifics {
         int[] dim = getBoardDim();
         return dim[0] * dim[1] + 2; // tiles, score, score
     }
-
-    @Override
-    public int getGameWinner() {
-        if (Config.BHEIGHT == 3 || Globals.SCORELIMIT < 8)
-            return PLAYER1;
-        return PLAYER_NONE;
-    }
 }

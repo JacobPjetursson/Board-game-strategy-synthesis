@@ -58,8 +58,8 @@ public class Move implements FFTMove {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof kulibrat.game.Move)) return false;
-        kulibrat.game.Move move = (kulibrat.game.Move) o;
+        if (!(o instanceof Move)) return false;
+        Move move = (Move) o;
         return oldRow == move.oldRow &&
                 oldCol == move.oldCol &&
                 newRow == move.newRow &&

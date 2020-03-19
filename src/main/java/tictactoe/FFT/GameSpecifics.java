@@ -142,11 +142,4 @@ public class GameSpecifics implements FFTGameSpecifics {
         int[] dim = getBoardDim();
         return dim[0] * dim[1];
     }
-
-    @Override
-    public int getGameWinner() {
-        if (Config.TIC_TAC_TOE_SIMPLE_RULES)
-            return PLAYER1;
-        return PLAYER_NONE;
-    }
 }

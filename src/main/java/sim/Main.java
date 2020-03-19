@@ -22,11 +22,8 @@ public class Main {
         FFTManager fftManager = new FFTManager(specs);
         FFTSolver.solveGame(s);
 
-        try {
-            fftManager.autogenFFT();
-        } catch (TransitionDefinitionException | MoveDefinitionException | GoalDefinitionException e) {
-            e.printStackTrace();
-        }
+        fftManager.autogenFFT();
+
     }
 
     public static HashSet<Clause> findAutomorphismsTest(Clause clause) {

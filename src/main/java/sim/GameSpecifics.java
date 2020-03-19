@@ -100,9 +100,4 @@ public class GameSpecifics implements FFTGameSpecifics {
     public int getMaxPrecons() {
         return 15;
     }
-
-    @Override
-    public int getGameWinner() {
-        return PLAYER2;
-    }
 }
