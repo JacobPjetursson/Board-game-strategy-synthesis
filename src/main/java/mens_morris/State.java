@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import static mens_morris.Logic.POS_NONBOARD;
+import static misc.Config.THREE_MENS;
 import static misc.Globals.*;
 
 public class State implements FFTState {
@@ -23,14 +24,18 @@ public class State implements FFTState {
     // save for multiple runs
     private HashSet<Literal> literals;
 
+    // varies depending on game type
+    private static final int MEN = (THREE_MENS) ? 3*2 : 6*2;
+    public static final int BOARD_SIZE = (THREE_MENS) ? 3 : 5;
+
     // initial state
     public State () {
         turn = PLAYER1;
         board = initBoard();
         phase2 = false;
         canRemove = false;
-        // each player starts with 6 men
-        unplaced = 12;
+        // each player starts with specific amount of men
+        unplaced = MEN;
         this.zobrist_key = initZobrist();
     }
 
@@ -44,7 +49,7 @@ public class State implements FFTState {
 
     // Duplicate constructor, for "root" state
     public State(State state) {
-        board = new int[5][5];
+        board = new int[BOARD_SIZE][BOARD_SIZE];
         for (int i = 0; i < state.board.length; i++) {
             board[i] = Arrays.copyOf(state.board[i], state.board[i].length);
         }
@@ -52,7 +57,6 @@ public class State implements FFTState {
         move = state.move;
         this.phase2 = state.phase2;
         this.canRemove = state.canRemove;
-        this.literals = state.literals;
         unplaced = state.unplaced;
         zobrist_key = state.zobrist_key;
     }
@@ -89,8 +93,8 @@ public class State implements FFTState {
         }
         String phaseStr = (phase2) ? "" : "!";
         String removeStr = (canRemove) ? "" : "!";
-        literals.add(new Literal(phaseStr + "phase2"));
-        literals.add(new Literal(removeStr + "canRemove"));
+        if (!THREE_MENS) literals.add(new Literal(phaseStr + "phase2"));
+        if (!THREE_MENS) literals.add(new Literal(removeStr + "canRemove"));
         this.literals = literals;
         return literals;
     }
@@ -114,8 +118,8 @@ public class State implements FFTState {
 
         String phaseStr = (phase2) ? "" : "!";
         String removeStr = (canRemove) ? "" : "!";
-        literals.add(new Literal(phaseStr + "phase2"));
-        literals.add(new Literal(removeStr + "canRemove"));
+        if (!THREE_MENS) literals.add(new Literal(phaseStr + "phase2"));
+        if (!THREE_MENS) literals.add(new Literal(removeStr + "canRemove"));
         return literals;
     }
 
@@ -200,7 +204,9 @@ public class State implements FFTState {
     }
 
     public int[][] initBoard() {
-        int[][] board = new int[5][5];
+        int[][] board = new int[BOARD_SIZE][BOARD_SIZE];
+        if (THREE_MENS)
+            return board;
         // all empty spots
         board[1][0] = -1;
         board[3][0] = -1;

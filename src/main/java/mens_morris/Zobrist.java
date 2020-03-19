@@ -20,8 +20,8 @@ public class Zobrist {
         System.out.println("Zobrist seed: " + seed);
 
         // board keys
-        int rows = 5;
-        int cols = 5;
+        int rows = State.BOARD_SIZE;
+        int cols = State.BOARD_SIZE;
         int unique_pieces = 3;
         board = new long[rows][cols][unique_pieces];
         for (int i = 0; i < board.length; i++) {

@@ -20,12 +20,10 @@ public class State implements FFTState {
     private int turn;
     private Move move;
     private long zobrist_key;
-    private static int[] transformations = {TRANS_HREF, TRANS_VREF, TRANS_ROT};
 
     // save results if already computed once (e.g. several verifications)
     private ArrayList<Move> legalMoves;
     private ArrayList<State> children;
-    private HashMap<Move, State> nextStates = new HashMap<>();
     private HashSet<Literal> literals;
 
     // Starting state
@@ -84,9 +82,6 @@ public class State implements FFTState {
     }
 
     public State getNextState(Move m) {
-        if (nextStates.get(m) != null)
-            return nextStates.get(m);
-        nextStates.put(m, new State(this, m));
         return new State(this, m);
     }
 

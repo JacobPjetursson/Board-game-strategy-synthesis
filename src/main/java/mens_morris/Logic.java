@@ -6,6 +6,7 @@ import fftlib.game.FFTState;
 
 import java.util.ArrayList;
 
+import static misc.Config.THREE_MENS;
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 
@@ -21,7 +22,7 @@ public class Logic implements FFTLogic {
             for (int j = 0; j < state.board[i].length; j++) {
                 if (state.canRemove) {  // remove
                     if (state.board[i][j] == opponent &&
-                            (!isMill(i, j, state) || menCounter(state, opponent) == 3))
+                            (!isMill(i, j, team, state) || menCounter(state, opponent) == 3))
                         moves.add(new Move(i, j, POS_NONBOARD, POS_NONBOARD, team));
                 }
                 else if (!state.phase2) {
@@ -35,8 +36,9 @@ public class Logic implements FFTLogic {
         return moves;
     }
 
-    public static boolean isMill(int row, int col, State state) {
-        int team = state.board[row][col];
+    public static boolean isMill(int row, int col, int team, State state) {
+        if (THREE_MENS)
+            return isMillThreeMens(row, col, team, state);
         int step = 1;
         // increase step if row or col is in edge of board
         if (row == 0 || row == state.board.length -1 || col == 0 || col == state.board.length - 1)
@@ -72,11 +74,13 @@ public class Logic implements FFTLogic {
         ArrayList<Move> moves = new ArrayList<>();
         int vStep = 1;
         int hStep = 1;
-        // increase step if row or col is in edge of board
-        if (row == 0 || row == state.board.length -1)
-            hStep = 2;
-        if (col == 0 || col == state.board.length - 1)
-            vStep = 2;
+        // increase step if row or col is in edge of board and not 3-mens
+        if (!THREE_MENS) {
+            if (row == 0 || row == state.board.length -1)
+                hStep = 2;
+            if (col == 0 || col == state.board.length - 1)
+                vStep = 2;
+        }
 
         // north
         if (row > (vStep-1) && state.board[row-vStep][col] == 0) {
@@ -94,6 +98,27 @@ public class Logic implements FFTLogic {
         if (col > (hStep-1) && state.board[row][col - hStep] == 0) {
             moves.add(new Move(row, col, row, col-hStep, team));
         }
+
+        // Move diagonally if three mens
+        if (THREE_MENS) {
+            // north west
+            if (col < state.board.length-1 && row > 0 &&
+                    state.board[row-1][col+1] == 0)
+                moves.add(new Move(row, col, row-1, col+1, team));
+            // south west
+            if (col < state.board.length-1 && row < state.board.length-1 &&
+                    state.board[row+1][col+1] == 0)
+                moves.add(new Move(row, col, row+1, col+1, team));
+            // north east
+            if (col > 0 && row > 0 &&
+                    state.board[row-1][col-1] == 0)
+                moves.add(new Move(row, col, row-1, col-1, team));
+            // south east
+            if (col > 0 && row < state.board.length-1 &&
+                    state.board[row+1][col-1] == 0)
+                moves.add(new Move(row, col, row+1, col-1, team));
+
+        }
         return moves;
     }
 
@@ -109,6 +134,12 @@ public class Logic implements FFTLogic {
     }
 
     public static boolean gameOver(State state) {
+        if (THREE_MENS) {
+            Move m = state.getMove();
+            if (m == null)
+                return false;
+            return isMillThreeMens(m.newRow, m.newCol, m.team, state);
+        }
         if (!state.phase2)
             return false;
         int p1Counter = 0;
@@ -153,7 +184,7 @@ public class Logic implements FFTLogic {
             state.unplaced--;
 
         state.phase2 = isPhase2(state);
-        if (isMill(m.newRow, m.newCol, state)) {
+        if (isMill(m.newRow, m.newCol, m.team, state)) {
             state.canRemove = true;
             return;
         }
@@ -177,5 +208,46 @@ public class Logic implements FFTLogic {
     public boolean isLegalMove(FFTState state, FFTMove move) {
         Move m = (Move) move;
         return legalMoves(move.getTeam(), (State) state).contains(m);
+    }
+
+    public static boolean isMillThreeMens(int row, int col, int team, State state) {
+        // horizontal
+        int counter = 0;
+        for (int i = 0; i < 3; i++) {
+            if (state.board[row][i] == team)
+                counter++;
+        }
+        if (counter == 3)
+            return true;
+        counter = 0;
+        // vertical
+        for (int i = 0; i < 3; i++) {
+            if (state.board[i][col] == team)
+                counter++;
+        }
+        if (counter == 3)
+            return true;
+        counter = 0;
+        boolean onLine = false;
+        // NW/SE
+        for (int i = 0; i < 3; i++) {
+            if (state.board[i][i] == team)
+                counter++;
+            if (row == i && col == i)
+                onLine = true;
+        }
+        if (counter == 3 && onLine)
+            return true;
+        counter = 0;
+        int j = 0;
+        // NE / SW
+        for (int i = 2; i >= 0; i--) {
+            if (state.board[i][j] == team)
+                counter++;
+            if (row == i && col == j)
+                onLine = true;
+            j++;
+        }
+        return counter == 3 && onLine;
     }
 }

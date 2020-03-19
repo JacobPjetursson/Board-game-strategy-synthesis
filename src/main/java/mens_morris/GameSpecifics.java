@@ -15,7 +15,7 @@ import java.util.HashSet;
 
 import static fftlib.game.Transform.*;
 import static mens_morris.Logic.POS_NONBOARD;
-import static misc.Globals.PLAYER_NONE;
+import static misc.Config.THREE_MENS;
 
 public class GameSpecifics implements FFTGameSpecifics {
     @Override
@@ -63,6 +63,9 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public int[] getBoardDim() {
+        if (THREE_MENS) {
+            return new int[] {3, 3};
+        }
         return new int[] {5,5};
     }
 
@@ -98,6 +101,8 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public int getMaxPrecons() {
-        return 16;
+        if (THREE_MENS)
+            return 9+2;
+        return 16+2;
     }
 }

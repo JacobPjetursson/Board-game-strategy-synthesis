@@ -28,7 +28,9 @@ public class Runner {
     private static RuleGroup rg;
     private static Role p1Role, p2Role;
     private static Move noop;
+
     private static int winner;
+    private static int max_precons;
 
     public static void main(String[] args) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
 
@@ -58,13 +60,14 @@ public class Runner {
 
         GGPMapping result = lookupTable.get(initialState);
         winner = result.getWinner();
+        max_precons = initialState.getContents().size();
         String winnerStr = winner == PLAYER1 ? "Player 1" : winner == PLAYER2 ? "Player 2" : "Draw";
         System.out.println("Winner of game: " + winnerStr);
         Database.initialize(lookupTable);
         System.out.println("Solution size: " + lookupTable.size());
 
 
-        states = new PriorityQueue<MachineState>(new StateComparator());
+        states = new PriorityQueue<>(new StateComparator());
 
         System.out.println("Filtering...");
         if (VERIFY_SINGLE_STRATEGY) {
@@ -239,7 +242,7 @@ public class Runner {
                     chosenMove = m;
                     bestPath = path;
                 }
-                if (path.size() >= FFTManager.MAX_PRECONS) // Everything has been removed
+                if (path.size() >= max_precons) // Everything has been removed
                     break;
             }
             r.setMove(chosenMove);
@@ -293,7 +296,7 @@ public class Runner {
             it.add(s);
             r.addPrecondition(s);
 
-            if (bestPath.size() >= FFTManager.MAX_PRECONS) { // Everything removed, no better path exists
+            if (bestPath.size() >= max_precons) { // Everything removed, no better path exists
                 break;
             }
         }

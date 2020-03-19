@@ -32,6 +32,8 @@ public class GGPManager {
     public static Role p2role;
     public static Move noop;
 
+    private static int max_precons;
+
     public static void loadGDL(String filepath) {
         String rawSheet = FileUtils.readFileAsString(new File(filepath));
         Game theGame = Game.createEphemeralGame(Game.preprocessRulesheet(rawSheet));
@@ -57,7 +59,7 @@ public class GGPManager {
         p1role = sm.getRoles().get(0);
         p2role = sm.getRoles().get(1);
         noop = new Move(GdlPool.getConstant("noop"));
-        FFTManager.MAX_PRECONS = sm.getInitialState().getContents().size();
+        max_precons = sm.getInitialState().getContents().size();
     }
 
     public static MachineState getInitialState() {

@@ -37,7 +37,6 @@ public class FFTManager {
     public static BiFunction<Action, Integer, FFTMove> actionToMove;
     public static BiFunction<HashSet<Literal>, Integer, FFTState> preconsToState;
     public static BiFunction<String, String, Rule> gdlToRule;
-    public static int MAX_PRECONS;
     public static String[] playerNames;
     private static int fft_index = 0;
 
@@ -64,7 +63,6 @@ public class FFTManager {
         failState = gameSpecifics.getFailState();
         interactiveState = gameSpecifics.getInteractiveState();
         playerNames = gameSpecifics.getPlayerNames();
-        MAX_PRECONS = gameSpecifics.getMaxPrecons();
 
         // Try loading ffts from file in working directory
         load();

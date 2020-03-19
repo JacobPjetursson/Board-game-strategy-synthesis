@@ -18,8 +18,8 @@ public class FFTAutoGen {
     private static FFT fft;
     private static RuleGroup rg;
 
-    // CONFIGURATION
     private static int winner;
+    private static int max_precons;
 
     public static FFT generateFFT(int perspective_) {
         AUTOGEN_PERSPECTIVE = perspective_;
@@ -34,6 +34,7 @@ public class FFTAutoGen {
         fft.addRuleGroup(rg);
         lookupTable = FFTSolution.getLookupTable();
         winner = FFTSolution.getWinner();
+        max_precons = FFTManager.initialFFTState.getAllLiterals().size();
 
         System.out.println("Solution size: " + lookupTable.size());
 
@@ -208,7 +209,7 @@ public class FFTAutoGen {
                     chosenAction = a;
                     bestPath = path;
                 }
-                if (path.size() >= FFTManager.MAX_PRECONS) // Everything has been removed
+                if (path.size() >= max_precons) // Everything has been removed
                     break;
             }
             r.setAction(chosenAction);
@@ -263,7 +264,7 @@ public class FFTAutoGen {
             it.add(l);
             r.addPrecondition(l);
 
-            if (bestPath.size() >= FFTManager.MAX_PRECONS) // Everything removed, no better path exists
+            if (bestPath.size() >= max_precons) // Everything removed, no better path exists
                 break;
         }
         return bestPath;
