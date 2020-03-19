@@ -30,6 +30,9 @@ public class Config {
     // SIM
     public static boolean SIM_SIMPLE_RULES;
 
+    // MENS MORRIS
+    public static boolean THREE_MENS;
+
     // GGP-FFT PROPERTIES
     public static boolean DETAILED_DEBUG;
     public static boolean FULL_RULES;
@@ -49,12 +52,14 @@ public class Config {
         Properties tictactoe = new Properties();
         Properties kulibrat = new Properties();
         Properties sim = new Properties();
+        Properties morris = new Properties();
         Properties ggp = new Properties();
 
         global.load(new FileInputStream("properties/global.properties"));
         tictactoe.load(new FileInputStream("properties/tictactoe.properties"));
         kulibrat.load(new FileInputStream("properties/kulibrat.properties"));
         sim.load(new FileInputStream("properties/sim.properties"));
+        morris.load(new FileInputStream("properties/mens_morris.properties"));
         ggp.load(new FileInputStream("properties/ggp.properties"));
 
         // GLOBAL CONFIG
@@ -95,6 +100,9 @@ public class Config {
 
         // SIM
         SIM_SIMPLE_RULES = Boolean.parseBoolean(sim.getProperty("simple_rules"));
+
+        // MENS MORRIS
+        THREE_MENS = Boolean.parseBoolean(morris.getProperty("three_mens"));
 
         // GGP
         GGP_GAME = ggp.getProperty("ggp_game");

@@ -109,10 +109,6 @@ public class Logic implements FFTLogic {
     }
 
     public static boolean gameOver(State state) {
-        // shorter statespace
-        if (menCounter(state, PLAYER1) + menCounter(state, PLAYER2) > 6)
-            return true;
-
         if (!state.phase2)
             return false;
         int p1Counter = 0;
