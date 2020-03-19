@@ -16,6 +16,8 @@ public class Config {
     public static boolean RANDOM_RULE_ORDERING;
     public static boolean MINIMIZE_PRECONDITIONS;
     public static boolean SYMMETRY_DETECTION;
+    public static boolean GENERATE_ALL_RULES;
+    public static boolean MINIMIZE_RULE_BY_RULE;
     public static boolean SINGLE_THREAD;
 
     // KULIBRAT PROPERTIES
@@ -35,7 +37,6 @@ public class Config {
 
     // GGP-FFT PROPERTIES
     public static boolean DETAILED_DEBUG;
-    public static boolean FULL_RULES;
     public static boolean VERIFY_SINGLE_STRATEGY;
     public static String GGP_GAME;
 
@@ -82,10 +83,11 @@ public class Config {
         ENABLE_GGP_PARSER = Boolean.parseBoolean(global.getProperty("enable_ggp_parser"));
         RANDOM_RULE_ORDERING = Boolean.parseBoolean(global.getProperty("random_rule_ordering"));
         MINIMIZE_PRECONDITIONS = Boolean.parseBoolean(global.getProperty("minimize_preconditions"));
+        GENERATE_ALL_RULES = Boolean.parseBoolean(global.getProperty("generate_all_rules"));
+        MINIMIZE_RULE_BY_RULE = Boolean.parseBoolean(global.getProperty("minimize_rule_by_rule"));
         SYMMETRY_DETECTION = Boolean.parseBoolean(global.getProperty("symmetry_detection"));
         // DEBUG AND TEST
         DETAILED_DEBUG = Boolean.parseBoolean(global.getProperty("detailedDebug"));
-        FULL_RULES = Boolean.parseBoolean(global.getProperty("fullRules"));
         VERIFY_SINGLE_STRATEGY = Boolean.parseBoolean(global.getProperty("verify_single_strategy"));
         SINGLE_THREAD = Boolean.parseBoolean(global.getProperty("single_thread"));
 

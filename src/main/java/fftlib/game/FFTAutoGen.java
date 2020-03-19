@@ -70,25 +70,25 @@ public class FFTAutoGen {
     private static void filterSolution() {
         for (Map.Entry<? extends FFTState, ? extends StateMapping> entry : lookupTable.entrySet()) {
             FFTState state = entry.getKey();
-            StateMapping play = entry.getValue();
-            if (AUTOGEN_PERSPECTIVE == PLAYER1 && play.getMove().getTeam() != PLAYER1)
+            StateMapping mapping = entry.getValue();
+            if (AUTOGEN_PERSPECTIVE == PLAYER1 && mapping.getMove().getTeam() != PLAYER1)
                 continue;
-            else if (AUTOGEN_PERSPECTIVE == PLAYER2 && play.getMove().getTeam() != PLAYER2)
+            else if (AUTOGEN_PERSPECTIVE == PLAYER2 && mapping.getMove().getTeam() != PLAYER2)
                 continue;
             boolean threshold = false;
             switch(AUTOGEN_PERSPECTIVE) {
                 case PLAYER1:
-                    threshold = play.getWinner() == PLAYER1 || winner == play.getWinner();
+                    threshold = mapping.getWinner() == PLAYER1 || winner == mapping.getWinner();
                     break;
                 case PLAYER2:
-                    threshold = play.getWinner() == PLAYER2 || winner == play.getWinner();
+                    threshold = mapping.getWinner() == PLAYER2 || winner == mapping.getWinner();
                     break;
                 case PLAYER_ANY:
-                    if (play.getMove().getTeam() == PLAYER1 && (play.getWinner() == PLAYER1 || play.getWinner() == PLAYER_NONE))
+                    if (mapping.getMove().getTeam() == PLAYER1 && (mapping.getWinner() == PLAYER1 || mapping.getWinner() == PLAYER_NONE))
                         threshold = true;
 
-                    else if (play.getMove().getTeam() == PLAYER2 &&
-                            (play.getWinner() == PLAYER2 || play.getWinner() == PLAYER_NONE))
+                    else if (mapping.getMove().getTeam() == PLAYER2 &&
+                            (mapping.getWinner() == PLAYER2 || mapping.getWinner() == PLAYER_NONE))
                         threshold = true;
                     break;
             }
@@ -143,7 +143,7 @@ public class FFTAutoGen {
             System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + rg.rules.size());
             FFTState state = states.iterator().next();
 
-            if (fft.verify(AUTOGEN_PERSPECTIVE, true)) {
+            if (!GENERATE_ALL_RULES && fft.verify(AUTOGEN_PERSPECTIVE, true)) {
                 System.out.println("FFT verified before empty statespace");
                 return;
             }
@@ -154,7 +154,8 @@ public class FFTAutoGen {
             System.out.println();
 
             // Delete states that apply
-            states.removeIf(s -> r.apply(s) != null);
+            if (!GENERATE_ALL_RULES)
+                states.removeIf(s -> r.apply(s) != null);
 
         }
     }
@@ -162,20 +163,17 @@ public class FFTAutoGen {
     private static Rule addRule(FFTState s) {
         HashSet<Literal> minSet = new HashSet<>();
         HashSet<Literal> literals = s.getAllLiterals();
-        ArrayList<Action> actions = new ArrayList<>();
-        ArrayList<Action> actionsCopy;
         StateMapping mapping = lookupTable.get(s);
         Action bestAction = mapping.getMove().getAction();
 
         for (Literal l : literals)
             minSet.add(new Literal(l));
 
-        for (FFTMove m : FFTSolution.optimalMoves(s))
-            actions.add(m.getAction());
-        actionsCopy = new ArrayList<>(actions);
-
-        if (FULL_RULES)
-            return new Rule(minSet, actions.get(0));
+        if (GENERATE_ALL_RULES) {
+            Rule r = new Rule(minSet, bestAction);
+            rg.rules.add(r);
+            return r;
+        }
 
         Rule r;
         if (!GREEDY_AUTOGEN) {
@@ -199,6 +197,12 @@ public class FFTAutoGen {
         }
 
         if (!GREEDY_AUTOGEN) {
+            ArrayList<Action> actions = new ArrayList<>();
+            ArrayList<Action> actionsCopy;
+            for (FFTMove m : FFTSolution.optimalMoves(s))
+                actions.add(m.getAction());
+            actionsCopy = new ArrayList<>(actions);
+
             LinkedList<Literal> copy = new LinkedList<>(literals);
             LinkedList<Literal> bestPath = new LinkedList<>();
             Action chosenAction = null;

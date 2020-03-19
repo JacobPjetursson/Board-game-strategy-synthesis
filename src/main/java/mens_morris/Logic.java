@@ -134,6 +134,8 @@ public class Logic implements FFTLogic {
     }
 
     public static boolean gameOver(State state) {
+        if (legalMoves(state.getTurn(), state).isEmpty())
+            return true;
         if (THREE_MENS) {
             Move m = state.getMove();
             if (m == null)

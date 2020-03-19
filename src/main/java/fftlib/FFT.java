@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 
-import static misc.Config.SINGLE_THREAD;
+import static misc.Config.*;
 import static misc.Globals.*;
 
 
@@ -237,9 +237,9 @@ public class FFT {
         int precSize = getAmountOfPreconditions();
 
         minimizeRules(perspective);
-        if (minimize_precons)
+        if (!MINIMIZE_RULE_BY_RULE && minimize_precons) {
             minimizePreconditions(perspective);
-
+        }
 
         int minRuleSize = getAmountOfRules();
         int minPrecSize = getAmountOfPreconditions();
@@ -250,7 +250,7 @@ public class FFT {
             precSize = minPrecSize;
 
             minimizeRules(perspective);
-            if (minimize_precons)
+            if (!MINIMIZE_RULE_BY_RULE && minimize_precons)
                 minimizePreconditions(perspective);
 
             minRuleSize = getAmountOfRules();
@@ -261,6 +261,7 @@ public class FFT {
     }
 
     private ArrayList<Rule> minimizeRules(int team) {
+        if (DETAILED_DEBUG) System.out.println("Minimizing rules");
         ArrayList<Rule> redundantRules = new ArrayList<>();
 
         for (RuleGroup rg : ruleGroups) {
@@ -270,42 +271,64 @@ public class FFT {
                 if (r.multiRule) continue; // TODO - support multirule when minimizing?
                 itr.remove();
                 if (verify(team, true)) {
+                    if (GENERATE_ALL_RULES && DETAILED_DEBUG)
+                        System.out.println("Removed rule, current amount of rules: " + rg.rules.size());
                     redundantRules.add(r);
                 }
-                else
+                else {
                     itr.add(r);
+                    if (GENERATE_ALL_RULES && DETAILED_DEBUG)
+                        System.out.println("Couldn't remove rule, current amount of rules: " + rg.rules.size());
+                    if (MINIMIZE_RULE_BY_RULE)
+                        minimizePreconditions(r, team);
+
+                }
             }
         }
         return redundantRules;
     }
-    // TODO - fix this ugly beast, either by making common type for precons and sentences or by typecasting
     private void minimizePreconditions(int team) {
+        if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
+        int amount = 0;
         for (RuleGroup rg : ruleGroups) {
             for(Rule r : rg.rules) {
                 if (r.multiRule) continue; // TODO - support multirule when minimizing?
-                if (Config.ENABLE_GGP) {
-                    Set<GdlSentence> sentences = new HashSet<>();
-                    for (GdlSentence s : r.sentences)
-                        sentences.add(s.clone());
-
-                    for (GdlSentence s : sentences) {
-                        r.removePrecondition(s);
-                        if (!verify(team, true))
-                            r.addPrecondition(s);
-                    }
-                } else {
-                    ArrayList<Literal> literals = new ArrayList<>();
-                    for (Literal l : r.preconditions.literals)
-                        literals.add(l.clone());
-
-                    for (Literal l : literals) {
-                        r.removePrecondition(l);
-                        if (!verify(team, true))
-                            r.addPrecondition(l);
-                    }
-                }
+                minimizePreconditions(r, team);
+                amount++;
+                if (GENERATE_ALL_RULES && DETAILED_DEBUG) System.out.println("Minimized preconditions (" + amount + "/" + rg.rules.size() + ")");
             }
         }
+    }
+
+    // TODO - fix this ugly beast, either by making common type for precons and sentences or by typecasting
+    private void minimizePreconditions(Rule r, int team) {
+        int amount;
+        if (Config.ENABLE_GGP) {
+            amount = r.sentences.size();
+            Set<GdlSentence> sentences = new HashSet<>();
+            for (GdlSentence s : r.sentences)
+                sentences.add(s.clone());
+
+            for (GdlSentence s : sentences) {
+                r.removePrecondition(s);
+                if (!verify(team, true))
+                    r.addPrecondition(s);
+            }
+        } else {
+            amount = r.preconditions.literals.size();
+            ArrayList<Literal> literals = new ArrayList<>();
+            for (Literal l : r.preconditions.literals)
+                literals.add(l.clone());
+
+            for (Literal l : literals) {
+                r.removePrecondition(l);
+                if (!verify(team, true))
+                    r.addPrecondition(l);
+            }
+        }
+        int newAmount = (ENABLE_GGP) ? r.sentences.size() : r.preconditions.literals.size();
+        if (GENERATE_ALL_RULES && DETAILED_DEBUG)
+            System.out.println("Minimized rule from " + amount + " to " + newAmount + " preconditions");
     }
 
     public void shutDownThreadPool() {

@@ -182,20 +182,22 @@ public class Runner {
             if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
             System.out.println();
 
-            if (fft.verify(AUTOGEN_PERSPECTIVE, true)) {
+            if (!GENERATE_ALL_RULES && fft.verify(AUTOGEN_PERSPECTIVE, true)) {
                 System.out.println("FFT verified before empty statespace");
                 return;
             }
 
             // Delete states that apply
-            states.removeIf(s -> {
-                try {
-                    return r.apply(s) != null;
-                } catch (MoveDefinitionException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            });
+            if (!GENERATE_ALL_RULES) {
+                states.removeIf(s -> {
+                    try {
+                        return r.apply(s) != null;
+                    } catch (MoveDefinitionException e) {
+                        e.printStackTrace();
+                        return false;
+                    }
+                });
+            }
         }
     }
 
@@ -212,8 +214,11 @@ public class Runner {
         ArrayList<Move> moves = new ArrayList<>(Database.optimalMoves(ms));
         ArrayList<Move> movesCopy = new ArrayList<>(moves);
 
-        if (FULL_RULES)
-            return new Rule(minSet, moves.get(0));
+        if (GENERATE_ALL_RULES) {
+            Rule r = new Rule(minSet, bestMove);
+            rg.rules.add(r);
+            return r;
+        }
 
         Rule r;
         if (!GREEDY_AUTOGEN) {
