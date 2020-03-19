@@ -29,6 +29,10 @@ public class GameSpecifics implements FFTGameSpecifics {
         this.cont = cont;
     }
 
+    public GameSpecifics() {
+
+    }
+
     @Override
     public FFTMove actionToMove(Action a, int team) {
         if (a.actionErr || (a.addClause.isEmpty() && a.remClause.isEmpty()))

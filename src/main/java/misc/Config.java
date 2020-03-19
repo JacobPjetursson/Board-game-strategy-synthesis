@@ -24,10 +24,12 @@ public class Config {
     public static int BWIDTH;
     public static int BHEIGHT;
     public static boolean USE_DB;
+    public static boolean KULIBRAT_SHOW_GUI;
     public static String DB_PATH;
 
     // TIC TAC TOE PROPERTIES
     public static boolean TIC_TAC_TOE_SIMPLE_RULES;
+    public static boolean TIC_TAC_TOE_SHOW_GUI;
 
     // SIM
     public static boolean SIM_SIMPLE_RULES;
@@ -95,10 +97,12 @@ public class Config {
         BWIDTH = Integer.parseInt(kulibrat.getProperty("boardWidth"));
         BHEIGHT = Integer.parseInt(kulibrat.getProperty("boardHeight"));
         USE_DB = Boolean.parseBoolean(kulibrat.getProperty("use_db"));
+        KULIBRAT_SHOW_GUI = Boolean.parseBoolean(kulibrat.getProperty("show_gui"));
         DB_PATH = kulibrat.getProperty("db_path");
 
         // TIC TAC TOE
         TIC_TAC_TOE_SIMPLE_RULES = Boolean.parseBoolean(tictactoe.getProperty("simple_rules"));
+        TIC_TAC_TOE_SHOW_GUI = Boolean.parseBoolean(tictactoe.getProperty("show_gui"));
 
         // SIM
         SIM_SIMPLE_RULES = Boolean.parseBoolean(sim.getProperty("simple_rules"));
