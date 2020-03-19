@@ -9,16 +9,13 @@ import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
-import kulibrat.game.Move;
 import misc.Config;
 
 import java.util.HashSet;
 
-import static fftlib.Literal.PIECEOCC_ANY;
-import static fftlib.Literal.PIECEOCC_PLAYER;
 import static fftlib.game.Transform.*;
-import static kulibrat.game.Logic.POS_NONBOARD;
-import static misc.Globals.*;
+import static mens_morris.Logic.POS_NONBOARD;
+import static misc.Globals.PLAYER_NONE;
 
 public class GameSpecifics implements FFTGameSpecifics {
     @Override

@@ -5,12 +5,9 @@ import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
-import static misc.Config.SIM_SIMPLE_RULES;
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
-import static sim.Line.NO_COLOR;
 
 public class Logic implements FFTLogic {
     public static final int POS_NONBOARD = -1;
