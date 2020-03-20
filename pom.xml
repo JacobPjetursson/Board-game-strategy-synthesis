@@ -175,7 +175,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>GGP-FFT</id>
+                        <id>GGP</id>
                         <configuration>
                             <mainClass>fftlib.GGPAutogen.Runner</mainClass>
                         </configuration>
