@@ -332,7 +332,7 @@ public class FFT {
     }
 
     public void shutDownThreadPool() {
-        forkJoinPool.shutdown();
+        forkJoinPool.shutdownNow();
     }
 
     public String toString() {

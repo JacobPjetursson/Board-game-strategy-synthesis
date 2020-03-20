@@ -277,17 +277,29 @@ public class FFTAutoGen {
     private static class StateComparator implements Comparator<FFTState>{
         @Override
         public int compare(FFTState s1, FFTState s2) {
-            if (RANDOM_RULE_ORDERING)
+            if (RULE_ORDERING == RULE_ORDERING_RANDOM)
                 return 0;
-            int s1_score = lookupTable.get(s1).getScore();
-            int s2_score = lookupTable.get(s2).getScore();
 
-            if (Math.abs(s1_score) > 1000)
-                s1_score = Math.abs(Math.abs(s1_score) - 2000);
-            if (Math.abs(s2_score) > 1000)
-                s2_score = Math.abs(Math.abs(s2_score) - 2000);
+            if (RULE_ORDERING == RULE_ORDERING_TERMINAL_LAST ||
+                RULE_ORDERING == RULE_ORDERING_TERMINAL_FIRST) {
+                int s1_score = lookupTable.get(s1).getScore();
+                int s2_score = lookupTable.get(s2).getScore();
 
-            return s1_score - s2_score; // s1 - s2 means states closer to terminal first
+                if (Math.abs(s1_score) > 1000)
+                    s1_score = Math.abs(Math.abs(s1_score) - 2000);
+                if (Math.abs(s2_score) > 1000)
+                    s2_score = Math.abs(Math.abs(s2_score) - 2000);
+
+                if (RULE_ORDERING == RULE_ORDERING_TERMINAL_FIRST)
+                    return s1_score - s2_score; // s1 - s2 means states closer to terminal first
+                else if (RULE_ORDERING == RULE_ORDERING_TERMINAL_LAST)
+                    return s2_score - s1_score;
+            }
+            int s1_precons_amount = s1.getLiterals().size();
+            int s2_precons_amount = s2.getLiterals().size();
+            if (RULE_ORDERING == RULE_ORDERING_FEWEST_PRECONS_FIRST)
+                return s1_precons_amount - s2_precons_amount;
+            return s2_precons_amount - s1_precons_amount;
         }
     }
 

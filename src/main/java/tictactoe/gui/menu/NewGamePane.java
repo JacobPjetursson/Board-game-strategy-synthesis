@@ -145,7 +145,7 @@ public class NewGamePane extends AnchorPane {
         autogenRandomCheck.setFont(Font.font("Verdana", 16));
         autogenRandomCheck.setSelected(false);
         autogenRandomCheck.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
-            Config.RANDOM_RULE_ORDERING = newValue;
+            Config.RULE_ORDERING = newValue ? RULE_ORDERING_RANDOM : RULE_ORDERING_TERMINAL_FIRST;
         });
 
         CheckBox autogenMinimizeCheck = new CheckBox("Minimize rule preconditions");

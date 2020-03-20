@@ -19,9 +19,7 @@ import kulibrat.game.State;
 import misc.Config;
 import misc.Globals;
 
-import static misc.Globals.PLAYER1;
-import static misc.Globals.PLAYER2;
-import static misc.Globals.PLAYER_ANY;
+import static misc.Globals.*;
 
 
 public class NewGamePane extends AnchorPane {
@@ -277,7 +275,7 @@ public class NewGamePane extends AnchorPane {
         autogenRandomCheck.setFont(Font.font("Verdana", 16));
         autogenRandomCheck.setSelected(false);
         autogenRandomCheck.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
-            Config.RANDOM_RULE_ORDERING = newValue;
+            Config.RULE_ORDERING = (newValue) ? RULE_ORDERING_RANDOM : RULE_ORDERING_TERMINAL_FIRST;
         });
 
         CheckBox autogenMinimizeCheck = new CheckBox("Minimize rule preconditions");

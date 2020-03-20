@@ -28,6 +28,13 @@ public class Globals {
     public static final int TICTACTOE = 1;
     public static final int SIM = 2;
 
+    // AUTOGEN RULE ORDERINGS
+    public static final int RULE_ORDERING_TERMINAL_FIRST = 0;
+    public static final int RULE_ORDERING_TERMINAL_LAST = 1;
+    public static final int RULE_ORDERING_FEWEST_PRECONS_FIRST = 2;
+    public static final int RULE_ORDERING_FEWEST_PRECONS_LAST = 3;
+    public static final int RULE_ORDERING_RANDOM = 4;
+
     // MISC VARIABLES
     public static final int CLICK_INTERACTIVE = 0;
     public static final int CLICK_DISABLED = 1;

@@ -4,6 +4,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import static misc.Globals.*;
+import static misc.Globals.RULE_ORDERING_TERMINAL_FIRST;
+
 public class Config {
 
     // GLOBAL PROPERTIES
@@ -13,7 +16,7 @@ public class Config {
     public static int SEED;
     public static boolean ENABLE_GGP;
     public static boolean ENABLE_GGP_PARSER;
-    public static boolean RANDOM_RULE_ORDERING;
+    public static int RULE_ORDERING;
     public static boolean MINIMIZE_PRECONDITIONS;
     public static boolean SYMMETRY_DETECTION;
     public static boolean GENERATE_ALL_RULES;
@@ -48,6 +51,7 @@ public class Config {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        printSettings();
     }
 
     private static void loadProperties() throws IOException {
@@ -78,12 +82,29 @@ public class Config {
                 AUTOGEN_PERSPECTIVE = Globals.PLAYER1;
         }
 
+        String ordering = global.getProperty("rule_ordering");
+        switch (ordering) {
+            case "terminal_first":
+                RULE_ORDERING = Globals.RULE_ORDERING_TERMINAL_FIRST;
+                break;
+            case "terminal_last":
+                RULE_ORDERING = Globals.RULE_ORDERING_TERMINAL_LAST;
+                break;
+            case "fewest_precons_first":
+                RULE_ORDERING = Globals.RULE_ORDERING_FEWEST_PRECONS_FIRST;
+                break;
+            case "fewest_precons_last":
+                RULE_ORDERING = Globals.RULE_ORDERING_FEWEST_PRECONS_LAST;
+                break;
+            default:
+                RULE_ORDERING = Globals.RULE_ORDERING_RANDOM;
+        }
+
         GREEDY_AUTOGEN = Boolean.parseBoolean(global.getProperty("greedy_autogen"));
         RANDOM_SEED = Boolean.parseBoolean(global.getProperty("random_seed"));
         SEED = Integer.parseInt(global.getProperty("seed"));
         ENABLE_GGP = Boolean.parseBoolean(global.getProperty("enable_ggp"));
         ENABLE_GGP_PARSER = Boolean.parseBoolean(global.getProperty("enable_ggp_parser"));
-        RANDOM_RULE_ORDERING = Boolean.parseBoolean(global.getProperty("random_rule_ordering"));
         MINIMIZE_PRECONDITIONS = Boolean.parseBoolean(global.getProperty("minimize_preconditions"));
         GENERATE_ALL_RULES = Boolean.parseBoolean(global.getProperty("generate_all_rules"));
         MINIMIZE_RULE_BY_RULE = Boolean.parseBoolean(global.getProperty("minimize_rule_by_rule"));
@@ -112,5 +133,30 @@ public class Config {
 
         // GGP
         GGP_GAME = ggp.getProperty("ggp_game");
+    }
+
+    private static void printSettings() {
+        System.out.println("PRINTING PROPERTIES BELOW:");
+        System.out.println("--------------------------");
+        String perspectiveStr = (AUTOGEN_PERSPECTIVE == PLAYER1) ? "Player 1" :
+                (AUTOGEN_PERSPECTIVE == PLAYER2) ? "Player 2" : "Both";
+        String ruleOrderingStr = (RULE_ORDERING == RULE_ORDERING_RANDOM) ? "Random" :
+                (RULE_ORDERING == RULE_ORDERING_FEWEST_PRECONS_FIRST) ? "Fewest preconditions first" :
+                        (RULE_ORDERING == RULE_ORDERING_FEWEST_PRECONS_LAST) ? "Fewest preconditions last" :
+                                (RULE_ORDERING == RULE_ORDERING_TERMINAL_FIRST) ? "Close to terminal first" :
+                                        "Close to terminal last";
+
+        System.out.printf("%-30.40s %-30.40s\n", "Autogen perspective:", perspectiveStr);
+        System.out.printf("%-30.40s %-30.40s\n", "Rule ordering:", ruleOrderingStr);
+        System.out.printf("%-30.40s %-30.40s\n", "Minimize preconditions:", MINIMIZE_PRECONDITIONS);
+        System.out.printf("%-30.40s %-30.40s\n", "Symmetry detection:", SYMMETRY_DETECTION);
+        System.out.printf("%-30.40s %-30.40s\n", "Greedy Autogeneration:", GREEDY_AUTOGEN);
+        System.out.printf("%-30.40s %-30.40s\n", "Generate all rules:", GENERATE_ALL_RULES);
+        System.out.printf("%-30.40s %-30.40s\n", "Minimize rule by rule:", MINIMIZE_RULE_BY_RULE);
+        System.out.printf("%-30.40s %-30.40s\n", "Random seed:", RANDOM_SEED);
+        System.out.printf("%-30.40s %-30.40s\n", "Seed value:",SEED);
+        System.out.printf("%-30.40s %-30.40s\n", "Detailed debug messages:", DETAILED_DEBUG);
+        System.out.printf("%-30.40s %-30.40s\n", "Single thread:", SINGLE_THREAD);
+        System.out.printf("%-30.40s %-30.40s\n", "Verify single strategy:", VERIFY_SINGLE_STRATEGY);
     }
 }
