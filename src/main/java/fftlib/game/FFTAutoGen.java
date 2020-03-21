@@ -110,34 +110,6 @@ public class FFTAutoGen {
         }
     }
 
-    private static void filterToSingleStrat() {
-        LinkedList<FFTState> frontier = new LinkedList<>();
-        HashSet<FFTState> closedSet = new HashSet<>();
-        FFTState initialState = FFTManager.initialFFTState;
-        frontier.add(initialState);
-        while (!frontier.isEmpty()) {
-            FFTState state = frontier.pop();
-            if (FFTManager.logic.gameOver(state))
-                continue;
-            if (AUTOGEN_PERSPECTIVE != state.getTurn()) {
-                for (FFTState child : state.getChildren())
-                    if (!closedSet.contains(child)) {
-                        closedSet.add(child);
-                        frontier.add(child);
-                    }
-            } else {
-                states.add(state);
-                StateMapping info = lookupTable.get(state);
-                strategy.put(state, info);
-                FFTState nextState = state.getNextState(info.getMove());
-                if (!closedSet.contains(nextState)) {
-                    closedSet.add(nextState);
-                    frontier.add(nextState);
-                }
-            }
-        }
-    }
-
     private static void makeRules() {
         while (!states.isEmpty()) {
             System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + rg.rules.size());
@@ -301,6 +273,45 @@ public class FFTAutoGen {
                 return s1_precons_amount - s2_precons_amount;
             return s2_precons_amount - s1_precons_amount;
         }
+    }
+
+    private static void filterToSingleStrat() {
+        LinkedList<FFTState> frontier = new LinkedList<>();
+        HashSet<FFTState> closedSet = new HashSet<>();
+        Random r = new Random();
+        if (RANDOM_SEED) r.setSeed(SEED);
+        FFTState initialState = FFTManager.initialFFTState;
+        frontier.add(initialState);
+        while (!frontier.isEmpty()) {
+            FFTState state = frontier.pop();
+            if (FFTManager.logic.gameOver(state))
+                continue;
+            if (AUTOGEN_PERSPECTIVE != state.getTurn()) {
+                for (FFTState child : state.getChildren())
+                    if (!closedSet.contains(child)) {
+                        closedSet.add(child);
+                        frontier.add(child);
+                    }
+            } else {
+                states.add(state);
+                /* Taking random optimal move never works for some reason
+                ArrayList<? extends FFTMove> moves = FFTSolution.optimalMoves(state);
+                FFTMove move = moves.get(r.nextInt(moves.size()));
+                int score = lookupTable.get(state).score;
+                int depth = lookupTable.get(state).depth;
+                strategy.put(state, new StateMapping(move, score, depth));
+                FFTState nextState = state.getNextState(move);
+                 */
+                StateMapping mapping = lookupTable.get(state);
+                strategy.put(state, mapping);
+                FFTState nextState = state.getNextState(mapping.getMove());
+                if (!closedSet.contains(nextState)) {
+                    closedSet.add(nextState);
+                    frontier.add(nextState);
+                }
+            }
+        }
+        fft.setStrategy(strategy);
     }
 
 }

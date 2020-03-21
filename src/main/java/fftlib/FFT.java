@@ -33,6 +33,8 @@ public class FFT {
     private static ConcurrentHashMap<MachineState, Boolean> closedMapGGP = new ConcurrentHashMap<>();
     private static boolean failed; // failed is set to true if verification failed
 
+    public HashMap<FFTState, StateMapping> strategy;
+
     public FFT(String name) {
         this.name = name;
         ruleGroups = new ArrayList<>();
@@ -47,22 +49,26 @@ public class FFT {
         this.failingPoint = duplicate.failingPoint;
     }
 
+    public void setStrategy(HashMap<FFTState, StateMapping> strat) {
+        strategy = strat;
+    }
+
     public void addRuleGroup(RuleGroup ruleGroup) {
         ruleGroups.add(ruleGroup);
     }
 
     public boolean verify(int team, boolean complete) {
         if (!Config.ENABLE_GGP && SINGLE_THREAD) {
-            return verifySingleThread(team, complete, null);
+            return verifySingleThread(team, complete);
         }
         else {
-            return (Config.ENABLE_GGP) ? verifyGGP(team, complete, null) : verify(team, complete, null);
+            return (Config.ENABLE_GGP) ? verifyGGP(team, complete) : verify_(team, complete);
         }
     }
 
-    public boolean verifySingleThread(int team, boolean complete, HashMap<FFTState, StateMapping> strategy) {
+    public boolean verifySingleThread(int team, boolean complete) {
         if (team == PLAYER_ANY)
-            return verifySingleThread(PLAYER1, complete, strategy) && verifySingleThread(PLAYER2, complete, strategy);
+            return verifySingleThread(PLAYER1, complete) && verifySingleThread(PLAYER2, complete);
         FFTState initialState = FFTManager.initialFFTState;
         LinkedList<FFTState> frontier = new LinkedList<>();
         HashSet<FFTState> closedSet = new HashSet<>();
@@ -149,9 +155,9 @@ public class FFT {
         return true;
     }
 
-    public boolean verify(int team, boolean complete, HashMap<FFTState, StateMapping> strategy) {
+    public boolean verify_(int team, boolean complete) {
         if (team == PLAYER_ANY)
-            return verify(PLAYER1, complete, strategy) && verify(PLAYER2, complete, strategy);
+            return verify_(PLAYER1, complete) && verify_(PLAYER2, complete);
         FFTState initialState = FFTManager.initialFFTState;
         closedMap.clear();
         failed = false;
@@ -165,13 +171,13 @@ public class FFT {
             return false;
         }
 
-        return forkJoinPool.invoke(new VerificationTask(initialState, team, complete, strategy));
+        return forkJoinPool.invoke(new VerificationTask(initialState, team, complete));
     }
 
 
-    private boolean verifyGGP(int team, boolean complete, HashMap<MachineState, GGPMapping> strategy) {
+    private boolean verifyGGP(int team, boolean complete) {
         if (team == PLAYER_ANY)
-            return verifyGGP(PLAYER1, complete, strategy) && verifyGGP(PLAYER2, complete, strategy);
+            return verifyGGP(PLAYER1, complete) && verifyGGP(PLAYER2, complete);
         MachineState initialState = GGPManager.getInitialState();
         closedMapGGP.clear();
         failed = false;
@@ -184,7 +190,7 @@ public class FFT {
             System.out.println("A perfect player 1 has won from the start of the game");
             return false;
         }
-        return forkJoinPool.invoke(new GGPVerificationTask(initialState, team, complete, strategy));
+        return forkJoinPool.invoke(new GGPVerificationTask(initialState, team, complete));
     }
 
     public Move apply(MachineState state) throws MoveDefinitionException {
@@ -352,13 +358,11 @@ public class FFT {
         List<RecursiveTask<Boolean>> forks;
 
         boolean complete;
-        HashMap<FFTState, StateMapping> strategy;
 
-        VerificationTask(FFTState state, int team, boolean complete, HashMap<FFTState, StateMapping> strategy) {
+        VerificationTask(FFTState state, int team, boolean complete) {
             this.state = state;
             this.team = team;
             this.complete = complete;
-            this.strategy = strategy;
             forks = new LinkedList<>();
             this.opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
 
@@ -439,7 +443,7 @@ public class FFT {
         private void addTask(FFTState state) {
             if (!closedMap.containsKey(state)) {
                 closedMap.put(state, true);
-                VerificationTask t = new VerificationTask(state, team, complete, strategy);
+                VerificationTask t = new VerificationTask(state, team, complete);
                 forks.add(t);
                 t.fork();
             }
@@ -451,15 +455,12 @@ public class FFT {
         int team, opponent;
         MachineState ms;
         List<RecursiveTask<Boolean>> forks;
-
         boolean complete;
-        HashMap<MachineState, GGPMapping> strategy;
 
-        GGPVerificationTask(MachineState ms, int team, boolean complete, HashMap<MachineState, GGPMapping> strategy) {
+        GGPVerificationTask(MachineState ms, int team, boolean complete) {
             this.ms = ms;
             this.team = team;
             this.complete = complete;
-            this.strategy = strategy;
 
             forks = new LinkedList<>();
             this.opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
@@ -494,20 +495,6 @@ public class FFT {
                     Set<Move> optimalMoves = Database.optimalMoves(ms);
                     // If move is null, check that all possible (random) moves are ok
                     if (move == null) {
-                        if (!complete && strategy != null) { // only expand on move from strategy
-                            GGPMapping mapping = strategy.get(ms);
-                            if (mapping == null) {
-                                System.out.println("Given strategy is not a winning strategy");
-                                failed = true;
-                                return false;
-                            }
-                            addTask(GGPManager.getNextState(ms, mapping.getMove()));
-                            boolean result = true;
-                            for (RecursiveTask<Boolean> t : forks) {
-                                result = result && t.join();
-                            }
-                            return result;
-                        }
                         for (Move m : GGPManager.getLegalMoves(ms, currRole)) {
                             if (optimalMoves.contains(m)) {
                                 addTask(GGPManager.getNextState(ms, m));
@@ -520,19 +507,6 @@ public class FFT {
                         failed = true;
                         return false;
                     } else {
-                        if (!complete && strategy != null) { // check that move is same as from strategy
-                            GGPMapping mapping = strategy.get(ms);
-                            if (mapping == null) {
-                                System.out.println("Given strategy is not a winning strategy");
-                                failed = true;
-                                return false;
-                            }
-                            if (!mapping.getMove().equals(move)) { // DOESN'T WORK BECAUSE OF TRANSFORMATIONS!
-                                failed = true;
-                                return false;
-                            }
-
-                        }
                         addTask(GGPManager.getNextState(ms, move));
                     }
                 }
@@ -549,7 +523,7 @@ public class FFT {
         private void addTask(MachineState ms) {
             if (!closedMapGGP.containsKey(ms)) {
                 closedMapGGP.put(ms, true);
-                GGPVerificationTask t = new GGPVerificationTask(ms, team, complete, strategy);
+                GGPVerificationTask t = new GGPVerificationTask(ms, team, complete);
                 forks.add(t);
                 t.fork();
             }
