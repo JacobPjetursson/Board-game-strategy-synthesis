@@ -16,9 +16,6 @@ public class State implements FFTState {
     private long zobrist_key;
     LinkedList<Line> lines;
 
-    // save for multiple runs
-    private HashSet<Literal> literals;
-
     // initial state
     public State () {
         turn = PLAYER1;
@@ -82,8 +79,6 @@ public class State implements FFTState {
 
     @Override
     public HashSet<Literal> getLiterals() {
-        if (literals != null)
-            return literals;
         HashSet<Literal> literals = new HashSet<>();
         for (Line l : lines) {
             if (l.color == PLAYER1)
@@ -91,7 +86,6 @@ public class State implements FFTState {
             else if (l.color == PLAYER2)
                 literals.add(new Literal(l.n1, l.n2, PLAYER2, false));
         }
-        this.literals = literals;
         return literals;
     }
 

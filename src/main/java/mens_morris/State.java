@@ -21,9 +21,6 @@ public class State implements FFTState {
     boolean phase2; // did phase 2 start?
     int unplaced; // need to place 12 pieces for phase2 (half for each player)
 
-    // save for multiple runs
-    private HashSet<Literal> literals;
-
     // varies depending on game type
     private static final int MEN = (THREE_MENS) ? 3*2 : 6*2;
     public static final int BOARD_SIZE = (THREE_MENS) ? 3 : 5;
@@ -76,8 +73,6 @@ public class State implements FFTState {
     }
 
     public HashSet<Literal> getLiterals() {
-        if (literals != null)
-            return literals;
         HashSet<Literal> literals = new HashSet<>();
 
         for (int i = 0; i < board.length; i++) {
@@ -95,7 +90,6 @@ public class State implements FFTState {
         String removeStr = (canRemove) ? "" : "!";
         if (!THREE_MENS) literals.add(new Literal(phaseStr + "phase2"));
         if (!THREE_MENS) literals.add(new Literal(removeStr + "canRemove"));
-        this.literals = literals;
         return literals;
     }
 
