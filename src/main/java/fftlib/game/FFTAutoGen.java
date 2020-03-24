@@ -63,7 +63,6 @@ public class FFTAutoGen {
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
         System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
         System.out.println("Final rules: \n" + fft);
-        fft.shutDownThreadPool(); // to avoid warnings in end of output
     }
 
 
@@ -121,6 +120,11 @@ public class FFTAutoGen {
             }
 
             Rule r = addRule(state);
+            // Run partial verification again to insert new rule mappings
+            fft.SAFE_RUN = true;
+            fft.verify(AUTOGEN_PERSPECTIVE, false);
+            fft.SAFE_RUN = false;
+
             states.remove(state);
             if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
             System.out.println();
@@ -151,7 +155,8 @@ public class FFTAutoGen {
         if (!GREEDY_AUTOGEN) {
             r = new Rule();
             r.setPreconditions(new Clause(minSet));
-        } else {
+        }
+        else {
             r = new Rule(minSet, bestAction);
         }
 
@@ -204,7 +209,7 @@ public class FFTAutoGen {
                 if (DETAILED_DEBUG) System.out.println("INSPECTING: " + l.name);
                 r.removePrecondition(l);
 
-                boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false); // strategy is null if VERIFY_SINGLE_STRAT is false
+                boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false);
                 if (!verify) {
                     if (DETAILED_DEBUG) System.out.println("FAILED TO VERIFY RULE!");
                     r.addPrecondition(l);
@@ -311,7 +316,7 @@ public class FFTAutoGen {
                 }
             }
         }
-        fft.setStrategy(strategy);
+        fft.setSingleStrategy(strategy);
     }
 
 }

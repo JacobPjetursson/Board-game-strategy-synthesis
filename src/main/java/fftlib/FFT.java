@@ -2,7 +2,6 @@ package fftlib;
 
 import fftlib.GGPAutogen.Database;
 import fftlib.GGPAutogen.GGPManager;
-import fftlib.GGPAutogen.GGPMapping;
 import fftlib.game.*;
 import misc.Config;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
@@ -33,7 +32,12 @@ public class FFT {
     private static ConcurrentHashMap<MachineState, Boolean> closedMapGGP = new ConcurrentHashMap<>();
     private static boolean failed; // failed is set to true if verification failed
 
-    public HashMap<FFTState, StateMapping> strategy;
+    public HashMap<FFTState, StateMapping> singleStrategy; // used for alternative version of program
+
+    // used for optimization
+    private static ConcurrentHashMap<FFTState, FFTMove> strategy = new ConcurrentHashMap<>(); // used for storing verification results, e.g. moves from strat
+    private static LinkedList<StateAndCoverage> nonCoveredRoots = new LinkedList<>(); // used for storing roots of states not covered
+    public boolean SAFE_RUN; // used as flag to signal that current run is a safe run, e.g. verification guaranteed to succeed
 
     public FFT(String name) {
         this.name = name;
@@ -49,8 +53,24 @@ public class FFT {
         this.failingPoint = duplicate.failingPoint;
     }
 
-    public void setStrategy(HashMap<FFTState, StateMapping> strat) {
-        strategy = strat;
+    public int size() {
+        int size = 0;
+        for (RuleGroup rg : ruleGroups)
+            size += rg.rules.size();
+        return size;
+    }
+
+    public void setSingleStrategy(HashMap<FFTState, StateMapping> strat) {
+        singleStrategy = strat;
+    }
+
+    public Rule getLastRule() {
+        if (ruleGroups.isEmpty())
+            return null;
+        RuleGroup rg = ruleGroups.get(ruleGroups.size() - 1);
+        if (rg.rules.isEmpty())
+            return null;
+        return rg.rules.get(rg.rules.size() - 1);
     }
 
     public void addRuleGroup(RuleGroup ruleGroup) {
@@ -70,9 +90,16 @@ public class FFT {
         if (team == PLAYER_ANY)
             return verifySingleThread(PLAYER1, complete) && verifySingleThread(PLAYER2, complete);
         FFTState initialState = FFTManager.initialFFTState;
-        LinkedList<FFTState> frontier = new LinkedList<>();
+        LinkedList<StateAndCoverage> frontier;
+        if (SAVE_NONCOVERED_ROOT)
+            frontier = new LinkedList<>(nonCoveredRoots);
+        else
+            frontier = new LinkedList<>();
+        if (SAFE_RUN)
+            nonCoveredRoots.clear();
         HashSet<FFTState> closedSet = new HashSet<>();
-        frontier.add(initialState);
+        if (frontier.isEmpty()) // true if we're not using noncovered root or during first run
+            frontier.add(new StateAndCoverage(initialState, true));
         int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
         // Check if win or draw is even possible
         int winner = FFTSolution.queryState(initialState).getWinner();
@@ -85,7 +112,9 @@ public class FFT {
         }
 
         while (!frontier.isEmpty()) {
-            FFTState state = frontier.pop();
+            StateAndCoverage sc = frontier.pop();
+            FFTState state = sc.state;
+            boolean allParentsCovered = sc.allParentsCovered;
             if (FFTManager.logic.gameOver(state)) {
                 if (FFTManager.logic.getWinner(state) == opponent) {
                     // Should not hit this given initial check
@@ -96,15 +125,30 @@ public class FFT {
                 for (FFTState child : state.getChildren())
                     if (!closedSet.contains(child)) {
                         closedSet.add(child);
-                        frontier.add(child);
+                        frontier.add(new StateAndCoverage(child, allParentsCovered));
                     }
             } else {
-                FFTMove move = apply(state);
+                FFTMove move;
+                Rule newRule = this.getLastRule();
+                if (!SAVE_STRAT || newRule == null) {
+                    move = apply(state);
+                }
+                else {
+                    // re-use move from strategy if it's from a previous rule, otherwise apply with new rule
+                    move = strategy.get(state);
+                    if (move == null) {
+                        move = newRule.apply(state);
+                    }
+                }
                 ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(state);
                 // If move is null, check that all possible (random) moves are ok
                 if (move == null) {
-                    if (!complete && strategy != null) { // only expand on move from strategy
-                        StateMapping info = strategy.get(state);
+                    // only add root (checked by allParentsCovered true), and only in safe run
+                    if (SAVE_NONCOVERED_ROOT && allParentsCovered && SAFE_RUN) {
+                        nonCoveredRoots.add(new StateAndCoverage(state, true));
+                    }
+                    if (!complete && singleStrategy != null) { // only expand on move from strategy
+                        StateMapping info = singleStrategy.get(state);
                         if (info == null) {
                             System.out.println("Given strategy is not a winning strategy");
                             return false;
@@ -112,7 +156,7 @@ public class FFT {
                         FFTState nextState = state.getNextState(info.getMove());
                         if (!closedSet.contains(nextState)) {
                             closedSet.add(nextState);
-                            frontier.add(nextState);
+                            frontier.add(new StateAndCoverage(nextState, false));
                         }
                         continue;
                     }
@@ -122,7 +166,7 @@ public class FFT {
                             FFTState nextState = state.getNextState(m);
                             if (!closedSet.contains(nextState)) {
                                 closedSet.add(nextState);
-                                frontier.add(nextState);
+                                frontier.add(new StateAndCoverage(nextState, false));
                             }
                         } else if (complete) {
                             failingPoint = new FFTStateAndMove(state, m, true);
@@ -132,9 +176,9 @@ public class FFT {
                 } else if (!optimalMoves.contains(move)) {
                     failingPoint = new FFTStateAndMove(state, move, false);
                     return false;
-                } else {
-                    if (!complete && strategy != null) { // check that move is same as from strategy
-                        StateMapping info = strategy.get(state);
+                } else { // move is not null, expand on state from that move
+                    if (!complete && singleStrategy != null) { // check that move is same as from strategy
+                        StateMapping info = singleStrategy.get(state);
                         if (info == null) {
                             System.out.println("Given strategy is not a winning strategy");
                             return false;
@@ -144,10 +188,13 @@ public class FFT {
                         }
 
                     }
+                    // insert into strategy if we know verification will succeed
+                    if (SAVE_STRAT && SAFE_RUN)
+                        strategy.put(state, move);
                     FFTState nextState = state.getNextState(move);
                     if (!closedSet.contains(nextState)) {
                         closedSet.add(nextState);
-                        frontier.add(nextState);
+                        frontier.add(new StateAndCoverage(nextState, allParentsCovered));
                     }
                 }
             }
@@ -159,6 +206,17 @@ public class FFT {
         if (team == PLAYER_ANY)
             return verify_(PLAYER1, complete) && verify_(PLAYER2, complete);
         FFTState initialState = FFTManager.initialFFTState;
+        LinkedList<VerificationTask> tasks = new LinkedList<>();
+        if (SAVE_NONCOVERED_ROOT) {
+            for (StateAndCoverage sc : nonCoveredRoots)
+                tasks.add(new VerificationTask(sc, team, complete));
+        }
+        if (SAFE_RUN)
+            nonCoveredRoots.clear();
+        if (tasks.isEmpty()) { // true if we're not using noncovered root or during first run
+            StateAndCoverage sc = new StateAndCoverage(initialState, true);
+            tasks.add(new VerificationTask(sc, team, complete));
+        }
         closedMap.clear();
         failed = false;
         // Check if win or draw is even possible
@@ -170,8 +228,10 @@ public class FFT {
             System.out.println("A perfect player 1 has won from the start of the game");
             return false;
         }
-
-        return forkJoinPool.invoke(new VerificationTask(initialState, team, complete));
+        boolean result = true;
+        for (VerificationTask t : tasks)
+            result = result && forkJoinPool.invoke(t);
+        return result;
     }
 
 
@@ -217,6 +277,16 @@ public class FFT {
         return null;
     }
 
+    public static class StateAndCoverage {
+        public FFTState state;
+        public boolean allParentsCovered;
+
+        public StateAndCoverage(FFTState state, boolean allParentsCovered) {
+            this.state = state;
+            this.allParentsCovered = allParentsCovered;
+        }
+    }
+
     public int getAmountOfRules() {
         int ruleSize = 0;
         for (RuleGroup rg : ruleGroups) {
@@ -234,6 +304,10 @@ public class FFT {
     }
 
     public int minimize(int perspective, boolean minimize_precons) { // Returns amount of iterations
+        boolean prevSafeStrat = SAVE_STRAT;
+        boolean prevNonCoveredRoot = SAVE_NONCOVERED_ROOT;
+        SAVE_STRAT = false;
+        SAVE_NONCOVERED_ROOT = false;
         if (!verify(perspective, true)) {
             System.out.println("FFT is not a winning strategy, so it can not be minimized");
             return -1;
@@ -263,6 +337,8 @@ public class FFT {
             minPrecSize = getAmountOfPreconditions();
             i++;
         }
+        SAVE_STRAT = prevSafeStrat;
+        SAVE_NONCOVERED_ROOT = prevNonCoveredRoot;
         return i;
     }
 
@@ -337,10 +413,6 @@ public class FFT {
             System.out.println("Minimized rule from " + amount + " to " + newAmount + " preconditions");
     }
 
-    public void shutDownThreadPool() {
-        forkJoinPool.shutdownNow();
-    }
-
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (RuleGroup rg : ruleGroups) {
@@ -356,11 +428,13 @@ public class FFT {
         int team, opponent;
         FFTState state;
         List<RecursiveTask<Boolean>> forks;
+        boolean allParentsCovered = true;
 
         boolean complete;
 
-        VerificationTask(FFTState state, int team, boolean complete) {
-            this.state = state;
+        VerificationTask(StateAndCoverage sc, int team, boolean complete) {
+            this.state = sc.state;
+            allParentsCovered = sc.allParentsCovered;
             this.team = team;
             this.complete = complete;
             forks = new LinkedList<>();
@@ -381,21 +455,25 @@ public class FFT {
                 }
             } else if (team != state.getTurn()) {
                 for (FFTState child : state.getChildren()) {
-                    addTask(child);
+                    addTask(child, allParentsCovered);
                 }
             } else {
                 FFTMove move = apply(state);
                 ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(state);
                 // If move is null, check that all possible (random) moves are ok
                 if (move == null) {
-                    if (!complete && strategy != null) { // only expand on move from strategy
-                        StateMapping info = strategy.get(state);
+                    // only add root (checked by allParentsCovered true), and only in safe run
+                    if (SAVE_NONCOVERED_ROOT && allParentsCovered && SAFE_RUN) {
+                        nonCoveredRoots.add(new StateAndCoverage(state, true));
+                    }
+                    if (!complete && singleStrategy != null) { // only expand on move from strategy
+                        StateMapping info = singleStrategy.get(state);
                         if (info == null) {
                             System.out.println("Given strategy is not a winning strategy");
                             failed = true;
                             return false;
                         }
-                        addTask(state.getNextState(info.getMove()));
+                        addTask(state.getNextState(info.getMove()), false);
                         boolean result = true;
                         for (RecursiveTask<Boolean> t : forks) {
                             result = result && t.join();
@@ -405,7 +483,7 @@ public class FFT {
 
                     for (FFTMove m : state.getLegalMoves()) {
                         if (optimalMoves.contains(m)) {
-                            addTask(state.getNextState(m));
+                            addTask(state.getNextState(m), false);
                         } else if (complete) {
                             failingPoint = new FFTStateAndMove(state, m, true);
                             failed = true;
@@ -417,8 +495,8 @@ public class FFT {
                     failed = true;
                     return false;
                 } else {
-                    if (!complete && strategy != null) { // check that move is same as from strategy
-                        StateMapping info = strategy.get(state);
+                    if (!complete && singleStrategy != null) { // check that move is same as from strategy
+                        StateMapping info = singleStrategy.get(state);
                         if (info == null) {
                             System.out.println("Given strategy is not a winning strategy");
                             failed = true;
@@ -430,7 +508,7 @@ public class FFT {
                         }
 
                     }
-                    addTask(state.getNextState(move));
+                    addTask(state.getNextState(move), allParentsCovered);
                 }
             }
             boolean result = true;
@@ -440,10 +518,10 @@ public class FFT {
             return result;
         }
 
-        private void addTask(FFTState state) {
+        private void addTask(FFTState state, boolean allParentsCovered) {
             if (!closedMap.containsKey(state)) {
                 closedMap.put(state, true);
-                VerificationTask t = new VerificationTask(state, team, complete);
+                VerificationTask t = new VerificationTask(new StateAndCoverage(state, allParentsCovered), team, complete);
                 forks.add(t);
                 t.fork();
             }
