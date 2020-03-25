@@ -1,10 +1,12 @@
 package tictactoe.FFT;
 
-import com.google.common.collect.Sets;
 import fftlib.Action;
 import fftlib.Literal;
 import fftlib.Rule;
-import fftlib.game.*;
+import fftlib.game.FFTGameSpecifics;
+import fftlib.game.FFTLogic;
+import fftlib.game.FFTMove;
+import fftlib.game.FFTState;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 import misc.Config;
@@ -13,9 +15,7 @@ import tictactoe.game.Logic;
 import tictactoe.game.Move;
 import tictactoe.game.State;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 
 import static fftlib.Literal.PIECEOCC_ANY;
 import static fftlib.Literal.PIECEOCC_PLAYER;
@@ -148,34 +148,5 @@ public class GameSpecifics implements FFTGameSpecifics {
     public int getMaxPrecons() {
         int[] dim = getBoardDim();
         return dim[0] * dim[1];
-    }
-
-    private HashSet<Literal> getGameLiteralsExcluding(HashSet<Literal> existingLits) { // return set of all positive literals, e.g. 18 for tic tac toe
-        HashSet<Literal> literals = new HashSet<>();
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                boolean contains = false;
-                for (Literal l : existingLits) {
-                    if (l.row == i && l.col == j) {
-                        contains = true;
-                        break;
-                    }
-                }
-                if (contains)
-                    continue;
-
-                Literal p1 = new Literal(i, j, PLAYER1, false);
-                Literal p2 = new Literal(i, j, PLAYER2, false);
-                if (!existingLits.contains(p1))
-                    literals.add(p1);
-                if (!existingLits.contains(p2))
-                    literals.add(p2);
-            }
-        }
-        return literals;
-    }
-    public Set<Set<Literal>> getLiteralPowerSet(HashSet<Literal> existingLits) {
-        Set<Set<Literal>> powerSet = Sets.powerSet(getGameLiteralsExcluding(existingLits));
-        return powerSet;
     }
 }

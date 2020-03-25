@@ -22,14 +22,12 @@ public class State implements FFTState {
     private ArrayList<Move> legalMoves;
     private ArrayList<State> children;
     private HashSet<Literal> literals;
-    private State parent;
 
     // Starting state
     public State() {
         board = new int[3][3];
         turn = PLAYER1;
-        //zobrist_key = initHashCode();
-        this.literals = getLiterals();
+        zobrist_key = initHashCode();
     }
 
     // Duplicate constructor
@@ -41,17 +39,14 @@ public class State implements FFTState {
         turn = state.turn;
         move = state.move;
         this.zobrist_key = state.zobrist_key;
-        this.literals = new HashSet<>(state.literals);
     }
 
     // Non-root state
     private State(State parent, Move m) {
         this(parent);
-        this.parent = parent;
         Logic.doTurn(m, this);
         this.move = m;
-        //updateHashCode(parent);
-        updateLiterals();
+        updateHashCode(parent);
     }
 
     private long initHashCode() {
@@ -69,7 +64,6 @@ public class State implements FFTState {
     }
 
     private void updateHashCode(State parent) {
-        /*
         zobrist_key ^= Zobrist.turn[parent.getTurn()];
         zobrist_key ^= Zobrist.turn[turn];
 
@@ -77,13 +71,6 @@ public class State implements FFTState {
         int k = board[move.row][move.col];
         zobrist_key ^= Zobrist.board[move.row][move.col][k_parent];
         zobrist_key ^= Zobrist.board[move.row][move.col][k];
-
-         */
-    }
-
-    private void updateLiterals() {
-        Literal l = new Literal(move.row, move.col, move.team, false);
-        this.literals.add(l);
     }
 
     @Override
@@ -194,7 +181,7 @@ public class State implements FFTState {
         legalMoves = Logic.legalMoves(turn, this);
         return legalMoves;
     }
-/*
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof State)) return false;
@@ -208,19 +195,4 @@ public class State implements FFTState {
     public int hashCode() {
         return (int) zobrist_key;
     }
-*/
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof State)) return false;
-
-        State state = (State) obj;
-        return this == state ||
-                this.literals.equals(state.literals);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(literals);
-    }
-
 }

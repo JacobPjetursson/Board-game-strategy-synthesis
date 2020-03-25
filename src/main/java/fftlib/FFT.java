@@ -36,7 +36,6 @@ public class FFT {
 
     // used for optimization
     private static ConcurrentHashMap<FFTState, FFTMove> strategy = new ConcurrentHashMap<>(); // used for storing verification results, e.g. moves from strat
-    private static ConcurrentHashMap<FFTState, Boolean> reachableStates = new ConcurrentHashMap<>();
     public boolean SAFE_RUN; // used as flag to signal that current run is a safe run, e.g. verification guaranteed to succeed
 
     public FFT(String name) {
