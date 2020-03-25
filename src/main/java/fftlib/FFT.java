@@ -36,6 +36,7 @@ public class FFT {
 
     // used for optimization
     private static ConcurrentHashMap<FFTState, FFTMove> strategy = new ConcurrentHashMap<>(); // used for storing verification results, e.g. moves from strat
+    private static ConcurrentHashMap<MachineState, Move> strategyGGP = new ConcurrentHashMap<>();
     public boolean SAFE_RUN; // used as flag to signal that current run is a safe run, e.g. verification guaranteed to succeed
 
     public FFT(String name) {
@@ -415,7 +416,18 @@ public class FFT {
                     addTask(child);
                 }
             } else {
-                FFTMove move = apply(state);
+                FFTMove move;
+                Rule newRule = getLastRule();
+                if (!SAVE_STRAT || newRule == null) {
+                    move = apply(state);
+                }
+                else {
+                    // re-use move from strategy if it's from a previous rule, otherwise apply with new rule
+                    move = strategy.get(state);
+                    if (move == null) {
+                        move = newRule.apply(state);
+                    }
+                }
                 ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(state);
                 // If move is null, check that all possible (random) moves are ok
                 if (move == null) {
@@ -461,6 +473,8 @@ public class FFT {
                         }
 
                     }
+                    if (SAVE_STRAT && SAFE_RUN)
+                        strategy.put(state, move);
                     addTask(state.getNextState(move));
                 }
             }
@@ -522,7 +536,18 @@ public class FFT {
                     for (MachineState child : GGPManager.getNextStates(ms))
                         addTask(child);
                 } else {
-                    Move move = apply(ms);
+                    Move move;
+                    Rule newRule = getLastRule();
+                    if (!SAVE_STRAT || newRule == null) {
+                        move = apply(ms);
+                    }
+                    else {
+                        // re-use move from strategy if it's from a previous rule, otherwise apply with new rule
+                        move = strategyGGP.get(ms);
+                        if (move == null) {
+                            move = newRule.apply(ms);
+                        }
+                    }
                     Set<Move> optimalMoves = Database.optimalMoves(ms);
                     // If move is null, check that all possible (random) moves are ok
                     if (move == null) {
@@ -538,6 +563,8 @@ public class FFT {
                         failed = true;
                         return false;
                     } else {
+                        if (SAVE_STRAT && SAFE_RUN)
+                            strategyGGP.put(ms, move);
                         addTask(GGPManager.getNextState(ms, move));
                     }
                 }
