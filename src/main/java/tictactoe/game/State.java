@@ -5,10 +5,7 @@ import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import tictactoe.ai.Zobrist;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 import static fftlib.game.Transform.*;
 import static misc.Globals.PLAYER1;
@@ -25,12 +22,14 @@ public class State implements FFTState {
     private ArrayList<Move> legalMoves;
     private ArrayList<State> children;
     private HashSet<Literal> literals;
+    private State parent;
 
     // Starting state
     public State() {
         board = new int[3][3];
         turn = PLAYER1;
-        zobrist_key = initHashCode();
+        //zobrist_key = initHashCode();
+        this.literals = getLiterals();
     }
 
     // Duplicate constructor
@@ -42,14 +41,17 @@ public class State implements FFTState {
         turn = state.turn;
         move = state.move;
         this.zobrist_key = state.zobrist_key;
+        this.literals = new HashSet<>(state.literals);
     }
 
     // Non-root state
     private State(State parent, Move m) {
         this(parent);
+        this.parent = parent;
         Logic.doTurn(m, this);
         this.move = m;
-        updateHashCode(parent);
+        //updateHashCode(parent);
+        updateLiterals();
     }
 
     private long initHashCode() {
@@ -67,6 +69,7 @@ public class State implements FFTState {
     }
 
     private void updateHashCode(State parent) {
+        /*
         zobrist_key ^= Zobrist.turn[parent.getTurn()];
         zobrist_key ^= Zobrist.turn[turn];
 
@@ -74,6 +77,13 @@ public class State implements FFTState {
         int k = board[move.row][move.col];
         zobrist_key ^= Zobrist.board[move.row][move.col][k_parent];
         zobrist_key ^= Zobrist.board[move.row][move.col][k];
+
+         */
+    }
+
+    private void updateLiterals() {
+        Literal l = new Literal(move.row, move.col, move.team, false);
+        this.literals.add(l);
     }
 
     @Override
@@ -140,7 +150,7 @@ public class State implements FFTState {
         return literals;
     }
 
-    public HashSet<Literal> getAllLiterals() { // Including negatives
+    public HashSet<Literal> getAllLiterals() { // Including negatives, used for creating rules
         HashSet<Literal> literals = new HashSet<>();
 
         for (int i = 0; i < board.length; i++) {
@@ -184,7 +194,7 @@ public class State implements FFTState {
         legalMoves = Logic.legalMoves(turn, this);
         return legalMoves;
     }
-
+/*
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof State)) return false;
@@ -197,6 +207,20 @@ public class State implements FFTState {
     @Override
     public int hashCode() {
         return (int) zobrist_key;
+    }
+*/
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof State)) return false;
+
+        State state = (State) obj;
+        return this == state ||
+                this.literals.equals(state.literals);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(literals);
     }
 
 }

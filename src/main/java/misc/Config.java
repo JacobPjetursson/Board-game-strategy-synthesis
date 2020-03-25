@@ -22,7 +22,6 @@ public class Config {
     public static boolean MINIMIZE_PRECONDITIONS;
     public static boolean SYMMETRY_DETECTION;
     public static boolean SAVE_STRAT;
-    public static boolean SAVE_NONCOVERED_ROOT;
     public static boolean GENERATE_ALL_RULES;
     public static boolean MINIMIZE_RULE_BY_RULE;
     public static boolean SINGLE_THREAD;
@@ -114,7 +113,6 @@ public class Config {
         MINIMIZE_RULE_BY_RULE = Boolean.parseBoolean(global.getProperty("minimize_rule_by_rule"));
         SYMMETRY_DETECTION = Boolean.parseBoolean(global.getProperty("symmetry_detection"));
         SAVE_STRAT = Boolean.parseBoolean(global.getProperty("save_intermediate_strategy"));
-        SAVE_NONCOVERED_ROOT = Boolean.parseBoolean(global.getProperty("save_root_of_noncovered_states"));
         // DEBUG AND TEST
         DETAILED_DEBUG = Boolean.parseBoolean(global.getProperty("detailedDebug"));
         VERIFY_SINGLE_STRATEGY = Boolean.parseBoolean(global.getProperty("verify_single_strategy"));
@@ -165,6 +163,5 @@ public class Config {
         System.out.printf("%-30.40s %-30.40s\n", "Single thread:", SINGLE_THREAD);
         System.out.printf("%-30.40s %-30.40s\n", "Verify single strategy:", VERIFY_SINGLE_STRATEGY);
         System.out.printf("%-30.40s %-30.40s\n", "Save intermediate strategy:", SAVE_STRAT);
-        System.out.printf("%-30.40s %-30.40s\n", "Save root of non-covered state:", SAVE_NONCOVERED_ROOT);
     }
 }
