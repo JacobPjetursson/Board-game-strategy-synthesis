@@ -35,6 +35,11 @@ public class Globals {
     public static final int RULE_ORDERING_FEWEST_PRECONS_LAST = 3;
     public static final int RULE_ORDERING_RANDOM = 4;
 
+    // TIC TAC TOE RULE MODES
+    public static final int TIC_TAC_TOE_NORMAL_RULES = 0;
+    public static final int TIC_TAC_TOE_SIMPLE_RULES = 1;
+    public static final int TIC_TAC_TOE_STUPID_RULES = 2;
+
     // MISC VARIABLES
     public static final int CLICK_INTERACTIVE = 0;
     public static final int CLICK_DISABLED = 1;

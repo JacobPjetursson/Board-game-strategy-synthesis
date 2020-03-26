@@ -24,7 +24,11 @@ public class FFTAutoGen {
     public static FFT generateFFT(int perspective_) {
         AUTOGEN_PERSPECTIVE = perspective_;
         fft = new FFT("Autogen");
+        long timeStart = System.currentTimeMillis();
         setup();
+        start();
+        double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
+        System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
         return fft;
     }
 
@@ -32,16 +36,29 @@ public class FFTAutoGen {
     public static FFT generateFFT(int perspective_, FFT currFFT) {
         AUTOGEN_PERSPECTIVE = perspective_;
         fft = currFFT;
+        // check if existing FFT is weakly optimal
         if (!fft.verify(perspective_, false)) {
             System.out.println("Existing FFT is not weakly optimal. Returning");
             return fft;
         }
+
+        long timeStart = System.currentTimeMillis();
         setup();
+        System.out.println("Removing states that apply to current rules");
+        if (!GENERATE_ALL_RULES)
+            states.removeIf(s -> {
+                for (Rule r : fft.getRules())
+                    if (r.apply(s) != null)
+                        return true;
+                return false;
+            });
+        start();
+        double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
+        System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
         return fft;
     }
 
     private static void setup() {
-        long timeStart = System.currentTimeMillis();
         rg = new RuleGroup("Autogen");
         fft.addRuleGroup(rg);
         lookupTable = FFTSolution.getLookupTable();
@@ -59,10 +76,13 @@ public class FFTAutoGen {
         } else {
             System.out.println("Filtering for all strategies");
             filterSolution();
-            deleteIrrelevantStates();
+            if (USE_FILTERING)
+                deleteIrrelevantStates();
         }
         System.out.println("Amount of states after filtering: " + states.size());
+    }
 
+    private static void start() {
         System.out.println("Making rules");
         makeRules();
 
@@ -71,9 +91,6 @@ public class FFTAutoGen {
         int i = fft.minimize(AUTOGEN_PERSPECTIVE, Config.MINIMIZE_PRECONDITIONS);
         System.out.println("Final amount of rules after " + i + " minimize iterations: " + fft.getAmountOfRules());
         System.out.println("Final amount of preconditions after " + i + " minimize iterations: " + fft.getAmountOfPreconditions());
-
-        double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
-        System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
         System.out.println("Final rules: \n" + fft);
     }
 
@@ -82,6 +99,10 @@ public class FFTAutoGen {
         for (Map.Entry<? extends FFTState, ? extends StateMapping> entry : lookupTable.entrySet()) {
             FFTState state = entry.getKey();
             StateMapping mapping = entry.getValue();
+            if (!USE_FILTERING) {
+                states.add(state);
+                continue;
+            }
             if (AUTOGEN_PERSPECTIVE == PLAYER1 && mapping.getMove().getTeam() != PLAYER1)
                 continue;
             else if (AUTOGEN_PERSPECTIVE == PLAYER2 && mapping.getMove().getTeam() != PLAYER2)

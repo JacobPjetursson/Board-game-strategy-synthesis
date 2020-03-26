@@ -6,7 +6,7 @@ import fftlib.game.FFTState;
 
 import java.util.ArrayList;
 
-import static misc.Config.TIC_TAC_TOE_SIMPLE_RULES;
+import static misc.Config.TIC_TAC_TOE_RULES;
 import static misc.Globals.*;
 
 
@@ -55,71 +55,29 @@ public class Logic implements FFTLogic {
 
     public static int getWinner(State state) {
         int[][] board = state.getBoard();
-        for (int team = 1; team < 3; team++) {
-            if (TIC_TAC_TOE_SIMPLE_RULES) {
-                if (board[0][0] == team && board[1][1] == team) {
-                    return team;
-                } else if (board[0][0] == team && board[0][1] == team) {
-                    return team;
-                } else if (board[1][1] == team && board[2][2] == team) {
-                    return team;
-                } else if (board[0][2] == team && board[1][1] == team) {
-                    return team;
-                } else if (board[1][1] == team && board[2][0] == team) {
-                    return team;
-                } else if (board[0][0] == team && board[0][1] == team) {
-                    return team;
-                } else if (board[0][1] == team && board[0][2] == team) {
-                    return team;
-                } else if (board[1][0] == team && board[1][1] == team) {
-                    return team;
-                } else if (board[1][1] == team && board[1][2] == team) {
-                    return team;
-                } else if (board[2][0] == team && board[2][1] == team) {
-                    return team;
-                } else if (board[2][1] == team && board[2][2] == team) {
-                    return team;
-                } else if (board[0][0] == team && board[1][0] == team) {
-                    return team;
-                } else if (board[1][0] == team && board[2][0] == team) {
-                    return team;
-                } else if (board[0][1] == team && board[1][1] == team) {
-                    return team;
-                } else if (board[1][1] == team && board[2][1] == team) {
-                    return team;
-                } else if (board[0][2] == team && board[1][2] == team) {
-                    return team;
-                } else if (board[1][2] == team && board[2][2] == team) {
-                    return team;
+        if (TIC_TAC_TOE_RULES == TIC_TAC_TOE_SIMPLE_RULES)
+            return getSimpleRuleWinner(state);
 
-                } else if (board[1][0] == team && board[0][1] == team) {
-                    return team;
-                } else if (board[0][1] == team && board[1][2] == team) {
-                    return team;
-                } else if (board[1][0] == team && board[2][1] == team) {
-                    return team;
-                } else if (board[2][1] == team && board[1][2] == team) {
-                    return team;
-                }
-            }
-            else {
-                if (board[0][0] == team && board[1][1] == team && board[2][2] == team) {
-                    return team;
-                } else if (board[0][2] == team && board[1][1] == team && board[2][0] == team) {
-                    return team;
-                } else if (board[0][0] == team && board[0][1] == team && board[0][2] == team) {
-                    return team;
-                } else if (board[1][0] == team && board[1][1] == team && board[1][2] == team) {
-                    return team;
-                } else if (board[2][0] == team && board[2][1] == team && board[2][2] == team) {
-                    return team;
-                } else if (board[0][0] == team && board[1][0] == team && board[2][0] == team) {
-                    return team;
-                } else if (board[0][1] == team && board[1][1] == team && board[2][1] == team) {
-                    return team;
-                } else if (board[0][2] == team && board[1][2] == team && board[2][2] == team) {
-                    return team;
-                }
+        if (TIC_TAC_TOE_RULES == TIC_TAC_TOE_STUPID_RULES)
+            return getStupidRuleWinner(state);
+
+        for (int team = 1; team < 3; team++) {
+            if (board[0][0] == team && board[1][1] == team && board[2][2] == team) {
+                return team;
+            } else if (board[0][2] == team && board[1][1] == team && board[2][0] == team) {
+                return team;
+            } else if (board[0][0] == team && board[0][1] == team && board[0][2] == team) {
+                return team;
+            } else if (board[1][0] == team && board[1][1] == team && board[1][2] == team) {
+                return team;
+            } else if (board[2][0] == team && board[2][1] == team && board[2][2] == team) {
+                return team;
+            } else if (board[0][0] == team && board[1][0] == team && board[2][0] == team) {
+                return team;
+            } else if (board[0][1] == team && board[1][1] == team && board[2][1] == team) {
+                return team;
+            } else if (board[0][2] == team && board[1][2] == team && board[2][2] == team) {
+                return team;
             }
         }
         return 0;
@@ -139,5 +97,67 @@ public class Logic implements FFTLogic {
 
     public boolean isLegalMove(FFTState state, FFTMove move) {
         return isLegalMove((State) state, (Move) move);
+    }
+
+    public static int getSimpleRuleWinner(State state) {
+        int[][] board = state.getBoard();
+        for (int team = 1; team < 3; team++) {
+            if (board[0][0] == team && board[1][1] == team) {
+                return team;
+            } else if (board[0][0] == team && board[0][1] == team) {
+                return team;
+            } else if (board[1][1] == team && board[2][2] == team) {
+                return team;
+            } else if (board[0][2] == team && board[1][1] == team) {
+                return team;
+            } else if (board[1][1] == team && board[2][0] == team) {
+                return team;
+            } else if (board[0][0] == team && board[0][1] == team) {
+                return team;
+            } else if (board[0][1] == team && board[0][2] == team) {
+                return team;
+            } else if (board[1][0] == team && board[1][1] == team) {
+                return team;
+            } else if (board[1][1] == team && board[1][2] == team) {
+                return team;
+            } else if (board[2][0] == team && board[2][1] == team) {
+                return team;
+            } else if (board[2][1] == team && board[2][2] == team) {
+                return team;
+            } else if (board[0][0] == team && board[1][0] == team) {
+                return team;
+            } else if (board[1][0] == team && board[2][0] == team) {
+                return team;
+            } else if (board[0][1] == team && board[1][1] == team) {
+                return team;
+            } else if (board[1][1] == team && board[2][1] == team) {
+                return team;
+            } else if (board[0][2] == team && board[1][2] == team) {
+                return team;
+            } else if (board[1][2] == team && board[2][2] == team) {
+                return team;
+
+            } else if (board[1][0] == team && board[0][1] == team) {
+                return team;
+            } else if (board[0][1] == team && board[1][2] == team) {
+                return team;
+            } else if (board[1][0] == team && board[2][1] == team) {
+                return team;
+            } else if (board[2][1] == team && board[1][2] == team) {
+                return team;
+            }
+        }
+        return 0;
+    }
+
+    public static int getStupidRuleWinner(State state) {
+        int [][] board = state.getBoard();
+        for (int[] ints : board) {
+            for (int anInt : ints) {
+                if (anInt == 0)
+                    return 0;
+            }
+        }
+        return PLAYER1;
     }
 }

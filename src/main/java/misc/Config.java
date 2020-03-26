@@ -25,6 +25,7 @@ public class Config {
     public static boolean GENERATE_ALL_RULES;
     public static boolean MINIMIZE_RULE_BY_RULE;
     public static boolean SINGLE_THREAD;
+    public static boolean USE_FILTERING;
 
     // KULIBRAT PROPERTIES
     public static int BWIDTH;
@@ -34,7 +35,7 @@ public class Config {
     public static String DB_PATH;
 
     // TIC TAC TOE PROPERTIES
-    public static boolean TIC_TAC_TOE_SIMPLE_RULES;
+    public static int TIC_TAC_TOE_RULES;
     public static boolean TIC_TAC_TOE_SHOW_GUI;
 
     // SIM
@@ -117,6 +118,7 @@ public class Config {
         DETAILED_DEBUG = Boolean.parseBoolean(global.getProperty("detailedDebug"));
         VERIFY_SINGLE_STRATEGY = Boolean.parseBoolean(global.getProperty("verify_single_strategy"));
         SINGLE_THREAD = Boolean.parseBoolean(global.getProperty("single_thread"));
+        USE_FILTERING = Boolean.parseBoolean(global.getProperty("use_filtering"));
 
         // KULIBRAT
         BWIDTH = Integer.parseInt(kulibrat.getProperty("boardWidth"));
@@ -126,7 +128,17 @@ public class Config {
         DB_PATH = kulibrat.getProperty("db_path");
 
         // TIC TAC TOE
-        TIC_TAC_TOE_SIMPLE_RULES = Boolean.parseBoolean(tictactoe.getProperty("simple_rules"));
+        String rules = tictactoe.getProperty("rules");
+        switch (rules) {
+            case "simple":
+                TIC_TAC_TOE_RULES = TIC_TAC_TOE_SIMPLE_RULES;
+                break;
+            case "stupid":
+                TIC_TAC_TOE_RULES = TIC_TAC_TOE_STUPID_RULES;
+                break;
+            default:
+                TIC_TAC_TOE_RULES = TIC_TAC_TOE_NORMAL_RULES;
+        }
         TIC_TAC_TOE_SHOW_GUI = Boolean.parseBoolean(tictactoe.getProperty("show_gui"));
 
         // SIM

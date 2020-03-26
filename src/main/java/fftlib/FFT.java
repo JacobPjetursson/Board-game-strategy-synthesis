@@ -73,6 +73,13 @@ public class FFT {
         return rg.rules.get(rg.rules.size() - 1);
     }
 
+    public ArrayList<Rule> getRules() {
+        ArrayList<Rule> rules = new ArrayList<>();
+        for (RuleGroup rg : ruleGroups)
+            rules.addAll(rg.rules);
+        return rules;
+    }
+
     public void addRuleGroup(RuleGroup ruleGroup) {
         ruleGroups.add(ruleGroup);
     }
