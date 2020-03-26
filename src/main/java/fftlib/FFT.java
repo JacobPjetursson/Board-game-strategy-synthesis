@@ -313,6 +313,9 @@ public class FFT {
     private ArrayList<Rule> minimizeRules(int team) {
         if (DETAILED_DEBUG) System.out.println("Minimizing rules");
         ArrayList<Rule> redundantRules = new ArrayList<>();
+        if (MINIMIZE_BOTTOMS_UP)
+            return minimizeRulesBottomsUp(team);
+
 
         for (RuleGroup rg : ruleGroups) {
             if (rg.locked) // don't minimize if rulegroup is locked
@@ -323,14 +326,10 @@ public class FFT {
                 if (r.multiRule) continue; // TODO - support multirule when minimizing?
                 itr.remove();
                 if (verify(team, true)) {
-                    if (GENERATE_ALL_RULES && DETAILED_DEBUG)
-                        System.out.println("Removed rule, current amount of rules: " + rg.rules.size());
                     redundantRules.add(r);
                 }
                 else {
                     itr.add(r);
-                    if (GENERATE_ALL_RULES && DETAILED_DEBUG)
-                        System.out.println("Couldn't remove rule, current amount of rules: " + rg.rules.size());
                     if (MINIMIZE_RULE_BY_RULE)
                         minimizePreconditions(r, team);
 
@@ -339,6 +338,33 @@ public class FFT {
         }
         return redundantRules;
     }
+
+    private ArrayList<Rule> minimizeRulesBottomsUp(int team) {
+        ArrayList<Rule> redundantRules = new ArrayList<>();
+        for (int i = ruleGroups.size() - 1; i >= 0; i--) {
+            RuleGroup rg = ruleGroups.get(i);
+            if (rg.locked) // don't minimize if rulegroup is locked
+                continue;
+            ListIterator<Rule> itr = rg.rules.listIterator(rg.rules.size());
+            while(itr.hasPrevious()) {
+                Rule r = itr.previous();
+                if (r.multiRule) continue; // TODO - support multirule when minimizing?
+                itr.remove();
+                if (verify(team, true)) {
+                    redundantRules.add(r);
+                }
+                else {
+                    itr.add(r);
+                    itr.previous();
+                    if (MINIMIZE_RULE_BY_RULE)
+                        minimizePreconditions(r, team);
+
+                }
+            }
+        }
+        return redundantRules;
+    }
+
     private void minimizePreconditions(int team) {
         if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
         int amount = 0;

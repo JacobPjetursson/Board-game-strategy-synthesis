@@ -24,6 +24,7 @@ public class Config {
     public static boolean SAVE_STRAT;
     public static boolean GENERATE_ALL_RULES;
     public static boolean MINIMIZE_RULE_BY_RULE;
+    public static boolean MINIMIZE_BOTTOMS_UP;
     public static boolean SINGLE_THREAD;
     public static boolean USE_FILTERING;
 
@@ -112,6 +113,7 @@ public class Config {
         MINIMIZE_PRECONDITIONS = Boolean.parseBoolean(global.getProperty("minimize_preconditions"));
         GENERATE_ALL_RULES = Boolean.parseBoolean(global.getProperty("generate_all_rules"));
         MINIMIZE_RULE_BY_RULE = Boolean.parseBoolean(global.getProperty("minimize_rule_by_rule"));
+        MINIMIZE_BOTTOMS_UP = Boolean.parseBoolean(global.getProperty("minimize_bottoms_up"));
         SYMMETRY_DETECTION = Boolean.parseBoolean(global.getProperty("symmetry_detection"));
         SAVE_STRAT = Boolean.parseBoolean(global.getProperty("save_intermediate_strategy"));
         // DEBUG AND TEST
@@ -169,11 +171,14 @@ public class Config {
         System.out.printf("%-30.40s %-30.40s\n", "Greedy Autogeneration:", GREEDY_AUTOGEN);
         System.out.printf("%-30.40s %-30.40s\n", "Generate all rules:", GENERATE_ALL_RULES);
         System.out.printf("%-30.40s %-30.40s\n", "Minimize rule by rule:", MINIMIZE_RULE_BY_RULE);
+        System.out.printf("%-30.40s %-30.40s\n", "Minimize bottoms up:", MINIMIZE_BOTTOMS_UP);
+
         System.out.printf("%-30.40s %-30.40s\n", "Random seed:", RANDOM_SEED);
         System.out.printf("%-30.40s %-30.40s\n", "Seed value:",SEED);
         System.out.printf("%-30.40s %-30.40s\n", "Detailed debug messages:", DETAILED_DEBUG);
         System.out.printf("%-30.40s %-30.40s\n", "Single thread:", SINGLE_THREAD);
         System.out.printf("%-30.40s %-30.40s\n", "Verify single strategy:", VERIFY_SINGLE_STRATEGY);
+        System.out.printf("%-30.40s %-30.40s\n", "Use filtering:", USE_FILTERING);
         System.out.printf("%-30.40s %-30.40s\n", "Save intermediate strategy:", SAVE_STRAT);
     }
 }
