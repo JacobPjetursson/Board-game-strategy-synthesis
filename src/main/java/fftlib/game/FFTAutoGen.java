@@ -29,6 +29,7 @@ public class FFTAutoGen {
         start();
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
         System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
+        System.out.println("Final rules: \n" + fft);
         return fft;
     }
 
@@ -55,6 +56,7 @@ public class FFTAutoGen {
         start();
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
         System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
+        System.out.println("Final rules: \n" + fft);
         return fft;
     }
 
@@ -91,7 +93,6 @@ public class FFTAutoGen {
         int i = fft.minimize(AUTOGEN_PERSPECTIVE, Config.MINIMIZE_PRECONDITIONS);
         System.out.println("Final amount of rules after " + i + " minimize iterations: " + fft.getAmountOfRules());
         System.out.println("Final amount of preconditions after " + i + " minimize iterations: " + fft.getAmountOfPreconditions());
-        System.out.println("Final rules: \n" + fft);
     }
 
 
