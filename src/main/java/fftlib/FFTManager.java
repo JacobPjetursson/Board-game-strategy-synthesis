@@ -31,7 +31,7 @@ public class FFTManager {
     public static int gameBoardHeight;
     private static String path;
     public static FFTState initialFFTState;
-    public FFT currFFT;
+    public static FFT currFFT;
     private static FFTFailState failState;
     public static InteractiveFFTState interactiveState;
     public static BiFunction<Action, Integer, FFTMove> actionToMove;
@@ -65,7 +65,7 @@ public class FFTManager {
         playerNames = gameSpecifics.getPlayerNames();
 
         // Try loading ffts from file in working directory
-        load();
+        ffts = load(path);
         if (!ffts.isEmpty())
             currFFT = ffts.get(fft_index);
     }
@@ -93,13 +93,14 @@ public class FFTManager {
 
     }
 
-    private static void load() {
+    public static ArrayList<FFT> load(String filePath) {
         List<String> lines;
         // Create new file if not exists
-        File fftFile = new File(path);
+        File fftFile = new File(filePath);
+        ArrayList<FFT> ffts = new ArrayList<>();
         try {
             if (!fftFile.createNewFile()) {
-                lines = Files.readAllLines(Paths.get(path));
+                lines = Files.readAllLines(Paths.get(filePath));
                 int fftIndex = -1;
                 int rgIndex = -1;
                 for (String line : lines) {
@@ -124,6 +125,7 @@ public class FFTManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return ffts;
     }
 
     public void setCurrFFT(int index) {
@@ -159,11 +161,20 @@ public class FFTManager {
         return failState.getFailState(ps, optimalMoves);
     }
 
-    public void autogenFFT() {
+    public static void autogenFFT() {
         if (Globals.ENABLE_AUTOGEN) {
             FFT fft = FFTAutoGen.generateFFT(Config.AUTOGEN_PERSPECTIVE);
             ffts.add(0, fft);
             currFFT = fft;
+        }
+        Globals.ENABLE_AUTOGEN = false;
+    }
+
+    public static void autogenFFT(FFT fft) { // autogen using a current fft
+        if (Globals.ENABLE_AUTOGEN) {
+            FFT newFFT = FFTAutoGen.generateFFT(Config.AUTOGEN_PERSPECTIVE, fft);
+            ffts.add(0, newFFT);
+            currFFT = newFFT;
         }
         Globals.ENABLE_AUTOGEN = false;
     }

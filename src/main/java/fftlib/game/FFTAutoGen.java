@@ -23,13 +23,25 @@ public class FFTAutoGen {
 
     public static FFT generateFFT(int perspective_) {
         AUTOGEN_PERSPECTIVE = perspective_;
+        fft = new FFT("Autogen");
+        setup();
+        return fft;
+    }
+
+    // use already existing FFT (weakly optimal)
+    public static FFT generateFFT(int perspective_, FFT currFFT) {
+        AUTOGEN_PERSPECTIVE = perspective_;
+        fft = currFFT;
+        if (!fft.verify(perspective_, false)) {
+            System.out.println("Existing FFT is not weakly optimal. Returning");
+            return fft;
+        }
         setup();
         return fft;
     }
 
     private static void setup() {
         long timeStart = System.currentTimeMillis();
-        fft = new FFT("Autogen");
         rg = new RuleGroup("Autogen");
         fft.addRuleGroup(rg);
         lookupTable = FFTSolution.getLookupTable();
@@ -120,9 +132,13 @@ public class FFTAutoGen {
             }
 
             Rule r = addRule(state);
-            // Run partial verification again to insert new rule mappings
+            // Run partial verification again to insert new rule mappings. Also return if no longer weakly optimal
             fft.SAFE_RUN = true;
-            fft.verify(AUTOGEN_PERSPECTIVE, false);
+            if (!fft.verify(AUTOGEN_PERSPECTIVE, false)) {
+                System.out.println("FFT is somehow no longer weakly optimal, returning");
+                return;
+            }
+
             fft.SAFE_RUN = false;
 
             states.remove(state);

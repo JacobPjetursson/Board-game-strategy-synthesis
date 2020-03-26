@@ -308,6 +308,8 @@ public class FFT {
         ArrayList<Rule> redundantRules = new ArrayList<>();
 
         for (RuleGroup rg : ruleGroups) {
+            if (rg.locked) // don't minimize if rulegroup is locked
+                continue;
             ListIterator<Rule> itr = rg.rules.listIterator();
             while(itr.hasNext()) {
                 Rule r = itr.next();
@@ -334,6 +336,7 @@ public class FFT {
         if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
         int amount = 0;
         for (RuleGroup rg : ruleGroups) {
+            if (rg.locked) continue; // don't minimize if rg is locked
             for(Rule r : rg.rules) {
                 if (r.multiRule) continue; // TODO - support multirule when minimizing?
                 minimizePreconditions(r, team);
