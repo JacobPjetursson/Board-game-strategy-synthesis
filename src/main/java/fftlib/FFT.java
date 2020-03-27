@@ -28,16 +28,17 @@ public class FFT {
 
     // For concurrency purposes
     private static ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
-    private static ConcurrentHashMap<FFTState, Boolean> closedMap = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<MachineState, Boolean> closedMapGGP = new ConcurrentHashMap<>();
-    private static boolean failed; // failed is set to true if verification failed
+    private ConcurrentHashMap<FFTState, Boolean> closedMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<MachineState, Boolean> closedMapGGP = new ConcurrentHashMap<>();
+    private boolean failed; // failed is set to true if verification failed
 
     public HashMap<FFTState, StateMapping> singleStrategy; // used for alternative version of program
 
     // used for optimization
-    private static ConcurrentHashMap<FFTState, FFTMove> strategy = new ConcurrentHashMap<>(); // used for storing verification results, e.g. moves from strat
-    private static ConcurrentHashMap<MachineState, Move> strategyGGP = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<FFTState, FFTMove> strategy = new ConcurrentHashMap<>(); // used for storing verification results, e.g. moves from strat
+    private ConcurrentHashMap<MachineState, Move> strategyGGP = new ConcurrentHashMap<>();
     public boolean SAFE_RUN; // used as flag to signal that current run is a safe run, e.g. verification guaranteed to succeed
+    public boolean USE_STRATEGY;
 
     public FFT(String name) {
         this.name = name;
@@ -129,7 +130,7 @@ public class FFT {
             } else {
                 FFTMove move;
                 Rule newRule = this.getLastRule();
-                if (!SAVE_STRAT || newRule == null) {
+                if (!USE_STRATEGY || newRule == null) {
                     move = apply(state);
                 }
                 else {
@@ -184,7 +185,7 @@ public class FFT {
 
                     }
                     // insert into strategy if we know verification will succeed
-                    if (SAVE_STRAT && SAFE_RUN)
+                    if (USE_STRATEGY && SAFE_RUN)
                         strategy.put(state, move);
                     FFTState nextState = state.getNextState(move);
                     if (!closedSet.contains(nextState)) {
@@ -275,12 +276,12 @@ public class FFT {
     }
 
     public int minimize(int perspective, boolean minimize_precons) { // Returns amount of iterations
-        boolean prevSafeStrat = SAVE_STRAT;
-        SAVE_STRAT = false;
         if (!verify(perspective, true)) {
             System.out.println("FFT is not a winning strategy, so it can not be minimized");
             return -1;
         }
+        // Once we've started minimizing, we can't use our strategy hashset anymore
+        USE_STRATEGY = false;
 
         int ruleSize = getAmountOfRules();
         int precSize = getAmountOfPreconditions();
@@ -306,7 +307,6 @@ public class FFT {
             minPrecSize = getAmountOfPreconditions();
             i++;
         }
-        SAVE_STRAT = prevSafeStrat;
         return i;
     }
 
@@ -454,7 +454,7 @@ public class FFT {
             } else {
                 FFTMove move;
                 Rule newRule = getLastRule();
-                if (!SAVE_STRAT || newRule == null) {
+                if (!USE_STRATEGY || newRule == null) {
                     move = apply(state);
                 }
                 else {
@@ -509,7 +509,7 @@ public class FFT {
                         }
 
                     }
-                    if (SAVE_STRAT && SAFE_RUN)
+                    if (USE_STRATEGY && SAFE_RUN)
                         strategy.put(state, move);
                     addTask(state.getNextState(move));
                 }
@@ -574,7 +574,7 @@ public class FFT {
                 } else {
                     Move move;
                     Rule newRule = getLastRule();
-                    if (!SAVE_STRAT || newRule == null) {
+                    if (!USE_STRATEGY || newRule == null) {
                         move = apply(ms);
                     }
                     else {
@@ -599,7 +599,7 @@ public class FFT {
                         failed = true;
                         return false;
                     } else {
-                        if (SAVE_STRAT && SAFE_RUN)
+                        if (USE_STRATEGY && SAFE_RUN)
                             strategyGGP.put(ms, move);
                         addTask(GGPManager.getNextState(ms, move));
                     }

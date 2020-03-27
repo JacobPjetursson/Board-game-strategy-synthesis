@@ -66,6 +66,7 @@ public class FFTAutoGen {
         lookupTable = FFTSolution.getLookupTable();
         winner = FFTSolution.getWinner();
         max_precons = FFTManager.initialFFTState.getAllLiterals().size();
+        fft.USE_STRATEGY = SAVE_STRAT; // Only use this feature if autogenerating, e.g. not when simply loading from file
 
         System.out.println("Solution size: " + lookupTable.size());
 
