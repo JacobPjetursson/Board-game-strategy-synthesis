@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 import static fftlib.FFTManager.*;
+import static misc.Config.SHOW_RULE_GROUPS;
 import static misc.Globals.*;
 
 public class FFTInteractivePane extends BorderPane {
@@ -71,7 +72,7 @@ public class FFTInteractivePane extends BorderPane {
 
     private int[] selectedIndices; // rgIdx, rIdx
 
-    private static final int ROW_SIZE = 25;
+    private static final int ROW_SIZE = 26;
 
     public FFTInteractivePane(FFTManager fftManager) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
@@ -113,7 +114,7 @@ public class FFTInteractivePane extends BorderPane {
         lw = new ListView<>();
         lw.setPickOnBounds(false);
         lw.setPrefHeight(520);
-        lw.setMinWidth(400);
+        lw.setMinWidth(550);
         lw.setCellFactory(param -> new RuleCell());
         showRuleGroups();
         BorderPane.setMargin(lw, new Insets(15));
@@ -174,12 +175,12 @@ public class FFTInteractivePane extends BorderPane {
                     stage.setScene(new Scene(new FFTFailurePane(scene, fftManager, this), WIDTH, Globals.HEIGHT));
                 }
             } else {
-                Label verifiedLabel = new Label("The FFT was successfully verified");
+                Label verifiedLabel = new Label("The strategy was successfully verified");
                 verifiedLabel.setFont(Font.font("Verdana", 16));
                 bottomBox.getChildren().add(verifiedLabel);
 
                 Timeline timeline = new Timeline(new KeyFrame(
-                        Duration.millis(2500),
+                        Duration.millis(10000),
                         ae -> bottomBox.getChildren().remove(verifiedLabel)));
                 timeline.play();
             }
@@ -249,13 +250,13 @@ public class FFTInteractivePane extends BorderPane {
             showRuleGroups();
         });
 
-        Button addRgBtn = new Button("Add meta rule");
+        Button addRgBtn = new Button("Add rule group");
         addRgBtn.setStyle(greenBtnStyle);
         addRgBtn.setFont(Font.font("Verdana", 16));
         addRgBtn.setOnMouseClicked(event -> {
             Stage newStage = new Stage();
             newStage.setScene(new Scene(
-                    new NameRGPane("Write name of new meta rule", false), 500, 200));
+                    new NameRGPane("Write name of new rule group", false), 500, 200));
             newStage.initModality(Modality.APPLICATION_MODAL);
             newStage.initOwner(getScene().getWindow());
             newStage.setOnCloseRequest(Event::consume);
@@ -524,7 +525,7 @@ public class FFTInteractivePane extends BorderPane {
         for (int i = 0; i < fftManager.currFFT.ruleGroups.size(); i++) {
             // Rule group
             RuleGroup rg = fftManager.currFFT.ruleGroups.get(i);
-            //rules.add(new RulePane(i));
+            if (SHOW_RULE_GROUPS) rules.add(new RulePane(i));
             for (int j = 0; j < rg.rules.size(); j++) {
                 rules.add(new RulePane(i, j));
             }

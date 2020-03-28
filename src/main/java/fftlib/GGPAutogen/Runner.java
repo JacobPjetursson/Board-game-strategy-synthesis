@@ -52,8 +52,8 @@ public class Runner {
 
     private static void setup() throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
         long timeStart = System.currentTimeMillis();
-        fft = new FFT("Autogen");
-        rg = new RuleGroup("Autogen");
+        fft = new FFT("Synthesis");
+        rg = new RuleGroup("Synthesis");
         fft.addRuleGroup(rg);
         MachineState initialState = GGPManager.getInitialState();
         Solver solver = new Solver();

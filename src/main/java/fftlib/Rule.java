@@ -291,8 +291,6 @@ public class Rule {
             return m;
         }
         for (Rule rule : symmetryRules) {
-            if (rule.preconditions.equals(preconditions))
-                continue;
             m = match(rule, state, stLiterals);
             if (m != null) {
                 return m;

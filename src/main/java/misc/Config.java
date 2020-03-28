@@ -27,6 +27,7 @@ public class Config {
     public static boolean MINIMIZE_BOTTOMS_UP;
     public static boolean SINGLE_THREAD;
     public static boolean USE_FILTERING;
+    public static boolean SHOW_RULE_GROUPS;
 
     // KULIBRAT PROPERTIES
     public static int BWIDTH;
@@ -116,6 +117,7 @@ public class Config {
         MINIMIZE_BOTTOMS_UP = Boolean.parseBoolean(global.getProperty("minimize_bottoms_up"));
         SYMMETRY_DETECTION = Boolean.parseBoolean(global.getProperty("symmetry_detection"));
         SAVE_STRAT = Boolean.parseBoolean(global.getProperty("save_intermediate_strategy"));
+        SHOW_RULE_GROUPS = Boolean.parseBoolean(global.getProperty("show_rule_groups"));
         // DEBUG AND TEST
         DETAILED_DEBUG = Boolean.parseBoolean(global.getProperty("detailedDebug"));
         VERIFY_SINGLE_STRATEGY = Boolean.parseBoolean(global.getProperty("verify_single_strategy"));

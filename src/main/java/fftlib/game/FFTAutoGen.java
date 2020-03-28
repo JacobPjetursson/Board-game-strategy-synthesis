@@ -23,7 +23,7 @@ public class FFTAutoGen {
 
     public static FFT generateFFT(int perspective_) {
         AUTOGEN_PERSPECTIVE = perspective_;
-        fft = new FFT("Autogen");
+        fft = new FFT("Synthesis");
         long timeStart = System.currentTimeMillis();
         setup();
         start();
@@ -63,7 +63,7 @@ public class FFTAutoGen {
     }
 
     private static void setup() {
-        rg = new RuleGroup("Autogen");
+        rg = new RuleGroup("Synthesis");
         fft.addRuleGroup(rg);
         lookupTable = FFTSolution.getLookupTable();
         winner = FFTSolution.getWinner();

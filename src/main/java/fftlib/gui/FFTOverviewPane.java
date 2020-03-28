@@ -31,6 +31,7 @@ import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import static fftlib.FFTManager.*;
+import static misc.Config.SHOW_RULE_GROUPS;
 import static misc.Globals.WIDTH;
 
 public class FFTOverviewPane extends VBox {
@@ -291,11 +292,10 @@ public class FFTOverviewPane extends VBox {
             rgVBox = new VBox(10);
             rgVBox.setAlignment(Pos.CENTER_LEFT);
 
-            /* Uncomment for RG name
             Label rgLabel = new Label((idx + 1) + ": " + rg.name);
             rgLabel.setFont(Font.font("Verdana", 18));
-            rgVBox.getChildren().add(rgLabel);
-            */
+            if (SHOW_RULE_GROUPS) rgVBox.getChildren().add(rgLabel);
+
 
             for (int j = 0; j < rg.rules.size(); j++) {
                 Rule r = rg.rules.get(j);

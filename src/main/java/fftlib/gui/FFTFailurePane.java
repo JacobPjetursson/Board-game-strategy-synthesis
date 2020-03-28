@@ -15,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -22,6 +23,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
+import static misc.Config.SHOW_RULE_GROUPS;
 import static misc.Globals.PLAYER_ANY;
 
 
@@ -29,12 +31,13 @@ public class FFTFailurePane extends BorderPane {
     private FFTManager fftManager;
     private ListView<VBox> lw;
     FFTInteractivePane interactivePane;
+    int ROW_SIZE = 26;
 
     public FFTFailurePane(Scene prevScene, FFTManager fftManager, FFTInteractivePane interactivePane) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         this.fftManager = fftManager;
         this.interactivePane = interactivePane;
-        Label title = new Label("This is the first state where the FFT failed");
+        Label title = new Label("This is the first encountered state where the strategy failed");
         title.setFont(Font.font("Verdana", FontWeight.BOLD, 28));
         title.setAlignment(Pos.CENTER);
         title.setTextAlignment(TextAlignment.CENTER);
@@ -43,7 +46,6 @@ public class FFTFailurePane extends BorderPane {
         BorderPane.setAlignment(title, Pos.CENTER);
 
         Node playBox = fftManager.getFailState();
-        setCenter(playBox);
 
         lw = new ListView<>();
         lw.setPickOnBounds(false);
@@ -51,21 +53,24 @@ public class FFTFailurePane extends BorderPane {
         lw.setSelectionModel(new NoSelectionModel<>());
         showRuleGroups();
         BorderPane.setMargin(lw, new Insets(15));
-        setRight(lw);
+        HBox centerBox = new HBox(playBox, lw);
+        centerBox.setAlignment(Pos.CENTER);
+        centerBox.setSpacing(10);
+        setCenter(centerBox);
 
 
         VBox bottomBox = new VBox(8);
         bottomBox.setAlignment(Pos.CENTER);
         bottomBox.setPadding(new Insets(15));
 
-        Label colorInfoLabel = new Label("Green stands for the winning/non-losing moves, blue is the chosen move");
+        Label colorInfoLabel = new Label("Green are the optimal moves, blue is the move chosen by the strategy");
         colorInfoLabel.setFont(Font.font("Verdana", 16));
 
         String moveInfo;
         if (fftManager.currFFT.failingPoint.random)
-            moveInfo = "The FFT did not apply to the above state, and a random, losing move existed";
+            moveInfo = "The strategy did not apply to the above state, and a random, losing move existed";
         else
-            moveInfo = "The FFT applied to the above state, but the move it chose was a losing move";
+            moveInfo = "The strategy applied to the above state, but the move it chose was sub-optimal";
         Label moveInfoLabel = new Label(moveInfo);
         moveInfoLabel.setFont(Font.font("Verdana", 16));
 
@@ -76,7 +81,7 @@ public class FFTFailurePane extends BorderPane {
             stage.setScene(prevScene);
         });
 
-        Button addRuleInteractiveBtn = new Button("Add state to FFT");
+        Button addRuleInteractiveBtn = new Button("Add rule for this state");
         addRuleInteractiveBtn.setFont(Font.font("Verdana", 16));
 
         // add rule to FFT button
@@ -98,6 +103,7 @@ public class FFTFailurePane extends BorderPane {
     private void showRuleGroups() {
         ObservableList<VBox> ruleGroups = FXCollections.observableArrayList();
         boolean ruleApplied = false;
+        int counter = 0;
         for (int i = 0; i < fftManager.currFFT.ruleGroups.size(); i++) {
             // Rule group
             RuleGroup rg = fftManager.currFFT.ruleGroups.get(i);
@@ -105,7 +111,7 @@ public class FFTFailurePane extends BorderPane {
             rgVBox.setAlignment(Pos.CENTER);
             Label rgLabel = new Label((i + 1) + ": " + rg.name);
             rgLabel.setFont(Font.font("Verdana", 18));
-            rgVBox.getChildren().add(rgLabel);
+            if (SHOW_RULE_GROUPS) rgVBox.getChildren().add(rgLabel);
             for (int j = 0; j < rg.rules.size(); j++) {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r);
@@ -136,16 +142,16 @@ public class FFTFailurePane extends BorderPane {
                                 rLabel.setTextFill(Color.BLUE);
                                 ruleApplied = true;
                             }
-
                         }
-
                     }
                 }
                 failMove.setTeam(tempTeam);
                 rgVBox.getChildren().add(rLabel);
+                counter++;
             }
             ruleGroups.add(rgVBox);
         }
         lw.setItems(ruleGroups);
+        lw.setMaxHeight(counter * ROW_SIZE);
     }
 }
