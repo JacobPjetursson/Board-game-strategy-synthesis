@@ -16,9 +16,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import misc.Globals;
-import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
-import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
-import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 import tictactoe.FFT.GameSpecifics;
 import tictactoe.FFT.InteractiveState;
 import tictactoe.ai.AI;
@@ -76,7 +73,8 @@ public class Controller {
         this.fftManager = new FFTManager(gameSpecifics);
         FFTSolver.solveGame(state);
         // Autogenerate
-        fftManager.autogenFFT();
+        if (ENABLE_AUTOGEN)
+            FFTManager.autogenFFT();
 
 
         PlayPane playPane = new PlayPane(this);

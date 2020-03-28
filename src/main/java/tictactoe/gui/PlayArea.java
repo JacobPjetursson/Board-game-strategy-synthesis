@@ -20,7 +20,7 @@ public class PlayArea extends HBox {
         setAlignment(Pos.CENTER);
 
         info = new InfoPane(cont.getMode());
-        playBox = new PlayBox(90, CLICK_DEFAULT, cont);
+        playBox = new PlayBox(60, CLICK_DEFAULT, cont);
         getChildren().addAll(playBox, info);
     }
 

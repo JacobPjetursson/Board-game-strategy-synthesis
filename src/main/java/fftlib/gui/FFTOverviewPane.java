@@ -175,11 +175,11 @@ public class FFTOverviewPane extends VBox {
         ChoiceBox<String> verificationChoice = new ChoiceBox<>();
         verificationChoice.setMinWidth(textFieldWidth);
         verificationChoice.setMaxWidth(textFieldWidth);
-        verificationChoice.setValue("Completely");
+        verificationChoice.setValue("Total");
         verificationChoice.setStyle("-fx-font: 16px \"Verdana\";");
-        verificationChoice.setItems(FXCollections.observableArrayList("Completely", "Partially"));
+        verificationChoice.setItems(FXCollections.observableArrayList("Total", "Partial"));
 
-        verifyBtn = new Button("Verify FFT");
+        verifyBtn = new Button("Verify");
         verifyBtn.setFont(Font.font("Verdana", 16));
         verifyBtn.setTooltip(new Tooltip("Checks if the current FFT is a winning strategy,\n" +
                 "or if given rules are part of winning strategy"));

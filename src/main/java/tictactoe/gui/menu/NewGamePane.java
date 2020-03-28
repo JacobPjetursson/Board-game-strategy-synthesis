@@ -175,6 +175,7 @@ public class NewGamePane extends AnchorPane {
                     (crossValue.equals(fft)) ? Globals.FFT : Globals.LOOKUP_TABLE;
             int playerCircleMode = (circleValue.equals(human)) ? Globals.HUMAN :
                     (circleValue.equals(fft)) ? Globals.FFT : Globals.LOOKUP_TABLE;
+
             if (playerCrossMode != Globals.FFT && playerCircleMode != Globals.FFT)
                 Globals.ENABLE_AUTOGEN = false;
             new Controller(stage, playerCrossMode,

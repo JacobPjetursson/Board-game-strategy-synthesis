@@ -45,6 +45,7 @@ public class FFTAutoGen {
 
         long timeStart = System.currentTimeMillis();
         setup();
+        /*
         System.out.println("Removing states that apply to current rules");
         if (!GENERATE_ALL_RULES)
             states.removeIf(s -> {
@@ -53,6 +54,7 @@ public class FFTAutoGen {
                         return true;
                 return false;
             });
+        */
         start();
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
         System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");

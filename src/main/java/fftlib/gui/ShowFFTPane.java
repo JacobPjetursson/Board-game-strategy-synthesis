@@ -25,7 +25,7 @@ public class ShowFFTPane extends VBox {
     FFT fft;
     FFTState state;
     private ListView<VBox> lw;
-    private static final int ROW_SIZE = 25;
+    private static final double ROW_SIZE = 25.5;
 
     public ShowFFTPane() {
         setAlignment(Pos.CENTER);
@@ -37,7 +37,7 @@ public class ShowFFTPane extends VBox {
         lw = new ListView<>();
         lw.setPickOnBounds(false);
         lw.setPrefHeight(500);
-        lw.setPrefWidth(400);
+        lw.setPrefWidth(500);
 
 
         lw.setSelectionModel(new NoSelectionModel<>());

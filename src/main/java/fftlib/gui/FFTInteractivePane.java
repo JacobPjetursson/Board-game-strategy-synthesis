@@ -83,7 +83,7 @@ public class FFTInteractivePane extends BorderPane {
         VBox topBox = new VBox(5);
         topBox.setAlignment(Pos.CENTER);
 
-        Label title = new Label("Edit the FFT Interactively");
+        Label title = new Label("Edit the strategy interactively");
         title.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
         title.setAlignment(Pos.CENTER);
         title.setTextAlignment(TextAlignment.CENTER);
@@ -117,8 +117,6 @@ public class FFTInteractivePane extends BorderPane {
         lw.setCellFactory(param -> new RuleCell());
         showRuleGroups();
         BorderPane.setMargin(lw, new Insets(15));
-        BorderPane.setAlignment(lw, Pos.CENTER_LEFT);
-        setRight(lw);
 
         bottomBox = new VBox(15);
         bottomBox.setAlignment(Pos.CENTER);
@@ -147,11 +145,11 @@ public class FFTInteractivePane extends BorderPane {
         ChoiceBox<String> verificationChoice = new ChoiceBox<>();
         verificationChoice.setMinWidth(textFieldWidth);
         verificationChoice.setMaxWidth(textFieldWidth);
-        verificationChoice.setValue("Completely");
+        verificationChoice.setValue("Total");
         verificationChoice.setStyle("-fx-font: 16px \"Verdana\";");
-        verificationChoice.setItems(FXCollections.observableArrayList("Completely", "Partially"));
+        verificationChoice.setItems(FXCollections.observableArrayList("Total", "Partial"));
 
-        verifyBtn = new Button("Verify FFT");
+        verifyBtn = new Button("Verify");
         verifyBtn.setFont(Font.font("Verdana", 16));
         verifyBtn.setTooltip(new Tooltip("Checks if the current FFT is a winning strategy,\n" +
                 "or if given rules are part of winning strategy"));
@@ -251,13 +249,13 @@ public class FFTInteractivePane extends BorderPane {
             showRuleGroups();
         });
 
-        Button addRgBtn = new Button("Add rule group");
+        Button addRgBtn = new Button("Add meta rule");
         addRgBtn.setStyle(greenBtnStyle);
         addRgBtn.setFont(Font.font("Verdana", 16));
         addRgBtn.setOnMouseClicked(event -> {
             Stage newStage = new Stage();
             newStage.setScene(new Scene(
-                    new NameRGPane("Write name of new rule group", false), 500, 200));
+                    new NameRGPane("Write name of new meta rule", false), 500, 200));
             newStage.initModality(Modality.APPLICATION_MODAL);
             newStage.initOwner(getScene().getWindow());
             newStage.setOnCloseRequest(Event::consume);
@@ -297,7 +295,7 @@ public class FFTInteractivePane extends BorderPane {
             }
         });
 
-        saveToDiskBtn = new Button("Save FFT to disk");
+        saveToDiskBtn = new Button("Save to disk");
         saveToDiskBtn.setStyle(blueBtnStyle);
         saveToDiskBtn.setFont(Font.font("Verdana", 16));
         saveToDiskBtn.setOnMouseClicked(event -> {
@@ -306,13 +304,24 @@ public class FFTInteractivePane extends BorderPane {
             changes = false;
         });
 
-        Button minimizeBtn = new Button("Minimize FFT");
+        Button minimizeBtn = new Button("Minimize");
         minimizeBtn.setFont(Font.font("Verdana", 16));
         minimizeBtn.setOnMouseClicked(event -> {
 
             Stage newStage = new Stage();
             newStage.setScene(new Scene(
                     new MinimizeFFTPane(), 500, 200));
+            newStage.initModality(Modality.APPLICATION_MODAL);
+            newStage.initOwner(getScene().getWindow());
+            newStage.show();
+        });
+
+        Button generateBtn = new Button("Synthesize");
+        generateBtn.setFont(Font.font("Verdana", 16));
+        generateBtn.setOnMouseClicked(event -> {
+            Stage newStage = new Stage();
+            newStage.setScene(new Scene(
+                    new GenerateFFTPane(), 500, 200));
             newStage.initModality(Modality.APPLICATION_MODAL);
             newStage.initOwner(getScene().getWindow());
             newStage.show();
@@ -392,13 +401,13 @@ public class FFTInteractivePane extends BorderPane {
         infoBox.setAlignment(Pos.CENTER);
         infoBox.getChildren().addAll(label1, label2, perspectiveGrp);
 
-        ruleBtnBox = new HBox(10, saveRuleBtn, deleteRuleBtn);
+        ruleBtnBox = new HBox(10, saveToDiskBtn, saveRuleBtn, deleteRuleBtn);
         ruleBtnBox.setAlignment(Pos.CENTER);
 
         rgBtnBox = new HBox(10, renameRgBtn, deleteRgBtn);
         rgBtnBox.setAlignment(Pos.CENTER);
 
-        HBox topBtnBox = new HBox(10, addRuleBtn, addRgBtn, saveToDiskBtn, minimizeBtn);
+        HBox topBtnBox = new HBox(10, addRuleBtn, addRgBtn, generateBtn, minimizeBtn);
         topBtnBox.setAlignment(Pos.CENTER);
 
         ruleBox = new HBox(10, ruleBtnBox, clearRuleBtn, undoBtn);
@@ -482,9 +491,12 @@ public class FFTInteractivePane extends BorderPane {
     }
 
     private void addInteractiveNode(Node node) {
-        setCenter(node);
-        BorderPane.setMargin(node, new Insets(0, 0, 0, 0));
-        BorderPane.setAlignment(node, Pos.CENTER);
+        HBox centerBox = new HBox(node, lw);
+        centerBox.setSpacing(10);
+        centerBox.setAlignment(Pos.CENTER);
+        setCenter(centerBox);
+        BorderPane.setMargin(centerBox, new Insets(0, 0, 0, 0));
+        BorderPane.setAlignment(centerBox, Pos.CENTER);
     }
 
     public void update(FFTState state, FFTMove move) {
@@ -826,6 +838,69 @@ public class FFTInteractivePane extends BorderPane {
                 changes = tempChanges;
             } else {
                 msg = diffRules + " rules and " + diffPrecs + " preconditions were removed";
+                changes = true;
+            }
+            System.out.println(msg);
+            playMsg(msg, 5);
+            refresh(false);
+            Stage stage = (Stage) getScene().getWindow();
+            stage.close();
+        }
+
+    }
+
+    public class GenerateFFTPane extends VBox {
+
+        GenerateFFTPane() {
+            Label label = new Label("Choose which team to generate the FFT for");
+            label.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
+            label.setAlignment(Pos.CENTER);
+            label.setTextAlignment(TextAlignment.CENTER);
+
+            String[] playerNames = FFTManager.playerNames;
+
+            Button p1Btn = new Button(playerNames[0]);
+            p1Btn.setOnMouseClicked(event -> {
+                generateAndClose(PLAYER1);
+            });
+
+            Button p2Btn = new Button(playerNames[1]);
+            p2Btn.setOnMouseClicked(event -> {
+                generateAndClose(PLAYER2);
+            });
+
+            Button bothBtn = new Button("Both");
+            bothBtn.setOnMouseClicked(event -> {
+                generateAndClose(PLAYER_ANY);
+            });
+
+            HBox btnBox = new HBox(20, p1Btn, p2Btn, bothBtn);
+            btnBox.setAlignment(Pos.CENTER);
+
+            setSpacing(20);
+            setPadding(new Insets(20, 0, 20, 0));
+            setAlignment(Pos.CENTER);
+
+            getChildren().addAll(label, btnBox);
+        }
+
+        private void generateAndClose(int perspective) {
+            boolean tempChanges = changes;
+            pushUndoStack();
+
+            String msg;
+            if (!currFFT.verify(perspective, false)) { // error, not a winning strategy
+                msg = "The exiting strategy was not partially verified, so can't generate an optimal strategy";
+                popUndoStack();
+                changes = tempChanges;
+            }
+            else if (currFFT.verify(perspective, true)) {
+                msg = "Strategy is already weakly optimal";
+                popUndoStack();
+                changes = tempChanges;
+            } else {
+                FFTManager.autogenFFT(currFFT);
+                msg = "Weakly optimal strategy succesfully generated";
                 changes = true;
             }
             System.out.println(msg);

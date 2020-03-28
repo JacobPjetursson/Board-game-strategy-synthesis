@@ -169,22 +169,16 @@ public class FFTManager {
     }
 
     public static FFT autogenFFT() {
-        if (Globals.ENABLE_AUTOGEN) {
-            FFT fft = FFTAutoGen.generateFFT(Config.AUTOGEN_PERSPECTIVE);
-            ffts.add(0, fft);
-            currFFT = fft;
-        }
-        Globals.ENABLE_AUTOGEN = false;
+        FFT fft = FFTAutoGen.generateFFT(Config.AUTOGEN_PERSPECTIVE);
+        ffts.add(0, fft);
+        currFFT = fft;
         return currFFT;
     }
 
     public static FFT autogenFFT(FFT fft) { // autogen using a current fft
-        if (Globals.ENABLE_AUTOGEN) {
-            FFT newFFT = FFTAutoGen.generateFFT(Config.AUTOGEN_PERSPECTIVE, fft);
-            ffts.add(0, newFFT);
-            currFFT = newFFT;
-        }
-        Globals.ENABLE_AUTOGEN = false;
+        FFT newFFT = FFTAutoGen.generateFFT(Config.AUTOGEN_PERSPECTIVE, fft);
+        ffts.add(0, newFFT);
+        currFFT = newFFT;
         return currFFT;
     }
 
