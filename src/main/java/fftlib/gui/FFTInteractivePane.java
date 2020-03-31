@@ -72,7 +72,7 @@ public class FFTInteractivePane extends BorderPane {
 
     private int[] selectedIndices; // rgIdx, rIdx
 
-    private static final int ROW_SIZE = 26;
+    private static final int ROW_SIZE = 27;
 
     public FFTInteractivePane(FFTManager fftManager) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
@@ -146,11 +146,11 @@ public class FFTInteractivePane extends BorderPane {
         ChoiceBox<String> verificationChoice = new ChoiceBox<>();
         verificationChoice.setMinWidth(textFieldWidth);
         verificationChoice.setMaxWidth(textFieldWidth);
-        verificationChoice.setValue("Total");
+        verificationChoice.setValue("Strongly");
         verificationChoice.setStyle("-fx-font: 16px \"Verdana\";");
-        verificationChoice.setItems(FXCollections.observableArrayList("Total", "Partial"));
+        verificationChoice.setItems(FXCollections.observableArrayList("Strongly", "Weakly"));
 
-        verifyBtn = new Button("Verify");
+        verifyBtn = new Button("Verify optimality");
         verifyBtn.setFont(Font.font("Verdana", 16));
         verifyBtn.setTooltip(new Tooltip("Checks if the current FFT is a winning strategy,\n" +
                 "or if given rules are part of winning strategy"));
@@ -562,7 +562,7 @@ public class FFTInteractivePane extends BorderPane {
 
             Rule r = rg.rules.get(rIdx);
             this.label = new Label((rIdx + 1) + ": " + r);
-            label.setFont(Font.font("Verdana", 13));
+            label.setFont(Font.font("Verdana", 14));
             getChildren().add(label);
         }
     }
@@ -891,17 +891,17 @@ public class FFTInteractivePane extends BorderPane {
 
             String msg;
             if (!currFFT.verify(perspective, false)) { // error, not a winning strategy
-                msg = "The exiting strategy was not partially verified, so can't generate an optimal strategy";
+                msg = "The exiting strategy was not weakly verified, so can't generate an optimal strategy";
                 popUndoStack();
                 changes = tempChanges;
             }
             else if (currFFT.verify(perspective, true)) {
-                msg = "Strategy is already weakly optimal";
+                msg = "Strategy is already strongly optimal";
                 popUndoStack();
                 changes = tempChanges;
             } else {
                 FFTManager.autogenFFT(currFFT);
-                msg = "Weakly optimal strategy succesfully generated";
+                msg = "Strongly optimal strategy succesfully generated";
                 changes = true;
             }
             System.out.println(msg);

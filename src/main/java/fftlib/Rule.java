@@ -251,8 +251,6 @@ public class Rule {
             aStr = actionStr;
         }
         if (ENABLE_GGP_PARSER) {
-            if (cStr.isEmpty())
-                cStr = "∅";
             return "IF: [" + cStr + "] THEN: [" +
                     action.addClause.getFormattedString() + " " + action.remClause.getFormattedString() + "]";
         }

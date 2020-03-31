@@ -31,14 +31,14 @@ public class FFTFailurePane extends BorderPane {
     private FFTManager fftManager;
     private ListView<VBox> lw;
     FFTInteractivePane interactivePane;
-    int ROW_SIZE = 26;
+    int ROW_SIZE = 29;
 
     public FFTFailurePane(Scene prevScene, FFTManager fftManager, FFTInteractivePane interactivePane) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         this.fftManager = fftManager;
         this.interactivePane = interactivePane;
-        Label title = new Label("This is the first encountered state where the strategy failed");
-        title.setFont(Font.font("Verdana", FontWeight.BOLD, 28));
+        Label title = new Label("First encountered state where the strategy chose a sub-optimal move");
+        title.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
         title.setAlignment(Pos.CENTER);
         title.setTextAlignment(TextAlignment.CENTER);
         title.setMinHeight(65);
@@ -115,7 +115,7 @@ public class FFTFailurePane extends BorderPane {
             for (int j = 0; j < rg.rules.size(); j++) {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r);
-                rLabel.setFont(Font.font("Verdana", 13));
+                rLabel.setFont(Font.font("Verdana", 15));
                 // TODO - below is hacky
                 FFTMove failMove = fftManager.currFFT.failingPoint.getMove();
                 FFTState failState = fftManager.currFFT.failingPoint.getState();

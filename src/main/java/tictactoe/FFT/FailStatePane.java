@@ -24,7 +24,7 @@ public class FailStatePane implements FFTFailState {
     }
 
     private PlayBox getFailStatePane(State s, Move move, ArrayList<Move> optimalMoves) {
-        int tilesize = 90;
+        int tilesize = 60;
         PlayBox pb = new PlayBox(tilesize, CLICK_DISABLED, cont);
         pb.update(s);
         Platform.runLater(() -> {
