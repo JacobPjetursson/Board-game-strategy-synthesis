@@ -45,7 +45,7 @@ public class FFTAutoGen {
 
         long timeStart = System.currentTimeMillis();
         setup();
-        /*
+        /* TODO - also check if move is optimal, in addition to checking if rule applies
         System.out.println("Removing states that apply to current rules");
         if (!GENERATE_ALL_RULES)
             states.removeIf(s -> {
@@ -171,6 +171,7 @@ public class FFTAutoGen {
             System.out.println();
 
             // Delete states that apply
+            // TODO - i assume we forget to check that corresponding move is not null??
             if (!GENERATE_ALL_RULES)
                 states.removeIf(s -> r.apply(s) != null);
 
