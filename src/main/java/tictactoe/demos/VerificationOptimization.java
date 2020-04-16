@@ -7,8 +7,6 @@ import misc.Config;
 import tictactoe.FFT.GameSpecifics;
 import tictactoe.game.State;
 
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
 import java.util.*;
 
 import static misc.Config.*;
@@ -29,13 +27,6 @@ public class VerificationOptimization {
         GameSpecifics specs = new GameSpecifics();
         new FFTManager(specs);
         FFTSolver.solveGame(new State());
-        PrintStream debugFile = null;
-        try {
-            debugFile = new PrintStream("debug.txt");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        System.setOut(debugFile);
 
         generateFFT(PLAYER1);
     }
@@ -68,19 +59,8 @@ public class VerificationOptimization {
         initializeSets();
         System.out.println("Number of reachable states: " + reachableStates.size());
         System.out.println("Number of reachable relevant states: " + reachableRelevantStates.size());
-        System.out.println("Reachable states:");
-        for (FFTState s : reachableStates.keySet())
-            System.out.println(s + " , rParents: " + s.getReachableParents());
-        System.out.println();
-
-        System.out.println("Reachable relevant states: ");
-        for (FFTState s : reachableRelevantStates) {
-            System.out.println(s + " , rParents: " + s.getReachableParents());
-        }
-        System.out.println();
     }
 
-    // Labels each unique state with an occurrence, i.e. how many times said state could potentially be visited with optimal play from initial state
     private static void initializeSets() {
         int team = AUTOGEN_PERSPECTIVE;
         FFTState initialState = FFTManager.initialFFTState;
@@ -89,8 +69,6 @@ public class VerificationOptimization {
         frontier.add(initialState);
         reachableStates.put(initialState, initialState);
         reachableRelevantStates.add(initialState);
-        //if (FFTSolution.optimalMoves(initialState).size() != initialState.getLegalMoves().size())
-        //    relevantRules.add(initialState);
 
         while (!frontier.isEmpty()) {
             FFTState state = frontier.pop();
@@ -112,8 +90,6 @@ public class VerificationOptimization {
                 continue;
             }
             ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(state);
-            //if (state.getLegalMoves().size() != optimalMoves.size()) // not only optimal moves, so relevant
-            //    relevantRules.add(state);
             reachableRelevantStates.add(state);
 
             // Our turn, add all states from optimal moves
@@ -145,8 +121,7 @@ public class VerificationOptimization {
     private static void makeRules() {
         // TODO - try with iterator hasNext() and then skip states with all moves optimal
         while (!reachableRelevantStates.isEmpty()) {
-        //while (!relevantRules.isEmpty()) {
-            System.out.println("Remaining relevant rules: " + reachableRelevantStates.size() + ". Current amount of rules: " + rg.rules.size());
+            System.out.println("Remaining relevant states: " + reachableRelevantStates.size() + ". Current amount of rules: " + rg.rules.size());
             FFTState state = reachableRelevantStates.iterator().next();
 
             Rule r = addRule(state);
@@ -189,9 +164,7 @@ public class VerificationOptimization {
             } else if (DETAILED_DEBUG) {
                 System.out.println("REMOVING: " + l.name);
             }
-            System.out.println();
         }
-
         return r;
     }
 
@@ -210,40 +183,18 @@ public class VerificationOptimization {
             }
         }
 
-        /*
-            System.out.println("Applied set:");
-            for (FFTState s : appliedSet)
-                System.out.println(s + "reachable parents: " + s.getReachableParents() + " , isReachable: " + s.isReachable());
-            System.out.println();
-        */
-
         for (FFTState s : appliedSet) {
-            System.out.println("Updating set from state: " + s + " , and move: " + move);
             updateSets(s, move, suboptimalSet, deleteMap, undoMap);
             deleteMap.putIfAbsent(s, false);
         }
 
-
-        System.out.println("Checking if states in suboptimalSet is reachable");
         for (FFTState s : suboptimalSet) {
             if (s.isReachable()) {
-                System.out.println("State: " + s + " , is reachable with suboptimal move");
-                System.out.println("Simplification invalid, rule falsified");
                 undoReachableParents(undoMap);
                 return false;
             }
         }
 
-        System.out.println("Reachable states size: " + reachableStates.size());
-        System.out.println("Reachable relevant states size: " + reachableRelevantStates.size());
-
-        if (!fft.verify(AUTOGEN_PERSPECTIVE, false)) {
-            System.out.println("ERROR: Old verification failed where new did not");
-            System.out.println("Failing point: " + fft.failingPoint);
-            System.exit(1);
-            return false;
-        }
-        System.out.println("Simplification succeeded, applying deletions");
         for (Map.Entry<FFTState, Boolean> entry : deleteMap.entrySet()) {
             FFTState key = entry.getKey();
             if (entry.getValue()) { // del from both
@@ -251,13 +202,6 @@ public class VerificationOptimization {
             }
             reachableRelevantStates.remove(key);
         }
-        /*
-        System.out.println("Printing reachable relevant states:");
-        for (FFTState s : reachableRelevantStates)
-            System.out.println(s + " , reachable parents: " + s.getReachableParents() + " , isReachable: " + s.isReachable());
-        System.out.println();
-        */
-
         return true;
     }
 
@@ -266,21 +210,16 @@ public class VerificationOptimization {
                                    HashSet<FFTState> suboptimalSet, HashMap<FFTState, Boolean> deleteMap,
                                    HashMap<FFTState, FFTMove> undoMap) {
         if (chosenMove != null && !s.isReachable()) {// s might've been set unreachable by another state in appliedSet
-            System.out.println("state is not reachable");
             return;
         }
         ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(s);
         if (chosenMove != null && !optimalMoves.contains(chosenMove)) { // we choose wrong move
-            System.out.println("state chooses suboptimal move, adding to suboptimal set");
             suboptimalSet.add(s);
             return;
         }
-        System.out.println("Removing pointers to all children except chosenMove, adding state: " + s + " , and move: " + chosenMove + ", to undoMap");
         undoMap.put(s, chosenMove);
         for (FFTMove m : optimalMoves) { // remove pointer to all children except chosen move
-            System.out.println("Next state: " + s.getNextState(m) + ", from move: " + m);
             if (m.equals(chosenMove)) { // chosen move
-                System.out.println("We have chosen move");
                 continue;
             }
             FFTState existingChild = reachableStates.get(s.getNextState(m));
@@ -288,14 +227,10 @@ public class VerificationOptimization {
             // i.e. we deleted all but chosen move from this state, so it's still reachable, but children isn't
             // might also be the case that we already removed it once (deleteMap check)
             if (existingChild == null || deleteMap.getOrDefault(existingChild, false)) {
-                System.out.println("Existing child null or part of deleteMap");
                 continue;
             }
-            System.out.println("Removing ptr to child from optimal move: " + existingChild);
             existingChild.removeReachableParent(s);
-            System.out.println("remaining pointers: " + existingChild.getReachableParents());
             if (!existingChild.isReachable()) {
-                System.out.println("Child no longer reachable, removing from set and checking recursively");
                 deleteMap.put(existingChild, true);
                 updateSets(existingChild, null, suboptimalSet, deleteMap, undoMap); // FIXME - tail-end?
             }
@@ -303,16 +238,14 @@ public class VerificationOptimization {
     }
 
     private static void undoReachableParents(HashMap<FFTState, FFTMove> undoMap) {
-        System.out.println("Undoing deletions of reachable parents");
         for (Map.Entry<FFTState, FFTMove> entry : undoMap.entrySet()) {
             FFTState state = entry.getKey();
             FFTMove chosenMove = entry.getValue(); // may be null (if we want to add link to all children)
-            if (chosenMove == null) System.out.println("chosenMove null");
             for (FFTMove move : FFTSolution.optimalMoves(state)) {
                 if (move.equals(chosenMove))
                     continue;
                 FFTState child = reachableStates.get(state.getNextState(move));
-                System.out.println("For state: " + child + " , adding back parent: " + state);
+                // child can be null if choiceMove is not null
                 if (child != null)
                     child.addReachableParent(state);
             }

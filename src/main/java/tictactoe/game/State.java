@@ -3,12 +3,12 @@ package tictactoe.game;
 import fftlib.Literal;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
-import fftlib.game.Occurrence;
 import tictactoe.ai.Zobrist;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
-import static fftlib.game.Transform.*;
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER_ANY;
 
@@ -20,7 +20,6 @@ public class State implements FFTState {
     private long zobrist_key;
 
     // save results if already computed once (e.g. several verifications)
-    private ArrayList<Move> legalMoves;
     private HashSet<Literal> literals;
 
     // Reachability (experimental)
