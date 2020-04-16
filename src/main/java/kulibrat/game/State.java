@@ -149,6 +149,26 @@ public class State implements Serializable, FFTState {
     }
 
     @Override
+    public void addReachableParent(FFTState parent) {
+
+    }
+
+    @Override
+    public void removeReachableParent(FFTState parent) {
+
+    }
+
+    @Override
+    public HashSet<? extends FFTState> getReachableParents() {
+        return null;
+    }
+
+    @Override
+    public boolean isReachable() {
+        return false;
+    }
+
+    @Override
     public FFTState clone() {
         return new State(this);
     }

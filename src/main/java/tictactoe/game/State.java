@@ -3,6 +3,7 @@ package tictactoe.game;
 import fftlib.Literal;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
+import fftlib.game.Occurrence;
 import tictactoe.ai.Zobrist;
 
 import java.util.*;
@@ -20,14 +21,19 @@ public class State implements FFTState {
 
     // save results if already computed once (e.g. several verifications)
     private ArrayList<Move> legalMoves;
-    private ArrayList<State> children;
     private HashSet<Literal> literals;
+
+    // Reachability (experimental)
+    HashSet<State> reachableParents;
+    boolean reachable;
 
     // Starting state
     public State() {
         board = new int[3][3];
         turn = PLAYER1;
         zobrist_key = initHashCode();
+        // TODO - put in separate class or something to avoid clutter in lookupTable (where this is absolutely not needed)
+        reachable = true; // initial state always reachable;
     }
 
     // Duplicate constructor
@@ -39,6 +45,7 @@ public class State implements FFTState {
         turn = state.turn;
         move = state.move;
         this.zobrist_key = state.zobrist_key;
+
     }
 
     // Non-root state
@@ -46,7 +53,30 @@ public class State implements FFTState {
         this(parent);
         Logic.doTurn(m, this);
         this.move = m;
+        reachableParents = new HashSet<>();
         updateHashCode(parent);
+    }
+
+    public void addReachableParent(State parent) {
+        if (reachableParents == null) {
+            reachableParents = new HashSet<>();
+        }
+        reachableParents.add(parent);
+        reachable = true;
+    }
+
+    public void removeReachableParent(State parent) {
+        reachableParents.remove(parent);
+        if (reachableParents.isEmpty())
+            reachable = false;
+    }
+
+    public HashSet<State> getReachableParents() {
+        return reachableParents;
+    }
+
+    public boolean isReachable() {
+        return reachable;
     }
 
     private long initHashCode() {
@@ -83,14 +113,11 @@ public class State implements FFTState {
     }
 
     public ArrayList<State> getChildren() {
-        if (children != null)
-            return children;
         ArrayList<State> children = new ArrayList<>();
         for (Move m : getLegalMoves()) {
             State child = new State(this, m);
             children.add(child);
         }
-        this.children = children;
         return children;
     }
 
@@ -104,6 +131,16 @@ public class State implements FFTState {
 
     public Move getMove() {
         return move;
+    }
+
+    @Override
+    public void addReachableParent(FFTState parent) {
+        addReachableParent((State)parent);
+    }
+
+    @Override
+    public void removeReachableParent(FFTState parent) {
+        removeReachableParent((State) parent);
     }
 
     @Override
@@ -176,10 +213,7 @@ public class State implements FFTState {
 
     // Creates and/or returns a list of new state objects which correspond to the children of the given state.
     public ArrayList<Move> getLegalMoves() {
-        if (legalMoves != null)
-            return legalMoves;
-        legalMoves = Logic.legalMoves(turn, this);
-        return legalMoves;
+        return Logic.legalMoves(turn, this);
     }
 
     @Override

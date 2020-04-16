@@ -45,7 +45,7 @@ public class FFTAutoGen {
 
         long timeStart = System.currentTimeMillis();
         setup();
-        /* TODO - also check if move is optimal, in addition to checking if rule applies
+        /* TODO - why doesn't it work?
         System.out.println("Removing states that apply to current rules");
         if (!GENERATE_ALL_RULES)
             states.removeIf(s -> {
@@ -98,7 +98,8 @@ public class FFTAutoGen {
         System.out.println("Final amount of preconditions after " + i + " minimize iterations: " + fft.getAmountOfPreconditions());
     }
 
-
+    // TODO - this does not filter enough, e.g. it doesn't filter states that can only be reached with sub-optimal moves from player
+    // TODO - instead, do an initial game tree search to identify all reachable states, which will be subset of this
     private static void filterSolution() {
         for (Map.Entry<? extends FFTState, ? extends StateMapping> entry : lookupTable.entrySet()) {
             FFTState state = entry.getKey();
@@ -171,7 +172,6 @@ public class FFTAutoGen {
             System.out.println();
 
             // Delete states that apply
-            // TODO - i assume we forget to check that corresponding move is not null??
             if (!GENERATE_ALL_RULES)
                 states.removeIf(s -> r.apply(s) != null);
 

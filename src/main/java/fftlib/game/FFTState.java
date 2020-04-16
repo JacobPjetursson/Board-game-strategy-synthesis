@@ -23,5 +23,13 @@ public interface FFTState {
 
     FFTMove getMove();
 
+    void addReachableParent(FFTState parent);
+
+    void removeReachableParent(FFTState parent);
+
+    HashSet<? extends FFTState> getReachableParents();
+
+    boolean isReachable();
+
     FFTState clone();
 }

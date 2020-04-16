@@ -220,6 +220,26 @@ public class State implements FFTState {
         return move;
     }
 
+    @Override
+    public void addReachableParent(FFTState parent) {
+
+    }
+
+    @Override
+    public void removeReachableParent(FFTState parent) {
+
+    }
+
+    @Override
+    public HashSet<? extends FFTState> getReachableParents() {
+        return null;
+    }
+
+    @Override
+    public boolean isReachable() {
+        return false;
+    }
+
     public void changeTurn() {
         if (turn == PLAYER1)
             turn = PLAYER2;

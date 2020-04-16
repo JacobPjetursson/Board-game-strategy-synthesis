@@ -19,4 +19,8 @@ public class FFTStateAndMove {
     public FFTState getState() {
         return state;
     }
+
+    public String toString() {
+        return "state: " + state + " , sub-optimal move: " + move;
+    }
 }
