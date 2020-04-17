@@ -125,16 +125,15 @@ public class FFTAutoGen {
         for (Literal l : literals) {
             if (DETAILED_DEBUG) System.out.println("ATTEMPING TO REMOVE: " + l.name);
             r.removePrecondition(l);
-            if (DETAILED_DEBUG) System.out.println("RULE IS NOW: " + r);
-
             boolean verified = verifyRule(r, false);
 
             if (!verified) {
                 if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.name);
                 r.addPrecondition(l);
             } else {
-                if (DETAILED_DEBUG) System.out.println("REMOVING RULE: " + r);
+                if (DETAILED_DEBUG) System.out.println("REMOVING PRECONDITION: " + l.name);
             }
+            if (DETAILED_DEBUG) System.out.println("RULE IS NOW: " + r);
         }
 
         verifyRule(r, true); // safe run where we know we have the final rule
