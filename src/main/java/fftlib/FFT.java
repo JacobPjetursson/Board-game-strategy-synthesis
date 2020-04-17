@@ -312,7 +312,6 @@ public class FFT {
     }
 
     private ArrayList<Rule> minimizeRules(int team) {
-        if (DETAILED_DEBUG) System.out.println("Minimizing rules");
         ArrayList<Rule> redundantRules = new ArrayList<>();
         if (MINIMIZE_BOTTOMS_UP)
             return minimizeRulesBottomsUp(team);
@@ -367,24 +366,18 @@ public class FFT {
     }
 
     private void minimizePreconditions(int team) {
-        if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
-        int amount = 0;
         for (RuleGroup rg : ruleGroups) {
             if (rg.locked) continue; // don't minimize if rg is locked
             for(Rule r : rg.rules) {
                 if (r.multiRule) continue; // TODO - support multirule when minimizing?
                 minimizePreconditions(r, team);
-                amount++;
-                if (GENERATE_ALL_RULES && DETAILED_DEBUG) System.out.println("Minimized preconditions (" + amount + "/" + rg.rules.size() + ")");
             }
         }
     }
 
     // TODO - fix this ugly beast, either by making common type for precons and sentences or by typecasting
     private void minimizePreconditions(Rule r, int team) {
-        int amount;
         if (Config.ENABLE_GGP) {
-            amount = r.sentences.size();
             Set<GdlSentence> sentences = new HashSet<>();
             for (GdlSentence s : r.sentences)
                 sentences.add(s.clone());
@@ -395,7 +388,6 @@ public class FFT {
                     r.addPrecondition(s);
             }
         } else {
-            amount = r.preconditions.literals.size();
             ArrayList<Literal> literals = new ArrayList<>();
             for (Literal l : r.preconditions.literals)
                 literals.add(l.clone());
@@ -406,9 +398,6 @@ public class FFT {
                     r.addPrecondition(l);
             }
         }
-        int newAmount = (ENABLE_GGP) ? r.sentences.size() : r.preconditions.literals.size();
-        if (GENERATE_ALL_RULES && DETAILED_DEBUG)
-            System.out.println("Minimized rule from " + amount + " to " + newAmount + " preconditions");
     }
 
     public String toString() {

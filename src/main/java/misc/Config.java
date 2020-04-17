@@ -3,7 +3,9 @@ package misc;
 import org.apache.xpath.operations.Bool;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Properties;
 
 import static misc.Globals.*;
@@ -30,6 +32,8 @@ public class Config {
     public static boolean SHOW_RULE_GROUPS;
     public static boolean USE_DEBUG_FILE;
     public static String DEBUG_FILENAME;
+    public static boolean BENCHMARK_MODE;
+    public static int BENCHMARK_NUMBER;
 
     // KULIBRAT PROPERTIES
     public static int BWIDTH;
@@ -60,6 +64,7 @@ public class Config {
             e.printStackTrace();
         }
         printSettings();
+        setupDebugFile();
     }
 
     private static void loadProperties() throws IOException {
@@ -122,6 +127,8 @@ public class Config {
         SHOW_RULE_GROUPS = Boolean.parseBoolean(global.getProperty("show_rule_groups"));
         // DEBUG AND TEST
         DETAILED_DEBUG = Boolean.parseBoolean(global.getProperty("detailedDebug"));
+        BENCHMARK_MODE = Boolean.parseBoolean(global.getProperty("benchmark_mode"));
+        BENCHMARK_NUMBER = Integer.parseInt(global.getProperty("no_of_benchmarks"));
         USE_DEBUG_FILE = Boolean.parseBoolean(global.getProperty("use_debug_file"));
         DEBUG_FILENAME = global.getProperty("debug_filename");
         VERIFY_SINGLE_STRATEGY = Boolean.parseBoolean(global.getProperty("verify_single_strategy"));
@@ -183,9 +190,22 @@ public class Config {
         System.out.printf("%-30.40s %-30.40s\n", "Seed value:",SEED);
         System.out.printf("%-30.40s %-30.40s\n", "Detailed debug messages:", DETAILED_DEBUG);
         System.out.printf("%-30.40s %-30.40s\n", "Using debug file:", USE_DEBUG_FILE);
+        System.out.printf("%-30.40s %-30.40s\n", "Benchmark mode:", BENCHMARK_MODE);
         System.out.printf("%-30.40s %-30.40s\n", "Single thread:", SINGLE_THREAD);
         System.out.printf("%-30.40s %-30.40s\n", "Verify single strategy:", VERIFY_SINGLE_STRATEGY);
         System.out.printf("%-30.40s %-30.40s\n", "Use filtering:", USE_FILTERING);
         System.out.printf("%-30.40s %-30.40s\n", "Save intermediate strategy:", SAVE_STRAT);
+    }
+
+    private static void setupDebugFile() {
+        if (USE_DEBUG_FILE) {
+            PrintStream debugFile = null;
+            try {
+                debugFile = new PrintStream(DEBUG_FILENAME);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            System.setOut(debugFile);
+        }
     }
 }

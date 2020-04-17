@@ -6,10 +6,6 @@ import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
 import javafx.scene.input.DataFormat;
 import misc.Config;
-import misc.Globals;
-import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
-import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
-import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -175,10 +171,11 @@ public class FFTManager {
         return currFFT;
     }
 
+    // TODO - support existing fft
     public static FFT autogenFFT(FFT fft) { // autogen using a current fft
-        FFT newFFT = FFTAutoGen.generateFFT(Config.AUTOGEN_PERSPECTIVE, fft);
-        ffts.add(0, newFFT);
-        currFFT = newFFT;
+        //FFT newFFT = FFTAutoGen.generateFFT(Config.AUTOGEN_PERSPECTIVE, fft);
+        //ffts.add(0, newFFT);
+        //currFFT = newFFT;
         return currFFT;
     }
 
