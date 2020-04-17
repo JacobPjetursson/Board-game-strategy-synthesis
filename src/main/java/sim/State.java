@@ -16,6 +16,10 @@ public class State implements FFTState {
     private long zobrist_key;
     LinkedList<Line> lines;
 
+    // Reachability (experimental)
+    HashSet<State> reachableParents;
+    boolean reachable;
+
     // initial state
     public State () {
         turn = PLAYER1;
@@ -40,6 +44,7 @@ public class State implements FFTState {
 
         lines.add(new Line(4, 5));
         this.zobrist_key = initZobrist();
+        reachable = true; // initial state always reachable;
     }
 
     // next state
@@ -47,6 +52,7 @@ public class State implements FFTState {
         this(parent);
         this.move = m;
         Logic.doTurn(m, this);
+        reachableParents = new HashSet<>();
         updateHashCode(parent);
     }
 
@@ -59,6 +65,28 @@ public class State implements FFTState {
         turn = state.turn;
         move = state.move;
         zobrist_key = state.zobrist_key;
+    }
+
+    public void addReachableParent(State parent) {
+        if (reachableParents == null) {
+            reachableParents = new HashSet<>();
+        }
+        reachableParents.add(parent);
+        reachable = true;
+    }
+
+    public void removeReachableParent(State parent) {
+        reachableParents.remove(parent);
+        if (reachableParents.isEmpty())
+            reachable = false;
+    }
+
+    public HashSet<State> getReachableParents() {
+        return reachableParents;
+    }
+
+    public boolean isReachable() {
+        return reachable;
     }
 
 
@@ -184,16 +212,6 @@ public class State implements FFTState {
     @Override
     public void removeReachableParent(FFTState parent) {
 
-    }
-
-    @Override
-    public HashSet<? extends FFTState> getReachableParents() {
-        return null;
-    }
-
-    @Override
-    public boolean isReachable() {
-        return false;
     }
 
     @Override

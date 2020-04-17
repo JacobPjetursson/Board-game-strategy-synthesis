@@ -110,9 +110,6 @@ public class FFTAutoGen {
         StateMapping mapping = lookupTable.get(s);
         Action bestAction = mapping.getMove().getAction();
 
-        HashMap<FFTState, Boolean> correctDeleteMap = new HashMap<>();
-        HashMap<FFTState, FFTMove> redoMap = new HashMap<>();
-
         for (Literal l : literals)
             minSet.add(new Literal(l));
 
@@ -125,35 +122,21 @@ public class FFTAutoGen {
             System.out.println("ORIGINAL SCORE: " + mapping.getScore());
         }
 
-        Iterator<Literal> it = literals.iterator();
-        boolean lastVerified = false;
-        while (it.hasNext()) {
-            Literal l = it.next();
+        for (Literal l : literals) {
             if (DETAILED_DEBUG) System.out.println("ATTEMPING TO REMOVE: " + l.name);
             r.removePrecondition(l);
             if (DETAILED_DEBUG) System.out.println("RULE IS NOW: " + r);
 
-            //HashMap<FFTState, Boolean> deleteMap = new HashMap<>();
-            //HashMap<FFTState, FFTMove> undoMap = new HashMap<>();
             boolean verified = verifyRule(r, false);
 
             if (!verified) {
                 if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.name);
                 r.addPrecondition(l);
             } else {
-                //if (!it.hasNext()) // last simplification was correct
-                //    lastVerified = true;
-                //correctDeleteMap = deleteMap;
-                //redoMap = undoMap;
                 if (DETAILED_DEBUG) System.out.println("REMOVING RULE: " + r);
             }
-            //if (!lastVerified)
-            //    undoReachableParents(undoMap, false);
         }
 
-        //deleteUnreachableStates(correctDeleteMap);
-        //if (!lastVerified)
-        //    undoReachableParents(redoMap, true);
         verifyRule(r, true); // safe run where we know we have the final rule
         return r;
     }
@@ -246,9 +229,6 @@ public class FFTAutoGen {
                 FFTState child = reachableStates.get(state.getNextState(move));
                 // child can be null if choiceMove is not null
                 if (child != null) {
-                    //if (redo) {
-                    //    child.removeReachableParent(state);
-                    //} else {
                     child.addReachableParent(state);
 
                 }

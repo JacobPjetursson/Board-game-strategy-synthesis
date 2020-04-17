@@ -22,7 +22,7 @@ public class State implements FFTState {
     // save results if already computed once (e.g. several verifications)
     private HashSet<Literal> literals;
 
-    // Reachability (experimental)
+    // Reachability
     HashSet<State> reachableParents;
     boolean reachable;
 
