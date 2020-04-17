@@ -290,6 +290,11 @@ public class Rule {
         }
         for (Rule rule : symmetryRules) {
             m = match(rule, state, stLiterals);
+            // returns the first symmetry with a legal move
+            // We want to ensure that rule is optimal in all symmetric states, but since all these will be explored
+            // by the algorithm, we are good. This is the case since we always start with checking the default state
+            // (no applied symmetries), meaning every symmetric states will inevitably be checked.
+            // Alternative is to check that all non-null moves here are legal. TODO - check with method is fastest
             if (m != null) {
                 return m;
             }

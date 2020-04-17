@@ -7,6 +7,8 @@ import misc.Config;
 import tictactoe.FFT.GameSpecifics;
 import tictactoe.game.State;
 
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.*;
 
 import static misc.Config.*;
@@ -24,10 +26,10 @@ public class VerificationOptimization {
     private static RuleGroup rg;
 
     public static void main(String[] args) {
+        setupDebugFile();
         GameSpecifics specs = new GameSpecifics();
         new FFTManager(specs);
         FFTSolver.solveGame(new State());
-
         generateFFT(PLAYER1);
     }
 
@@ -59,6 +61,17 @@ public class VerificationOptimization {
         initializeSets();
         System.out.println("Number of reachable states: " + reachableStates.size());
         System.out.println("Number of reachable relevant states: " + reachableRelevantStates.size());
+    }
+
+    private static void setupDebugFile() {
+        PrintStream debugFile = null;
+        try {
+            debugFile = new PrintStream(DEBUG_FILENAME);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        if (USE_DEBUG_FILE)
+            System.setOut(debugFile);
     }
 
     private static void initializeSets() {
@@ -145,46 +158,47 @@ public class VerificationOptimization {
 
         // DEBUG
         if (DETAILED_DEBUG) {
-            System.out.print("ORIGINAL LITERALS: ");
-            for (Literal l : literals)
-                System.out.print(l.name + " ");
-            System.out.println();
-            System.out.println("ORIGINAL STATE: " + s);
-            System.out.println("ORIGINAL MOVE: " + mapping.getMove());
+            System.out.println("ORIGINAL STATE: " + s + " , AND MOVE: " + mapping.getMove());
             System.out.println("ORIGINAL SCORE: " + mapping.getScore());
         }
 
         for (Literal l : literals) {
             if (DETAILED_DEBUG) System.out.println("ATTEMPING TO REMOVE: " + l.name);
             r.removePrecondition(l);
+            if (DETAILED_DEBUG) System.out.println("RULE IS NOW: " + r);
 
-            if (!verifyRule(r)) {
-                if (DETAILED_DEBUG) System.out.println("FAILED TO VERIFY RULE!");
+            if (!verifyRule(r, false)) {
+                if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.name);
                 r.addPrecondition(l);
             } else if (DETAILED_DEBUG) {
                 System.out.println("REMOVING: " + l.name);
             }
         }
+        verifyRule(r, true); // safe run where we know we have the final rule
         return r;
     }
 
-    private static boolean verifyRule(Rule r) {
-        FFTMove move = r.action.getMove(AUTOGEN_PERSPECTIVE);
-        HashSet<FFTState> appliedSet = new HashSet<>();
+    private static boolean verifyRule(Rule r, boolean safe) {
+        HashMap<FFTState, FFTMove> appliedMap = new HashMap<>();
         HashSet<FFTState> suboptimalSet = new HashSet<>(); // contains states with sub-optimal moves
+
         // true if delete from both, false if only from relevantReachable
         HashMap<FFTState, Boolean> deleteMap = new HashMap<>();
         // Undo the changes to reachable parents if simplification invalid
         HashMap<FFTState, FFTMove> undoMap = new HashMap<>();
 
         for (FFTState s : reachableRelevantStates) {
-            if (r.apply(s) != null) { // this is equivalent to checking that rule applies with legal move
-                appliedSet.add(s);
+            // TODO - can we optimize this query?
+            FFTMove m = r.apply(s);
+            if (m != null) { // this is equivalent to checking that rule applies with legal move
+                appliedMap.put(s, m);
             }
         }
 
-        for (FFTState s : appliedSet) {
-            updateSets(s, move, suboptimalSet, deleteMap, undoMap);
+        for (Map.Entry<FFTState, FFTMove> entry : appliedMap.entrySet()) {
+            FFTState s = entry.getKey();
+            FFTMove m = entry.getValue();
+            updateSets(s, m, suboptimalSet, deleteMap, undoMap);
             deleteMap.putIfAbsent(s, false);
         }
 
@@ -195,12 +209,12 @@ public class VerificationOptimization {
             }
         }
 
-        for (Map.Entry<FFTState, Boolean> entry : deleteMap.entrySet()) {
-            FFTState key = entry.getKey();
-            if (entry.getValue()) { // del from both
-                reachableStates.remove(key);
-            }
-            reachableRelevantStates.remove(key);
+        // if safe, then delete, otherwise undo
+        if (safe) {
+            deleteUnreachableStates(deleteMap);
+        } else {
+            // TODO - check if its faster to make copies of states than to undo
+            undoReachableParents(undoMap);
         }
         return true;
     }
@@ -209,7 +223,8 @@ public class VerificationOptimization {
     private static void updateSets(FFTState s, FFTMove chosenMove,
                                    HashSet<FFTState> suboptimalSet, HashMap<FFTState, Boolean> deleteMap,
                                    HashMap<FFTState, FFTMove> undoMap) {
-        if (chosenMove != null && !s.isReachable()) {// s might've been set unreachable by another state in appliedSet
+        // s might've been set unreachable by another state in appliedSet
+        if (chosenMove != null && !s.isReachable()) {
             return;
         }
         ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(s);
@@ -234,6 +249,16 @@ public class VerificationOptimization {
                 deleteMap.put(existingChild, true);
                 updateSets(existingChild, null, suboptimalSet, deleteMap, undoMap); // FIXME - tail-end?
             }
+        }
+    }
+
+    private static void deleteUnreachableStates(HashMap<FFTState, Boolean> deleteMap) {
+        for (Map.Entry<FFTState, Boolean> entry : deleteMap.entrySet()) {
+            FFTState key = entry.getKey();
+            if (entry.getValue()) { // del from both
+                reachableStates.remove(key);
+            }
+            reachableRelevantStates.remove(key);
         }
     }
 

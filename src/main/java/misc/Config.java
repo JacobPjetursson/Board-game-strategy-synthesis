@@ -28,6 +28,8 @@ public class Config {
     public static boolean SINGLE_THREAD;
     public static boolean USE_FILTERING;
     public static boolean SHOW_RULE_GROUPS;
+    public static boolean USE_DEBUG_FILE;
+    public static String DEBUG_FILENAME;
 
     // KULIBRAT PROPERTIES
     public static int BWIDTH;
@@ -120,6 +122,8 @@ public class Config {
         SHOW_RULE_GROUPS = Boolean.parseBoolean(global.getProperty("show_rule_groups"));
         // DEBUG AND TEST
         DETAILED_DEBUG = Boolean.parseBoolean(global.getProperty("detailedDebug"));
+        USE_DEBUG_FILE = Boolean.parseBoolean(global.getProperty("use_debug_file"));
+        DEBUG_FILENAME = global.getProperty("debug_filename");
         VERIFY_SINGLE_STRATEGY = Boolean.parseBoolean(global.getProperty("verify_single_strategy"));
         SINGLE_THREAD = Boolean.parseBoolean(global.getProperty("single_thread"));
         USE_FILTERING = Boolean.parseBoolean(global.getProperty("use_filtering"));
@@ -178,6 +182,7 @@ public class Config {
         System.out.printf("%-30.40s %-30.40s\n", "Random seed:", RANDOM_SEED);
         System.out.printf("%-30.40s %-30.40s\n", "Seed value:",SEED);
         System.out.printf("%-30.40s %-30.40s\n", "Detailed debug messages:", DETAILED_DEBUG);
+        System.out.printf("%-30.40s %-30.40s\n", "Using debug file:", USE_DEBUG_FILE);
         System.out.printf("%-30.40s %-30.40s\n", "Single thread:", SINGLE_THREAD);
         System.out.printf("%-30.40s %-30.40s\n", "Verify single strategy:", VERIFY_SINGLE_STRATEGY);
         System.out.printf("%-30.40s %-30.40s\n", "Use filtering:", USE_FILTERING);
