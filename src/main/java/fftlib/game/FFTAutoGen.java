@@ -22,9 +22,11 @@ public class FFTAutoGen {
 
     public static FFT generateFFT(int perspective_) {
         // temp code
+        /*
         Scanner block = new Scanner(System.in);
         System.out.println("Press any button to continue");
         block.nextLine();
+         */
 
         AUTOGEN_PERSPECTIVE = perspective_;
 
