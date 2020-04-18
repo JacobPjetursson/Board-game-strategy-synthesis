@@ -206,12 +206,12 @@ public class State implements FFTState {
 
     @Override
     public void addReachableParent(FFTState parent) {
-
+        addReachableParent((State)parent);
     }
 
     @Override
     public void removeReachableParent(FFTState parent) {
-
+        removeReachableParent((State) parent);
     }
 
     @Override

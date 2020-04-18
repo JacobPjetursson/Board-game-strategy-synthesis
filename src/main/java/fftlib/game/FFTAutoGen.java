@@ -163,6 +163,9 @@ public class FFTAutoGen {
             deleteMap.putIfAbsent(s, false);
         }
 
+        System.out.println("deleteMap size: " + deleteMap.size());
+        System.out.println("undoMap size: " + undoMap.size());
+
         for (FFTState s : suboptimalSet) {
             if (s.isReachable()) {
                 undoReachableParents(undoMap);
