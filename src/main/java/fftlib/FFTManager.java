@@ -179,7 +179,7 @@ public class FFTManager {
     }
 
     public static FFT autogenFFT() {
-        FFT fft = FFTAutoGen.generateFFT(Config.AUTOGEN_TEAM);
+        FFT fft = FFTAutoGenOld.generateFFT(Config.AUTOGEN_TEAM);
         ffts.add(0, fft);
         currFFT = fft;
         return currFFT;
