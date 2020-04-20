@@ -161,7 +161,7 @@ public class FFTAutoGen {
                 appliedMap.put(s, m);
             }
         }
-        //System.out.println("AppliedMap size: " + appliedMap.size());
+        System.out.println("AppliedMap size: " + appliedMap.size());
 
         for (Map.Entry<FFTState, FFTMove> entry : appliedMap.entrySet()) {
             FFTState s = entry.getKey();
@@ -171,8 +171,8 @@ public class FFTAutoGen {
             deleteMap.putIfAbsent(s, false);
         }
 
-        //System.out.println("deleteMap size: " + deleteMap.size());
-        //System.out.println("undoMap size: " + undoMap.size());
+        System.out.println("deleteMap size: " + deleteMap.size());
+        System.out.println("undoMap size: " + undoMap.size());
 
         for (FFTState s : suboptimalSet) {
             if (s.isReachable()) {
