@@ -9,8 +9,6 @@ public interface FFTState {
 
     HashSet<Literal> getLiterals();
 
-    HashSet<Literal> getAllLiterals();
-
     long getZobristKey();
 
     int getTurn();

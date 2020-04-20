@@ -11,9 +11,9 @@ public class Main {
     public static void main(String[] args) {
         State s = new State();
         GameSpecifics specs = new GameSpecifics();
-        FFTManager fftManager = new FFTManager(specs);
+        FFTManager.initialize(specs);
         FFTSolver.solveGame(s);
 
-        fftManager.autogenFFT();
+        FFTManager.autogenFFT();
     }
 }

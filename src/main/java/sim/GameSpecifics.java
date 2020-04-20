@@ -1,52 +1,36 @@
 package sim;
 
-import fftlib.Action;
-import fftlib.Literal;
-import fftlib.Rule;
+import fftlib.*;
 import fftlib.game.*;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 import misc.Config;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
-import static fftlib.Literal.PIECEOCC_ANY;
-import static fftlib.Literal.PIECEOCC_PLAYER;
-import static fftlib.game.Transform.*;
-import static misc.Globals.PLAYER1;
-import static misc.Globals.PLAYER2;
-
 public class GameSpecifics implements FFTGameSpecifics {
+
+
     @Override
-    public FFTMove actionToMove(Action a, int team) {
-        if (a == null || (a.addClause.isEmpty() && a.remClause.isEmpty()))
+    public FFTMove actionToMove(Action a) {
+        if (a == null || a.adds.size() != 1)
             return null;
-        int n1 = -1;
-        int n2 = -1;
-        for (Literal l : a.addClause.literals) {
-            n1 = l.row;
-            n2 = l.col;
+        FFTMove m = null;
+        for (Literal l : a.adds) {
+            Position pos = Atoms.idToPos.get(l.id);
+            m = new Move(pos. occ, new Line(pos.row, pos.col));
         }
-        return new Move(team, new Line(n1, n2));
+        return m;
     }
 
     @Override
-    public FFTState preconsToState(HashSet<Literal> precons, int team) {
-        State s = new State();
-        int opponent = team == PLAYER1 ? PLAYER2 : PLAYER1;
-        for (Literal l : precons) {
-            if (l.boardPlacement && !l.negation && l.pieceOcc != PIECEOCC_ANY) {
-                int entry;
-                if (l.pieceOcc == PIECEOCC_PLAYER)
-                    entry = team;
-                else
-                    entry = opponent;
-
-                s.setLine(l.row, l.col, entry);
-            }
-        }
-        s.setTurn(team);
-        return s;
+    public Action moveToAction(FFTMove move) {
+        if (move == null)
+            return null;
+        Move m = (Move) move;
+        Position pos = new Position(m.line.n1, m.line.n2, m.team);
+        return new Action(Atoms.posToId.get(pos));
     }
 
     @Override
@@ -72,11 +56,6 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public int[] getAllowedTransformations() {
-        return new int[]{TRANS_HREF, TRANS_VREF, TRANS_ROT};
-    }
-
-    @Override
     public FFTState getInitialState() {
         return new State();
     }
@@ -84,6 +63,21 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public FFTLogic getLogic() {
         return new Logic();
+    }
+
+    @Override
+    public ArrayList<Integer> getGameAtoms() {
+        return Atoms.gameAtoms;
+    }
+
+    @Override
+    public String getAtomName(int atom) {
+        return Atoms.idToString.get(atom);
+    }
+
+    @Override
+    public int getAtomId(String name) {
+        return Atoms.stringToId.get(name);
     }
 
     @Override
@@ -97,7 +91,17 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public int getMaxPrecons() {
-        return 15;
+    public HashSet<SymmetryRule> getSymmetryRules(Rule rule) {
+        return Transform.findAutomorphisms(rule);
+    }
+
+    @Override
+    public int posToId(Position pos) {
+        return Atoms.posToId.get(pos);
+    }
+
+    @Override
+    public Position idToPos(int id) {
+        return Atoms.idToPos.get(id);
     }
 }

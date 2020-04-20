@@ -18,9 +18,10 @@ public class InteractivePlayBox extends PlayBox {
         super(tilesize, clickMode, cont);
     }
 
-    public void update(Rule r, int perspective) {
+    public void update(Rule r) { // TODO
+        /*
         int[][] preconBoard = Transform.preconsToBoard(r.preconditions);
-        Move m = (Move) r.action.getMove(perspective);
+        Move m = (Move) r.action.getMove();
 
         int enemy = (perspective == PLAYER1) ? PLAYER2 : PLAYER1;
         BoardTile[][] tiles = board.getTiles();
@@ -46,7 +47,6 @@ public class InteractivePlayBox extends PlayBox {
                     tile.setNegated(occ < 0);
             }
         }
-
         Platform.runLater(() -> {
             removeHighlights();
             if (m != null) {
@@ -54,6 +54,7 @@ public class InteractivePlayBox extends PlayBox {
             }
         });
 
+*/
 
     }
 }

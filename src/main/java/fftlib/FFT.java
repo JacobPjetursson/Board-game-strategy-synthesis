@@ -276,8 +276,8 @@ public class FFT {
         return precSize;
     }
 
-    public int minimize(int perspective, boolean minimize_precons) { // Returns amount of iterations
-        if (!verify(perspective, true)) {
+    public int minimize(int team, boolean minimize_precons) { // Returns amount of iterations
+        if (!verify(team, true)) {
             System.out.println("FFT is not a winning strategy, so it can not be minimized");
             return -1;
         }
@@ -287,9 +287,9 @@ public class FFT {
         int ruleSize = getAmountOfRules();
         int precSize = getAmountOfPreconditions();
 
-        minimizeRules(perspective);
+        minimizeRules(team);
         if (!MINIMIZE_RULE_BY_RULE && minimize_precons) {
-            minimizePreconditions(perspective);
+            minimizePreconditions(team);
         }
 
         int minRuleSize = getAmountOfRules();
@@ -300,9 +300,9 @@ public class FFT {
             ruleSize = minRuleSize;
             precSize = minPrecSize;
 
-            minimizeRules(perspective);
+            minimizeRules(team);
             if (!MINIMIZE_RULE_BY_RULE && minimize_precons)
-                minimizePreconditions(perspective);
+                minimizePreconditions(team);
 
             minRuleSize = getAmountOfRules();
             minPrecSize = getAmountOfPreconditions();
@@ -323,7 +323,6 @@ public class FFT {
             ListIterator<Rule> itr = rg.rules.listIterator();
             while(itr.hasNext()) {
                 Rule r = itr.next();
-                if (r.multiRule) continue; // TODO - support multirule when minimizing?
                 itr.remove();
                 if (verify(team, true)) {
                     redundantRules.add(r);
@@ -348,7 +347,6 @@ public class FFT {
             ListIterator<Rule> itr = rg.rules.listIterator(rg.rules.size());
             while(itr.hasPrevious()) {
                 Rule r = itr.previous();
-                if (r.multiRule) continue; // TODO - support multirule when minimizing?
                 itr.remove();
                 if (verify(team, true)) {
                     redundantRules.add(r);
@@ -369,7 +367,6 @@ public class FFT {
         for (RuleGroup rg : ruleGroups) {
             if (rg.locked) continue; // don't minimize if rg is locked
             for(Rule r : rg.rules) {
-                if (r.multiRule) continue; // TODO - support multirule when minimizing?
                 minimizePreconditions(r, team);
             }
         }
@@ -389,7 +386,7 @@ public class FFT {
             }
         } else {
             ArrayList<Literal> literals = new ArrayList<>();
-            for (Literal l : r.preconditions.literals)
+            for (Literal l : r.preconditions)
                 literals.add(l.clone());
 
             for (Literal l : literals) {

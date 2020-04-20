@@ -21,8 +21,8 @@ public class FFTAutoGenOld {
     private static int winner;
     private static int max_precons;
 
-    public static FFT generateFFT(int perspective_) {
-        AUTOGEN_PERSPECTIVE = perspective_;
+    public static FFT generateFFT(int team_) {
+        AUTOGEN_TEAM = team_;
         fft = new FFT("Synthesis");
         long timeStart = System.currentTimeMillis();
         setup();
@@ -34,11 +34,11 @@ public class FFTAutoGenOld {
     }
 
     // use already existing FFT (weakly optimal)
-    public static FFT generateFFT(int perspective_, FFT currFFT) {
-        AUTOGEN_PERSPECTIVE = perspective_;
+    public static FFT generateFFT(int team_, FFT currFFT) {
+        AUTOGEN_TEAM = team_;
         fft = currFFT;
         // check if existing FFT is weakly optimal
-        if (!fft.verify(perspective_, false)) {
+        if (!fft.verify(team_, false)) {
             System.out.println("Existing FFT is not weakly optimal. Returning");
             return fft;
         }
@@ -67,7 +67,7 @@ public class FFTAutoGenOld {
         fft.addRuleGroup(rg);
         lookupTable = FFTSolution.getLookupTable();
         winner = FFTSolution.getWinner();
-        max_precons = FFTManager.initialFFTState.getAllLiterals().size();
+        max_precons = FFTManager.initialFFTState.getLiterals().size();
         fft.USE_STRATEGY = SAVE_STRAT; // Only use this feature if autogenerating, e.g. not when simply loading from file
 
         System.out.println("Solution size: " + lookupTable.size());
@@ -93,7 +93,7 @@ public class FFTAutoGenOld {
 
         System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
-        int i = fft.minimize(AUTOGEN_PERSPECTIVE, Config.MINIMIZE_PRECONDITIONS);
+        int i = fft.minimize(AUTOGEN_TEAM, Config.MINIMIZE_PRECONDITIONS);
         System.out.println("Final amount of rules after " + i + " minimize iterations: " + fft.getAmountOfRules());
         System.out.println("Final amount of preconditions after " + i + " minimize iterations: " + fft.getAmountOfPreconditions());
     }
@@ -108,12 +108,12 @@ public class FFTAutoGenOld {
                 states.add(state);
                 continue;
             }
-            if (AUTOGEN_PERSPECTIVE == PLAYER1 && mapping.getMove().getTeam() != PLAYER1)
+            if (AUTOGEN_TEAM == PLAYER1 && mapping.getMove().getTeam() != PLAYER1)
                 continue;
-            else if (AUTOGEN_PERSPECTIVE == PLAYER2 && mapping.getMove().getTeam() != PLAYER2)
+            else if (AUTOGEN_TEAM == PLAYER2 && mapping.getMove().getTeam() != PLAYER2)
                 continue;
             boolean threshold = false;
-            switch(AUTOGEN_PERSPECTIVE) {
+            switch(AUTOGEN_TEAM) {
                 case PLAYER1:
                     threshold = mapping.getWinner() == PLAYER1 || winner == mapping.getWinner();
                     break;
@@ -152,7 +152,7 @@ public class FFTAutoGenOld {
             System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + rg.rules.size());
             FFTState state = states.iterator().next();
 
-            if (!GENERATE_ALL_RULES && fft.verify(AUTOGEN_PERSPECTIVE, true)) {
+            if (!GENERATE_ALL_RULES && fft.verify(AUTOGEN_TEAM, true)) {
                 System.out.println("FFT verified before empty statespace");
                 return;
             }
@@ -160,7 +160,7 @@ public class FFTAutoGenOld {
             Rule r = addRule(state);
             // Run partial verification again to insert new rule mappings. Also return if no longer weakly optimal
             fft.SAFE_RUN = true;
-            if (!fft.verify(AUTOGEN_PERSPECTIVE, false)) {
+            if (!fft.verify(AUTOGEN_TEAM, false)) {
                 System.out.println("FFT is somehow no longer weakly optimal, returning");
                 return;
             }
@@ -180,7 +180,7 @@ public class FFTAutoGenOld {
 
     private static Rule addRule(FFTState s) {
         HashSet<Literal> minSet = new HashSet<>();
-        HashSet<Literal> literals = s.getAllLiterals();
+        HashSet<Literal> literals = s.getLiterals();
         StateMapping mapping = lookupTable.get(s);
         Action bestAction = mapping.getMove().getAction();
 
@@ -196,7 +196,7 @@ public class FFTAutoGenOld {
         Rule r;
         if (!GREEDY_AUTOGEN) {
             r = new Rule();
-            r.setPreconditions(new Clause(minSet));
+            r.setPreconditions(minSet);
         }
         else {
             r = new Rule(minSet, bestAction);
@@ -208,7 +208,7 @@ public class FFTAutoGenOld {
         if (DETAILED_DEBUG) {
             System.out.print("ORIGINAL LITERALS: ");
             for (Literal l : literals)
-                System.out.print(l.name + " ");
+                System.out.print(l.getName() + " ");
             System.out.println();
             System.out.println("ORIGINAL STATE: " + s);
             System.out.println("ORIGINAL MOVE: " + mapping.getMove());
@@ -239,7 +239,7 @@ public class FFTAutoGenOld {
             if (DETAILED_DEBUG) {
                 System.out.println("Best removal path (removed " + bestPath.size() + "): ");
                 for (Literal l : bestPath)
-                    System.out.print(l.name + " ");
+                    System.out.print(l.getName() + " ");
                 System.out.println();
             }
             for (Literal l : bestPath)
@@ -248,15 +248,15 @@ public class FFTAutoGenOld {
         }
         else {
             for (Literal l : literals) {
-                if (DETAILED_DEBUG) System.out.println("INSPECTING: " + l.name);
+                if (DETAILED_DEBUG) System.out.println("INSPECTING: " + l.getName());
                 r.removePrecondition(l);
 
-                boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false);
+                boolean verify = fft.verify(AUTOGEN_TEAM, false);
                 if (!verify) {
                     if (DETAILED_DEBUG) System.out.println("FAILED TO VERIFY RULE!");
                     r.addPrecondition(l);
                 } else if (DETAILED_DEBUG)
-                    System.out.println("REMOVING: " + l.name);
+                    System.out.println("REMOVING: " + l.getName());
             }
         }
 
@@ -270,7 +270,7 @@ public class FFTAutoGenOld {
         while(it.hasNext()) {
             Literal l = it.next();
             r.removePrecondition(l);
-            boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false);
+            boolean verify = fft.verify(AUTOGEN_TEAM, false);
             if (!verify) {
                 r.addPrecondition(l);
                 continue;
@@ -314,7 +314,7 @@ public class FFTAutoGenOld {
                 else if (RULE_ORDERING == RULE_ORDERING_TERMINAL_LAST)
                     return s2_score - s1_score;
             }
-            int s1_precons_amount = s1.getLiterals().size();
+            int s1_precons_amount = s1.getLiterals().size(); // TODO - doesn't work
             int s2_precons_amount = s2.getLiterals().size();
             if (RULE_ORDERING == RULE_ORDERING_FEWEST_PRECONS_FIRST)
                 return s1_precons_amount - s2_precons_amount;
@@ -333,7 +333,7 @@ public class FFTAutoGenOld {
             FFTState state = frontier.pop();
             if (FFTManager.logic.gameOver(state))
                 continue;
-            if (AUTOGEN_PERSPECTIVE != state.getTurn()) {
+            if (AUTOGEN_TEAM != state.getTurn()) {
                 for (FFTState child : state.getChildren())
                     if (!closedSet.contains(child)) {
                         closedSet.add(child);

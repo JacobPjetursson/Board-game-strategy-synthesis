@@ -1,10 +1,8 @@
 package fftlib.GGPAutogen;
 
 import fftlib.FFT;
-import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
-import fftlib.game.FFTState;
 import misc.Config;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
@@ -86,7 +84,7 @@ public class Runner {
 
         System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
-        int it = fft.minimize(AUTOGEN_PERSPECTIVE, Config.MINIMIZE_PRECONDITIONS);
+        int it = fft.minimize(AUTOGEN_TEAM, Config.MINIMIZE_PRECONDITIONS);
         System.out.println("Amount of rules after " + it + " minimize iterations: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions after " + it + " minimize iterations: " + fft.getAmountOfPreconditions());
 
@@ -102,13 +100,13 @@ public class Runner {
         for (Map.Entry<MachineState, GGPMapping> entry : lookupTable.entrySet()) {
             MachineState state = entry.getKey();
             GGPMapping mapping = entry.getValue();
-            if (AUTOGEN_PERSPECTIVE == PLAYER1 && !mapping.getRole().equals(p1Role))
+            if (AUTOGEN_TEAM == PLAYER1 && !mapping.getRole().equals(p1Role))
                 continue;
-            else if (AUTOGEN_PERSPECTIVE == PLAYER2 && !mapping.getRole().equals(p2Role))
+            else if (AUTOGEN_TEAM == PLAYER2 && !mapping.getRole().equals(p2Role))
                 continue;
 
             boolean threshold = false;
-            switch(AUTOGEN_PERSPECTIVE) {
+            switch(AUTOGEN_TEAM) {
                 case PLAYER1:
                     threshold = mapping.getWinner() == PLAYER1 || winner == mapping.getWinner();
                     break;
@@ -153,7 +151,7 @@ public class Runner {
             Role r = GGPManager.getRole(ms);
             if (GGPManager.isTerminal(ms))
                 continue;
-            if (AUTOGEN_PERSPECTIVE != GGPManager.roleToPlayer(r)) {
+            if (AUTOGEN_TEAM != GGPManager.roleToPlayer(r)) {
                 for (MachineState child : GGPManager.getNextStates(ms))
                     if (!closedSet.contains(child)) {
                         closedSet.add(child);
@@ -183,7 +181,7 @@ public class Runner {
             if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
             System.out.println();
 
-            if (!GENERATE_ALL_RULES && fft.verify(AUTOGEN_PERSPECTIVE, true)) {
+            if (!GENERATE_ALL_RULES && fft.verify(AUTOGEN_TEAM, true)) {
                 System.out.println("FFT verified before empty statespace");
                 return;
             }
@@ -266,7 +264,7 @@ public class Runner {
                 if (DETAILED_DEBUG) System.out.println("INSPECTING: " + s);
                 r.removePrecondition(s);
 
-                boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false); // strategy is null if VERIFY_SINGLE_STRAT is false
+                boolean verify = fft.verify(AUTOGEN_TEAM, false); // strategy is null if VERIFY_SINGLE_STRAT is false
                 if (!verify) {
                     if (DETAILED_DEBUG) System.out.println("FAILED TO VERIFY RULE!");
                     r.addPrecondition(s);
@@ -285,7 +283,7 @@ public class Runner {
         while(it.hasNext()) {
             GdlSentence s = it.next();
             r.removePrecondition(s);
-            boolean verify = fft.verify(AUTOGEN_PERSPECTIVE, false);
+            boolean verify = fft.verify(AUTOGEN_TEAM, false);
             if (!verify) {
                 r.addPrecondition(s);
                 continue;

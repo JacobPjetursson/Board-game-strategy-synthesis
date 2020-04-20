@@ -51,7 +51,6 @@ public class Controller {
     private boolean endGamePopup;
     private ArrayList<StateAndMove> previousStates;
     private Window window;
-    private FFTManager fftManager;
     private boolean fftAutomaticMode;
     private boolean fftUserInteraction;
     private GameSpecifics gameSpecifics;
@@ -70,7 +69,7 @@ public class Controller {
         this.previousStates = new ArrayList<>();
 
         gameSpecifics = new GameSpecifics(this);
-        this.fftManager = new FFTManager(gameSpecifics);
+        FFTManager.initialize(gameSpecifics);
         FFTSolver.solveGame(state);
         // Autogenerate
         if (ENABLE_AUTOGEN)
@@ -96,9 +95,9 @@ public class Controller {
         automaticFFTBox = navPane.getAutomaticFFTBox();
         helpHumanBox = navPane.getHelpHumanBox();
 
-        FFTInteractivePane fftInteractivePane = new FFTInteractivePane(fftManager);
+        FFTInteractivePane fftInteractivePane = new FFTInteractivePane();
         new Scene(fftInteractivePane, Globals.WIDTH, Globals.HEIGHT);
-        FFTOverviewPane fftOverviewPane = new FFTOverviewPane(primaryStage, fftManager, fftInteractivePane);
+        FFTOverviewPane fftOverviewPane = new FFTOverviewPane(primaryStage, fftInteractivePane);
         new Scene(fftOverviewPane, Globals.WIDTH, Globals.HEIGHT);
         
         playArea.update(this);
@@ -183,13 +182,13 @@ public class Controller {
             if (player1Instance == LOOKUP_TABLE) {
                 aiCross = new PerfectPlayer(PLAYER1);
             } else if (player1Instance == FFT) {
-                aiCross = new FFTFollower(PLAYER1, fftManager);
+                aiCross = new FFTFollower(PLAYER1);
             }
         } else {
             if (player2Instance == LOOKUP_TABLE) {
                 aiCircle = new PerfectPlayer(PLAYER2);
             } else if (player2Instance == FFT) {
-                aiCircle = new FFTFollower(PLAYER2, fftManager);
+                aiCircle = new FFTFollower(PLAYER2);
             }
         }
     }
@@ -324,8 +323,8 @@ public class Controller {
         Move fftChosenMove = null;
         ArrayList<Move> moves = Logic.legalMoves(state.getTurn(), state);
         if (highlight) {
-            if (fftManager.currFFT != null)
-                fftChosenMove = (Move) fftManager.currFFT.apply(state);
+            if (FFTManager.currFFT != null)
+                fftChosenMove = (Move) FFTManager.currFFT.apply(state);
         }
         BoardTile[][] tiles = playArea.getPlayBox().getBoard().getTiles();
 
@@ -481,7 +480,7 @@ public class Controller {
     }
 
     public FFT getCurrFFT() {
-        return fftManager.currFFT;
+        return FFTManager.currFFT;
     }
 
 }

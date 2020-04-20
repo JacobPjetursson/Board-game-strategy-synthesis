@@ -1,14 +1,7 @@
 package mens_morris;
 
-import fftlib.Clause;
-import fftlib.Literal;
-import fftlib.game.Transform;
-
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Scanner;
 
-import static fftlib.FFTManager.gameBoardHeight;
 import static mens_morris.Logic.POS_NONBOARD;
 
 public class Demo {
@@ -121,33 +114,5 @@ public class Demo {
             System.out.println(c);
 
 */
-    }
-
-    public static HashSet<Clause> findAutomorphismsTest(Clause clause) {
-        int [] vertices = new int[gameBoardHeight];
-        for (int i = 0; i < gameBoardHeight; i++) {
-            vertices[i] = i;
-        }
-        ArrayList<int[]> permutations = Transform.findPermutations(vertices);
-        HashSet<Clause> transformations = new HashSet<>();
-        System.out.println("PERMUTATIONS SIZE: " + permutations.size());
-        for(int[] arr : permutations) {
-            System.out.print("permutations: ");
-            for (int i : arr) System.out.print(i + ", ");
-            System.out.println();
-
-            Clause precons = new Clause();
-            /*
-            Action action = null;
-            for (Literal lit : rule.action.addClause.literals) {
-                action = new Action(arr[lit.row], arr[lit.col], lit.pieceOcc, lit.negation);
-            }
-            */
-            for (Literal lit : clause.literals) {
-                precons.add(new Literal(arr[lit.row], arr[lit.col], lit.pieceOcc, lit.negation));
-            }
-            transformations.add(new Clause(precons));
-        }
-        return transformations;
     }
 }

@@ -1,25 +1,22 @@
 package kulibrat.FFT;
 
 import fftlib.Action;
-import fftlib.Literal;
+import fftlib.Position;
 import fftlib.Rule;
-import fftlib.game.*;
+import fftlib.SymmetryRule;
+import fftlib.game.FFTGameSpecifics;
+import fftlib.game.FFTLogic;
+import fftlib.game.FFTMove;
+import fftlib.game.FFTState;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 import kulibrat.game.Controller;
 import kulibrat.game.Logic;
-import kulibrat.game.Move;
 import kulibrat.game.State;
-import kulibrat.misc.Database;
 import misc.Config;
-import misc.Globals;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-
-import static fftlib.Literal.PIECEOCC_ANY;
-import static fftlib.game.Transform.TRANS_HREF;
-import static kulibrat.game.Logic.POS_NONBOARD;
-import static misc.Globals.*;
 
 public class GameSpecifics implements FFTGameSpecifics {
     private Controller cont;
@@ -33,8 +30,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     }
 
-    @Override
-    public FFTMove actionToMove(Action a, int team) {
+/*    public FFTMove actionToMove(Action a) {
         if (a.actionErr || (a.addClause.isEmpty() && a.remClause.isEmpty()))
             return null;
         int newRow = POS_NONBOARD;
@@ -53,42 +49,20 @@ public class GameSpecifics implements FFTGameSpecifics {
         return new Move(oldRow, oldCol, newRow, newCol, team);
     }
 
-    @Override
-    public FFTState preconsToState(HashSet<Literal>literals, int team) {
-        State s = new State();
+ */
 
-        for (Literal l : literals) {
-            if (!l.boardPlacement) {
-                String[] slSplit = l.name.toUpperCase().split("SL=");
-                if (slSplit.length > 1) {
-                    int sl = Integer.parseInt(slSplit[1]);
-                    s.setScoreLimit(sl);
-                }
-                String[] p1PointSplit = l.name.toUpperCase().split("P1SCORE=");
-                if (p1PointSplit.length > 1) {
-                    int p1Point = Integer.parseInt(p1PointSplit[1]);
-                    s.setScore(PLAYER1, p1Point);
-                }
-                String[] p2PointSplit = l.name.toUpperCase().split("P2SCORE=");
-                if (p2PointSplit.length > 1) {
-                    int p2Point = Integer.parseInt(p2PointSplit[1]);
-                    s.setScore(PLAYER2, p2Point);
-                }
-            }
-            else if (l.pieceOcc == PIECEOCC_ANY) {
-                // TODO - Can be either of players. This can not occur atm
-            } else {
-                s.setBoardEntry(l.row, l.col, l.pieceOcc);
-            }
-        }
-        return s;
+    @Override // TODO
+    public FFTMove actionToMove(Action a) {
+        return null;
     }
 
     @Override
-    public Rule gdlToRule(String precons, String action) {
+    public Action moveToAction(FFTMove m) {
+        return null;
+    }
 
-        HashSet<Literal> literals = new HashSet<>();
-        Action a = new Action();
+    @Override // TODO
+    public Rule gdlToRule(String precons, String action) {
         return null;
     }
 
@@ -108,11 +82,6 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public int[] getAllowedTransformations() {
-        return new int[]{TRANS_HREF};
-    }
-
-    @Override
     public FFTState getInitialState() {
         return new State();
     }
@@ -120,6 +89,21 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public FFTLogic getLogic() {
         return new Logic();
+    }
+
+    @Override
+    public ArrayList<Integer> getGameAtoms() {
+        return null;
+    }
+
+    @Override
+    public String getAtomName(int atom) {
+        return null;
+    }
+
+    @Override
+    public int getAtomId(String name) {
+        return 0;
     }
 
     @Override
@@ -135,8 +119,17 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public int getMaxPrecons() {
-        int[] dim = getBoardDim();
-        return dim[0] * dim[1] + 2; // tiles, score, score
+    public HashSet<SymmetryRule> getSymmetryRules(Rule rule) {
+        return null;
+    }
+
+    @Override
+    public int posToId(Position pos) {
+        return 0;
+    }
+
+    @Override
+    public Position idToPos(int id) {
+        return null;
     }
 }

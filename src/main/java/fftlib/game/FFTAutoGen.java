@@ -20,7 +20,7 @@ public class FFTAutoGen {
     private static FFT fft;
     private static RuleGroup rg;
 
-    public static FFT generateFFT(int perspective_) {
+    public static FFT generateFFT(int team_) {
         // temp code
         /*
         Scanner block = new Scanner(System.in);
@@ -28,7 +28,7 @@ public class FFTAutoGen {
         block.nextLine();
          */
 
-        AUTOGEN_PERSPECTIVE = perspective_;
+        AUTOGEN_TEAM = team_;
 
         if (BENCHMARK_MODE) {
             double avgRules = 0, avgPrecons = 0, avgTime = 0;
@@ -83,7 +83,7 @@ public class FFTAutoGen {
         if (DETAILED_DEBUG) System.out.println("Rules before minimizing");
         if (DETAILED_DEBUG) System.out.println(fft);
 
-        int i = fft.minimize(AUTOGEN_PERSPECTIVE, Config.MINIMIZE_PRECONDITIONS);
+        int i = fft.minimize(AUTOGEN_TEAM, Config.MINIMIZE_PRECONDITIONS);
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
 
         System.out.println("Final amount of rules after " + i + " minimize iterations: " + fft.getAmountOfRules());
@@ -99,7 +99,12 @@ public class FFTAutoGen {
             System.out.println("Remaining relevant states: " + reachableRelevantStates.size() + ". Current amount of rules: " + rg.rules.size());
             FFTState state = reachableRelevantStates.iterator().next();
 
+            int prevSize = reachableRelevantStates.size();
             Rule r = addRule(state);
+            if (prevSize == reachableRelevantStates.size()) {
+                System.out.println("SIZE UNCHANGED AFTER ADDING RULE!");
+                System.exit(1);
+            }
 
             if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
             System.out.println();
@@ -108,7 +113,7 @@ public class FFTAutoGen {
 
     private static Rule addRule(FFTState s) {
         HashSet<Literal> minSet = new HashSet<>();
-        HashSet<Literal> literals = s.getAllLiterals();
+        HashSet<Literal> literals = s.getLiterals();
         StateMapping mapping = lookupTable.get(s);
         Action bestAction = mapping.getMove().getAction();
 
@@ -121,23 +126,24 @@ public class FFTAutoGen {
         // DEBUG
         if (DETAILED_DEBUG) {
             System.out.println("ORIGINAL STATE: " + s + " , AND MOVE: " + mapping.getMove());
+            System.out.println("ORIGINAL PRECONDITIONS: " + s.getLiterals());
             System.out.println("ORIGINAL SCORE: " + mapping.getScore());
         }
 
         for (Literal l : literals) {
-            if (DETAILED_DEBUG) System.out.println("ATTEMPING TO REMOVE: " + l.name);
+            if (DETAILED_DEBUG) System.out.println("ATTEMPING TO REMOVE: " + l.getName());
             r.removePrecondition(l);
             boolean verified = verifyRule(r, false);
 
             if (!verified) {
-                if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.name);
+                if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.getName());
                 r.addPrecondition(l);
             } else {
-                if (DETAILED_DEBUG) System.out.println("REMOVING PRECONDITION: " + l.name);
+                if (DETAILED_DEBUG) System.out.println("REMOVING PRECONDITION: " + l.getName());
             }
             if (DETAILED_DEBUG) System.out.println("RULE IS NOW: " + r);
         }
-
+        if (DETAILED_DEBUG) System.out.println("DOING SAFE RUN");
         verifyRule(r, true); // safe run where we know we have the final rule
         return r;
     }
@@ -149,16 +155,18 @@ public class FFTAutoGen {
         HashMap<FFTState, FFTMove> undoMap = new HashMap<>();
 
         for (FFTState s : reachableRelevantStates) {
-            // TODO - can we optimize this query?
+            // TODO - This takes most of the time, can we optimize it?
             FFTMove m = r.apply(s);
             if (m != null) { // this is equivalent to checking that rule applies with legal move
                 appliedMap.put(s, m);
             }
         }
+        //System.out.println("AppliedMap size: " + appliedMap.size());
 
         for (Map.Entry<FFTState, FFTMove> entry : appliedMap.entrySet()) {
             FFTState s = entry.getKey();
             FFTMove m = entry.getValue();
+            //System.out.println("Updating set from state: " + s + ", and move: " + m);
             updateSets(s, m, suboptimalSet, deleteMap, undoMap);
             deleteMap.putIfAbsent(s, false);
         }
@@ -172,14 +180,16 @@ public class FFTAutoGen {
                 return false;
             }
         }
-/*
-        if (!fft.verify(AUTOGEN_PERSPECTIVE, false)) {
+
+        /*
+        if (!fft.verify(AUTOGEN_TEAM, false)) {
             System.out.println("ERROR: Old verification failed where new did not");
             System.out.println("Failing point: " + fft.failingPoint);
             System.exit(1);
             return false;
         }
-*/
+        */
+
         if (safe) {
             deleteUnreachableStates(deleteMap);
         } else {
@@ -216,14 +226,14 @@ public class FFTAutoGen {
             // i.e. we deleted all but chosen move from this state, so it's still reachable, but children isn't
             // might also be the case that we already removed it once (deleteMap check)
             if (existingChild == null || deleteMap.getOrDefault(existingChild, false)) {
-            //    System.out.println("Existing child null or part of deleteMap");
+                //System.out.println("Existing child null or part of deleteMap");
                 continue;
             }
             //System.out.println("Removing ptr to child from optimal move: " + existingChild);
             existingChild.removeReachableParent(s);
             //System.out.println("remaining pointers: " + existingChild.getReachableParents());
             if (!existingChild.isReachable()) {
-             //   System.out.println("Child no longer reachable, removing from set and checking recursively");
+                //System.out.println("Child no longer reachable, removing from set and checking recursively");
                 deleteMap.put(existingChild, true);
                 updateSets(existingChild, null, suboptimalSet, deleteMap, undoMap); // FIXME - tail-end?
             }
@@ -231,6 +241,7 @@ public class FFTAutoGen {
     }
 
     private static void deleteUnreachableStates(HashMap<FFTState, Boolean> deleteMap) {
+        //System.out.println("Deleting unreachable states");
         for (Map.Entry<FFTState, Boolean> entry : deleteMap.entrySet()) {
             FFTState key = entry.getKey();
             if (entry.getValue()) { // del from both
@@ -260,7 +271,7 @@ public class FFTAutoGen {
     }
 
     private static void initializeSets() {
-        int team = AUTOGEN_PERSPECTIVE;
+        int team = AUTOGEN_TEAM;
         FFTState initialState = FFTManager.initialFFTState;
         LinkedList<FFTState> frontier;
         frontier = new LinkedList<>();
@@ -325,7 +336,7 @@ public class FFTAutoGen {
                 else if (RULE_ORDERING == RULE_ORDERING_TERMINAL_LAST)
                     return s2_score - s1_score;
             }
-            int s1_precons_amount = s1.getLiterals().size();
+            int s1_precons_amount = s1.getLiterals().size(); // TODO - doesnt
             int s2_precons_amount = s2.getLiterals().size();
             if (RULE_ORDERING == RULE_ORDERING_FEWEST_PRECONS_FIRST)
                 return s1_precons_amount - s2_precons_amount;

@@ -11,7 +11,7 @@ public class FFTSolver{
     private static boolean solved = false;
     private static int CURR_MAX_DEPTH;
     private static int unexploredNodes = 0;
-    private static int team = PLAYER1; // Always from player1 perspective
+    private static int team = PLAYER1; // Always from player1
     private static HashMap<FFTState, StateMapping> lookupTable;
 
     // Runs an iterative deepening minimax as the exhaustive brute-force for the lookupDB. The data is saved in the transpo table

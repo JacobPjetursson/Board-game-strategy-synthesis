@@ -1,6 +1,5 @@
 package kulibrat.FFT;
 
-import fftlib.FFTManager;
 import fftlib.FFT_Follower;
 import kulibrat.ai.AI;
 import kulibrat.game.Move;
@@ -10,9 +9,9 @@ import kulibrat.game.State;
 public class FFTFollower extends AI {
     FFT_Follower fftFollower;
 
-    public FFTFollower(int team, FFTManager fftManager) {
+    public FFTFollower(int team) {
         super(team);
-        fftFollower = new FFT_Follower(team, fftManager);
+        fftFollower = new FFT_Follower(team);
     }
 
     @Override

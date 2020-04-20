@@ -1,10 +1,10 @@
 package kulibrat.game;
 
 import fftlib.Literal;
+import fftlib.Position;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import kulibrat.ai.Minimax.Zobrist;
-import misc.Config;
 import misc.Globals;
 
 import java.awt.*;
@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import static fftlib.Position.OCC_BLANK;
 import static kulibrat.game.Logic.POS_NONBOARD;
 import static misc.Config.BHEIGHT;
 import static misc.Config.BWIDTH;
@@ -287,37 +288,10 @@ public class State implements Serializable, FFTState {
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
-                int pieceOcc = board[i][j];
-                if (pieceOcc > 0) {
-                    if (turn == PLAYER1)
-                        literals.add(new Literal(i, j, pieceOcc, false));
-                    else {
-                        pieceOcc = (pieceOcc == 1) ? 2 : 1;
-                        literals.add(new Literal(i, j, pieceOcc, false));
-                    }
-                }
-            }
-        }
-        literals.add(new Literal("P1SCORE=" + redScore));
-        literals.add(new Literal("P2SCORE=" + blackScore));
-        return literals;
-    }
+                int occ = board[i][j] != 0 ? board[i][j] : OCC_BLANK;
+                Position pos = new Position(i, j, occ);
+                // TODO - do eet
 
-    public HashSet<Literal> getAllLiterals() {
-        HashSet<Literal> literals = new HashSet<>();
-
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                int pieceOcc = board[i][j];
-                if (pieceOcc > 0) {
-                    if (turn == PLAYER1)
-                        literals.add(new Literal(i, j, pieceOcc, false));
-                    else {
-                        pieceOcc = (pieceOcc == 1) ? 2 : 1;
-                        literals.add(new Literal(i, j, pieceOcc, false));
-                    }
-                } else
-                    literals.add(new Literal(i, j, PLAYER_ANY, true));
             }
         }
         literals.add(new Literal("P1SCORE=" + redScore));

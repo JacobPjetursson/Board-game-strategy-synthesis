@@ -28,14 +28,12 @@ import static misc.Globals.PLAYER_ANY;
 
 
 public class FFTFailurePane extends BorderPane {
-    private FFTManager fftManager;
     private ListView<VBox> lw;
     FFTInteractivePane interactivePane;
     int ROW_SIZE = 29;
 
-    public FFTFailurePane(Scene prevScene, FFTManager fftManager, FFTInteractivePane interactivePane) {
+    public FFTFailurePane(Scene prevScene, FFTInteractivePane interactivePane) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
-        this.fftManager = fftManager;
         this.interactivePane = interactivePane;
         Label title = new Label("First encountered state where the strategy chose a sub-optimal move");
         title.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
@@ -45,7 +43,7 @@ public class FFTFailurePane extends BorderPane {
         setTop(title);
         BorderPane.setAlignment(title, Pos.CENTER);
 
-        Node playBox = fftManager.getFailState();
+        Node playBox = FFTManager.getFailState();
 
         lw = new ListView<>();
         lw.setPickOnBounds(false);
@@ -67,7 +65,7 @@ public class FFTFailurePane extends BorderPane {
         colorInfoLabel.setFont(Font.font("Verdana", 16));
 
         String moveInfo;
-        if (fftManager.currFFT.failingPoint.random)
+        if (FFTManager.currFFT.failingPoint.random)
             moveInfo = "The strategy did not apply to the above state, and a random, losing move existed";
         else
             moveInfo = "The strategy applied to the above state, but the move it chose was sub-optimal";
@@ -87,8 +85,8 @@ public class FFTFailurePane extends BorderPane {
         // add rule to FFT button
         addRuleInteractiveBtn.setOnAction(event -> {
             Stage stage = (Stage) getScene().getWindow();
-            FFTState state = fftManager.currFFT.failingPoint.getState();
-            FFTMove move = fftManager.currFFT.failingPoint.getMove();
+            FFTState state = FFTManager.currFFT.failingPoint.getState();
+            FFTMove move = FFTManager.currFFT.failingPoint.getMove();
             stage.setScene(interactivePane.getScene());
             interactivePane.update(state, move);
             interactivePane.setPrevScene(getScene());
@@ -104,9 +102,9 @@ public class FFTFailurePane extends BorderPane {
         ObservableList<VBox> ruleGroups = FXCollections.observableArrayList();
         boolean ruleApplied = false;
         int counter = 0;
-        for (int i = 0; i < fftManager.currFFT.ruleGroups.size(); i++) {
+        for (int i = 0; i < FFTManager.currFFT.ruleGroups.size(); i++) {
             // Rule group
-            RuleGroup rg = fftManager.currFFT.ruleGroups.get(i);
+            RuleGroup rg = FFTManager.currFFT.ruleGroups.get(i);
             VBox rgVBox = new VBox(10);
             rgVBox.setAlignment(Pos.CENTER);
             Label rgLabel = new Label((i + 1) + ": " + rg.name);
@@ -117,31 +115,17 @@ public class FFTFailurePane extends BorderPane {
                 Label rLabel = new Label((j + 1) + ": " + r);
                 rLabel.setFont(Font.font("Verdana", 15));
                 // TODO - below is hacky
-                FFTMove failMove = fftManager.currFFT.failingPoint.getMove();
-                FFTState failState = fftManager.currFFT.failingPoint.getState();
+                FFTMove failMove = FFTManager.currFFT.failingPoint.getMove();
+                FFTState failState = FFTManager.currFFT.failingPoint.getState();
                 int tempTeam = failMove.getTeam();
                 failMove.setTeam(PLAYER_ANY);
                 if (!ruleApplied) {
-                    if (r.multiRule) {
-                        for (Rule rule : r.rules) {
-                            FFTMove ruleMove = rule.apply(failState);
-                            if (ruleMove == null)
-                                continue;
-                            ruleMove.setTeam(PLAYER_ANY);
-                            if (ruleMove.equals(failMove)) {
-                                rLabel.setTextFill(Color.BLUE);
-                                ruleApplied = true;
-                                break;
-                            }
-                        }
-                    } else {
-                        FFTMove ruleMove = r.apply(failState);
-                        if (ruleMove != null) {
-                            ruleMove.setTeam(PLAYER_ANY);
-                            if (ruleMove.equals(failMove)) {
-                                rLabel.setTextFill(Color.BLUE);
-                                ruleApplied = true;
-                            }
+                    FFTMove ruleMove = r.apply(failState);
+                    if (ruleMove != null) {
+                        ruleMove.setTeam(PLAYER_ANY);
+                        if (ruleMove.equals(failMove)) {
+                            rLabel.setTextFill(Color.BLUE);
+                            ruleApplied = true;
                         }
                     }
                 }

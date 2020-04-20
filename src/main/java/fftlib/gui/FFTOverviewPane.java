@@ -26,9 +26,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import misc.Globals;
-import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
-import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
-import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import static fftlib.FFTManager.*;
 import static misc.Config.SHOW_RULE_GROUPS;
@@ -37,21 +34,19 @@ import static misc.Globals.WIDTH;
 public class FFTOverviewPane extends VBox {
     private int textFieldWidth = 150;
     private ListView<RulePane> lw;
-    private FFTManager fftManager;
     private Label title;
     private Button delBtn, renameBtn, newBtn, addNewRuleGroupBtn, verifyBtn;
     private ComboBox<String> changeBox;
 
     private FFTInteractivePane interactivePane;
 
-    public FFTOverviewPane(Stage primaryStage, FFTManager fftManager, FFTInteractivePane interactivePane) {
+    public FFTOverviewPane(Stage primaryStage, FFTInteractivePane interactivePane) {
         setSpacing(15);
         setAlignment(Pos.CENTER);
         this.interactivePane = interactivePane;
 
         Scene prevScene = primaryStage.getScene();
 
-        this.fftManager = fftManager;
         title = new Label();
         title.setFont(Font.font("Verdana", FontWeight.BOLD, 24));
         title.setAlignment(Pos.CENTER);
@@ -73,7 +68,7 @@ public class FFTOverviewPane extends VBox {
             // In case of clear selection
             if ((Integer) newValue == -1)
                 return;
-            fftManager.setCurrFFT((Integer) newValue);
+            FFTManager.setCurrFFT((Integer) newValue);
             Platform.runLater(() -> changeBox.getSelectionModel().clearSelection());
             update();
             interactivePane.refresh(true);
@@ -104,8 +99,8 @@ public class FFTOverviewPane extends VBox {
         delBtn.setOnAction(event -> {
             Stage newStage = new Stage();
             String labelText = "Are you sure you want to delete the FFT:\n" +
-                    fftManager.currFFT.name + "?";
-            newStage.setScene(new Scene(new DeleteFFTDialog(labelText, this, fftManager), 500, 150));
+                    FFTManager.currFFT.name + "?";
+            newStage.setScene(new Scene(new DeleteFFTDialog(labelText, this), 500, 150));
             newStage.initModality(Modality.APPLICATION_MODAL);
             newStage.setOnCloseRequest(Event::consume);
             newStage.show();
@@ -154,7 +149,7 @@ public class FFTOverviewPane extends VBox {
         addNewRuleGroupBtn.setFont(Font.font("Verdana", 16));
         addNewRuleGroupBtn.setOnMouseClicked(event -> {
             RuleGroup rg = new RuleGroup(newRuleGroupField.getText());
-            fftManager.currFFT.addRuleGroup(rg);
+            FFTManager.currFFT.addRuleGroup(rg);
             newRuleGroupField.clear();
             update();
             interactivePane.refresh(true);
@@ -187,9 +182,9 @@ public class FFTOverviewPane extends VBox {
         verifyBtn.setOnMouseClicked(event -> {
             int team = teamChoice.getSelectionModel().getSelectedIndex() + 1;
             boolean wholeFFT = verificationChoice.getSelectionModel().getSelectedIndex() == 0;
-            boolean verified = fftManager.currFFT.verify(team, wholeFFT);
+            boolean verified = FFTManager.currFFT.verify(team, wholeFFT);
             if (!verified) {
-                if (fftManager.currFFT.failingPoint == null) {
+                if (FFTManager.currFFT.failingPoint == null) {
                     Label verifiedLabel = new Label("Always loses to perfect player");
                     verifiedLabel.setFont(Font.font("Verdana", 16));
                     getChildren().add(4, verifiedLabel);
@@ -200,7 +195,7 @@ public class FFTOverviewPane extends VBox {
                     timeline.play();
                 } else {
                     Scene scene = primaryStage.getScene();
-                    primaryStage.setScene(new Scene(new FFTFailurePane(scene, fftManager, interactivePane), WIDTH, Globals.HEIGHT));
+                    primaryStage.setScene(new Scene(new FFTFailurePane(scene, interactivePane), WIDTH, Globals.HEIGHT));
                 }
             } else {
                 Label verifiedLabel = new Label("The FFT was successfully verified");
@@ -249,7 +244,7 @@ public class FFTOverviewPane extends VBox {
     }
 
     public void update() {
-        boolean isNull = fftManager.currFFT == null;
+        boolean isNull = FFTManager.currFFT == null;
         changeBox.setDisable(isNull);
         delBtn.setDisable(isNull);
         renameBtn.setDisable(isNull);
@@ -259,7 +254,7 @@ public class FFTOverviewPane extends VBox {
             title.setText("Please make a new FFT");
             return;
         } else
-            title.setText(fftManager.currFFT.name);
+            title.setText(FFTManager.currFFT.name);
         // Items in changeBox (combobox)
         ObservableList<String> fftStrs = FXCollections.observableArrayList();
         for (FFT fft : FFTManager.ffts) {
@@ -273,7 +268,7 @@ public class FFTOverviewPane extends VBox {
     private void showRuleGroups() {
         // ListView
         ObservableList<RulePane> ruleGroups = FXCollections.observableArrayList();
-        for (int i = 0; i < fftManager.currFFT.ruleGroups.size(); i++) {
+        for (int i = 0; i < FFTManager.currFFT.ruleGroups.size(); i++) {
             // Rule group
             ruleGroups.add(new RulePane(i));
         }
@@ -288,7 +283,7 @@ public class FFTOverviewPane extends VBox {
         RulePane(int idx) { // Rulegroup entry
             super();
             this.idx = idx;
-            RuleGroup rg = fftManager.currFFT.ruleGroups.get(idx);
+            RuleGroup rg = FFTManager.currFFT.ruleGroups.get(idx);
             rgVBox = new VBox(10);
             rgVBox.setAlignment(Pos.CENTER_LEFT);
 
@@ -358,9 +353,9 @@ public class FFTOverviewPane extends VBox {
                     RulePane draggedPane = lw.getItems().remove(draggedIdx);
                     int droppedIdx = isEmpty() ? lw.getItems().size() : getIndex();
 
-                    RuleGroup rg_dragged = fftManager.currFFT.ruleGroups.get(draggedPane.idx);
-                    fftManager.currFFT.ruleGroups.remove(rg_dragged);
-                    fftManager.currFFT.ruleGroups.add(droppedIdx, rg_dragged);
+                    RuleGroup rg_dragged = FFTManager.currFFT.ruleGroups.get(draggedPane.idx);
+                    FFTManager.currFFT.ruleGroups.remove(rg_dragged);
+                    FFTManager.currFFT.ruleGroups.add(droppedIdx, rg_dragged);
 
                     event.setDropCompleted(true);
                     showRuleGroups();
@@ -396,9 +391,9 @@ public class FFTOverviewPane extends VBox {
         void setSaveBtnMouseClicked() {
             if (!tf.getText().replace(" ", "").isEmpty()) {
                 if (rename)
-                    fftManager.currFFT.name = tf.getText();
+                    FFTManager.currFFT.name = tf.getText();
                 else
-                    fftManager.addNewFFT(tf.getText());
+                    FFTManager.addNewFFT(tf.getText());
                 Stage stage = (Stage) getScene().getWindow();
                 stage.close();
                 update();

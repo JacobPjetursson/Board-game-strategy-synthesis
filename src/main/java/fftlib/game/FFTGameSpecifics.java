@@ -1,18 +1,17 @@
 package fftlib.game;
 
-import fftlib.Action;
-import fftlib.Literal;
-import fftlib.Rule;
+import fftlib.*;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public interface FFTGameSpecifics {
 
-    FFTMove actionToMove(Action a, int team);
+    FFTMove actionToMove(Action a);
 
-    FFTState preconsToState(HashSet<Literal> precons, int team);
+    Action moveToAction(FFTMove m);
 
     Rule gdlToRule(String precons, String action);
 
@@ -22,15 +21,23 @@ public interface FFTGameSpecifics {
 
     String[] getPlayerNames(); // VISUAL
 
-    int[] getAllowedTransformations();
-
     FFTState getInitialState();
 
     FFTLogic getLogic();
+
+    ArrayList<Integer> getGameAtoms();
+
+    String getAtomName(int atom);
+
+    int getAtomId(String name);
 
     FFTFailState getFailState(); // VISUAL
 
     InteractiveFFTState getInteractiveState(); // VISUAL
 
-    int getMaxPrecons();
+    HashSet<SymmetryRule> getSymmetryRules(Rule rule);
+
+    int posToId(Position pos);
+
+    Position idToPos(int id);
 }

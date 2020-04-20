@@ -16,9 +16,8 @@ public class Demo {
     public static boolean playGame = false;
 
     public static void main(String[] args) {
-        CURRENT_GAME = SIM;
         GameSpecifics gs = new GameSpecifics();
-        new FFTManager(gs);
+        FFTManager.initialize(gs);
         State s = new State();
         if (playGame) {
             playGame(s);
@@ -50,32 +49,33 @@ public class Demo {
         }
         System.out.println("The winner is player " + Logic.getWinner(s));
     }
-
-    public static HashSet<Clause> findAutomorphismsTest(Clause clause) {
+/*
+    public static HashSet<HashSet<Literal>> findAutomorphismsTest(HashSet<Literal> literals) {
         int [] vertices = new int[gameBoardHeight];
         for (int i = 0; i < gameBoardHeight; i++) {
             vertices[i] = i;
         }
         ArrayList<int[]> permutations = Transform.findPermutations(vertices);
-        HashSet<Clause> transformations = new HashSet<>();
+        HashSet<HashSet<Literal>> transformations = new HashSet<>();
         System.out.println("PERMUTATIONS SIZE: " + permutations.size());
         for(int[] arr : permutations) {
             System.out.print("permutations: ");
             for (int i : arr) System.out.print(i + ", ");
             System.out.println();
 
-            Clause precons = new Clause();
-            /*
+            HashSet<Literal> precons = new HashSet<>();
+
             Action action = null;
             for (Literal lit : rule.action.addClause.literals) {
                 action = new Action(arr[lit.row], arr[lit.col], lit.pieceOcc, lit.negation);
             }
-            */
-            for (Literal lit : clause.literals) {
+
+            for (Literal lit : literals) {
                 precons.add(new Literal(arr[lit.row], arr[lit.col], lit.pieceOcc, lit.negation));
             }
-            transformations.add(new Clause(precons));
+            transformations.add(precons);
         }
         return transformations;
     }
+    */
 }

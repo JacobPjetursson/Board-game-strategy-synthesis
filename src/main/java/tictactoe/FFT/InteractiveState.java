@@ -1,8 +1,8 @@
 package tictactoe.FFT;
 
 import fftlib.Action;
-import fftlib.Clause;
 import fftlib.Literal;
+import fftlib.Position;
 import fftlib.Rule;
 import fftlib.game.FFTState;
 import fftlib.gui.InteractiveFFTState;
@@ -48,27 +48,23 @@ public class InteractiveState implements InteractiveFFTState {
     public Node getInteractiveNode(Rule r) {
         this.rule = new Rule(r);
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
-        this.move = (Move) r.action.getMove(perspective);
+        this.move = (Move) r.action.getMove();
         actionTile = pb.getBoard().getTiles()[move.row][move.col];
         actionTile.setAction(true);
-        if (r.multiRule) {
-            // TODO - how to handle multirule?
-        } else {
-            pb.update(r, perspective);
-        }
+
+        pb.update(r);
+
         return pb;
     }
 
-    @Override
-    public void setPerspective(int perspective) {
-        this.perspective = perspective;
-        if (this.move != null)
-            this.move.team = perspective;
-        pb.update(rule, perspective);
-    }
-
     public void setActionFromTile(BoardTile bt) {
-        rule.removeLiterals(bt.getRow(), bt.getCol());
+        for (int i = 1; i < 4; i++) {
+            Position pos = new Position(bt.getRow(), bt.getCol(), i);
+            Literal l = new Literal(Atoms.posToId.get(pos), false);
+            rule.removePrecondition(l);
+            l.setNegation(true);
+            rule.removePrecondition(l);
+        }
         if (actionTile != null) {
             actionTile.removeHighlight();
             actionTile.setMandatory(false);
@@ -97,22 +93,18 @@ public class InteractiveState implements InteractiveFFTState {
         if (a == null)
             this.move = new Move();
         else
-            this.move = (Move) a.getMove(perspective);
+            this.move = (Move) a.getMove();
         actionTile = pb.getBoard().getTiles()[move.row][move.col];
         actionTile.setAction(true);
-        pb.update(rule, perspective);
+        pb.update(rule);
     }
     private Rule getRuleFromState(State s) {
         Rule r = new Rule();
         HashSet<Literal> literals = s.getLiterals();
         ArrayList<Literal> literalList = new ArrayList<>(literals);
-        // Only take boardplacement
-        HashSet<Literal> lits = new HashSet<>();
-        for (Literal l : literalList) {
-            if (l.boardPlacement)
-                lits.add(l);
-        }
-        r.setPreconditions(new Clause(lits));
+        // TODO - Only take boardplacement?
+        HashSet<Literal> lits = new HashSet<>(literalList);
+        r.setPreconditions(lits);
         return r;
     }
     @Override
@@ -122,13 +114,10 @@ public class InteractiveState implements InteractiveFFTState {
         this.move = null;
     }
 
-    @Override
-    public int getPerspective() {
-        return perspective;
-    }
-
+    // TODO
     public void updateRuleFromTile(BoardTile bt) {
-        rule.removeLiterals(bt.getRow(), bt.getCol());
+        /*
+        //rule.removeLiterals(bt.getRow(), bt.getCol());
         if (move != null && (move.col == bt.getCol() && move.row == bt.getRow())) {
             removeAction();
         }
@@ -148,5 +137,7 @@ public class InteractiveState implements InteractiveFFTState {
             }
             rule.addPrecondition(l);
         }
+
+         */
     }
 }

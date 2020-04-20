@@ -5,17 +5,15 @@ import fftlib.game.FFTState;
 
 public class FFT_Follower {
     public int team;
-    private FFTManager fftManager;
 
-    public FFT_Follower(int team, FFTManager fftManager) {
+    public FFT_Follower(int team) {
         this.team = team;
-        this.fftManager = fftManager;
     }
 
     public FFTMove makeMove(FFTState state) {
-        if (fftManager.currFFT == null)
+        if (FFTManager.currFFT == null)
             return null;
-        for (RuleGroup ruleGroup : fftManager.currFFT.ruleGroups) {
+        for (RuleGroup ruleGroup : FFTManager.currFFT.ruleGroups) {
             for (Rule rule : ruleGroup.rules) {
                 FFTMove move = rule.apply(state);
                 if (move != null) {

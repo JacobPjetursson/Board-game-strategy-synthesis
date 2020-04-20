@@ -1,110 +1,85 @@
 package fftlib;
 
 import fftlib.game.FFTMove;
-import fftlib.game.Transform;
-import misc.Globals;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
 
-import static fftlib.FFTManager.gameBoardHeight;
-import static fftlib.FFTManager.gameBoardWidth;
-import static fftlib.Literal.PIECEOCC_PLAYER;
-import static kulibrat.game.Logic.POS_NONBOARD;
-
 
 public class Action {
-    public Clause addClause;
-    public Clause remClause;
-    public boolean actionErr;
+    public HashSet<Literal> adds;
+    public HashSet<Literal> rems;
 
     public Action() {
-        this.addClause = new Clause();
-        this.remClause = new Clause();
+        this.adds = new HashSet<>();
+        this.rems = new HashSet<>();
     }
 
-    public Action(int row, int col, int occ, boolean neg) {
-        this.addClause = new Clause();
-        this.remClause = new Clause();
-        this.addClause.add(new Literal(row, col, occ, neg));
+    public Action(int id) {
+        this.adds = new HashSet<>();
+        this.rems = new HashSet<>();
+        this.adds.add(new Literal(id, false));
+    }
+
+    public Action(String name) {
+        this.adds = new HashSet<>();
+        this.rems = new HashSet<>();
+        this.adds.add(new Literal(FFTManager.getAtomId.apply(name), false));
     }
 
     public Action(Action duplicate) {
-        this.addClause = new Clause(duplicate.addClause);
-        this.remClause = new Clause(duplicate.remClause);
-        this.actionErr = duplicate.actionErr;
+        this.adds = new HashSet<>(duplicate.adds);
+        this.rems = new HashSet<>(duplicate.rems);
     }
 
     Action(ArrayList<String> literals) {
-        this.addClause = new Clause();
-        this.remClause = new Clause();
+        this.adds = new HashSet<>();
+        this.rems = new HashSet<>();
 
         for (String lStr : literals) {
             if (lStr.startsWith("+")) {
                 lStr = lStr.substring(1);
                 Literal l = new Literal(lStr);
-                if (l.error) {
-                    actionErr = true;
-                    return;
-                }
-                addClause.add(l);
+                adds.add(l);
             } else if (lStr.startsWith("-")) {
                 lStr = lStr.substring(1);
                 Literal l = new Literal(lStr);
-                if (l.error) {
-                    actionErr = true;
-                    return;
-                }
-                remClause.add(l);
+                rems.add(l);
             } else {
                 System.err.println("Invalid action format! Literal should be prefixed with plus (+) or minus (-)");
-                actionErr = true;
+                System.err.println("Action: " + this);
+                System.exit(1);
                 return;
             }
         }
 
-        if (addClause.isEmpty() && remClause.isEmpty()) {
+        if (adds.isEmpty() && rems.isEmpty()) {
             System.err.println("No action was specified");
-            actionErr = true;
-            return;
-        }
-        if (Globals.CURRENT_GAME == Globals.KULIBRAT) {
-            if(addClause.size() > 1 || remClause.size() > 1) {
-                System.err.println("Only moves with a single add literal and/or a single remove literal is allowed in this game");
-                actionErr = true;
-                return;
-            }
-            for (Literal l : addClause.literals) {
-                if (l.pieceOcc != PIECEOCC_PLAYER) {
-                    System.err.println("It is only allowed to move the player's own pieces in this game, i.e. P(x, y)");
-                    actionErr = true;
-                    return;
-                }
-            }
         }
     }
 
-    public Action(Clause addClause, Clause remClause) {
-        this.addClause = new Clause(addClause);
-        this.remClause = new Clause(remClause);
+
+    public Action(HashSet<Literal> adds, HashSet<Literal> rems) {
+        this.adds = new HashSet<>(adds);
+        this.rems = new HashSet<>(rems);
     }
 
-    public FFTMove getMove(int team) {
-        return FFTManager.actionToMove.apply(this, team);
+    public FFTMove getMove() {
+        return FFTManager.actionToMove.apply(this);
     }
 
     String getFormattedString() {
         StringBuilder actionMsg = new StringBuilder();
-        for (Literal literal : addClause.literals) {
+        for (Literal literal : adds) {
             if (actionMsg.length() > 0)
                 actionMsg.append(" ∧ ");
-            actionMsg.append("+").append(literal.name);
+            actionMsg.append("+").append(literal.getName());
         }
-        for (Literal literal : remClause.literals) {
+        for (Literal literal : rems) {
             if (actionMsg.length() > 0)
                 actionMsg.append(" ∧ ");
-            actionMsg.append("-").append(literal.name);
+            actionMsg.append("-").append(literal.getName());
         }
         return actionMsg.toString();
     }
@@ -115,12 +90,12 @@ public class Action {
 
         Action action = (Action) obj;
         return this == action ||
-                (this.addClause.equals(action.addClause) && (this.remClause.equals(action.remClause)));
+                (this.adds.equals(action.adds) && (this.rems.equals(action.rems)));
     }
 
     @Override
     public int hashCode() {
-        int hash = Objects.hash(addClause, remClause);
+        int hash = Objects.hash(adds, rems);
         return 31 * hash;
     }
 

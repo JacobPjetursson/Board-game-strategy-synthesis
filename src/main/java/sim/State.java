@@ -1,6 +1,7 @@
 package sim;
 
 import fftlib.Literal;
+import fftlib.Position;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 
+import static fftlib.Position.OCC_BLANK;
 import static misc.Globals.*;
 
 public class State implements FFTState {
@@ -16,7 +18,7 @@ public class State implements FFTState {
     private long zobrist_key;
     LinkedList<Line> lines;
 
-    // Reachability (experimental)
+    // Reachability
     HashSet<State> reachableParents;
     boolean reachable;
 
@@ -109,24 +111,9 @@ public class State implements FFTState {
     public HashSet<Literal> getLiterals() {
         HashSet<Literal> literals = new HashSet<>();
         for (Line l : lines) {
-            if (l.color == PLAYER1)
-                literals.add(new Literal(l.n1, l.n2, PLAYER1, false));
-            else if (l.color == PLAYER2)
-                literals.add(new Literal(l.n1, l.n2, PLAYER2, false));
-        }
-        return literals;
-    }
-
-    @Override
-    public HashSet<Literal> getAllLiterals() {
-        HashSet<Literal> literals = new HashSet<>();
-        for (Line l : lines) {
-            if (l.color == PLAYER1)
-                literals.add(new Literal(l.n1, l.n2, PLAYER1, false));
-            else if (l.color == PLAYER2)
-                literals.add(new Literal(l.n1, l.n2, PLAYER2, false));
-            else
-                literals.add(new Literal(l.n1, l.n2, PLAYER_ANY, true));
+            int occ = l.color != 0 ? l.color : OCC_BLANK;
+            Position pos = new Position(l.n1, l.n2, occ);
+            literals.add(new Literal(Atoms.posToId.get(pos), false));
         }
         return literals;
     }

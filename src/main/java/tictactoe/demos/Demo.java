@@ -12,8 +12,8 @@ import static misc.Globals.PLAYER1;
 public class Demo {
 
     public static void main(String[] args) {
-        GameSpecifics gs = new GameSpecifics(null);
-        new FFTManager(gs);
+        GameSpecifics gs = new GameSpecifics();
+        FFTManager.initialize(gs);
         FFTSolver.solveGame(new State());
 
         // Make strategy with meta rules

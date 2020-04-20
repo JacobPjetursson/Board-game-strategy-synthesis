@@ -1,16 +1,11 @@
 package mens_morris;
 
 import fftlib.Action;
-import fftlib.Clause;
-import fftlib.Literal;
+import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 
-import java.util.HashSet;
 import java.util.Objects;
 
-import static fftlib.Literal.PIECEOCC_ENEMY;
-import static fftlib.Literal.PIECEOCC_PLAYER;
-import static mens_morris.Logic.POS_NONBOARD;
 
 
 public class Move implements FFTMove {
@@ -33,22 +28,7 @@ public class Move implements FFTMove {
 
     @Override
     public Action getAction() {
-        HashSet<Literal> addLits = new HashSet<>();
-        HashSet<Literal> remLits = new HashSet<>();
-
-        if (newRow != POS_NONBOARD) {
-            addLits.add(new Literal(newRow, newCol, PIECEOCC_PLAYER, false));
-        }
-        if (oldRow != POS_NONBOARD) {
-            if (newRow == POS_NONBOARD) { // remove enemy piece
-                remLits.add(new Literal(oldRow, oldCol, PIECEOCC_ENEMY, false));
-            } else {
-                remLits.add(new Literal(oldRow, oldCol, PIECEOCC_PLAYER, false));
-            }
-        }
-        Clause addClause = new Clause(addLits);
-        Clause remClause = new Clause(remLits);
-        return new Action(addClause, remClause);
+        return FFTManager.moveToAction.apply(this);
     }
 
     @Override

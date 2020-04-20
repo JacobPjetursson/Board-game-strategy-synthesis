@@ -152,10 +152,11 @@ public class InteractivePlayBox extends PlayBox {
 
 
 
-    public void update(Rule r, int perspective) {
+    public void update(Rule r) { // TODO
+        /*
         HashSet<Literal> nonBoardLits = r.preconditions.nonBoardPlacements();
         int[][] preconBoard = Transform.preconsToBoard(r.preconditions);
-        Move m = (Move) r.action.getMove(perspective);
+        Move m = (Move) r.action.getMove();
 
 
         int enemy = (perspective == PLAYER1) ? PLAYER2 : PLAYER1;
@@ -167,7 +168,7 @@ public class InteractivePlayBox extends PlayBox {
                 BoardTile tile = tiles[i][j];
                 tile.setMandatory(occ != 0);
                 if (Math.abs(occ) == PIECEOCC_PLAYER)
-                    tile.addPiece(perspective, clickMode);
+                    tile.addPiece(clickMode);
                 else if (Math.abs(occ) == PIECEOCC_ENEMY)
                     tile.addPiece(enemy, clickMode);
 
@@ -200,6 +201,8 @@ public class InteractivePlayBox extends PlayBox {
         removeArrows();
         if (m != null)
             addArrow(m, Color.BLUE);
+
+         */
 
     }
 }

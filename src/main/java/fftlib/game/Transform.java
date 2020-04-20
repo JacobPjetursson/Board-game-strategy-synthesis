@@ -5,16 +5,12 @@ import fftlib.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
 
-import static fftlib.FFTManager.gameBoardHeight;
-import static fftlib.FFTManager.gameBoardWidth;
-import static kulibrat.game.Logic.POS_NONBOARD;
+import static fftlib.FFTManager.*;
 
 public class Transform {
 
     // LEVEL OF SYMMETRIES
-    public static final int TRANS_NONE = 0;
     public static final int TRANS_HREF = 1;
     public static final int TRANS_VREF = 2;
     public static final int TRANS_ROT = 3;
@@ -64,9 +60,9 @@ public class Transform {
         ArrayList<int[][]> pBoards = applyAll(refH, refV, rotate, pBoard);
         ArrayList<int[][]> aBoards = applyAll(refH, refV, rotate, aBoard);
         for (int i = 0; i < pBoards.size(); i++) {
-            Clause precon = boardToPrecons(pBoards.get(i));
+            HashSet<Literal> precons = boardToPrecons(pBoards.get(i));
             Action action = boardToAction(aBoards.get(i));
-            symmetryRules.add(new SymmetryRule(precon, action));
+            symmetryRules.add(new SymmetryRule(precons, action));
         }
 
         return symmetryRules;
@@ -119,72 +115,73 @@ public class Transform {
     }
 
     // Returns a board with the literals on it, the value equals to the piece occ.
-    public static int[][] preconsToBoard(Clause clause) {
+    public static int[][] preconsToBoard(HashSet<Literal> literals) {
         int height = FFTManager.gameBoardHeight;
         int width = FFTManager.gameBoardWidth;
         int[][] preconBoard = new int[height][width];
 
-        for (Literal l : clause.literals) {
-            if (l.boardPlacement && l.row >= 0 && l.col >= 0 && l.row <= height-1 && l.col <= width-1) {
-                if (l.negation)
-                    preconBoard[l.row][l.col] = -l.pieceOcc;
-                else
-                    preconBoard[l.row][l.col] = l.pieceOcc;
+        for (Literal l : literals) {
+            Position pos = getPosFromId.apply(l.id);
+            if (pos != null) {
+                preconBoard[pos.row][pos.col] = l.negation ? -pos.occ : pos.occ;
             }
         }
         return preconBoard;
     }
 
-    // Takes as input copies of the addClause, remClause lists and removes all the literals that are board placements
+    // Takes as input copies of the add and remove lists and removes all the literals that are board placements
     // It returns a board with the literals on it, the value equals to the piece occ.
     private static int[][] actionToBoard(Action action) {
-        int[][] clauseBoard = new int[gameBoardHeight][gameBoardWidth];
+        int[][] literalBoard = new int[gameBoardHeight][gameBoardWidth];
 
-        for (Literal l : action.addClause.literals) {
-            if (l.row != POS_NONBOARD)
-                clauseBoard[l.row][l.col] = l.pieceOcc;
+        for (Literal l : action.adds) {
+            Position pos = getPosFromId.apply(l.id);
+            if (pos != null)
+                literalBoard[pos.row][pos.col] = pos.occ;
         }
-        for (Literal l : action.remClause.literals) {
-            if (l.row != POS_NONBOARD)
-                clauseBoard[l.row][l.col] = -l.pieceOcc;
+        for (Literal l : action.rems) {
+            Position pos = getPosFromId.apply(l.id);
+            if (pos != null)
+                literalBoard[pos.row][pos.col] = -pos.occ;
         }
 
-        return clauseBoard;
+        return literalBoard;
     }
 
     // returns preconditions derived from transformed integer matrix and non-boardplacement literals
-    private static Clause boardToPrecons(int[][] board) {
+    private static HashSet<Literal> boardToPrecons(int[][] board) {
         HashSet<Literal> literals = new HashSet<>();
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
-                int val = board[i][j];
-                if (val < 0)
-                    literals.add(new Literal(i, j, -val, true));
-                else if (val > 0)
-                    literals.add(new Literal(i, j, val, false));
+
+                Position pos = new Position(i, j, board[i][j]);
+                if (pos.occ < 0)
+                    literals.add(new Literal(getIdFromPos.apply(pos), true));
+                else if (pos.occ > 0)
+                    literals.add(new Literal(getIdFromPos.apply(pos), false));
             }
         }
-        return new Clause(literals);
+        return literals;
     }
 
     // Takes empty addClause and remClause lists (except for constants),
     // and fill them up with the rotated pieces from the cb array.
-    private static Action boardToAction(int[][] cb) {
-        HashSet<Literal> addLits = new HashSet<>();
-        HashSet<Literal> remLits = new HashSet<>();
+    private static Action boardToAction(int[][] lb) {
+        HashSet<Literal> adds = new HashSet<>();
+        HashSet<Literal> rems = new HashSet<>();
         // Add back to list
-        for (int i = 0; i < cb.length; i++) {
-            for (int j = 0; j < cb[i].length; j++) {
-                int val = cb[i][j];
-                if (val < 0)
-                    remLits.add(new Literal(i, j, val, false));
-                else if (val > 0)
-                    addLits.add(new Literal(i, j, val, false));
+        for (int i = 0; i < lb.length; i++) {
+            for (int j = 0; j < lb[i].length; j++) {
+                if (lb[i][j] == 0) continue;
+                Position pos = new Position(i, j, lb[i][j]);
+                Literal l = new Literal(getIdFromPos.apply(pos), false);
+                if (pos.occ < 0)
+                    rems.add(l);
+                else if (pos.occ > 0)
+                    adds.add(l);
             }
         }
-        Clause addC = new Clause(addLits);
-        Clause remC = new Clause(remLits);
-        return new Action(addC, remC);
+        return new Action(adds, rems);
     }
 
     public static int[][] copyArray(int[][] arr) {
@@ -203,13 +200,31 @@ public class Transform {
         HashSet<SymmetryRule> transformations = new HashSet<>();
         for(int[] arr : permutations) {
 
-            Clause precons = new Clause();
+            HashSet<Literal> precons = new HashSet<>();
             Action action = null;
-            for (Literal lit : rule.action.addClause.literals) {
-                action = new Action(arr[lit.row], arr[lit.col], lit.pieceOcc, lit.negation);
+            for (Literal lit : rule.action.adds) {
+                Position pos = getPosFromId.apply(lit.id);
+                int n1 = arr[pos.row];
+                int n2 = arr[pos.col];
+                if (Math.abs(n1) > Math.abs(n2)) { // enforce lowest number first
+                    int temp = n1;
+                    n1 = n2;
+                    n2 = temp;
+                }
+                Position newPos = new Position(n1, n2, pos.occ);
+                action = new Action(getIdFromPos.apply(newPos));
             }
-            for (Literal lit : rule.preconditions.literals) {
-                precons.add(new Literal(arr[lit.row], arr[lit.col], lit.pieceOcc, lit.negation));
+            for (Literal lit : rule.preconditions) {
+                Position pos = getPosFromId.apply(lit.id);
+                int n1 = arr[pos.row];
+                int n2 = arr[pos.col];
+                if (Math.abs(n1) > Math.abs(n2)) { // enforce lowest number first
+                    int temp = n1;
+                    n1 = n2;
+                    n2 = temp;
+                }
+                Position newPos = new Position(n1, n2, pos.occ);
+                precons.add(new Literal(getIdFromPos.apply(newPos), lit.negation));
             }
             transformations.add(new SymmetryRule(precons, action));
         }
@@ -242,4 +257,5 @@ public class Transform {
         input[a] = input[b];
         input[b] = tmp;
     }
+
 }

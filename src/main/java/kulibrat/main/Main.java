@@ -21,9 +21,9 @@ public class Main extends Application {
             launch(args);
         else {
             GameSpecifics specs = new GameSpecifics();
-            FFTManager fftManager = new FFTManager(specs);
+            FFTManager.initialize(specs);
             FFTSolver.solveGame(new State());
-            fftManager.autogenFFT();
+            FFTManager.autogenFFT();
         }
     }
 

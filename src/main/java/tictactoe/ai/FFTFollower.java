@@ -1,6 +1,5 @@
 package tictactoe.ai;
 
-import fftlib.FFTManager;
 import fftlib.FFT_Follower;
 import tictactoe.game.Move;
 import tictactoe.game.State;
@@ -10,9 +9,9 @@ public class FFTFollower implements AI {
     int team;
     FFT_Follower fftFollower;
 
-    public FFTFollower(int team, FFTManager fftManager) {
+    public FFTFollower(int team) {
         this.team = team;
-        fftFollower = new FFT_Follower(team, fftManager);
+        fftFollower = new FFT_Follower(team);
     }
 
     @Override

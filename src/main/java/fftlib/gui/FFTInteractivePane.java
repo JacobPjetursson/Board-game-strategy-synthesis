@@ -30,9 +30,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import misc.Globals;
-import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
-import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
-import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -43,14 +40,9 @@ import static misc.Globals.*;
 
 public class FFTInteractivePane extends BorderPane {
     private int textFieldWidth = 150;
-    private FFTManager fftManager;
-    private int perspective = PLAYER1;
     private ListView<RulePane> lw;
     private InteractiveFFTState interactiveFFTState;
     private Label ruleLabel;
-
-    private RadioButton p1Btn;
-    private RadioButton p2Btn;
 
     private Button saveRuleBtn;
     private Button deleteRuleBtn;
@@ -74,11 +66,10 @@ public class FFTInteractivePane extends BorderPane {
 
     private static final int ROW_SIZE = 27;
 
-    public FFTInteractivePane(FFTManager fftManager) {
+    public FFTInteractivePane() {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         setMaxHeight(Globals.HEIGHT);
         setMaxWidth(Globals.WIDTH);
-        this.fftManager = fftManager;
         undoStack = new Stack<>();
 
         VBox topBox = new VBox(5);
@@ -157,10 +148,10 @@ public class FFTInteractivePane extends BorderPane {
         verifyBtn.setOnMouseClicked(event -> {
             int team = teamChoice.getSelectionModel().getSelectedIndex() + 1;
             boolean wholeFFT = verificationChoice.getSelectionModel().getSelectedIndex() == 0;
-            boolean verified =  fftManager.currFFT.verify(team, wholeFFT);
+            boolean verified =  FFTManager.currFFT.verify(team, wholeFFT);
 
             if (!verified) {
-                if (fftManager.currFFT.failingPoint == null) {
+                if (FFTManager.currFFT.failingPoint == null) {
                     Label verifiedLabel = new Label("Always loses to perfect player");
                     verifiedLabel.setFont(Font.font("Verdana", 16));
                     getChildren().add(4, verifiedLabel);
@@ -172,7 +163,7 @@ public class FFTInteractivePane extends BorderPane {
                 } else {
                     Stage stage = (Stage) getScene().getWindow();
                     Scene scene = stage.getScene();
-                    stage.setScene(new Scene(new FFTFailurePane(scene, fftManager, this), WIDTH, Globals.HEIGHT));
+                    stage.setScene(new Scene(new FFTFailurePane(scene, this), WIDTH, Globals.HEIGHT));
                 }
             } else {
                 Label verifiedLabel = new Label("The strategy was successfully verified");
@@ -190,25 +181,6 @@ public class FFTInteractivePane extends BorderPane {
         verifyBox.setAlignment(Pos.CENTER);
         verifyBox.setSpacing(10);
         verifyBox.getChildren().addAll(verifyBtn, teamChoice, verificationChoice);
-
-        p1Btn = new RadioButton(playerNames[0]);
-        p1Btn.setFont(Font.font("Verdana", 16));
-        p2Btn = new RadioButton(playerNames[1]);
-        p2Btn.setFont(Font.font("Verdana", 16));
-        ToggleGroup toggleGrp = new ToggleGroup();
-        p1Btn.setToggleGroup(toggleGrp);
-        p2Btn.setToggleGroup(toggleGrp);
-        HBox perspectiveGrp = new HBox(10, label3, p1Btn, p2Btn);
-        perspectiveGrp.setAlignment(Pos.CENTER);
-        p1Btn.setOnMouseClicked(event -> {
-            perspective = PLAYER1;
-            interactiveFFTState.setPerspective(perspective);
-        });
-        p2Btn.setOnMouseClicked(event -> {
-            perspective = PLAYER2;
-            interactiveFFTState.setPerspective(perspective);
-        });
-
 
         Button back = new Button("Back");
         back.setFont(Font.font("Verdana", 16));
@@ -237,16 +209,12 @@ public class FFTInteractivePane extends BorderPane {
         addRuleBtn.setFont(Font.font("Verdana", 16));
         addRuleBtn.setOnMouseClicked(event -> {
             Rule r = interactiveFFTState.getRule();
-            if (!Rule.isValidRuleFormat(r)) {
-                System.err.println("Invalid rule format!");
-                return;
-            }
             pushUndoStack();
-            ArrayList<RuleGroup> ruleGroups = fftManager.currFFT.ruleGroups;
+            ArrayList<RuleGroup> ruleGroups = FFTManager.currFFT.ruleGroups;
             if (ruleGroups.isEmpty())
                 ruleGroups.add(new RuleGroup(""));
             Rule copy = new Rule(r);
-            fftManager.currFFT.ruleGroups.get(ruleGroups.size() - 1).addRule(copy);
+            FFTManager.currFFT.ruleGroups.get(ruleGroups.size() - 1).addRule(copy);
             showRuleGroups();
         });
 
@@ -271,17 +239,10 @@ public class FFTInteractivePane extends BorderPane {
             if (undoStack.empty())
                 return;
             UndoItem item = popUndoStack();
-            fftManager.currFFT = item.getFFT();
+            FFTManager.currFFT = item.getFFT();
             showRuleGroups();
             lw.requestFocus();
             selectedIndices = item.getSelectedIndices();
-            int perspective = item.getPerspective();
-            interactiveFFTState.setPerspective(perspective);
-            if (perspective == PLAYER1)
-                p1Btn.fire();
-            else
-                p2Btn.fire();
-
 
             if (selectedIndices == null) {
                 clearPane();
@@ -290,7 +251,7 @@ public class FFTInteractivePane extends BorderPane {
                 int rIdx = selectedIndices[1];
                 int selectionIdx = rgIdx + rIdx + 1;
                 lw.getSelectionModel().select(selectionIdx);
-                RuleGroup rg = fftManager.currFFT.ruleGroups.get(rgIdx);
+                RuleGroup rg = FFTManager.currFFT.ruleGroups.get(rgIdx);
                 addInteractiveNode(interactiveFFTState.getInteractiveNode(rg.rules.get(rIdx)));
 
             }
@@ -334,7 +295,7 @@ public class FFTInteractivePane extends BorderPane {
         saveRuleBtn.setDisable(true);
         saveRuleBtn.setOnMouseClicked(event -> {
             Rule r = interactiveFFTState.getRule();
-            if (!Rule.isValidRuleFormat(r) || selectedIndices == null) {
+            if (selectedIndices == null) {
                 return;
             }
             pushUndoStack();
@@ -342,8 +303,8 @@ public class FFTInteractivePane extends BorderPane {
             int rgIdx = selectedIndices[0];
             int rIdx = selectedIndices[1];
             // Replace
-            fftManager.currFFT.ruleGroups.get(rgIdx).rules.remove(rIdx);
-            fftManager.currFFT.ruleGroups.get(rgIdx).rules.add(rIdx, r);
+            FFTManager.currFFT.ruleGroups.get(rgIdx).rules.remove(rIdx);
+            FFTManager.currFFT.ruleGroups.get(rgIdx).rules.add(rIdx, r);
             showRuleGroups();
 
             playMsg("Rule saved", 3);
@@ -357,7 +318,7 @@ public class FFTInteractivePane extends BorderPane {
             pushUndoStack();
             int rgIdx = selectedIndices[0];
             int rIdx = selectedIndices[1];
-            fftManager.currFFT.ruleGroups.get(rgIdx).rules.remove(rIdx);
+            FFTManager.currFFT.ruleGroups.get(rgIdx).rules.remove(rIdx);
             clearPane();
             showRuleGroups();
         });
@@ -387,7 +348,7 @@ public class FFTInteractivePane extends BorderPane {
         deleteRgBtn.setOnMouseClicked(event -> {
             // Confirmation on delete
             int rgIdx = selectedIndices[0];
-            RuleGroup rg = fftManager.currFFT.ruleGroups.get(rgIdx);
+            RuleGroup rg = FFTManager.currFFT.ruleGroups.get(rgIdx);
             String labelText = "Are you sure you want to delete the rule group:\n" + rg.name;
             Stage newStage = new Stage();
             newStage.setScene(new Scene(
@@ -400,7 +361,7 @@ public class FFTInteractivePane extends BorderPane {
 
         VBox infoBox = new VBox(7);
         infoBox.setAlignment(Pos.CENTER);
-        infoBox.getChildren().addAll(label1, label2, perspectiveGrp);
+        infoBox.getChildren().addAll(label1, label2);
 
         ruleBtnBox = new HBox(10, saveToDiskBtn, saveRuleBtn, deleteRuleBtn);
         ruleBtnBox.setAlignment(Pos.CENTER);
@@ -447,7 +408,7 @@ public class FFTInteractivePane extends BorderPane {
     }
 
     private void pushUndoStack() {
-        UndoItem uItem = new UndoItem(new FFT(fftManager.currFFT), selectedIndices, perspective);
+        UndoItem uItem = new UndoItem(new FFT(currFFT), selectedIndices);
         undoStack.push(uItem);
         undoBtn.setDisable(false);
         changes = true;
@@ -484,10 +445,6 @@ public class FFTInteractivePane extends BorderPane {
         lw.getSelectionModel().clearSelection();
 
         Node node = FFTManager.interactiveState.getInteractiveNode(state);
-        if (state.getTurn() == PLAYER1)
-            p1Btn.setSelected(true);
-        else
-            p2Btn.setSelected(true);
         addInteractiveNode(node);
     }
 
@@ -522,9 +479,9 @@ public class FFTInteractivePane extends BorderPane {
     private void showRuleGroups() {
         selectedIndices = null;
         ObservableList<RulePane> rules = FXCollections.observableArrayList();
-        for (int i = 0; i < fftManager.currFFT.ruleGroups.size(); i++) {
+        for (int i = 0; i < FFTManager.currFFT.ruleGroups.size(); i++) {
             // Rule group
-            RuleGroup rg = fftManager.currFFT.ruleGroups.get(i);
+            RuleGroup rg = FFTManager.currFFT.ruleGroups.get(i);
             if (SHOW_RULE_GROUPS) rules.add(new RulePane(i));
             for (int j = 0; j < rg.rules.size(); j++) {
                 rules.add(new RulePane(i, j));
@@ -546,7 +503,7 @@ public class FFTInteractivePane extends BorderPane {
             this.isRuleGroup = true;
             this.rgIdx = rgIdx;
 
-            RuleGroup rg = fftManager.currFFT.ruleGroups.get(rgIdx);
+            RuleGroup rg = FFTManager.currFFT.ruleGroups.get(rgIdx);
             this.label = new Label((rgIdx + 1) + ": " + rg.name);
             label.setFont(Font.font("Verdana", 18));
             getChildren().add(label);
@@ -558,7 +515,7 @@ public class FFTInteractivePane extends BorderPane {
             this.isRuleGroup = false;
             this.rgIdx = rgIdx;
             this.rIdx = rIdx;
-            RuleGroup rg = fftManager.currFFT.ruleGroups.get(rgIdx);
+            RuleGroup rg = FFTManager.currFFT.ruleGroups.get(rgIdx);
 
             Rule r = rg.rules.get(rIdx);
             this.label = new Label((rIdx + 1) + ": " + r);
@@ -585,7 +542,7 @@ public class FFTInteractivePane extends BorderPane {
                     deleteRgBtn.setDisable(false);
                     renameRgBtn.setDisable(false);
                 } else {
-                    RuleGroup rg = fftManager.currFFT.ruleGroups.get(pane.rgIdx);
+                    RuleGroup rg = FFTManager.currFFT.ruleGroups.get(pane.rgIdx);
                     addInteractiveNode(interactiveFFTState.getInteractiveNode(rg.rules.get(pane.rIdx)));
                     selectedIndices = new int[]{pane.rgIdx, pane.rIdx};
                     saveRuleBtn.setDisable(false);
@@ -648,16 +605,16 @@ public class FFTInteractivePane extends BorderPane {
                     int selectionIdx, rgSelectionIdx, rSelectionIdx;
 
                     RulePane draggedPane = lw.getItems().get(draggedIdx);
-                    RuleGroup rg_dragged = fftManager.currFFT.ruleGroups.get(draggedPane.rgIdx);
+                    RuleGroup rg_dragged = FFTManager.currFFT.ruleGroups.get(draggedPane.rgIdx);
                     Rule r_dragged = rg_dragged.rules.get(draggedPane.rIdx);
                     rg_dragged.rules.remove(r_dragged);
 
                     if (isEmpty()) { // out-of-bounds
-                        RuleGroup rg_last = fftManager.currFFT.ruleGroups.get(fftManager.currFFT.ruleGroups.size() - 1);
+                        RuleGroup rg_last = FFTManager.currFFT.ruleGroups.get(FFTManager.currFFT.ruleGroups.size() - 1);
                         rg_last.rules.add(r_dragged);
                         selectionIdx = lw.getItems().size() - 1;
 
-                        rgSelectionIdx = fftManager.currFFT.ruleGroups.size() - 1;
+                        rgSelectionIdx = FFTManager.currFFT.ruleGroups.size() - 1;
                         rSelectionIdx = rg_last.rules.size() - 1;
                     } else {
                         RulePane droppedPane = lw.getItems().get(droppedIdx);
@@ -670,7 +627,7 @@ public class FFTInteractivePane extends BorderPane {
                             rgIdx--;
                         }
 
-                        RuleGroup rg_dropped = fftManager.currFFT.ruleGroups.get(rgIdx);
+                        RuleGroup rg_dropped = FFTManager.currFFT.ruleGroups.get(rgIdx);
                         rg_dropped.rules.add(rIdx, r_dragged);
 
                         selectionIdx = droppedIdx;
@@ -722,7 +679,7 @@ public class FFTInteractivePane extends BorderPane {
 
         private void removeRuleGroup() {
             int rgIdx = selectedIndices[0];
-            fftManager.currFFT.ruleGroups.remove(rgIdx);
+            FFTManager.currFFT.ruleGroups.remove(rgIdx);
             deleteRgBtn.setDisable(true);
             renameRgBtn.setDisable(true);
             showRuleGroups();
@@ -746,11 +703,11 @@ public class FFTInteractivePane extends BorderPane {
                 RuleGroup rg;
                 if (rename) {
                     int rgIdx = selectedIndices[0];
-                    rg = fftManager.currFFT.ruleGroups.get(rgIdx);
+                    rg = FFTManager.currFFT.ruleGroups.get(rgIdx);
                     rg.name = tf.getText();
                 } else {
                     rg = new RuleGroup(tf.getText());
-                    fftManager.currFFT.ruleGroups.add(rg);
+                    FFTManager.currFFT.ruleGroups.add(rg);
                 }
 
                 Stage stage = (Stage) getScene().getWindow();
@@ -818,15 +775,15 @@ public class FFTInteractivePane extends BorderPane {
             getChildren().addAll(label, minimizeBox, btnBox);
         }
 
-        private void minimizeAndClose(int perspective) {
+        private void minimizeAndClose(int team) {
             boolean tempChanges = changes;
             pushUndoStack();
-            int ruleSize = fftManager.currFFT.getAmountOfRules();
-            int precSize = fftManager.currFFT.getAmountOfPreconditions();
-            int iterations = fftManager.currFFT.minimize(perspective, minimizeBox.isSelected());
+            int ruleSize = FFTManager.currFFT.getAmountOfRules();
+            int precSize = FFTManager.currFFT.getAmountOfPreconditions();
+            int iterations = FFTManager.currFFT.minimize(team, minimizeBox.isSelected());
 
-            int diffRules = ruleSize - fftManager.currFFT.getAmountOfRules();
-            int diffPrecs = precSize - fftManager.currFFT.getAmountOfPreconditions();
+            int diffRules = ruleSize - FFTManager.currFFT.getAmountOfRules();
+            int diffPrecs = precSize - FFTManager.currFFT.getAmountOfPreconditions();
             String msg;
             if (iterations == -1) { // error, not a winning strategy
                 msg = "FFT is not a winning strategy, so it can't be minimized";
@@ -885,17 +842,17 @@ public class FFTInteractivePane extends BorderPane {
             getChildren().addAll(label, btnBox);
         }
 
-        private void generateAndClose(int perspective) {
+        private void generateAndClose(int team) {
             boolean tempChanges = changes;
             pushUndoStack();
 
             String msg;
-            if (!currFFT.verify(perspective, false)) { // error, not a winning strategy
+            if (!currFFT.verify(team, false)) { // error, not a winning strategy
                 msg = "The exiting strategy was not weakly verified, so can't generate an optimal strategy";
                 popUndoStack();
                 changes = tempChanges;
             }
-            else if (currFFT.verify(perspective, true)) {
+            else if (currFFT.verify(team, true)) {
                 msg = "Strategy is already strongly optimal";
                 popUndoStack();
                 changes = tempChanges;
@@ -914,15 +871,13 @@ public class FFTInteractivePane extends BorderPane {
     }
 
 
-    private class UndoItem {
+    private static class UndoItem {
         private FFT fft;
         private int[] selectedIndices;
-        private int perspective;
 
-        public UndoItem(FFT fft, int[] selectedIndices, int perspective) {
+        public UndoItem(FFT fft, int[] selectedIndices) {
             this.fft = fft;
             this.selectedIndices = selectedIndices;
-            this.perspective = perspective;
         }
 
         public FFT getFFT() {
@@ -931,10 +886,6 @@ public class FFTInteractivePane extends BorderPane {
 
         public int[] getSelectedIndices() {
             return selectedIndices;
-        }
-
-        public int getPerspective() {
-            return perspective;
         }
     }
 }

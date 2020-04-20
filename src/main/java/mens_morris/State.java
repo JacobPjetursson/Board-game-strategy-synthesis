@@ -72,29 +72,8 @@ public class State implements FFTState {
                 this.zobrist_key == state.zobrist_key;
     }
 
-    public HashSet<Literal> getLiterals() {
-        HashSet<Literal> literals = new HashSet<>();
-
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                int pieceOcc = board[i][j];
-                if (pieceOcc > 0) {
-                    if (turn != PLAYER1) {
-                        pieceOcc = (pieceOcc == 1) ? 2 : 1;
-                    }
-                    literals.add(new Literal(i, j, pieceOcc, false));
-                }
-            }
-        }
-        String phaseStr = (phase2) ? "" : "!";
-        String removeStr = (canRemove) ? "" : "!";
-        if (!THREE_MENS) literals.add(new Literal(phaseStr + "phase2"));
-        if (!THREE_MENS) literals.add(new Literal(removeStr + "canRemove"));
-        return literals;
-    }
-
     @Override
-    public HashSet<Literal> getAllLiterals() {
+    public HashSet<Literal> getLiterals() { // TODO
         HashSet<Literal> literals = new HashSet<>();
 
         for (int i = 0; i < board.length; i++) {
@@ -104,9 +83,10 @@ public class State implements FFTState {
                     if (turn != PLAYER1) {
                         pieceOcc = (pieceOcc == 1) ? 2 : 1;
                     }
-                    literals.add(new Literal(i, j, pieceOcc, false));
-                } else if (pieceOcc == 0)
-                    literals.add(new Literal(i, j, PLAYER_ANY, true));
+                    //literals.add(new Literal(i, j, pieceOcc, false));
+                } else if (pieceOcc == 0) {
+                    //literals.add(new Literal(i, j, PLAYER_ANY, true));
+                }
             }
         }
 

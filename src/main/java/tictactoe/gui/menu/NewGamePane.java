@@ -120,13 +120,13 @@ public class NewGamePane extends AnchorPane {
             String val = autogenChoices.getItems().get(newValue.intValue());
             switch (val) {
                 case "Cross":
-                    Config.AUTOGEN_PERSPECTIVE = PLAYER1;
+                    Config.AUTOGEN_TEAM = PLAYER1;
                     break;
                 case "Nought":
-                    Config.AUTOGEN_PERSPECTIVE = PLAYER2;
+                    Config.AUTOGEN_TEAM = PLAYER2;
                     break;
                 default:
-                    Config.AUTOGEN_PERSPECTIVE = PLAYER_ANY;
+                    Config.AUTOGEN_TEAM = PLAYER_ANY;
                     break;
             }
         });

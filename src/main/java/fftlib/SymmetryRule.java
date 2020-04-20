@@ -5,13 +5,8 @@ import java.util.Objects;
 
 public class SymmetryRule extends Rule { // Simpler rule class for rules in symmetry hashset
 
-    public SymmetryRule(Clause precons, Action action) {
-        this.preconditions = precons;
-        this.action = action;
-    }
-
     public SymmetryRule(HashSet<Literal> precons, Action action) {
-        this.preconditions = new Clause(precons);
+        this.preconditions = precons;
         this.action = action;
     }
 

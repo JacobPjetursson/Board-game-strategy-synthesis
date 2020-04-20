@@ -3,7 +3,6 @@ package fftlib;
 import fftlib.GGPAutogen.GGPManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
-import fftlib.game.Transform;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
@@ -12,26 +11,16 @@ import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 
 import java.util.*;
 
-import static fftlib.Literal.*;
 import static misc.Config.ENABLE_GGP_PARSER;
 import static misc.Config.SYMMETRY_DETECTION;
-import static misc.Globals.CURRENT_GAME;
-import static misc.Globals.SIM;
 
 
 public class Rule {
     private static final ArrayList<String> separators = new ArrayList<>(
             Arrays.asList("and", "And", "AND", "&", "∧"));
-    public Clause preconditions;
-    public HashSet<SymmetryRule> symmetryRules;
+    public HashSet<Literal> preconditions;
     public Action action;
-    private String actionStr, preconStr;
-
-
-    // If multirule, the rule class instead contains a list of rules
-    public boolean multiRule;
-    public HashSet<Rule> rules;
-    public boolean errors;
+    public HashSet<SymmetryRule> symmetryRules;
 
     // General game playing
     public Set<GdlSentence> sentences;
@@ -47,57 +36,42 @@ public class Rule {
             this.action = getAction(actionStr);
             this.preconditions = getPreconditions(preconStr);
         }
-        errors = !isValidRuleFormat(this);
-        this.symmetryRules = getTransformedRules();
+        this.symmetryRules = getSymmetryRules();
     }
 
     public Rule(HashSet<Literal> precons, Action action) {
-        this.multiRule = false;
-        this.action = action;
-        this.preconditions = new Clause(precons);
-        this.symmetryRules = getTransformedRules();
-    }
-
-    public Rule(Clause precons, Action action) {
-        this.multiRule = false;
         this.action = action;
         this.preconditions = precons;
-        this.symmetryRules = getTransformedRules();
+        this.symmetryRules = getSymmetryRules();
     }
 
     // GDL Constructor
     public Rule(Set<GdlSentence> sentences, Move move) {
-        this.multiRule = false;
         this.sentences = sentences;
         this.move = move;
     }
 
     // Empty constructor to allow rule buildup
     public Rule() {
-        this.preconditions = new Clause();
+        this.preconditions = new HashSet<>();
         this.action = new Action();
-        preconStr = "";
-        actionStr = "";
     }
 
     public Rule(Set<GdlSentence> sentences) {
-        this.multiRule = false;
         this.sentences = sentences;
     }
 
     // Duplicate constructor
     public Rule(Rule duplicate) {
         this.action = new Action(duplicate.action);
-        this.preconditions = new Clause(duplicate.preconditions);
-        this.errors = duplicate.errors;
+        this.preconditions = new HashSet<>(duplicate.preconditions);
         this.symmetryRules = new HashSet<>(duplicate.symmetryRules);
 
     }
 
     public void addPrecondition(Literal l) {
-        if (!preconditions.literals.contains(l))
-            preconditions.add(l);
-        this.symmetryRules = getTransformedRules();
+        preconditions.add(l);
+        this.symmetryRules = getSymmetryRules();
     }
 
     public void addPrecondition(GdlSentence s) {
@@ -107,7 +81,7 @@ public class Rule {
 
     public void removePrecondition(Literal l) {
         this.preconditions.remove(l);
-        this.symmetryRules = getTransformedRules();
+        this.symmetryRules = getSymmetryRules();
     }
 
     public void removePrecondition(GdlSentence s) {
@@ -116,51 +90,29 @@ public class Rule {
 
     }
 
-
-    public void removeLiterals(int row, int col) {
-        ArrayList<Literal> removeList = new ArrayList<>();
-        for (Literal l : preconditions.literals) {
-            if (l.row == row && l.col == col)
-                removeList.add(l);
-        }
-        preconditions.literals.removeAll(removeList);
-        removeList.clear();
-        for (Literal l : action.addClause.literals) {
-            if (l.row == row && l.col == col)
-                removeList.add(l);
-        }
-        action.addClause.literals.removeAll(removeList);
-        removeList.clear();
-        for (Literal l : action.remClause.literals) {
-            if (l.row == row && l.col == col)
-                removeList.add(l);
-        }
-        action.remClause.literals.removeAll(removeList);
-
-        this.symmetryRules = getTransformedRules();
-    }
-
     public void setAction(Action a) {
         if (a == null)
             this.action = new Action();
         else
             this.action = a;
-        this.symmetryRules = getTransformedRules();
+        this.symmetryRules = getSymmetryRules();
     }
 
+    // Gdl
     public void setMove(Move m) {
         this.move = m;
-        this.symmetryRules = getTransformedRules();
+        this.symmetryRules = getSymmetryRules();
     }
 
-    public void setPreconditions(Clause c) {
-        if (c == null)
-            this.preconditions = new Clause();
+    public void setPreconditions(HashSet<Literal> precons) {
+        if (precons == null)
+            this.preconditions = new HashSet<>();
         else
-            this.preconditions = c;
-        this.symmetryRules = getTransformedRules();
+            this.preconditions = precons;
+        this.symmetryRules = getSymmetryRules();
     }
 
+    // Gdl
     public void setSentences(Set<GdlSentence> sentences) {
         this.sentences = sentences;
         //this.transformedSentences = getTransformedSentences();
@@ -202,84 +154,46 @@ public class Rule {
         return corrected_parts;
     }
 
-    private static Clause getPreconditions(String clauseStr) {
+    private static HashSet<Literal> getPreconditions(String preconStr) {
         HashSet<Literal> literals = new HashSet<>();
-        for (String c : prepPreconditions(clauseStr)) {
-            literals.add(new Literal(c));
+        for (String precons : prepPreconditions(preconStr)) {
+            literals.add(new Literal(precons));
         }
-       return new Clause(literals);
+       return literals;
     }
 
     private static Action getAction(String actionStr) {
         return new Action(prepAction(actionStr));
     }
 
-    public static boolean isValidRuleFormat(Rule r) {
-        if (r.multiRule) {
-            for (Rule rule : r.rules)
-                if (!isValidRuleFormat(rule))
-                    return false;
-            return true;
-        }
-        for (Literal l : r.preconditions.literals)
-            if (l.error)
-                return false;
-        if (r.action.addClause.isEmpty() && r.action.remClause.isEmpty())
-            return false;
-        if (r.action.actionErr)
-            return false;
-        for (Literal l : r.action.addClause.literals)
-            if (l.error)
-                return false;
-        for (Literal l : r.action.remClause.literals)
-            if (l.error)
-                return false;
-
-        return true;
-    }
-
     public String toString() {
         if (sentences != null || move != null) { // ggp
             return "IF: " + sentences + " THEN: " + move;
         }
-        String cStr, aStr;
-        if (preconditions != null && action != null) {
-            cStr = preconditions.getFormattedString();
-            aStr = action.getFormattedString();
-        } else {
-            cStr = preconStr;
-            aStr = actionStr;
-        }
+
         if (ENABLE_GGP_PARSER) {
-            return "IF: [" + cStr + "] THEN: [" +
-                    action.addClause.getFormattedString() + " " + action.remClause.getFormattedString() + "]";
+            // TODO
         }
 
-        return "IF [" + cStr + "] THEN [" + aStr + "]";
+        return "IF [" + getPreconString() + "] THEN [" + getActionString() + "]";
     }
 
-    String getPreconStr() {
-        if (preconditions != null)
-            return preconditions.getFormattedString();
-        else
-            return preconStr;
-    }
-
-    String getActionStr() {
-        if (action != null)
-            return action.getFormattedString();
-        else
-            return actionStr;
-    }
-
-    public HashSet<SymmetryRule> getTransformedRules() {
-
-        if (CURRENT_GAME != SIM) {
-            return Transform.getSymmetryRules(FFTManager.gameSymmetries, this);
+    public String getPreconString() {
+        StringBuilder pStr = new StringBuilder();
+        for (Literal l : preconditions) {
+            if (pStr.length() > 0)
+                pStr.append(" ∧ ");
+            pStr.append(l.getName());
         }
-        else {
-            return Transform.findAutomorphisms(this);
-        }
+        return pStr.toString();
+    }
+
+    public String getActionString() {
+        return action.getFormattedString();
+    }
+
+    public HashSet<SymmetryRule> getSymmetryRules() {
+        return FFTManager.getSymmetryRules.apply(this);
     }
 
     public FFTMove apply(FFTState state) {
@@ -294,7 +208,8 @@ public class Rule {
             // We want to ensure that rule is optimal in all symmetric states, but since all these will be explored
             // by the algorithm, we are good. This is the case since we always start with checking the default state
             // (no applied symmetries), meaning every symmetric states will inevitably be checked.
-            // Alternative is to check that all non-null moves here are legal. TODO - check with method is fastest
+            // Alternative is to check that all non-null moves here are legal.
+            // TODO - check which method is fastest
             if (m != null) {
                 return m;
             }
@@ -304,28 +219,14 @@ public class Rule {
 
     private FFTMove match(Rule rule, FFTState state, HashSet<Literal> stLiterals) {
         boolean match = true;
-        for (Literal l : rule.preconditions.literals) {
-            if (l.pieceOcc == PIECEOCC_ANY) {
-                Literal temp = new Literal(l);
-                temp.pieceOcc = PIECEOCC_PLAYER;
-                temp.format();
-                match = matchLiteral(temp, stLiterals);
-                if (!match)
-                    break;
-
-                temp.pieceOcc = PIECEOCC_ENEMY;
-                temp.format();
-                match = matchLiteral(temp, stLiterals);
-            } else {
-                match = matchLiteral(l, stLiterals);
-            }
+        for (Literal l : rule.preconditions) {
+            match = matchLiteral(l, stLiterals);
             if (!match)
                 break;
 
         }
         if (match) {
-            Action a = rule.action;
-            FFTMove move = a.getMove(state.getTurn());
+            FFTMove move = rule.action.getMove();
             if (FFTManager.logic.isLegalMove(state, move)) {
                 return move;
             }
@@ -360,7 +261,6 @@ public class Rule {
         if (l.negation) {
             Literal temp = new Literal(l);
             temp.negation = false;
-            temp.format();
             return !stLiterals.contains(temp);
         }
         return stLiterals.contains(l);

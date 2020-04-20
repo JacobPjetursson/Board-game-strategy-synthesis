@@ -17,12 +17,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 public class FFTManager {
     public static ArrayList<FFT> ffts;
     public static FFTLogic logic;
-    static int [] gameSymmetries;
     public static int gameBoardWidth;
     public static int gameBoardHeight;
     private static String path;
@@ -30,9 +31,17 @@ public class FFTManager {
     public static FFT currFFT;
     private static FFTFailState failState;
     public static InteractiveFFTState interactiveState;
-    public static BiFunction<Action, Integer, FFTMove> actionToMove;
-    public static BiFunction<HashSet<Literal>, Integer, FFTState> preconsToState;
+    public static Function<Action, FFTMove> actionToMove;
+    public static Function<FFTMove, Action> moveToAction;
     public static BiFunction<String, String, Rule> gdlToRule;
+    public static Function<Rule, HashSet<SymmetryRule>> getSymmetryRules;
+    public static Function<Position, Integer> getIdFromPos;
+    public static Function<Integer, Position> getPosFromId;
+
+    // Game atoms
+    public static Supplier<ArrayList<Integer>> getGameAtoms;
+    public static Function<String, Integer> getAtomId;
+    public static Function<Integer, String> getAtomName;
     public static String[] playerNames;
     private static int fft_index = 0;
 
@@ -43,22 +52,27 @@ public class FFTManager {
     public static final String orangeBtnStyle = "-fx-border-color: #000000; -fx-background-color: #ffa500;";
 
     // Most game-related classes are processed here
-    public FFTManager(FFTGameSpecifics gameSpecifics) {
+    public static void initialize(FFTGameSpecifics gameSpecifics) {
         ffts = new ArrayList<>();
 
         initialFFTState = gameSpecifics.getInitialState();
         logic = gameSpecifics.getLogic();
         path = gameSpecifics.getFFTFilePath();
-        gameSymmetries = gameSpecifics.getAllowedTransformations();
         int[] dim = gameSpecifics.getBoardDim();
         gameBoardHeight = dim[0];
         gameBoardWidth = dim[1];
         actionToMove = gameSpecifics::actionToMove;
-        preconsToState = gameSpecifics::preconsToState;
+        moveToAction = gameSpecifics::moveToAction;
         gdlToRule = gameSpecifics::gdlToRule;
         failState = gameSpecifics.getFailState();
         interactiveState = gameSpecifics.getInteractiveState();
         playerNames = gameSpecifics.getPlayerNames();
+        getGameAtoms = gameSpecifics::getGameAtoms;
+        getAtomId = gameSpecifics::getAtomId;
+        getAtomName = gameSpecifics::getAtomName;
+        getPosFromId = gameSpecifics::idToPos;
+        getIdFromPos = gameSpecifics::posToId;
+        getSymmetryRules = gameSpecifics::getSymmetryRules;
 
         // Try loading ffts from file in working directory
         ffts = load(path);
@@ -79,7 +93,7 @@ public class FFTManager {
                         fft_file.append("*");
                     fft_file.append("\n");
                     for (Rule r : rg.rules) {
-                        fft_file.append(r.getPreconStr()).append(" -> ").append(r.getActionStr()).append("\n");
+                        fft_file.append(r.getPreconString()).append(" -> ").append(r.getActionString()).append("\n");
                     }
                 }
             }
@@ -131,12 +145,12 @@ public class FFTManager {
         return ffts;
     }
 
-    public void setCurrFFT(int index) {
+    public static void setCurrFFT(int index) {
         currFFT = ffts.get(index);
         fft_index = index;
     }
 
-    public void addNewFFT(String name) {
+    public static void addNewFFT(String name) {
         FFT newFFT = new FFT(name);
         ffts.add(newFFT);
         currFFT = newFFT;
@@ -145,7 +159,7 @@ public class FFTManager {
         save();
     }
 
-    public void deleteCurrFFT() {
+    public static void deleteCurrFFT() {
         ffts.remove(currFFT);
         if (!ffts.isEmpty()) {
             currFFT = ffts.get(0);
@@ -157,7 +171,7 @@ public class FFTManager {
         save();
     }
 
-    public Node getFailState() {
+    public static Node getFailState() {
         FFTStateAndMove ps = currFFT.failingPoint;
         FFTState s = ps.getState();
         ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(s);
@@ -165,7 +179,7 @@ public class FFTManager {
     }
 
     public static FFT autogenFFT() {
-        FFT fft = FFTAutoGen.generateFFT(Config.AUTOGEN_PERSPECTIVE);
+        FFT fft = FFTAutoGen.generateFFT(Config.AUTOGEN_TEAM);
         ffts.add(0, fft);
         currFFT = fft;
         return currFFT;

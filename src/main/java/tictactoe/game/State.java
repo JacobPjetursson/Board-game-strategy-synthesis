@@ -3,14 +3,16 @@ package tictactoe.game;
 import fftlib.Literal;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
+import tictactoe.FFT.Atoms;
+import fftlib.Position;
 import tictactoe.ai.Zobrist;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import static fftlib.Position.OCC_BLANK;
 import static misc.Globals.PLAYER1;
-import static misc.Globals.PLAYER_ANY;
 
 
 public class State implements FFTState {
@@ -151,43 +153,16 @@ public class State implements FFTState {
         this.move = move;
     }
 
-    public HashSet<Literal> getLiterals() {
-        if (literals != null)
-            return literals;
+    public HashSet<Literal> getLiterals() { // Including negatives, used for creating rules
         HashSet<Literal> literals = new HashSet<>();
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
-                int pieceOcc = board[i][j];
-                if (pieceOcc > 0) {
-                    if (turn == PLAYER1)
-                        literals.add(new Literal(i, j, pieceOcc, false));
-                    else {
-                        pieceOcc = (pieceOcc == 1) ? 2 : 1;
-                        literals.add(new Literal(i, j, pieceOcc, false));
-                    }
-                }
-            }
-        }
-        this.literals = literals;
-        return literals;
-    }
 
-    public HashSet<Literal> getAllLiterals() { // Including negatives, used for creating rules
-        HashSet<Literal> literals = new HashSet<>();
-
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                int pieceOcc = board[i][j];
-                if (pieceOcc > 0) {
-                    if (turn == PLAYER1)
-                        literals.add(new Literal(i, j, pieceOcc, false));
-                    else {
-                        pieceOcc = (pieceOcc == 1) ? 2 : 1;
-                        literals.add(new Literal(i, j, pieceOcc, false));
-                    }
-                } else
-                    literals.add(new Literal(i, j, PLAYER_ANY, true));
+                int occ = board[i][j] != 0 ? board[i][j] : OCC_BLANK;
+                Position pos = new Position(i, j, occ);
+                int id = Atoms.posToId.get(pos);
+                literals.add(new Literal(id, false));
             }
         }
         return literals;

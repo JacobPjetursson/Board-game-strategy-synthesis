@@ -74,7 +74,6 @@ public class Controller {
     private boolean endGamePopup;
     private ArrayList<StateAndMove> previousStates;
     private Window window;
-    private FFTManager fftManager;
     private boolean fftAutomaticMode;
     private boolean fftUserInteraction;
     private GameSpecifics gameSpecifics;
@@ -102,7 +101,7 @@ public class Controller {
 
         // Prepare the FFT Stuff
         gameSpecifics = new GameSpecifics(this);
-        this.fftManager = new FFTManager(gameSpecifics);
+        FFTManager.initialize(gameSpecifics);
 
         // Do database stuff
         if (USE_DB) {
@@ -123,7 +122,7 @@ public class Controller {
         }
 
         // Autogenerate
-        fftManager.autogenFFT();
+        FFTManager.autogenFFT();
 
 
         PlayPane playPane = new PlayPane(this);
@@ -146,8 +145,8 @@ public class Controller {
         goalRed = playArea.getPlayBox().getGoal(PLAYER1);
         goalBlack = playArea.getPlayBox().getGoal(PLAYER2);
 
-        fftInteractivePane = new FFTInteractivePane(fftManager);
-        fftOverviewPane = new FFTOverviewPane(primaryStage, this.fftManager, fftInteractivePane);
+        fftInteractivePane = new FFTInteractivePane();
+        fftOverviewPane = new FFTOverviewPane(primaryStage, fftInteractivePane);
         new Scene(fftInteractivePane, Globals.WIDTH, Globals.HEIGHT);
         new Scene(fftOverviewPane, Globals.WIDTH, Globals.HEIGHT);
 
@@ -270,7 +269,7 @@ public class Controller {
             } else if (playerRedInstance == MONTE_CARLO) {
                 aiRed = new MCTS(state, PLAYER1, redTime);
             } else if (playerRedInstance == FFT) {
-                aiRed = new FFTFollower(PLAYER1, fftManager);
+                aiRed = new FFTFollower(PLAYER1);
             }
         } else {
             if (playerBlackInstance == MINIMAX) {
@@ -283,7 +282,7 @@ public class Controller {
             } else if (playerBlackInstance == MONTE_CARLO) {
                 aiBlack = new MCTS(state, PLAYER2, blackTime);
             } else if (playerBlackInstance == FFT) {
-                aiBlack = new FFTFollower(PLAYER2, fftManager);
+                aiBlack = new FFTFollower(PLAYER2);
             }
         }
     }
@@ -667,7 +666,7 @@ public class Controller {
     }
 
     public FFT getCurrFFT() {
-        return fftManager.currFFT;
+        return FFTManager.currFFT;
     }
 
 }

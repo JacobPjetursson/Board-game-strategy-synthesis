@@ -1,7 +1,5 @@
 package misc;
 
-import org.apache.xpath.operations.Bool;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -14,7 +12,7 @@ import static misc.Globals.RULE_ORDERING_TERMINAL_FIRST;
 public class Config {
 
     // GLOBAL PROPERTIES
-    public static int AUTOGEN_PERSPECTIVE;
+    public static int AUTOGEN_TEAM;
     public static boolean GREEDY_AUTOGEN;
     public static boolean RANDOM_SEED;
     public static int SEED;
@@ -83,16 +81,16 @@ public class Config {
         ggp.load(new FileInputStream("properties/ggp.properties"));
 
         // GLOBAL CONFIG
-        String perspective = global.getProperty("autogen_perspective", "player1");
+        String perspective = global.getProperty("autogen_team", "player1");
         switch(perspective) {
             case "player2":
-                AUTOGEN_PERSPECTIVE = Globals.PLAYER2;
+                AUTOGEN_TEAM = Globals.PLAYER2;
                 break;
             case "both":
-                AUTOGEN_PERSPECTIVE = Globals.PLAYER_ANY;
+                AUTOGEN_TEAM = Globals.PLAYER_ANY;
                 break;
             default:
-                AUTOGEN_PERSPECTIVE = Globals.PLAYER1;
+                AUTOGEN_TEAM = Globals.PLAYER1;
         }
 
         String ordering = global.getProperty("rule_ordering");
@@ -169,8 +167,8 @@ public class Config {
     private static void printSettings() {
         System.out.println("PRINTING PROPERTIES BELOW:");
         System.out.println("--------------------------");
-        String perspectiveStr = (AUTOGEN_PERSPECTIVE == PLAYER1) ? "Player 1" :
-                (AUTOGEN_PERSPECTIVE == PLAYER2) ? "Player 2" : "Both";
+        String perspectiveStr = (AUTOGEN_TEAM == PLAYER1) ? "Player 1" :
+                (AUTOGEN_TEAM == PLAYER2) ? "Player 2" : "Both";
         String ruleOrderingStr = (RULE_ORDERING == RULE_ORDERING_RANDOM) ? "Random" :
                 (RULE_ORDERING == RULE_ORDERING_FEWEST_PRECONS_FIRST) ? "Fewest preconditions first" :
                         (RULE_ORDERING == RULE_ORDERING_FEWEST_PRECONS_LAST) ? "Fewest preconditions last" :

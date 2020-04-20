@@ -54,7 +54,6 @@ public class RuleGroup {
     int getAmountOfPreconditions() {
         int precons = 0;
         for (Rule r : rules) {
-            if (r.multiRule) continue; // TODO - fuck this shit
             precons += (Config.ENABLE_GGP) ? r.sentences.size() : r.preconditions.size();
         }
         return precons;

@@ -1,14 +1,13 @@
 package tictactoe.game;
 
 import fftlib.Action;
-import fftlib.Clause;
+import fftlib.FFTManager;
 import fftlib.Literal;
 import fftlib.game.FFTMove;
 
 import java.util.HashSet;
 import java.util.Objects;
 
-import static fftlib.Literal.PIECEOCC_PLAYER;
 import static misc.Globals.PLAYER_NONE;
 
 public class Move implements FFTMove {
@@ -58,13 +57,7 @@ public class Move implements FFTMove {
 
     @Override
     public Action getAction() {
-        HashSet<Literal> addLits = new HashSet<>();
-        addLits.add(new Literal(row, col, PIECEOCC_PLAYER, false));
-        HashSet<Literal> remLits = new HashSet<>();
-
-        Clause addClause = new Clause(addLits);
-        Clause remClause = new Clause(remLits);
-        return new Action(addClause, remClause);
+        return FFTManager.moveToAction.apply(this);
     }
 
     public void setTeam(int team) {
