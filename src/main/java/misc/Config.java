@@ -32,6 +32,7 @@ public class Config {
     public static String DEBUG_FILENAME;
     public static boolean BENCHMARK_MODE;
     public static int BENCHMARK_NUMBER;
+    public static boolean USE_OLD_VERIFICATION;
 
     // KULIBRAT PROPERTIES
     public static int BWIDTH;
@@ -132,6 +133,7 @@ public class Config {
         VERIFY_SINGLE_STRATEGY = Boolean.parseBoolean(global.getProperty("verify_single_strategy"));
         SINGLE_THREAD = Boolean.parseBoolean(global.getProperty("single_thread"));
         USE_FILTERING = Boolean.parseBoolean(global.getProperty("use_filtering"));
+        USE_OLD_VERIFICATION = Boolean.parseBoolean(global.getProperty("use_old_verification"));
 
         // KULIBRAT
         BWIDTH = Integer.parseInt(kulibrat.getProperty("boardWidth"));
@@ -192,7 +194,7 @@ public class Config {
         System.out.printf("%-30.40s %-30.40s\n", "Single thread:", SINGLE_THREAD);
         System.out.printf("%-30.40s %-30.40s\n", "Verify single strategy:", VERIFY_SINGLE_STRATEGY);
         System.out.printf("%-30.40s %-30.40s\n", "Use filtering:", USE_FILTERING);
-        System.out.printf("%-30.40s %-30.40s\n", "Save intermediate strategy:", SAVE_STRAT);
+        System.out.printf("%-30.40s %-30.40s\n", "Use old verification:", USE_OLD_VERIFICATION);
     }
 
     private static void setupDebugFile() {

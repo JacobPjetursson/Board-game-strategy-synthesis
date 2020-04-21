@@ -20,6 +20,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static misc.Config.USE_OLD_VERIFICATION;
+
 
 public class FFTManager {
     public static ArrayList<FFT> ffts;
@@ -179,7 +181,12 @@ public class FFTManager {
     }
 
     public static FFT autogenFFT() {
-        FFT fft = FFTAutoGenOld.generateFFT(Config.AUTOGEN_TEAM);
+        FFT fft;
+        if (USE_OLD_VERIFICATION) {
+            fft = FFTAutoGenOld.generateFFT(Config.AUTOGEN_TEAM);
+        } else {
+            fft = FFTAutoGen.generateFFT(Config.AUTOGEN_TEAM);
+        }
         ffts.add(0, fft);
         currFFT = fft;
         return currFFT;
