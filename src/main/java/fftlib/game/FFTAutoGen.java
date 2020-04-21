@@ -15,7 +15,8 @@ public class FFTAutoGen {
     private static HashMap<FFTState, FFTState> reachableStates; // TODO - consider doing (long, FFTState)
     // Subset of reachable states where strategy does not output a move, and player has the turn
     // This is the set of states that a new rule can potentially influence
-    private static HashSet<FFTState> reachableRelevantStates;
+    // Bitcode -> State
+    private static HashMap<Long, FFTState> reachableRelevantStates;
 
     private static FFT fft;
     private static RuleGroup rg;
@@ -62,7 +63,7 @@ public class FFTAutoGen {
         fft.USE_STRATEGY = false; // TODO - remove somehow
 
         reachableStates = new HashMap<>();
-        reachableRelevantStates = new HashSet<>();
+        reachableRelevantStates = new HashMap<>();
 
         // Set reachable parents for all states
         initializeSets();
@@ -97,14 +98,9 @@ public class FFTAutoGen {
         // TODO - try with iterator hasNext() and then skip states with all moves optimal
         while (!reachableRelevantStates.isEmpty()) {
             System.out.println("Remaining relevant states: " + reachableRelevantStates.size() + ". Current amount of rules: " + rg.rules.size());
-            FFTState state = reachableRelevantStates.iterator().next();
+            FFTState state = reachableRelevantStates.values().iterator().next(); // TODO - correct?
 
-            int prevSize = reachableRelevantStates.size();
             Rule r = addRule(state);
-            if (prevSize == reachableRelevantStates.size()) {
-                System.out.println("SIZE UNCHANGED AFTER ADDING RULE!");
-                System.exit(1);
-            }
 
             if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
             System.out.println();
@@ -154,14 +150,35 @@ public class FFTAutoGen {
         HashMap<FFTState, Boolean> deleteMap = new HashMap<>();
         HashMap<FFTState, FFTMove> undoMap = new HashMap<>();
 
-        for (FFTState s : reachableRelevantStates) {
-            // TODO - This takes most of the time, can we optimize it?
-            FFTMove m = r.apply(s);
-            if (m != null) { // this is equivalent to checking that rule applies with legal move
-                appliedMap.put(s, m);
+        long coveredStates = r.getNumberOfCoveredStates();
+        if (DETAILED_DEBUG) {
+            System.out.println("Upper bound for no. of covered states: " + coveredStates);
+            System.out.println("Size of reachable relevant states: " + reachableRelevantStates.size());
+        }
+        if (USE_APPLYSET_OPT && coveredStates < reachableRelevantStates.size()) {
+            //System.out.println("Using covered states");
+            HashSet<Long> codes = r.getCoveredStateBitCodes();
+            if (DETAILED_DEBUG) System.out.println("Exact no. of covered states: " + codes.size());
+            for (long code : codes) {
+                FFTState s = reachableRelevantStates.get(code);
+                if (s == null) continue;
+                FFTMove m = r.apply(s);
+                if (m != null)
+                    appliedMap.put(s, m);
             }
         }
-        //System.out.println("AppliedMap size: " + appliedMap.size());
+        else {
+            //System.out.println("Using reachable relevant states");
+            for (FFTState s : reachableRelevantStates.values()) {
+                FFTMove m = r.apply(s);
+                if (m != null) { // this is equivalent to checking that rule applies with legal move
+                    appliedMap.put(s, m);
+                }
+            }
+        }
+
+        if (DETAILED_DEBUG)
+            System.out.println("appliedMap size: " + appliedMap.size());
 
         for (Map.Entry<FFTState, FFTMove> entry : appliedMap.entrySet()) {
             FFTState s = entry.getKey();
@@ -247,7 +264,8 @@ public class FFTAutoGen {
             if (entry.getValue()) { // del from both
                 reachableStates.remove(key);
             }
-            reachableRelevantStates.remove(key);
+
+            reachableRelevantStates.remove(key.getBitString());
         }
     }
 
@@ -277,7 +295,8 @@ public class FFTAutoGen {
         frontier = new LinkedList<>();
         frontier.add(initialState);
         reachableStates.put(initialState, initialState);
-        reachableRelevantStates.add(initialState);
+        reachableRelevantStates.put(Literal.getBitString(initialState.getLiterals()),
+                                    initialState);
 
         while (!frontier.isEmpty()) {
             FFTState state = frontier.pop();
@@ -299,7 +318,8 @@ public class FFTAutoGen {
                 continue;
             }
             ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(state);
-            reachableRelevantStates.add(state);
+            long code = Literal.getBitString(state.getLiterals());
+            reachableRelevantStates.put(code, state);
 
             // Our turn, add all states from optimal moves
             for (FFTMove m : optimalMoves) {

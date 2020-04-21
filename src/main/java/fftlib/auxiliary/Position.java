@@ -1,4 +1,4 @@
-package fftlib;
+package fftlib.auxiliary;
 
 import java.util.Objects;
 

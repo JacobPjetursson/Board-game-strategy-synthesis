@@ -1,47 +1,47 @@
 package tictactoe.FFT;
 
-import fftlib.Position;
+import fftlib.auxiliary.Position;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class Atoms {
-    public static int P1_0_0 = 1;
-    public static int P2_0_0 = 2;
-    public static int B_0_0 = 3;
+    public static int P1_0_0 = 0;
+    public static int P2_0_0 = 1;
+    public static int B_0_0 = 2;
 
-    public static int P1_0_1 = 4;
-    public static int P2_0_1 = 5;
-    public static int B_0_1 = 6;
+    public static int P1_0_1 = 3;
+    public static int P2_0_1 = 4;
+    public static int B_0_1 = 5;
 
-    public static int P1_0_2 = 7;
-    public static int P2_0_2 = 8;
-    public static int B_0_2 = 9;
+    public static int P1_0_2 = 6;
+    public static int P2_0_2 = 7;
+    public static int B_0_2 = 8;
 
-    public static int P1_1_0 = 10;
-    public static int P2_1_0 = 11;
-    public static int B_1_0 = 12;
+    public static int P1_1_0 = 9;
+    public static int P2_1_0 = 10;
+    public static int B_1_0 = 11;
 
-    public static int P1_1_1 = 13;
-    public static int P2_1_1 = 14;
-    public static int B_1_1 = 15;
+    public static int P1_1_1 = 12;
+    public static int P2_1_1 = 13;
+    public static int B_1_1 = 14;
 
-    public static int P1_1_2 = 16;
-    public static int P2_1_2 = 17;
-    public static int B_1_2 = 18;
+    public static int P1_1_2 = 15;
+    public static int P2_1_2 = 16;
+    public static int B_1_2 = 17;
 
-    public static int P1_2_0 = 19;
-    public static int P2_2_0 = 20;
-    public static int B_2_0 = 21;
+    public static int P1_2_0 = 18;
+    public static int P2_2_0 = 19;
+    public static int B_2_0 = 20;
 
-    public static int P1_2_1 = 22;
-    public static int P2_2_1 = 23;
-    public static int B_2_1 = 24;
+    public static int P1_2_1 = 21;
+    public static int P2_2_1 = 22;
+    public static int B_2_1 = 23;
 
-    public static int P1_2_2 = 25;
-    public static int P2_2_2 = 26;
-    public static int B_2_2 = 27;
+    public static int P1_2_2 = 24;
+    public static int P2_2_2 = 25;
+    public static int B_2_2 = 26;
 
     public static HashMap<Integer, String> idToString;
     public static HashMap<String, Integer> stringToId;

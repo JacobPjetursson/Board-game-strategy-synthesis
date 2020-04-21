@@ -1,7 +1,7 @@
 package sim;
 
 import fftlib.Literal;
-import fftlib.Position;
+import fftlib.auxiliary.Position;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-import static fftlib.Position.OCC_BLANK;
+import static fftlib.auxiliary.Position.OCC_BLANK;
 import static misc.Globals.*;
 
 public class State implements FFTState {
@@ -85,6 +85,11 @@ public class State implements FFTState {
 
     public HashSet<State> getReachableParents() {
         return reachableParents;
+    }
+
+    @Override
+    public long getBitString() {
+        return Literal.getBitString(getLiterals());
     }
 
     public boolean isReachable() {

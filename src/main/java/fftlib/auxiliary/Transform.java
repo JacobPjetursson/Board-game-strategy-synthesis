@@ -1,4 +1,4 @@
-package fftlib.game;
+package fftlib.auxiliary;
 
 import fftlib.*;
 
@@ -155,8 +155,10 @@ public class Transform {
             for (int j = 0; j < board[i].length; j++) {
 
                 Position pos = new Position(i, j, board[i][j]);
-                if (pos.occ < 0)
+                if (pos.occ < 0) {
+                    pos.occ = Math.abs(pos.occ);
                     literals.add(new Literal(getIdFromPos.apply(pos), true));
+                }
                 else if (pos.occ > 0)
                     literals.add(new Literal(getIdFromPos.apply(pos), false));
             }
@@ -174,10 +176,12 @@ public class Transform {
             for (int j = 0; j < lb[i].length; j++) {
                 if (lb[i][j] == 0) continue;
                 Position pos = new Position(i, j, lb[i][j]);
+                int occ = pos.occ;
+                pos.occ = Math.abs(pos.occ); // no negative occ in id mapping
                 Literal l = new Literal(getIdFromPos.apply(pos), false);
-                if (pos.occ < 0)
+                if (occ < 0)
                     rems.add(l);
-                else if (pos.occ > 0)
+                else if (occ > 0)
                     adds.add(l);
             }
         }

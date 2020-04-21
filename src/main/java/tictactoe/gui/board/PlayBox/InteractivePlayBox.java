@@ -1,16 +1,7 @@
 package tictactoe.gui.board.PlayBox;
 
 import fftlib.Rule;
-import fftlib.game.Transform;
-import javafx.application.Platform;
 import tictactoe.game.Controller;
-import tictactoe.game.Move;
-import tictactoe.gui.board.BoardTile;
-
-import static fftlib.Literal.*;
-import static misc.Globals.PLAYER1;
-import static misc.Globals.PLAYER2;
-import static tictactoe.gui.board.BoardTile.blueStr;
 
 public class InteractivePlayBox extends PlayBox {
 

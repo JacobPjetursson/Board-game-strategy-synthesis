@@ -1,6 +1,7 @@
 package mens_morris;
 
 import fftlib.*;
+import fftlib.auxiliary.Position;
 import fftlib.game.FFTGameSpecifics;
 import fftlib.game.FFTLogic;
 import fftlib.game.FFTMove;
@@ -98,5 +99,15 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public Position idToPos(int id) {
         return null;
+    }
+
+    @Override
+    public HashSet<Long> getCoveredStateBitCodes(Rule rule) {
+        return null;
+    }
+
+    @Override
+    public long getNumberOfCoveredStates(Rule rule) {
+        return 0;
     }
 }

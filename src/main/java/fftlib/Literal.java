@@ -1,5 +1,8 @@
 package fftlib;
 
+import java.util.HashSet;
+import java.util.Objects;
+
 public class Literal {
     public int id;
     public boolean negation;
@@ -45,12 +48,22 @@ public class Literal {
         if (this == literal)
             return true;
 
-        return this.id == literal.id;
+        return this.id == literal.id && this.negation == literal.negation;
+    }
+
+    public static long getBitString(HashSet<Literal> literals) {
+        int bs = 0;
+        for (Literal l : literals) {
+            if (l.negation)
+                continue;
+            bs |= (1 << l.id);
+        }
+        return bs;
     }
 
     @Override
     public int hashCode() {
-        return this.id;
+        return 31 * Objects.hash(id, negation);
     }
 
     public String getName() {

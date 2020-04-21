@@ -216,6 +216,11 @@ public class State implements FFTState {
     }
 
     @Override
+    public long getBitString() {
+        return Literal.getBitString(getLiterals());
+    }
+
+    @Override
     public boolean isReachable() {
         return false;
     }

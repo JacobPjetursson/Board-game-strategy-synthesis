@@ -27,6 +27,8 @@ public interface FFTState {
 
     HashSet<? extends FFTState> getReachableParents();
 
+    long getBitString(); // TODO could be abstract
+
     boolean isReachable();
 
     FFTState clone();

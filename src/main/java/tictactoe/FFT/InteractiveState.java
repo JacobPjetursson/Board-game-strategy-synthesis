@@ -2,7 +2,7 @@ package tictactoe.FFT;
 
 import fftlib.Action;
 import fftlib.Literal;
-import fftlib.Position;
+import fftlib.auxiliary.Position;
 import fftlib.Rule;
 import fftlib.game.FFTState;
 import fftlib.gui.InteractiveFFTState;

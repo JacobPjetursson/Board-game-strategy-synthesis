@@ -1,7 +1,7 @@
 package kulibrat.game;
 
 import fftlib.Literal;
-import fftlib.Position;
+import fftlib.auxiliary.Position;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import kulibrat.ai.Minimax.Zobrist;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import static fftlib.Position.OCC_BLANK;
+import static fftlib.auxiliary.Position.OCC_BLANK;
 import static kulibrat.game.Logic.POS_NONBOARD;
 import static misc.Config.BHEIGHT;
 import static misc.Config.BWIDTH;
@@ -162,6 +162,11 @@ public class State implements Serializable, FFTState {
     @Override
     public HashSet<? extends FFTState> getReachableParents() {
         return null;
+    }
+
+    @Override
+    public long getBitString() {
+        return Literal.getBitString(getLiterals());
     }
 
     @Override

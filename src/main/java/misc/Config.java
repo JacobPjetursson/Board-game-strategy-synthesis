@@ -1,5 +1,7 @@
 package misc;
 
+import org.apache.xpath.operations.Bool;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -33,6 +35,7 @@ public class Config {
     public static boolean BENCHMARK_MODE;
     public static int BENCHMARK_NUMBER;
     public static boolean USE_OLD_VERIFICATION;
+    public static boolean USE_APPLYSET_OPT;
 
     // KULIBRAT PROPERTIES
     public static int BWIDTH;
@@ -134,6 +137,7 @@ public class Config {
         SINGLE_THREAD = Boolean.parseBoolean(global.getProperty("single_thread"));
         USE_FILTERING = Boolean.parseBoolean(global.getProperty("use_filtering"));
         USE_OLD_VERIFICATION = Boolean.parseBoolean(global.getProperty("use_old_verification"));
+        USE_APPLYSET_OPT = Boolean.parseBoolean(global.getProperty("use_applyset_opt"));
 
         // KULIBRAT
         BWIDTH = Integer.parseInt(kulibrat.getProperty("boardWidth"));
@@ -185,6 +189,8 @@ public class Config {
         System.out.printf("%-30.40s %-30.40s\n", "Generate all rules:", GENERATE_ALL_RULES);
         System.out.printf("%-30.40s %-30.40s\n", "Minimize rule by rule:", MINIMIZE_RULE_BY_RULE);
         System.out.printf("%-30.40s %-30.40s\n", "Minimize bottoms up:", MINIMIZE_BOTTOMS_UP);
+        System.out.printf("%-30.40s %-30.40s\n", "Use applySet optimization:", USE_APPLYSET_OPT);
+
 
         System.out.printf("%-30.40s %-30.40s\n", "Random seed:", RANDOM_SEED);
         System.out.printf("%-30.40s %-30.40s\n", "Seed value:",SEED);

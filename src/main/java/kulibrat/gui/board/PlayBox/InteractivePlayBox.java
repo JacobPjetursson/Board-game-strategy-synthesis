@@ -1,8 +1,6 @@
 package kulibrat.gui.board.PlayBox;
 
-import fftlib.Literal;
 import fftlib.Rule;
-import fftlib.game.Transform;
 import javafx.geometry.Pos;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -11,13 +9,8 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import kulibrat.game.Controller;
-import kulibrat.game.Move;
 import kulibrat.game.State;
-import kulibrat.gui.board.BoardTile;
 
-import java.util.HashSet;
-
-import static fftlib.Literal.*;
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 

@@ -1,16 +1,10 @@
 package sim;
 
 import fftlib.*;
-import fftlib.game.FFTSolution;
 import fftlib.game.FFTSolver;
-import fftlib.game.Transform;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Scanner;
-
-import static fftlib.FFTManager.gameBoardHeight;
-import static misc.Globals.*;
 
 public class Demo {
     public static boolean playGame = false;

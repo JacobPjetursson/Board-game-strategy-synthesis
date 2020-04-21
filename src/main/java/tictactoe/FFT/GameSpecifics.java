@@ -1,6 +1,10 @@
 package tictactoe.FFT;
 
+import com.google.common.collect.Sets;
 import fftlib.*;
+import fftlib.auxiliary.Aux;
+import fftlib.auxiliary.Position;
+import fftlib.auxiliary.Transform;
 import fftlib.game.*;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
@@ -12,8 +16,10 @@ import tictactoe.game.State;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import static fftlib.game.Transform.*;
+import static fftlib.auxiliary.Transform.*;
 
 
 public class GameSpecifics implements FFTGameSpecifics {
@@ -123,5 +129,54 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public Position idToPos(int id) {
         return Atoms.idToPos.get(id);
+    }
+
+    // TODO - can we do this smarter and more domain-independent?
+    // TODO - does there exist a more general version of this that is less ad-hoc?
+    @Override
+    public HashSet<Long> getCoveredStateBitCodes(Rule rule) {
+        HashSet<Long> bitCodes = new HashSet<>();
+        List<Set<Literal>> subsets = new ArrayList<>();
+        int row, col, occ;
+        Position pos;
+        Literal l;
+        // find sets of preconditions that can not co-exist
+        for (row = 0; row < 3; row++) {
+            for (col = 0; col < 3; col++) {
+                boolean setExists = false;
+                HashSet<Literal> litSet = new HashSet<>();
+                // make set of all relevant literals from this cell
+                for (occ = 1; occ < 4; occ++) {
+                    pos = new Position(row, col, occ);
+                    l = new Literal(posToId(pos), false);
+                    if (rule.preconditions.contains(l)) {
+                        setExists = true;
+                        break;
+                    }
+                    Literal negLit = new Literal(posToId(pos), true);
+                    if (!rule.preconditions.contains(negLit))
+                        litSet.add(l);
+                }
+                if (!setExists) {
+                    subsets.add(litSet);
+                }
+            }
+        }
+        // Find the cartesian product of those sets (combination of sets where
+        // we only pick one from each set)
+        Set<List<Literal>> cartesianSet = Sets.cartesianProduct(subsets);
+        // Add each
+        for (List<Literal> literals : cartesianSet) {
+            HashSet<Literal> precons = new HashSet<>(rule.preconditions);
+            precons.addAll(literals);
+            bitCodes.add(Literal.getBitString(precons));
+        }
+        return bitCodes;
+    }
+
+    @Override
+    public long getNumberOfCoveredStates(Rule rule) {
+        int free_slots = FFTManager.max_precons - rule.preconditions.size();
+        return Aux.pow2(3, free_slots);
     }
 }

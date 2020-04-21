@@ -154,6 +154,26 @@ public class Rule {
         return corrected_parts;
     }
 
+    // This is an upper bound due to how symmetry works (may lead to duplicate states
+    // that are hard to detect)
+    // FIXME - make it work with negative preconditions
+    // TODO - somehow make it more precise (do a pre-run to compute size?)
+    public long getNumberOfCoveredStates() {
+        int number = 0;
+        for (Rule r : symmetryRules) {
+            number += FFTManager.getNumberOfCoveredStates.apply(r);
+        }
+        return number;
+    }
+
+    public HashSet<Long> getCoveredStateBitCodes() {
+        HashSet<Long> bitCodes = new HashSet<>();
+        for (Rule r : symmetryRules) {
+            bitCodes.addAll(FFTManager.getCoveredStateBitCodes.apply(r));
+        }
+        return bitCodes;
+    }
+
     private static HashSet<Literal> getPreconditions(String preconStr) {
         HashSet<Literal> literals = new HashSet<>();
         for (String precons : prepPreconditions(preconStr)) {

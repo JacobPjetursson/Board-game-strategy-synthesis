@@ -1,15 +1,12 @@
 package kulibrat.FFT;
 
 import fftlib.Action;
-import fftlib.Literal;
 import fftlib.Rule;
 import fftlib.game.FFTState;
-import fftlib.game.Transform;
 import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import kulibrat.game.Controller;
-import kulibrat.game.Logic;
 import kulibrat.game.Move;
 import kulibrat.game.State;
 import kulibrat.gui.board.BoardPiece;
@@ -17,9 +14,7 @@ import kulibrat.gui.board.BoardTile;
 import kulibrat.gui.board.PlayBox.InteractivePlayBox;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
-import static kulibrat.game.Logic.POS_NONBOARD;
 import static misc.Globals.*;
 
 

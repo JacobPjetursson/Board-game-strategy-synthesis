@@ -1,5 +1,6 @@
 package fftlib;
 
+import fftlib.auxiliary.Position;
 import fftlib.game.*;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
@@ -44,8 +45,11 @@ public class FFTManager {
     public static Supplier<ArrayList<Integer>> getGameAtoms;
     public static Function<String, Integer> getAtomId;
     public static Function<Integer, String> getAtomName;
+    public static Function<Rule, Long> getNumberOfCoveredStates;
+    public static Function<Rule, HashSet<Long>> getCoveredStateBitCodes;
     public static String[] playerNames;
     private static int fft_index = 0;
+    public static int max_precons;
 
     public static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     public static final String blueBtnStyle = "-fx-border-color: #000000; -fx-background-color: #4444ff;";
@@ -58,6 +62,7 @@ public class FFTManager {
         ffts = new ArrayList<>();
 
         initialFFTState = gameSpecifics.getInitialState();
+        max_precons = initialFFTState.getLiterals().size();
         logic = gameSpecifics.getLogic();
         path = gameSpecifics.getFFTFilePath();
         int[] dim = gameSpecifics.getBoardDim();
@@ -75,6 +80,8 @@ public class FFTManager {
         getPosFromId = gameSpecifics::idToPos;
         getIdFromPos = gameSpecifics::posToId;
         getSymmetryRules = gameSpecifics::getSymmetryRules;
+        getNumberOfCoveredStates = gameSpecifics::getNumberOfCoveredStates;
+        getCoveredStateBitCodes = gameSpecifics::getCoveredStateBitCodes;
 
         // Try loading ffts from file in working directory
         ffts = load(path);

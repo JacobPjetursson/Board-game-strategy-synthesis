@@ -1,5 +1,14 @@
-Zobrist seed: 0
-IF [B(0, 0) ∧ P1(2, 0) ∧ P1(0, 1) ∧ P2(2, 1) ∧ B(0, 2) ∧ P2(1, 0) ∧ B(2, 2) ∧ B(1, 1)] THEN [+P1(0, 2)]
-[[0, 1, 0], [0, 2, 2], [1, 1, 1]] , TEAM: 1
-[IF [P1(2, 0) ∧ P1(0, 1) ∧ P2(2, 1) ∧ P2(1, 0)] THEN [+P1(0, 2)], IF [P1(1, 2) ∧ P1(0, 0) ∧ P2(0, 1) ∧ P2(1, 0)] THEN [+P1(2, 2)], IF [P2(1, 2) ∧ P2(0, 1) ∧ P1(0, 2) ∧ P1(1, 0)] THEN [+P1(2, 0)], IF [P2(1, 2) ∧ P1(0, 1) ∧ P2(2, 1) ∧ P1(2, 2)] THEN [+P1(0, 0)], IF [P1(0, 0) ∧ P2(0, 1) ∧ P1(2, 1) ∧ P2(1, 0)] THEN [+P1(2, 2)], IF [P2(1, 2) ∧ P2(0, 1) ∧ P1(2, 1) ∧ P1(0, 2)] THEN [+P1(2, 0)], IF [P2(1, 2) ∧ P2(2, 1) ∧ P1(2, 2) ∧ P1(1, 0)] THEN [+P1(0, 0)], IF [P1(1, 2) ∧ P1(2, 0) ∧ P2(2, 1) ∧ P2(1, 0)] THEN [+P1(0, 2)]]
-null
+Zobrist seed: 1
+CURRENT MAX DEPTH: 1, LOOKUP TABLE SIZE: 1, UNEVALUATED NODES: 1
+CURRENT MAX DEPTH: 2, LOOKUP TABLE SIZE: 16, UNEVALUATED NODES: 16
+CURRENT MAX DEPTH: 3, LOOKUP TABLE SIZE: 226, UNEVALUATED NODES: 226
+CURRENT MAX DEPTH: 4, LOOKUP TABLE SIZE: 1591, UNEVALUATED NODES: 1591
+CURRENT MAX DEPTH: 5, LOOKUP TABLE SIZE: 9781, UNEVALUATED NODES: 9781
+CURRENT MAX DEPTH: 6, LOOKUP TABLE SIZE: 38491, UNEVALUATED NODES: 38491
+CURRENT MAX DEPTH: 7, LOOKUP TABLE SIZE: 129991, UNEVALUATED NODES: 0
+CURRENT MAX DEPTH: 8, LOOKUP TABLE SIZE: 129991, UNEVALUATED NODES: 0
+State space explored, and unevaluated nodes unchanged between runs
+CURRENT MAX DEPTH: 9, LOOKUP TABLE SIZE: 129991, UNEVALUATED NODES: 0
+State space explored, and unevaluated nodes unchanged between runs
+Time spent on solving game: 15.472
+Winner is Player 2

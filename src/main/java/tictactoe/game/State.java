@@ -4,14 +4,14 @@ import fftlib.Literal;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import tictactoe.FFT.Atoms;
-import fftlib.Position;
+import fftlib.auxiliary.Position;
 import tictactoe.ai.Zobrist;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import static fftlib.Position.OCC_BLANK;
+import static fftlib.auxiliary.Position.OCC_BLANK;
 import static misc.Globals.PLAYER1;
 
 
@@ -46,7 +46,13 @@ public class State implements FFTState {
         turn = state.turn;
         move = state.move;
         this.zobrist_key = state.zobrist_key;
+    }
 
+    // Constructor for ease of debugging
+    public State(int[][] board, int turn) {
+        this.board = board;
+        this.turn = turn;
+        this.zobrist_key = initHashCode();
     }
 
     // Non-root state
@@ -74,6 +80,11 @@ public class State implements FFTState {
 
     public HashSet<State> getReachableParents() {
         return reachableParents;
+    }
+
+    @Override
+    public long getBitString() {
+        return Literal.getBitString(getLiterals());
     }
 
     public boolean isReachable() {

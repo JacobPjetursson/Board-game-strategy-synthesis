@@ -1,6 +1,6 @@
 package sim;
 
-import fftlib.Position;
+import fftlib.auxiliary.Position;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,7 +18,7 @@ public class Atoms {
         idToPos = new HashMap<>();
         posToId = new HashMap<>();
         gameAtoms = new ArrayList<>();
-        int counter = 1;
+        int counter = 0;
         String s;
         for (int i = 0; i < 6; i++) {
             for (int j = i+1; j < 6; j++) {
