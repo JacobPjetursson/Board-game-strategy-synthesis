@@ -147,7 +147,7 @@ public class InteractivePlayBox extends PlayBox {
 
     public void update(Rule r) { // TODO
         /*
-        HashSet<Literal> nonBoardLits = r.preconditions.nonBoardPlacements();
+        LiteralSet nonBoardLits = r.preconditions.nonBoardPlacements();
         int[][] preconBoard = Transform.preconsToBoard(r.preconditions);
         Move m = (Move) r.action.getMove();
 

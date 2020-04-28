@@ -1,5 +1,5 @@
 package fftlib.game;
-
+// TODO - get rid of this class?
 public class FFTStateAndMove {
     public boolean random;
     private FFTState state;

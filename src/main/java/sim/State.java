@@ -4,6 +4,7 @@ import fftlib.Literal;
 import fftlib.auxiliary.Position;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
+import fftlib.game.LiteralSet;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -89,7 +90,7 @@ public class State implements FFTState {
 
     @Override
     public long getBitString() {
-        return Literal.getBitString(getLiterals());
+        return getLiterals().getBitString();
     }
 
     public boolean isReachable() {
@@ -113,8 +114,8 @@ public class State implements FFTState {
     }
 
     @Override
-    public HashSet<Literal> getLiterals() {
-        HashSet<Literal> literals = new HashSet<>();
+    public LiteralSet getLiterals() {
+        LiteralSet literals = new LiteralSet();
         for (Line l : lines) {
             int occ = l.color != 0 ? l.color : OCC_BLANK;
             Position pos = new Position(l.n1, l.n2, occ);

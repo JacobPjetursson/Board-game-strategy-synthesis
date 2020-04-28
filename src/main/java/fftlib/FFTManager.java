@@ -47,6 +47,7 @@ public class FFTManager {
     public static Function<Integer, String> getAtomName;
     public static Function<Rule, Long> getNumberOfCoveredStates;
     public static Function<Rule, HashSet<Long>> getCoveredStateBitCodes;
+    public static Function<Action, LiteralSet> getActionPreconditions;
     public static String[] playerNames;
     private static int fft_index = 0;
     public static int max_precons;
@@ -60,6 +61,12 @@ public class FFTManager {
     // Most game-related classes are processed here
     public static void initialize(FFTGameSpecifics gameSpecifics) {
         ffts = new ArrayList<>();
+        getGameAtoms = gameSpecifics::getGameAtoms;
+        getAtomId = gameSpecifics::getAtomId;
+        getAtomName = gameSpecifics::getAtomName;
+        getPosFromId = gameSpecifics::idToPos;
+        getIdFromPos = gameSpecifics::posToId;
+        getActionPreconditions = gameSpecifics::getActionPreconditions;
 
         initialFFTState = gameSpecifics.getInitialState();
         max_precons = initialFFTState.getLiterals().size();
@@ -74,11 +81,6 @@ public class FFTManager {
         failState = gameSpecifics.getFailState();
         interactiveState = gameSpecifics.getInteractiveState();
         playerNames = gameSpecifics.getPlayerNames();
-        getGameAtoms = gameSpecifics::getGameAtoms;
-        getAtomId = gameSpecifics::getAtomId;
-        getAtomName = gameSpecifics::getAtomName;
-        getPosFromId = gameSpecifics::idToPos;
-        getIdFromPos = gameSpecifics::posToId;
         getSymmetryRules = gameSpecifics::getSymmetryRules;
         getNumberOfCoveredStates = gameSpecifics::getNumberOfCoveredStates;
         getCoveredStateBitCodes = gameSpecifics::getCoveredStateBitCodes;

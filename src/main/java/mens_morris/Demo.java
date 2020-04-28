@@ -79,7 +79,7 @@ public class Demo {
 
 
         FFTManager.gameBoardHeight = 6;
-        HashSet<Literal> precons = new HashSet<>();
+        LiteralSet precons = new HashSet<>();
         //precons.add(new Literal(0, 1, Literal.PIECEOCC_PLAYER, false));
         //precons.add(new Literal(1, 2, Literal.PIECEOCC_PLAYER, false));
 

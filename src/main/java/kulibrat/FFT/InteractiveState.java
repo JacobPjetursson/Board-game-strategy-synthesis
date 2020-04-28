@@ -50,8 +50,8 @@ public class InteractiveState implements InteractiveFFTState {
     public Node getInteractiveNode(Rule r) {
         this.rule = new Rule(r);
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
-        if (r.action != null)
-            this.move = (Move) r.action.getMove();
+        if (r.getAction() != null)
+            this.move = (Move) r.getAction().getMove();
         pb.update(r);
 
         return pb;
@@ -82,10 +82,10 @@ public class InteractiveState implements InteractiveFFTState {
     private Rule getRuleFromState(State s) { // TODO
         /*
         Rule r = new Rule();
-        HashSet<Literal> literals = s.getAllLiterals();
+        LiteralSet literals = s.getAllLiterals();
         ArrayList<Literal> literalList = new ArrayList<>(literals);
         // Remove scorelimit and points
-        HashSet<Literal> lits = new HashSet<>();
+        LiteralSet lits = new HashSet<>();
         for (Literal l : literalList)
             if (l.boardPlacement)
                 lits.add(l);

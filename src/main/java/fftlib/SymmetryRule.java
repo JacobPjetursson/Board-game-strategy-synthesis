@@ -1,11 +1,13 @@
 package fftlib;
 
+import fftlib.game.LiteralSet;
+
 import java.util.HashSet;
 import java.util.Objects;
 
 public class SymmetryRule extends Rule { // Simpler rule class for rules in symmetry hashset
 
-    public SymmetryRule(HashSet<Literal> precons, Action action) {
+    public SymmetryRule(LiteralSet precons, Action action) {
         this.preconditions = precons;
         this.action = action;
     }

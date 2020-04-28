@@ -5,16 +5,16 @@ import java.util.Objects;
 
 public class Literal {
     public int id;
-    public boolean negation;
+    public boolean negated;
 
     public Literal(int id, boolean neg) {
         this.id = id;
-        this.negation = neg;
+        this.negated = neg;
     }
 
     public Literal(String name) {
         if (name.startsWith("!")) {
-            this.negation = true;
+            this.negated = true;
             name = name.substring(1);
         }
         try {
@@ -28,11 +28,11 @@ public class Literal {
 
     public Literal(Literal duplicate) {
         this.id = duplicate.id;
-        this.negation = duplicate.negation;
+        this.negated = duplicate.negated;
     }
 
-    public void setNegation(boolean negation) {
-        this.negation = negation;
+    public void setNegated(boolean negated) {
+        this.negated = negated;
     }
 
     @Override
@@ -48,22 +48,12 @@ public class Literal {
         if (this == literal)
             return true;
 
-        return this.id == literal.id && this.negation == literal.negation;
-    }
-
-    public static long getBitString(HashSet<Literal> literals) {
-        int bs = 0;
-        for (Literal l : literals) {
-            if (l.negation)
-                continue;
-            bs |= (1 << l.id);
-        }
-        return bs;
+        return this.id == literal.id && this.negated == literal.negated;
     }
 
     @Override
     public int hashCode() {
-        return 31 * Objects.hash(id, negation);
+        return 31 * Objects.hash(id, negated);
     }
 
     public String getName() {

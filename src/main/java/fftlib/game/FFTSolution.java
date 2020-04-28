@@ -11,6 +11,7 @@ import static misc.Globals.PLAYER2;
 
 public class FFTSolution{
     private static HashMap<? extends FFTState, StateMapping> lookupTable;
+    private static HashMap<FFTState, ArrayList<? extends FFTMove>> optimalMovesMap = new HashMap<>();
 
     // Outputs a string which is the amount of turns to a terminal node, based on a score from the database entry
     public static String turnsToTerminal(int turn, FFTState n) {
@@ -37,11 +38,17 @@ public class FFTSolution{
     }
 
     public static ArrayList<? extends FFTMove> optimalMoves(FFTState state) {
+        ArrayList<? extends FFTMove> optMoves = optimalMovesMap.get(state);
+        if (optMoves != null)
+            return optMoves;
         ArrayList<FFTMove> optimalMoves = new ArrayList<>();
-        if (FFTManager.logic.gameOver(state))
+        if (FFTManager.logic.gameOver(state)) {
+            optimalMovesMap.put(state, new ArrayList<>());
             return optimalMoves;
+        }
         StateMapping mapping = queryState(state);
         if (mapping.getMove() == null) {
+            optimalMovesMap.put(state, new ArrayList<>());
             return optimalMoves;
         }
         FFTState next = state.getNextState(mapping.getMove());
@@ -59,6 +66,7 @@ public class FFTSolution{
                         optimalMoves.add(m);
                 }
             }
+            optimalMovesMap.put(state, optimalMoves);
             return optimalMoves;
         }
 

@@ -3,6 +3,7 @@ package fftlib;
 import fftlib.GGPAutogen.GGPManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
+import fftlib.game.LiteralSet;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
@@ -18,9 +19,9 @@ import static misc.Config.SYMMETRY_DETECTION;
 public class Rule {
     private static final ArrayList<String> separators = new ArrayList<>(
             Arrays.asList("and", "And", "AND", "&", "∧"));
-    public HashSet<Literal> preconditions;
-    public Action action;
-    public HashSet<SymmetryRule> symmetryRules;
+    protected LiteralSet preconditions;
+    protected Action action;
+    private HashSet<SymmetryRule> symmetryRules;
 
     // General game playing
     public Set<GdlSentence> sentences;
@@ -39,7 +40,7 @@ public class Rule {
         this.symmetryRules = getSymmetryRules();
     }
 
-    public Rule(HashSet<Literal> precons, Action action) {
+    public Rule(LiteralSet precons, Action action) {
         this.action = action;
         this.preconditions = precons;
         this.symmetryRules = getSymmetryRules();
@@ -53,7 +54,7 @@ public class Rule {
 
     // Empty constructor to allow rule buildup
     public Rule() {
-        this.preconditions = new HashSet<>();
+        this.preconditions = new LiteralSet();
         this.action = new Action();
     }
 
@@ -64,7 +65,7 @@ public class Rule {
     // Duplicate constructor
     public Rule(Rule duplicate) {
         this.action = new Action(duplicate.action);
-        this.preconditions = new HashSet<>(duplicate.preconditions);
+        this.preconditions = new LiteralSet(duplicate.preconditions);
         this.symmetryRules = new HashSet<>(duplicate.symmetryRules);
 
     }
@@ -90,6 +91,20 @@ public class Rule {
 
     }
 
+    public LiteralSet getPreconditions() {
+        return preconditions;
+    }
+
+    public LiteralSet getAllPreconditions() {
+        LiteralSet precons = new LiteralSet(preconditions);
+        precons.addAll(action.getPreconditions());
+        return precons;
+    }
+
+    public Action getAction() {
+        return action;
+    }
+
     public void setAction(Action a) {
         if (a == null)
             this.action = new Action();
@@ -104,9 +119,9 @@ public class Rule {
         this.symmetryRules = getSymmetryRules();
     }
 
-    public void setPreconditions(HashSet<Literal> precons) {
+    public void setPreconditions(LiteralSet precons) {
         if (precons == null)
-            this.preconditions = new HashSet<>();
+            this.preconditions = new LiteralSet();
         else
             this.preconditions = precons;
         this.symmetryRules = getSymmetryRules();
@@ -160,6 +175,9 @@ public class Rule {
     // TODO - somehow make it more precise (do a pre-run to compute size?)
     public long getNumberOfCoveredStates() {
         int number = 0;
+        if (!SYMMETRY_DETECTION)
+            return FFTManager.getNumberOfCoveredStates.apply(this);
+
         for (Rule r : symmetryRules) {
             number += FFTManager.getNumberOfCoveredStates.apply(r);
         }
@@ -167,6 +185,9 @@ public class Rule {
     }
 
     public HashSet<Long> getCoveredStateBitCodes() {
+        if (!SYMMETRY_DETECTION)
+            return FFTManager.getCoveredStateBitCodes.apply(this);
+
         HashSet<Long> bitCodes = new HashSet<>();
         for (Rule r : symmetryRules) {
             bitCodes.addAll(FFTManager.getCoveredStateBitCodes.apply(r));
@@ -174,8 +195,8 @@ public class Rule {
         return bitCodes;
     }
 
-    private static HashSet<Literal> getPreconditions(String preconStr) {
-        HashSet<Literal> literals = new HashSet<>();
+    private static LiteralSet getPreconditions(String preconStr) {
+        LiteralSet literals = new LiteralSet();
         for (String precons : prepPreconditions(preconStr)) {
             literals.add(new Literal(precons));
         }
@@ -217,13 +238,13 @@ public class Rule {
     }
 
     public FFTMove apply(FFTState state) {
-        HashSet<Literal> stLiterals = state.getLiterals();
-        FFTMove m = match(this, state, stLiterals);
+        LiteralSet stLiterals = state.getLiterals();
+        FFTMove m = match(this, stLiterals);
         if (m != null || !SYMMETRY_DETECTION) {
             return m;
         }
         for (Rule rule : symmetryRules) {
-            m = match(rule, state, stLiterals);
+            m = match(rule, stLiterals);
             // returns the first symmetry with a legal move
             // We want to ensure that rule is optimal in all symmetric states, but since all these will be explored
             // by the algorithm, we are good. This is the case since we always start with checking the default state
@@ -237,7 +258,7 @@ public class Rule {
         return null;
     }
 
-    private FFTMove match(Rule rule, FFTState state, HashSet<Literal> stLiterals) {
+    private FFTMove match(Rule rule, LiteralSet stLiterals) {
         boolean match = true;
         for (Literal l : rule.preconditions) {
             match = matchLiteral(l, stLiterals);
@@ -245,12 +266,9 @@ public class Rule {
                 break;
 
         }
-        if (match) {
-            FFTMove move = rule.action.getMove();
-            if (FFTManager.logic.isLegalMove(state, move)) {
-                return move;
-            }
-        }
+        if (match && rule.action.isLegal(stLiterals))
+            return rule.action.getMove();
+
         return null;
     }
 
@@ -277,10 +295,10 @@ public class Rule {
         return null;
     }
 
-    private boolean matchLiteral(Literal l, HashSet<Literal> stLiterals) {
-        if (l.negation) {
+    private boolean matchLiteral(Literal l, LiteralSet stLiterals) {
+        if (l.negated) {
             Literal temp = new Literal(l);
-            temp.negation = false;
+            temp.negated = false;
             return !stLiterals.contains(temp);
         }
         return stLiterals.contains(l);

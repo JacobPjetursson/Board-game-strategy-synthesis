@@ -44,20 +44,20 @@ public class Demo {
         System.out.println("The winner is player " + Logic.getWinner(s));
     }
 /*
-    public static HashSet<HashSet<Literal>> findAutomorphismsTest(HashSet<Literal> literals) {
+    public static HashSet<LiteralSet> findAutomorphismsTest(LiteralSet literals) {
         int [] vertices = new int[gameBoardHeight];
         for (int i = 0; i < gameBoardHeight; i++) {
             vertices[i] = i;
         }
         ArrayList<int[]> permutations = Transform.findPermutations(vertices);
-        HashSet<HashSet<Literal>> transformations = new HashSet<>();
+        HashSet<LiteralSet> transformations = new HashSet<>();
         System.out.println("PERMUTATIONS SIZE: " + permutations.size());
         for(int[] arr : permutations) {
             System.out.print("permutations: ");
             for (int i : arr) System.out.print(i + ", ");
             System.out.println();
 
-            HashSet<Literal> precons = new HashSet<>();
+            LiteralSet precons = new HashSet<>();
 
             Action action = null;
             for (Literal lit : rule.action.addClause.literals) {

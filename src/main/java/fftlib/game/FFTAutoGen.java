@@ -29,7 +29,12 @@ public class FFTAutoGen {
         block.nextLine();
          */
 
+        fft = new FFT("Synthesis");
         AUTOGEN_TEAM = team_;
+        if (!fft.isValid(AUTOGEN_TEAM)) {
+            System.err.println("Invalid fft");
+            return null;
+        }
 
         if (BENCHMARK_MODE) {
             double avgRules = 0, avgPrecons = 0, avgTime = 0;
@@ -108,8 +113,8 @@ public class FFTAutoGen {
     }
 
     private static Rule addRule(FFTState s) {
-        HashSet<Literal> minSet = new HashSet<>();
-        HashSet<Literal> literals = s.getLiterals();
+        LiteralSet minSet = new LiteralSet();
+        LiteralSet literals = s.getLiterals();
         StateMapping mapping = lookupTable.get(s);
         Action bestAction = mapping.getMove().getAction();
 
@@ -295,7 +300,7 @@ public class FFTAutoGen {
         frontier = new LinkedList<>();
         frontier.add(initialState);
         reachableStates.put(initialState, initialState);
-        reachableRelevantStates.put(Literal.getBitString(initialState.getLiterals()),
+        reachableRelevantStates.put(initialState.getLiterals().getBitString(),
                                     initialState);
 
         while (!frontier.isEmpty()) {
@@ -318,7 +323,7 @@ public class FFTAutoGen {
                 continue;
             }
             ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(state);
-            long code = Literal.getBitString(state.getLiterals());
+            long code = state.getLiterals().getBitString();
             reachableRelevantStates.put(code, state);
 
             // Our turn, add all states from optimal moves

@@ -7,7 +7,7 @@ import java.util.HashSet;
 
 public interface FFTState {
 
-    HashSet<Literal> getLiterals();
+    LiteralSet getLiterals();
 
     long getZobristKey();
 

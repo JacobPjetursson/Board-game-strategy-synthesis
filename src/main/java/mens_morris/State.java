@@ -3,6 +3,7 @@ package mens_morris;
 import fftlib.Literal;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
+import fftlib.game.LiteralSet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,8 +74,8 @@ public class State implements FFTState {
     }
 
     @Override
-    public HashSet<Literal> getLiterals() { // TODO
-        HashSet<Literal> literals = new HashSet<>();
+    public LiteralSet getLiterals() { // TODO
+        LiteralSet literals = new LiteralSet();
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
@@ -217,7 +218,7 @@ public class State implements FFTState {
 
     @Override
     public long getBitString() {
-        return Literal.getBitString(getLiterals());
+        return getLiterals().getBitString();
     }
 
     @Override

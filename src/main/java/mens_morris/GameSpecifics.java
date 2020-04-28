@@ -2,10 +2,7 @@ package mens_morris;
 
 import fftlib.*;
 import fftlib.auxiliary.Position;
-import fftlib.game.FFTGameSpecifics;
-import fftlib.game.FFTLogic;
-import fftlib.game.FFTMove;
-import fftlib.game.FFTState;
+import fftlib.game.*;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
 import misc.Config;
@@ -98,6 +95,11 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public Position idToPos(int id) {
+        return null;
+    }
+
+    @Override
+    public LiteralSet getActionPreconditions(Action action) {
         return null;
     }
 

@@ -1,6 +1,7 @@
 package fftlib.auxiliary;
 
 import fftlib.*;
+import fftlib.game.LiteralSet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,12 +56,12 @@ public class Transform {
                 refV = true;
         }
         HashSet<SymmetryRule> symmetryRules = new HashSet<>();
-        int [][] pBoard = preconsToBoard(rule.preconditions);
-        int [][] aBoard = actionToBoard(rule.action);
+        int [][] pBoard = preconsToBoard(rule.getPreconditions());
+        int [][] aBoard = actionToBoard(rule.getAction());
         ArrayList<int[][]> pBoards = applyAll(refH, refV, rotate, pBoard);
         ArrayList<int[][]> aBoards = applyAll(refH, refV, rotate, aBoard);
         for (int i = 0; i < pBoards.size(); i++) {
-            HashSet<Literal> precons = boardToPrecons(pBoards.get(i));
+            LiteralSet precons = boardToPrecons(pBoards.get(i));
             Action action = boardToAction(aBoards.get(i));
             symmetryRules.add(new SymmetryRule(precons, action));
         }
@@ -115,7 +116,7 @@ public class Transform {
     }
 
     // Returns a board with the literals on it, the value equals to the piece occ.
-    public static int[][] preconsToBoard(HashSet<Literal> literals) {
+    public static int[][] preconsToBoard(LiteralSet literals) {
         int height = FFTManager.gameBoardHeight;
         int width = FFTManager.gameBoardWidth;
         int[][] preconBoard = new int[height][width];
@@ -123,7 +124,7 @@ public class Transform {
         for (Literal l : literals) {
             Position pos = getPosFromId.apply(l.id);
             if (pos != null) {
-                preconBoard[pos.row][pos.col] = l.negation ? -pos.occ : pos.occ;
+                preconBoard[pos.row][pos.col] = l.negated ? -pos.occ : pos.occ;
             }
         }
         return preconBoard;
@@ -149,8 +150,8 @@ public class Transform {
     }
 
     // returns preconditions derived from transformed integer matrix and non-boardplacement literals
-    private static HashSet<Literal> boardToPrecons(int[][] board) {
-        HashSet<Literal> literals = new HashSet<>();
+    private static LiteralSet boardToPrecons(int[][] board) {
+        LiteralSet literals = new LiteralSet();
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
 
@@ -169,8 +170,8 @@ public class Transform {
     // Takes empty addClause and remClause lists (except for constants),
     // and fill them up with the rotated pieces from the cb array.
     private static Action boardToAction(int[][] lb) {
-        HashSet<Literal> adds = new HashSet<>();
-        HashSet<Literal> rems = new HashSet<>();
+        LiteralSet adds = new LiteralSet();
+        LiteralSet rems = new LiteralSet();
         // Add back to list
         for (int i = 0; i < lb.length; i++) {
             for (int j = 0; j < lb[i].length; j++) {
@@ -204,9 +205,9 @@ public class Transform {
         HashSet<SymmetryRule> transformations = new HashSet<>();
         for(int[] arr : permutations) {
 
-            HashSet<Literal> precons = new HashSet<>();
+            LiteralSet precons = new LiteralSet();
             Action action = null;
-            for (Literal lit : rule.action.adds) {
+            for (Literal lit : rule.getAction().adds) {
                 Position pos = getPosFromId.apply(lit.id);
                 int n1 = arr[pos.row];
                 int n2 = arr[pos.col];
@@ -218,7 +219,7 @@ public class Transform {
                 Position newPos = new Position(n1, n2, pos.occ);
                 action = new Action(getIdFromPos.apply(newPos));
             }
-            for (Literal lit : rule.preconditions) {
+            for (Literal lit : rule.getPreconditions()) {
                 Position pos = getPosFromId.apply(lit.id);
                 int n1 = arr[pos.row];
                 int n2 = arr[pos.col];
@@ -228,7 +229,7 @@ public class Transform {
                     n2 = temp;
                 }
                 Position newPos = new Position(n1, n2, pos.occ);
-                precons.add(new Literal(getIdFromPos.apply(newPos), lit.negation));
+                precons.add(new Literal(getIdFromPos.apply(newPos), lit.negated));
             }
             transformations.add(new SymmetryRule(precons, action));
         }

@@ -1,6 +1,8 @@
 package fftlib;
 
 import fftlib.game.FFTMove;
+import fftlib.game.FFTState;
+import fftlib.game.LiteralSet;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -8,34 +10,34 @@ import java.util.Objects;
 
 
 public class Action {
-    public HashSet<Literal> adds;
-    public HashSet<Literal> rems;
+    public LiteralSet adds;
+    public LiteralSet rems;
 
     public Action() {
-        this.adds = new HashSet<>();
-        this.rems = new HashSet<>();
+        this.adds = new LiteralSet();
+        this.rems = new LiteralSet();
     }
 
     public Action(int id) {
-        this.adds = new HashSet<>();
-        this.rems = new HashSet<>();
+        this.adds = new LiteralSet();
+        this.rems = new LiteralSet();
         this.adds.add(new Literal(id, false));
     }
 
     public Action(String name) {
-        this.adds = new HashSet<>();
-        this.rems = new HashSet<>();
+        this.adds = new LiteralSet();
+        this.rems = new LiteralSet();
         this.adds.add(new Literal(FFTManager.getAtomId.apply(name), false));
     }
 
     public Action(Action duplicate) {
-        this.adds = new HashSet<>(duplicate.adds);
-        this.rems = new HashSet<>(duplicate.rems);
+        this.adds = new LiteralSet(duplicate.adds);
+        this.rems = new LiteralSet(duplicate.rems);
     }
 
     Action(ArrayList<String> literals) {
-        this.adds = new HashSet<>();
-        this.rems = new HashSet<>();
+        this.adds = new LiteralSet();
+        this.rems = new LiteralSet();
 
         for (String lStr : literals) {
             if (lStr.startsWith("+")) {
@@ -60,9 +62,22 @@ public class Action {
     }
 
 
-    public Action(HashSet<Literal> adds, HashSet<Literal> rems) {
-        this.adds = new HashSet<>(adds);
-        this.rems = new HashSet<>(rems);
+    public Action(LiteralSet adds, LiteralSet rems) {
+        this.adds = new LiteralSet(adds);
+        this.rems = new LiteralSet(rems);
+    }
+
+    public LiteralSet getPreconditions() {
+        return FFTManager.getActionPreconditions.apply(this);
+    }
+
+    public boolean isLegal(LiteralSet stateLiterals)  {
+        for (Literal l : getPreconditions()) {
+            if (!stateLiterals.contains(l)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public FFTMove getMove() {

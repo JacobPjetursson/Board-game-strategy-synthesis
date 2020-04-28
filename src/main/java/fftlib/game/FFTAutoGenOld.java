@@ -179,8 +179,8 @@ public class FFTAutoGenOld {
     }
 
     private static Rule addRule(FFTState s) {
-        HashSet<Literal> minSet = new HashSet<>();
-        HashSet<Literal> literals = s.getLiterals();
+        LiteralSet minSet = new LiteralSet();
+        LiteralSet literals = s.getLiterals();
         StateMapping mapping = lookupTable.get(s);
         Action bestAction = mapping.getMove().getAction();
 

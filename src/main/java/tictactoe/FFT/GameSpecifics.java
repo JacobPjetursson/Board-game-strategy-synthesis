@@ -131,12 +131,18 @@ public class GameSpecifics implements FFTGameSpecifics {
         return Atoms.idToPos.get(id);
     }
 
+    @Override
+    public LiteralSet getActionPreconditions(Action action) {
+        return Atoms.actionToPrecons.get(action);
+    }
+
     // TODO - can we do this smarter and more domain-independent?
     // TODO - does there exist a more general version of this that is less ad-hoc?
     @Override
     public HashSet<Long> getCoveredStateBitCodes(Rule rule) {
         HashSet<Long> bitCodes = new HashSet<>();
         List<Set<Literal>> subsets = new ArrayList<>();
+        LiteralSet precons = rule.getAllPreconditions();
         int row, col, occ;
         Position pos;
         Literal l;
@@ -144,17 +150,17 @@ public class GameSpecifics implements FFTGameSpecifics {
         for (row = 0; row < 3; row++) {
             for (col = 0; col < 3; col++) {
                 boolean setExists = false;
-                HashSet<Literal> litSet = new HashSet<>();
+                LiteralSet litSet = new LiteralSet();
                 // make set of all relevant literals from this cell
                 for (occ = 1; occ < 4; occ++) {
                     pos = new Position(row, col, occ);
                     l = new Literal(posToId(pos), false);
-                    if (rule.preconditions.contains(l)) {
+                    if (precons.contains(l)) {
                         setExists = true;
                         break;
                     }
                     Literal negLit = new Literal(posToId(pos), true);
-                    if (!rule.preconditions.contains(negLit))
+                    if (!precons.contains(negLit))
                         litSet.add(l);
                 }
                 if (!setExists) {
@@ -167,16 +173,23 @@ public class GameSpecifics implements FFTGameSpecifics {
         Set<List<Literal>> cartesianSet = Sets.cartesianProduct(subsets);
         // Add each
         for (List<Literal> literals : cartesianSet) {
-            HashSet<Literal> precons = new HashSet<>(rule.preconditions);
-            precons.addAll(literals);
-            bitCodes.add(Literal.getBitString(precons));
+            LiteralSet newSet = new LiteralSet(precons);
+            newSet.addAll(literals);
+            bitCodes.add(newSet.getBitString());
         }
         return bitCodes;
     }
 
     @Override
     public long getNumberOfCoveredStates(Rule rule) {
-        int free_slots = FFTManager.max_precons - rule.preconditions.size();
-        return Aux.pow2(3, free_slots);
+        LiteralSet precons = rule.getAllPreconditions();
+        int no_of_negated = 0;
+        for (Literal l : precons) {
+            if (l.negated)
+                no_of_negated++;
+        }
+        int free_slots = FFTManager.max_precons - precons.size();
+        // this assumes they are from different cells
+        return Aux.pow2(2, no_of_negated) * Aux.pow2(3, free_slots);
     }
 }

@@ -5,6 +5,7 @@ import fftlib.Literal;
 import fftlib.auxiliary.Position;
 import fftlib.Rule;
 import fftlib.game.FFTState;
+import fftlib.game.LiteralSet;
 import fftlib.gui.InteractiveFFTState;
 import javafx.scene.Node;
 import tictactoe.game.Controller;
@@ -48,7 +49,7 @@ public class InteractiveState implements InteractiveFFTState {
     public Node getInteractiveNode(Rule r) {
         this.rule = new Rule(r);
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
-        this.move = (Move) r.action.getMove();
+        this.move = (Move) r.getAction().getMove();
         actionTile = pb.getBoard().getTiles()[move.row][move.col];
         actionTile.setAction(true);
 
@@ -62,7 +63,7 @@ public class InteractiveState implements InteractiveFFTState {
             Position pos = new Position(bt.getRow(), bt.getCol(), i);
             Literal l = new Literal(Atoms.posToId.get(pos), false);
             rule.removePrecondition(l);
-            l.setNegation(true);
+            l.setNegated(true);
             rule.removePrecondition(l);
         }
         if (actionTile != null) {
@@ -100,10 +101,10 @@ public class InteractiveState implements InteractiveFFTState {
     }
     private Rule getRuleFromState(State s) {
         Rule r = new Rule();
-        HashSet<Literal> literals = s.getLiterals();
+        LiteralSet literals = s.getLiterals();
         ArrayList<Literal> literalList = new ArrayList<>(literals);
         // TODO - Only take boardplacement?
-        HashSet<Literal> lits = new HashSet<>(literalList);
+        LiteralSet lits = new LiteralSet(literalList);
         r.setPreconditions(lits);
         return r;
     }

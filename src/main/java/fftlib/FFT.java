@@ -85,6 +85,18 @@ public class FFT {
         ruleGroups.add(ruleGroup);
     }
 
+    public boolean isValid(int team) {
+        int winner = FFTSolution.queryState(FFTManager.initialFFTState).getWinner();
+        if (team == PLAYER1 && winner == PLAYER2) {
+            System.out.println("A perfect player 2 has won from start of the game");
+            return false;
+        } else if (team == PLAYER2 && winner == PLAYER1) {
+            System.out.println("A perfect player 1 has won from the start of the game");
+            return false;
+        }
+        return true;
+    }
+
     public boolean verify(int team, boolean complete) {
         if (!Config.ENABLE_GGP && SINGLE_THREAD) {
             return verifySingleThread(team, complete);
@@ -103,17 +115,8 @@ public class FFT {
         HashSet<FFTState> closedSet = new HashSet<>();
         frontier.add(initialState);
         int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
-        // TODO - move this elsewhere
-        // Check if win or draw is even possible (initial checks)
-        int winner = FFTSolution.queryState(initialState).getWinner();
-        if (team == PLAYER1 && winner == PLAYER2) {
-            System.out.println("A perfect player 2 has won from start of the game");
+        if (!isValid(team))
             return false;
-        } else if (team == PLAYER2 && winner == PLAYER1) {
-            System.out.println("A perfect player 1 has won from the start of the game");
-            return false;
-        }
-
         while (!frontier.isEmpty()) {
             FFTState state = frontier.pop();
             if (FFTManager.logic.gameOver(state)) {
@@ -386,7 +389,7 @@ public class FFT {
             }
         } else {
             ArrayList<Literal> literals = new ArrayList<>();
-            for (Literal l : r.preconditions)
+            for (Literal l : r.getPreconditions())
                 literals.add(l.clone());
 
             for (Literal l : literals) {

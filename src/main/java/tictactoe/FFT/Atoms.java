@@ -1,6 +1,8 @@
 package tictactoe.FFT;
 
+import fftlib.Action;
 import fftlib.auxiliary.Position;
+import fftlib.game.LiteralSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,6 +49,7 @@ public class Atoms {
     public static HashMap<String, Integer> stringToId;
     public static HashMap<Integer, Position> idToPos;
     public static HashMap<Position, Integer> posToId;
+    public static HashMap<Action, LiteralSet> actionToPrecons;
 
     static {
         idToString = new HashMap<>();
@@ -196,6 +199,34 @@ public class Atoms {
         posToId.put(new Position(2, 2, 1), P1_2_2);
         posToId.put(new Position(2, 2, 2), P2_2_2);
         posToId.put(new Position(2, 2, 3), B_2_2);
+
+        actionToPrecons = new HashMap<>();
+        actionToPrecons.put(new Action(P1_0_0), new LiteralSet(B_0_0, false));
+        actionToPrecons.put(new Action(P2_0_0), new LiteralSet(B_0_0, false));
+
+        actionToPrecons.put(new Action(P1_0_1), new LiteralSet(B_0_1, false));
+        actionToPrecons.put(new Action(P2_0_1), new LiteralSet(B_0_1, false));
+
+        actionToPrecons.put(new Action(P1_0_2), new LiteralSet(B_0_2, false));
+        actionToPrecons.put(new Action(P2_0_2), new LiteralSet(B_0_2, false));
+
+        actionToPrecons.put(new Action(P1_1_0), new LiteralSet(B_1_0, false));
+        actionToPrecons.put(new Action(P2_1_0), new LiteralSet(B_1_0, false));
+
+        actionToPrecons.put(new Action(P1_1_1), new LiteralSet(B_1_1, false));
+        actionToPrecons.put(new Action(P2_1_1), new LiteralSet(B_1_1, false));
+
+        actionToPrecons.put(new Action(P1_1_2), new LiteralSet(B_1_2, false));
+        actionToPrecons.put(new Action(P2_1_2), new LiteralSet(B_1_2, false));
+
+        actionToPrecons.put(new Action(P1_2_0), new LiteralSet(B_2_0, false));
+        actionToPrecons.put(new Action(P2_2_0), new LiteralSet(B_2_0, false));
+
+        actionToPrecons.put(new Action(P1_2_1), new LiteralSet(B_2_1, false));
+        actionToPrecons.put(new Action(P2_2_1), new LiteralSet(B_2_1, false));
+
+        actionToPrecons.put(new Action(P1_2_2), new LiteralSet(B_2_2, false));
+        actionToPrecons.put(new Action(P2_2_2), new LiteralSet(B_2_2, false));
     }
 
     public static ArrayList<Integer> getGameAtoms() {

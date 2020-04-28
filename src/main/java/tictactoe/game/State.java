@@ -3,6 +3,7 @@ package tictactoe.game;
 import fftlib.Literal;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
+import fftlib.game.LiteralSet;
 import tictactoe.FFT.Atoms;
 import fftlib.auxiliary.Position;
 import tictactoe.ai.Zobrist;
@@ -20,9 +21,6 @@ public class State implements FFTState {
     private int turn;
     private Move move;
     private long zobrist_key;
-
-    // save results if already computed once (e.g. several verifications)
-    private HashSet<Literal> literals;
 
     // Reachability
     HashSet<State> reachableParents;
@@ -84,7 +82,7 @@ public class State implements FFTState {
 
     @Override
     public long getBitString() {
-        return Literal.getBitString(getLiterals());
+        return getLiterals().getBitString();
     }
 
     public boolean isReachable() {
@@ -164,8 +162,8 @@ public class State implements FFTState {
         this.move = move;
     }
 
-    public HashSet<Literal> getLiterals() { // Including negatives, used for creating rules
-        HashSet<Literal> literals = new HashSet<>();
+    public LiteralSet getLiterals() { // Including negatives, used for creating rules
+        LiteralSet literals = new LiteralSet();
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {

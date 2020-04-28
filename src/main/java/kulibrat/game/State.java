@@ -4,6 +4,7 @@ import fftlib.Literal;
 import fftlib.auxiliary.Position;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
+import fftlib.game.LiteralSet;
 import kulibrat.ai.Minimax.Zobrist;
 import misc.Globals;
 
@@ -166,7 +167,7 @@ public class State implements Serializable, FFTState {
 
     @Override
     public long getBitString() {
-        return Literal.getBitString(getLiterals());
+        return getLiterals().getBitString();
     }
 
     @Override
@@ -288,8 +289,8 @@ public class State implements Serializable, FFTState {
         return legalMoves;
     }
 
-    public HashSet<Literal> getLiterals() {
-        HashSet<Literal> literals = new HashSet<>();
+    public LiteralSet getLiterals() {
+        LiteralSet literals = new LiteralSet();
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
