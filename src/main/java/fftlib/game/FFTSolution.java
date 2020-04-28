@@ -43,7 +43,7 @@ public class FFTSolution{
             return optMoves;
         ArrayList<FFTMove> optimalMoves = new ArrayList<>();
         StateMapping mapping = queryState(state);
-        if (mapping.getMove() == null) {
+        if (mapping == null || mapping.getMove() == null) {
             optimalMovesMap.put(state, new ArrayList<>());
             return optimalMoves;
         }
