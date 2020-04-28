@@ -42,10 +42,6 @@ public class FFTSolution{
         if (optMoves != null)
             return optMoves;
         ArrayList<FFTMove> optimalMoves = new ArrayList<>();
-        if (FFTManager.logic.gameOver(state)) {
-            optimalMovesMap.put(state, new ArrayList<>());
-            return optimalMoves;
-        }
         StateMapping mapping = queryState(state);
         if (mapping.getMove() == null) {
             optimalMovesMap.put(state, new ArrayList<>());
@@ -95,6 +91,7 @@ public class FFTSolution{
                     optimalMoves.add(m);
             }
         }
+        optimalMovesMap.put(state, optimalMoves);
         return optimalMoves;
     }
 
