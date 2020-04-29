@@ -83,7 +83,7 @@ public class BoardPiece extends Circle {
 
     private void select() {
         if (clickMode == CLICK_INTERACTIVE) {
-            cont.getInteractiveState().setSelected(this);
+            cont.getInteractiveNode().setSelected(this);
         } else {
             cont.setSelected(this);
         }
@@ -112,7 +112,7 @@ public class BoardPiece extends Circle {
             BoardTile bt = getTile();
             return bt == null || !getTile().highlight;
         }
-        return clickMode != CLICK_DISABLED && cont.getState().getTurn() == this.team &&
+        return clickMode != CLICK_DISABLED && cont.getNode().getTurn() == this.team &&
                 (cont.getPlayerInstance(team) == HUMAN || (cont.getPlayerInstance(team) == FFT &&
                         cont.getFFTAllowInteraction()));
     }

@@ -12,7 +12,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import kulibrat.game.Controller;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 
 import static misc.Globals.*;
 
@@ -72,14 +72,14 @@ public class InfoPane extends AnchorPane {
     }
 
     public void update(Controller cont) {
-        State state = cont.getState();
+        Node node = cont.getNode();
         fft = cont.getCurrFFT();
         if (mode == HUMAN_VS_AI)
-            showFFTPane.update(fft, state);
+            showFFTPane.update(fft, node);
 
-        scoreBoard.updateScore(state);
+        scoreBoard.updateScore(node);
 
-        if (state.getTurn() == PLAYER1)
+        if (node.getTurn() == PLAYER1)
             turnCircle.setFill(Color.RED);
         else
             turnCircle.setFill(Color.BLACK);

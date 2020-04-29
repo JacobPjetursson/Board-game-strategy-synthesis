@@ -12,10 +12,10 @@ public class FFTSolver{
     private static int CURR_MAX_DEPTH;
     private static int unexploredNodes = 0;
     private static int team = PLAYER1; // Always from player1
-    private static HashMap<FFTState, StateMapping> lookupTable;
+    private static HashMap<FFTNode, NodeMapping> lookupTable;
 
     // Runs an iterative deepening minimax as the exhaustive brute-force for the lookupDB. The data is saved in the transpo table
-    public static HashMap<? extends FFTState, StateMapping> solveGame(FFTState initialState) {
+    public static HashMap<? extends FFTNode, NodeMapping> solveGame(FFTNode initialNode) {
         if (solved) {
             System.out.println("Game already solved once, returning immediately");
             return lookupTable;
@@ -27,12 +27,11 @@ public class FFTSolver{
         int doneCounter = 0;
         long timeStart = System.currentTimeMillis();
         while (!done) {
-            initialState = initialState.clone(); // Start from fresh (Don't reuse previous game tree in new iterations)
             CURR_MAX_DEPTH += 1;
             int prevSize = lookupTable.size();
             int prevvUnexploredNodes = unexploredNodes;
             unexploredNodes = 0;
-            minimax(initialState, CURR_MAX_DEPTH);
+            minimax(initialNode, CURR_MAX_DEPTH);
             System.out.println("CURRENT MAX DEPTH: " + CURR_MAX_DEPTH + ", LOOKUP TABLE SIZE: " + lookupTable.size()
                     + ", UNEVALUATED NODES: " + unexploredNodes);
 
@@ -48,37 +47,38 @@ public class FFTSolver{
 
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
         System.out.println("Time spent on solving game: " + timeSpent);
-        int winner = lookupTable.get(initialState).getWinner();
+        int winner = lookupTable.get(initialNode).getWinner();
+        FFTManager.winner = winner;
         String winnerStr = winner == PLAYER1 ? "Player 1" : (winner == PLAYER2) ? "Player 2" : "Draw";
         System.out.println("Winner is " + winnerStr);
         solved = true;
-        FFTSolution.setLookupTable(lookupTable);
+        FFTSolution.setSolution(lookupTable);
         return lookupTable;
     }
 
     // Is called for every depth limit of the iterative deepening function. Classic minimax with no pruning
-    private static StateMapping minimax(FFTState state, int depth) {
+    private static NodeMapping minimax(FFTNode node, int depth) {
         FFTMove bestMove = null;
-        int bestScore = (state.getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        int bestScore = (node.getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int score;
-        boolean gameover = FFTManager.logic.gameOver(state);
+        boolean gameover = FFTManager.logic.gameOver(node);
         if (gameover || depth == 0) {
-            return new StateMapping(bestMove, heuristic(state), depth);
+            return new NodeMapping(bestMove, heuristic(node), depth);
         }
-        StateMapping mapping = lookupTable.get(state);
+        NodeMapping mapping = lookupTable.get(node);
         if (mapping != null && depth <= mapping.getDepth()) {
             return mapping;
         }
         boolean explored = true;
-        for (FFTState child : state.getChildren()) {
-            StateMapping childMapping = minimax(child, depth - 1);
+        for (FFTNode child : node.getChildren()) {
+            NodeMapping childMapping = minimax(child, depth - 1);
             score = childMapping.getScore();
 
             if (childMapping.getWinner() == PLAYER1) score--;
             else if (childMapping.getWinner() == PLAYER2) score++;
             else explored = false;
 
-            if (state.getTurn() == team) {
+            if (node.getTurn() == team) {
                 if (score > bestScore) {
                     bestScore = score;
                     bestMove = child.getMove();
@@ -91,19 +91,19 @@ public class FFTSolver{
             }
         }
         if (mapping == null || depth > mapping.getDepth()) {
-            lookupTable.put(state,
-                    new StateMapping(bestMove, bestScore, depth));
+            lookupTable.put(node,
+                    new NodeMapping(bestMove, bestScore, depth));
         }
         if (!explored)
             unexploredNodes++;
-        return new StateMapping(bestMove, bestScore, depth);
+        return new NodeMapping(bestMove, bestScore, depth);
     }
 
     // Heuristic function which values player1 with 2000 for a win, and -2000 for a loss. All other nodes are 0
-    private static int heuristic(FFTState state) {
+    private static int heuristic(FFTNode node) {
         int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
-        if (FFTManager.logic.gameOver(state)) {
-            int winner = FFTManager.logic.getWinner(state);
+        if (FFTManager.logic.gameOver(node)) {
+            int winner = FFTManager.logic.getWinner(node);
             if (winner == team)
                 return 2000;
             else if (winner == opponent)

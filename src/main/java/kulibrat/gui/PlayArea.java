@@ -23,7 +23,7 @@ public class PlayArea extends HBox {
     }
 
     public void update(Controller cont) {
-        playBox.update(cont.getState());
+        playBox.update(cont.getNode());
         info.update(cont);
     }
 

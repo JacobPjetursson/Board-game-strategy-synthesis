@@ -1,13 +1,12 @@
 package tictactoe.FFT;
 
 import fftlib.game.FFTMove;
-import fftlib.game.FFTStateAndMove;
-import fftlib.gui.FFTFailState;
+import fftlib.game.FFTNodeAndMove;
+import fftlib.gui.FFTFailNode;
 import javafx.application.Platform;
-import javafx.scene.Node;
 import tictactoe.game.Controller;
 import tictactoe.game.Move;
-import tictactoe.game.State;
+import tictactoe.game.Node;
 import tictactoe.gui.board.BoardTile;
 import tictactoe.gui.board.PlayBox.PlayBox;
 
@@ -15,18 +14,18 @@ import java.util.ArrayList;
 
 import static misc.Globals.CLICK_DISABLED;
 
-public class FailStatePane implements FFTFailState {
+public class FailNodePane implements FFTFailNode {
 
     Controller cont;
 
-    FailStatePane(Controller cont) {
+    FailNodePane(Controller cont) {
         this.cont = cont;
     }
 
-    private PlayBox getFailStatePane(State s, Move move, ArrayList<Move> optimalMoves) {
+    private PlayBox getFailNodePane(Node n, Move move, ArrayList<Move> optimalMoves) {
         int tilesize = 60;
         PlayBox pb = new PlayBox(tilesize, CLICK_DISABLED, cont);
-        pb.update(s);
+        pb.update(n);
         Platform.runLater(() -> {
             pb.addHighlight(move.row, move.col, move.team, BoardTile.blueStr);
             for (Move m : optimalMoves) {
@@ -39,7 +38,7 @@ public class FailStatePane implements FFTFailState {
     }
 
     @Override
-    public Node getFailState(FFTStateAndMove ps, ArrayList<? extends FFTMove> optimalMoves) {
-        return getFailStatePane((State) ps.getState(), (Move) ps.getMove(), (ArrayList<Move>) optimalMoves);
+    public javafx.scene.Node getFailNode(FFTNodeAndMove ps, ArrayList<? extends FFTMove> optimalMoves) {
+        return getFailNodePane((Node) ps.getNode(), (Move) ps.getMove(), (ArrayList<Move>) optimalMoves);
     }
 }

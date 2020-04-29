@@ -15,7 +15,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import kulibrat.game.Controller;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 import misc.Config;
 import misc.Globals;
 
@@ -314,7 +314,7 @@ public class NewGamePane extends AnchorPane {
                 Globals.ENABLE_AUTOGEN = false;
 
             new Controller(stage, playerRedMode,
-                    playerBlackMode, new State(),
+                    playerBlackMode, new Node(),
                     Integer.parseInt(redDelayField.getText()),
                     Integer.parseInt(blackDelayField.getText()), overwriteDB.isSelected());
         });

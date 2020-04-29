@@ -13,7 +13,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import misc.Globals;
 import tictactoe.game.Controller;
-import tictactoe.game.State;
+import tictactoe.game.Node;
 import tictactoe.gui.menu.MenuPane;
 
 import static misc.Globals.*;
@@ -49,7 +49,7 @@ public class EndGamePane extends VBox {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
             new Controller(primaryStage, cont.getPlayerInstance(PLAYER1),
-                    cont.getPlayerInstance(PLAYER2), new State());
+                    cont.getPlayerInstance(PLAYER2), new Node());
         });
         restartGameBtn.setPrefWidth(110);
         hBox.getChildren().add(restartGameBtn);

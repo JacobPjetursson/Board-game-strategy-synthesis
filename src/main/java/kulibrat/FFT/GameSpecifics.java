@@ -1,16 +1,15 @@
 package kulibrat.FFT;
 
 import fftlib.Action;
-import fftlib.Literal;
 import fftlib.auxiliary.Position;
 import fftlib.Rule;
 import fftlib.SymmetryRule;
 import fftlib.game.*;
-import fftlib.gui.FFTFailState;
-import fftlib.gui.InteractiveFFTState;
+import fftlib.gui.FFTFailNode;
+import fftlib.gui.interactiveFFTNode;
 import kulibrat.game.Controller;
 import kulibrat.game.Logic;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 import misc.Config;
 
 import java.util.ArrayList;
@@ -18,7 +17,7 @@ import java.util.HashSet;
 
 public class GameSpecifics implements FFTGameSpecifics {
     private Controller cont;
-    public InteractiveState interactiveState;
+    public InteractiveNode interactiveNode;
 
     public GameSpecifics(Controller cont) {
         this.cont = cont;
@@ -59,6 +58,11 @@ public class GameSpecifics implements FFTGameSpecifics {
         return null;
     }
 
+    @Override
+    public State nodeToState(FFTNode n) {
+        return null;
+    }
+
     @Override // TODO
     public Rule gdlToRule(String precons, String action) {
         return null;
@@ -80,8 +84,8 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public FFTState getInitialState() {
-        return new State();
+    public FFTNode getInitialNode() {
+        return new Node();
     }
 
     @Override
@@ -105,15 +109,15 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public FFTFailState getFailState() {
-        return new FailStatePane(cont);
+    public FFTFailNode getFailNode() {
+        return new FailNodePane(cont);
     }
 
     @Override
-    public InteractiveFFTState getInteractiveState() {
-        if (interactiveState == null)
-            this.interactiveState = new InteractiveState(cont);
-        return interactiveState;
+    public interactiveFFTNode getInteractiveNode() {
+        if (interactiveNode == null)
+            this.interactiveNode = new InteractiveNode(cont);
+        return interactiveNode;
     }
 
     @Override

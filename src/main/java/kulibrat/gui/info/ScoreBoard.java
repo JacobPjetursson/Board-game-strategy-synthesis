@@ -7,7 +7,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
@@ -31,8 +31,8 @@ public class ScoreBoard extends VBox {
         getChildren().addAll(score, blackLabel, redLabel);
     }
 
-    void updateScore(State state) {
-        redLabel.setText("Red: " + state.getScore(PLAYER1));
-        blackLabel.setText("Black: " + state.getScore(PLAYER2));
+    void updateScore(Node node) {
+        redLabel.setText("Red: " + node.getScore(PLAYER1));
+        blackLabel.setText("Black: " + node.getScore(PLAYER2));
     }
 }

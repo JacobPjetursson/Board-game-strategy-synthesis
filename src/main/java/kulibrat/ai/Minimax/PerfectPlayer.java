@@ -1,10 +1,9 @@
 package kulibrat.ai.Minimax;
 
-import fftlib.game.FFTSolution;
-import fftlib.game.StateMapping;
+import fftlib.game.NodeMapping;
 import kulibrat.ai.AI;
 import kulibrat.game.Move;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 import kulibrat.misc.Database;
 
 import static misc.Config.USE_DB;
@@ -19,19 +18,21 @@ public class PerfectPlayer extends AI {
     }
     // This function fetches the best move from the DB, if it exists
     @Override
-    public Move makeMove(State state) {
+    public Move makeMove(Node node) {
         String teamstr = (team == PLAYER2) ? "BLACK" : "RED";
         System.out.println("Finding best play for " + teamstr);
-        if (state.getLegalMoves().size() == 1) {
-            return state.getLegalMoves().get(0);
+        if (node.getLegalMoves().size() == 1) {
+            return node.getLegalMoves().get(0);
         }
         // table lookup
-        State simState = new State(state);
-        StateMapping mapping;
+        Node simState = new Node(node);
+        NodeMapping mapping;
         if (USE_DB) {
             mapping = Database.queryState(simState);
         } else {
-            mapping = FFTSolution.queryState(state);
+            // todo
+            //mapping = FFTSolution.queryState(state);
+            mapping = null;
         }
         if (mapping == null) {
             System.err.println("DB Table is empty and needs to be rebuilt. Exiting");

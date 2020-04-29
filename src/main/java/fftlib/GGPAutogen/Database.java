@@ -1,7 +1,5 @@
 package fftlib.GGPAutogen;
 
-import fftlib.game.FFTMove;
-import fftlib.game.FFTState;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;

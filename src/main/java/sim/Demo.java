@@ -12,36 +12,36 @@ public class Demo {
     public static void main(String[] args) {
         GameSpecifics gs = new GameSpecifics();
         FFTManager.initialize(gs);
-        State s = new State();
+        Node n = new Node();
         if (playGame) {
-            playGame(s);
+            playGame(n);
             return;
         }
         // Make strategy with meta rules
         ArrayList<FFT> ffts = FFTManager.load("FFTs/simFFT.txt");
-        FFTSolver.solveGame(s);
+        FFTSolver.solveGame(n);
         FFTManager.autogenFFT(ffts.get(0));
     }
 
-    public static void playGame(State s) {
+    public static void playGame(Node n) {
         Scanner scan = new Scanner(System.in);
         System.out.println("Input move as <u,v>");
-        while (!Logic.gameOver(s)) {
+        while (!Logic.gameOver(n)) {
             System.out.println("State: ");
-            System.out.println(s);
-            System.out.println("Player " + s.getTurn() + ", please make your move");
+            System.out.println(n);
+            System.out.println("Player " + n.getTurn() + ", please make your move");
             try {
                 String[] vertices = scan.nextLine().split(",");
                 int u = Integer.parseInt(vertices[0]);
                 int v = Integer.parseInt(vertices[1]);
-                Move move = new Move(s.getTurn(), new Line(u, v));
-                s = s.getNextState(move);
+                Move move = new Move(n.getTurn(), new Line(u, v));
+                n = n.getNextState(move);
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Incorrect format, please try again");
             }
         }
-        System.out.println("The winner is player " + Logic.getWinner(s));
+        System.out.println("The winner is player " + Logic.getWinner(n));
     }
 /*
     public static HashSet<LiteralSet> findAutomorphismsTest(LiteralSet literals) {

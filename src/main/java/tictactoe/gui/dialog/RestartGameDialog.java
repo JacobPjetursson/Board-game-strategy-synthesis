@@ -3,7 +3,7 @@ package tictactoe.gui.dialog;
 
 import javafx.stage.Stage;
 import tictactoe.game.Controller;
-import tictactoe.game.State;
+import tictactoe.game.Node;
 
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
@@ -25,6 +25,6 @@ public class RestartGameDialog extends ConfirmDialog {
         Stage stage = (Stage) getScene().getWindow();
         stage.close();
         new Controller(primaryStage, cont.getPlayerInstance(PLAYER1),
-                cont.getPlayerInstance(PLAYER2), new State());
+                cont.getPlayerInstance(PLAYER2), new Node());
     }
 }

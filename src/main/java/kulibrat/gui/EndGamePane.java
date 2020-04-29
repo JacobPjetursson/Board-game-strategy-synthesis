@@ -12,7 +12,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import kulibrat.game.Controller;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 import kulibrat.gui.menu.MenuPane;
 import misc.Globals;
 
@@ -50,7 +50,7 @@ public class EndGamePane extends VBox {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
             new Controller(primaryStage, cont.getPlayerInstance(PLAYER1),
-                    cont.getPlayerInstance(PLAYER2), new State(), cont.getTime(PLAYER1), cont.getTime(PLAYER2), cont.getOverwriteDB());
+                    cont.getPlayerInstance(PLAYER2), new Node(), cont.getTime(PLAYER1), cont.getTime(PLAYER2), cont.getOverwriteDB());
         });
         restartGameBtn.setPrefWidth(150);
         hBox.getChildren().add(restartGameBtn);

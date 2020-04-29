@@ -51,7 +51,7 @@ public class Goal extends StackPane {
         setOnMouseClicked(event -> {
             if (highlight) {
                 if (clickMode == CLICK_INTERACTIVE) {
-                    cont.getInteractiveState().setArrowEndpoint(POS_NONBOARD, POS_NONBOARD);
+                    cont.getInteractiveNode().setArrowEndpoint(POS_NONBOARD, POS_NONBOARD);
                 } else {
                     BoardPiece piece = cont.getSelected();
                     cont.doHumanTurn(new Move(piece.getRow(), piece.getCol(), POS_NONBOARD, POS_NONBOARD, piece.getTeam()));

@@ -84,7 +84,9 @@ public class Runner {
 
         System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
-        int it = fft.minimize(AUTOGEN_TEAM, Config.MINIMIZE_PRECONDITIONS);
+        // todo
+        //int it = fft.minimize(AUTOGEN_TEAM, Config.MINIMIZE_PRECONDITIONS);
+        int it = -1;
         System.out.println("Amount of rules after " + it + " minimize iterations: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions after " + it + " minimize iterations: " + fft.getAmountOfPreconditions());
 
@@ -181,7 +183,8 @@ public class Runner {
             if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
             System.out.println();
 
-            if (!GENERATE_ALL_RULES && fft.verify(AUTOGEN_TEAM, true)) {
+            // todo
+            if (!GENERATE_ALL_RULES && false) {//fft.verify(AUTOGEN_TEAM, true)) {
                 System.out.println("FFT verified before empty statespace");
                 return;
             }
@@ -264,7 +267,8 @@ public class Runner {
                 if (DETAILED_DEBUG) System.out.println("INSPECTING: " + s);
                 r.removePrecondition(s);
 
-                boolean verify = fft.verify(AUTOGEN_TEAM, false); // strategy is null if VERIFY_SINGLE_STRAT is false
+                // todo
+                boolean verify = false; // fft.verify(AUTOGEN_TEAM, false); // strategy is null if VERIFY_SINGLE_STRAT is false
                 if (!verify) {
                     if (DETAILED_DEBUG) System.out.println("FAILED TO VERIFY RULE!");
                     r.addPrecondition(s);
@@ -276,14 +280,15 @@ public class Runner {
         return r;
     }
 
-    private static LinkedList<GdlSentence> getBestRemovalPath(LinkedList<GdlSentence> sentences, Rule r, LinkedList<GdlSentence> path) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
+    private static LinkedList<GdlSentence> getBestRemovalPath(LinkedList<GdlSentence> sentences, Rule r, LinkedList<GdlSentence> path) {
         ListIterator<GdlSentence> it = sentences.listIterator();
         LinkedList<GdlSentence> bestPath = path;
 
         while(it.hasNext()) {
             GdlSentence s = it.next();
             r.removePrecondition(s);
-            boolean verify = fft.verify(AUTOGEN_TEAM, false);
+            //todo
+            boolean verify = false; //fft.verify(AUTOGEN_TEAM, false);
             if (!verify) {
                 r.addPrecondition(s);
                 continue;

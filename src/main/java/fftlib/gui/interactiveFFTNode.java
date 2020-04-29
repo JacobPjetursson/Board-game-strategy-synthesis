@@ -2,12 +2,12 @@ package fftlib.gui;
 
 import fftlib.Action;
 import fftlib.Rule;
-import fftlib.game.FFTState;
+import fftlib.game.FFTNode;
 import javafx.scene.Node;
 
-public interface InteractiveFFTState {
+public interface interactiveFFTNode {
 
-    Node getInteractiveNode(FFTState fftState);
+    Node getInteractiveNode(FFTNode fftNode);
 
     Node getInteractiveNode(Rule r);
 

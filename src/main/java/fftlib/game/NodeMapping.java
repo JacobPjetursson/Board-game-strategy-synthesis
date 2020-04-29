@@ -3,12 +3,12 @@ package fftlib.game;
 import static misc.Globals.*;
 
 // Class binds a move to a score for the minimax algorithm
-public class StateMapping {
+public class NodeMapping {
     public int score;
     public FFTMove move;
     public int depth;
 
-    public StateMapping(FFTMove move, int score, int depth) {
+    public NodeMapping(FFTMove move, int score, int depth) {
         this.move = move;
         this.score = score;
         this.depth = depth;

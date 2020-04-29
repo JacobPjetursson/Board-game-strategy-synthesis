@@ -3,7 +3,7 @@ package tictactoe.gui.board;
 import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
 import tictactoe.game.Controller;
-import tictactoe.game.State;
+import tictactoe.game.Node;
 
 public class Board extends GridPane {
     private static final int boardRows = 3;
@@ -26,8 +26,8 @@ public class Board extends GridPane {
         return tiles;
     }
 
-    public void update(State state) {
-        int[][] stateBoard = state.getBoard();
+    public void update(Node node) {
+        int[][] stateBoard = node.getBoard();
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles[i].length; j++) {
                 BoardTile tile = tiles[i][j];

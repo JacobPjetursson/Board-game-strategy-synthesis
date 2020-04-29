@@ -23,7 +23,8 @@ public class Atoms {
         posToId = new HashMap<>();
         gameAtoms = new ArrayList<>();
         actionToPrecons = new HashMap<>();
-        int counter = 0;
+
+        int counter = 1;
         String s;
         for (int i = 0; i < 6; i++) {
             for (int j = i+1; j < 6; j++) {

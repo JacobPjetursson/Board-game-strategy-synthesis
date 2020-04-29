@@ -3,9 +3,8 @@ package kulibrat.gui.board;
 import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
 import kulibrat.game.Controller;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 import misc.Config;
-import misc.Globals;
 
 public class Board extends GridPane {
     private static final int boardRows = Config.BHEIGHT;
@@ -33,8 +32,8 @@ public class Board extends GridPane {
         return tiles;
     }
 
-    public void update(Controller cont, State state) {
-        int[][] stateBoard = state.getBoard();
+    public void update(Controller cont, Node node) {
+        int[][] stateBoard = node.getBoard();
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles[i].length; j++) {
                 BoardTile tile = tiles[i][j];

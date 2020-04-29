@@ -6,7 +6,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import kulibrat.game.Controller;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
@@ -44,14 +44,14 @@ public class StaticPlayBox extends PlayBox {
         playBox.getChildren().add(0,infoBox);
     }
 
-    public void update(State s) {
-        board.update(cont, s);
-        playerRed.update(cont, s);
-        playerBlack.update(cont, s);
+    public void update(Node n) {
+        board.update(cont, n);
+        playerRed.update(cont, n);
+        playerBlack.update(cont, n);
 
-        int scoreLimit = s.getScoreLimit();
-        int player1Score = s.getScore(PLAYER1);
-        int player2Score = s.getScore(PLAYER2);
+        int scoreLimit = n.getScoreLimit();
+        int player1Score = n.getScore(PLAYER1);
+        int player2Score = n.getScore(PLAYER2);
 
         String slStr = Integer.toString(scoreLimit);
         scoreLimitLabel.setText("Score limit: " + slStr);

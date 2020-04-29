@@ -5,8 +5,8 @@ import fftlib.*;
 import fftlib.auxiliary.Position;
 import fftlib.auxiliary.Transform;
 import fftlib.game.*;
-import fftlib.gui.FFTFailState;
-import fftlib.gui.InteractiveFFTState;
+import fftlib.gui.FFTFailNode;
+import fftlib.gui.interactiveFFTNode;
 import misc.Config;
 
 import java.util.ArrayList;
@@ -42,6 +42,11 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
+    public State nodeToState(FFTNode n) {
+        return null;
+    }
+
+    @Override
     public Rule gdlToRule(String precons, String action) {
         return null;
     }
@@ -64,8 +69,8 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public FFTState getInitialState() {
-        return new State();
+    public FFTNode getInitialNode() {
+        return new Node();
     }
 
     @Override
@@ -89,12 +94,12 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public FFTFailState getFailState() {
+    public FFTFailNode getFailNode() {
         return null;
     }
 
     @Override
-    public InteractiveFFTState getInteractiveState() {
+    public interactiveFFTNode getInteractiveNode() {
         return null;
     }
 

@@ -1,7 +1,7 @@
 package fftlib.GGPAutogen;
 
 
-import kulibrat.game.State;
+import kulibrat.game.Node;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
@@ -146,7 +146,7 @@ public class Solver {
     }
 
     private boolean testGameRules(MachineState ms) throws MoveDefinitionException {
-        State testState = new State();
+        Node testState = new Node();
         for (GdlSentence sentence : ms.getContents()) {
             String s = sentence.toString();
             if (s.contains("pieces_left redplayer ")) {

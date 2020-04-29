@@ -9,7 +9,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import kulibrat.game.Controller;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
@@ -64,21 +64,21 @@ public class InteractivePlayBox extends PlayBox {
             mandatoryScoreLimit = newValue;
             if (scoreLimitField.getText().equals(""))
                 scoreLimitField.setText("0");
-            cont.getInteractiveState().setScoreLimit(
+            cont.getInteractiveNode().setScoreLimit(
                     Integer.parseInt(scoreLimitField.getText()), mandatoryScoreLimit);
         });
         p1ScoreBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
             mandatoryScoreP1 = newValue;
             if (p1ScoreField.getText().equals(""))
                 p1ScoreField.setText("0");
-            cont.getInteractiveState().setScore(
+            cont.getInteractiveNode().setScore(
                     PLAYER1, Integer.parseInt(p1ScoreField.getText()), mandatoryScoreP1);
         });
         p2ScoreBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
             mandatoryScoreP2 = newValue;
             if (p2ScoreField.getText().equals(""))
                 p2ScoreField.setText("0");
-            cont.getInteractiveState().setScore(
+            cont.getInteractiveNode().setScore(
                     PLAYER2, Integer.parseInt(p2ScoreField.getText()), mandatoryScoreP2);
         });
         scoreLimitField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -89,7 +89,7 @@ public class InteractivePlayBox extends PlayBox {
                 int sl = 0;
                 if (!scoreLimitField.getText().isEmpty())
                     sl = Integer.parseInt(scoreLimitField.getText());
-                cont.getInteractiveState().setScoreLimit(sl, mandatoryScoreLimit);
+                cont.getInteractiveNode().setScoreLimit(sl, mandatoryScoreLimit);
             }
         });
         p1ScoreField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -100,7 +100,7 @@ public class InteractivePlayBox extends PlayBox {
                 int p1Score = 0;
                 if (!p1ScoreField.getText().isEmpty())
                     p1Score = Integer.parseInt(p1ScoreField.getText());
-                cont.getInteractiveState().setScore(PLAYER1, p1Score, mandatoryScoreP1);
+                cont.getInteractiveNode().setScore(PLAYER1, p1Score, mandatoryScoreP1);
             }
         });
         p2ScoreField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -111,7 +111,7 @@ public class InteractivePlayBox extends PlayBox {
                 int p2Score = 0;
                 if (!p2ScoreField.getText().isEmpty())
                     p2Score = Integer.parseInt(p2ScoreField.getText());
-                cont.getInteractiveState().setScore(PLAYER2, p2Score, mandatoryScoreP2);
+                cont.getInteractiveNode().setScore(PLAYER2, p2Score, mandatoryScoreP2);
             }
         });
 
@@ -119,14 +119,14 @@ public class InteractivePlayBox extends PlayBox {
         updateBounds();
     }
 
-    public void update(State s) {
-        board.update(cont, s);
-        playerRed.update(cont, s);
-        playerBlack.update(cont, s);
+    public void update(Node n) {
+        board.update(cont, n);
+        playerRed.update(cont, n);
+        playerBlack.update(cont, n);
 
-        int scoreLimit = s.getScoreLimit();
-        int player1Score = s.getScore(PLAYER1);
-        int player2Score = s.getScore(PLAYER2);
+        int scoreLimit = n.getScoreLimit();
+        int player1Score = n.getScore(PLAYER1);
+        int player2Score = n.getScore(PLAYER2);
 
         setFields(scoreLimit, player1Score, player2Score);
     }

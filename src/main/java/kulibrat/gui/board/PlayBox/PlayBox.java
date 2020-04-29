@@ -10,7 +10,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import kulibrat.game.Controller;
 import kulibrat.game.Move;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 import kulibrat.gui.board.Board;
 import kulibrat.gui.board.BoardTile;
 import kulibrat.gui.board.Goal;
@@ -56,10 +56,10 @@ public class PlayBox extends Group {
         updateBounds();
     }
 
-    public void update(State s) {
-        board.update(cont, s);
-        playerRed.update(cont, s);
-        playerBlack.update(cont, s);
+    public void update(Node n) {
+        board.update(cont, n);
+        playerRed.update(cont, n);
+        playerBlack.update(cont, n);
     }
 
     protected void layoutChildren() {

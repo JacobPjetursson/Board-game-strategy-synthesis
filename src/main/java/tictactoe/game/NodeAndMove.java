@@ -1,20 +1,20 @@
 package tictactoe.game;
 
-public class StateAndMove {
+public class NodeAndMove {
     public boolean random;
-    private State state;
+    private Node node;
     private Move move;
     private int turnNo;
 
-    public StateAndMove(State state, Move move, int turnNo) {
-        this.state = state;
+    public NodeAndMove(Node node, Move move, int turnNo) {
+        this.node = node;
         this.move = move;
         this.turnNo = turnNo;
     }
 
     // used for fft
-    public StateAndMove(State state, Move move, boolean random) {
-        this.state = state;
+    public NodeAndMove(Node node, Move move, boolean random) {
+        this.node = node;
         this.move = move;
         this.random = random;
     }
@@ -23,8 +23,8 @@ public class StateAndMove {
         return move;
     }
 
-    public State getState() {
-        return state;
+    public Node getNode() {
+        return node;
     }
 
     public int getTurnNo() {

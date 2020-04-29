@@ -5,13 +5,13 @@ import fftlib.*;
 import fftlib.auxiliary.Position;
 import fftlib.auxiliary.Transform;
 import fftlib.game.*;
-import fftlib.gui.FFTFailState;
-import fftlib.gui.InteractiveFFTState;
+import fftlib.gui.FFTFailNode;
+import fftlib.gui.interactiveFFTNode;
 import misc.Config;
 import tictactoe.game.Controller;
 import tictactoe.game.Logic;
 import tictactoe.game.Move;
-import tictactoe.game.State;
+import tictactoe.game.Node;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,7 +25,7 @@ import static misc.Globals.PLAYER2;
 
 public class GameSpecifics implements FFTGameSpecifics {
     private Controller cont;
-    public InteractiveState interactiveState;
+    public InteractiveNode interactiveNode;
 
     public GameSpecifics(Controller cont) {
         this.cont = cont;
@@ -57,6 +57,22 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
+    public State nodeToState(FFTNode n) {
+        Node node = (Node) n;
+        LiteralSet literals = new LiteralSet();
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                int occ = node.getBoard()[i][j];
+                if (occ == 0)
+                    continue;
+                Position pos = new Position(i, j, occ);
+                literals.add(new Literal(Atoms.posToId.get(pos), false));
+            }
+        }
+        return new State(literals);
+    }
+
+    @Override
     public Rule gdlToRule(String precons, String action) {
         // TODO
         return null;
@@ -80,8 +96,8 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public FFTState getInitialState() {
-        return new State();
+    public FFTNode getInitialNode() {
+        return new Node();
     }
 
     @Override
@@ -105,15 +121,15 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public FFTFailState getFailState() {
-        return new FailStatePane(cont);
+    public FFTFailNode getFailNode() {
+        return new FailNodePane(cont);
     }
 
     @Override
-    public InteractiveFFTState getInteractiveState() {
-        if (interactiveState == null)
-            interactiveState = new InteractiveState(cont);
-        return interactiveState;
+    public interactiveFFTNode getInteractiveNode() {
+        if (interactiveNode == null)
+            interactiveNode = new InteractiveNode(cont);
+        return interactiveNode;
     }
 
     @Override
@@ -149,7 +165,6 @@ public class GameSpecifics implements FFTGameSpecifics {
         LiteralSet precons = rule.getAllPreconditions();
         int row, col, occ;
         Position pos;
-        Literal l;
         // find sets of preconditions that can not co-exist
         for (row = 0; row < 3; row++) {
             for (col = 0; col < 3; col++) {
@@ -158,19 +173,18 @@ public class GameSpecifics implements FFTGameSpecifics {
                 // make set of all relevant literals from this cell
                 for (occ = PLAYER1; occ <= PLAYER2; occ++) {
                     pos = new Position(row, col, occ);
-                    l = new Literal(posToId(pos), false);
+                    Literal l = new Literal(posToId(pos), false);
                     if (precons.contains(l)) {
                         setExists = true;
                         break;
                     }
                     Literal negLit = new Literal(posToId(pos), true);
                     if (!precons.contains(negLit)) {
-                        System.out.println("adding literal: " + l);
                         litSet.add(l);
                     }
                 }
-                if (!setExists && !litSet.isEmpty()) {
-                    System.out.println("adding litset: " + litSet);
+                if (!setExists) {
+                    litSet.add(Literal.NULL);
                     subsets.add(litSet);
                 }
             }
@@ -178,10 +192,13 @@ public class GameSpecifics implements FFTGameSpecifics {
         // Find the cartesian product of those sets (combination of sets where
         // we only pick one from each set)
         Set<List<Literal>> cartesianSet = Sets.cartesianProduct(subsets);
-        // Add each
+        // Add each if not null literal
         for (List<Literal> literals : cartesianSet) {
             LiteralSet newSet = new LiteralSet(precons);
-            newSet.addAll(literals);
+            for (Literal l : literals) {
+                if (!l.equals(Literal.NULL))
+                    newSet.add(l);
+            }
             bitCodes.add(newSet.getBitString());
         }
         return bitCodes;

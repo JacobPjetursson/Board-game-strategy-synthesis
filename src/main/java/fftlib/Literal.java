@@ -7,6 +7,9 @@ public class Literal {
     public int id;
     public boolean negated;
 
+    // used for cartesian product to allow the option of not picking any literal
+    public static Literal NULL = new Literal(0, false);
+
     public Literal(int id, boolean neg) {
         this.id = id;
         this.negated = neg;
@@ -58,7 +61,9 @@ public class Literal {
 
     @Override
     public int hashCode() {
-        return 31 * Objects.hash(id, negated);
+        if (negated)
+            return -id;
+        return id;
     }
 
     public String getName() {

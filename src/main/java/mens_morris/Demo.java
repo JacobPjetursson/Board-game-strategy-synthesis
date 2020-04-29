@@ -7,40 +7,40 @@ import static mens_morris.Logic.POS_NONBOARD;
 public class Demo {
 
     public static void main(String[] args) {
-        State s = new State();
+        Node n = new Node();
         Scanner scan = new Scanner(System.in);
         System.out.println("Input move as <row, col> for add/remove and <oldRow, oldCol, newRow, newCol> for move");
-        while (!Logic.gameOver(s)) {
+        while (!Logic.gameOver(n)) {
             System.out.println("State: ");
-            System.out.println(s);
+            System.out.println(n);
             System.out.println("Literals:");
-            System.out.println(s.getLiterals());
+            System.out.println(n.getState());
             System.out.println("Legal moves: ");
-            System.out.println(s.getLegalMoves());
-            System.out.println("Player " + s.getTurn() + ", please make your move");
+            System.out.println(n.getLegalMoves());
+            System.out.println("Player " + n.getTurn() + ", please make your move");
             try {
                 String[] pos = scan.nextLine().split(",");
                 Move move;
                 int row = Integer.parseInt(pos[0]);
                 int col = Integer.parseInt(pos[1]);
                 if (pos.length == 2) { // add/remove
-                    if (s.canRemove) {
-                        move = new Move(row, col, POS_NONBOARD, POS_NONBOARD, s.getTurn());
+                    if (n.canRemove) {
+                        move = new Move(row, col, POS_NONBOARD, POS_NONBOARD, n.getTurn());
                     } else {
-                        move = new Move(POS_NONBOARD, POS_NONBOARD, row, col, s.getTurn());
+                        move = new Move(POS_NONBOARD, POS_NONBOARD, row, col, n.getTurn());
                     }
                 } else {
                     int newRow = Integer.parseInt(pos[2]);
                     int newCol = Integer.parseInt(pos[3]);
-                    move = new Move(row, col, newRow, newCol, s.getTurn());
+                    move = new Move(row, col, newRow, newCol, n.getTurn());
                 }
-                s = s.getNextState(move);
+                n = n.getNextState(move);
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Incorrect format, please try again");
             }
         }
-        System.out.println("The winner is player " + Logic.getWinner(s));
+        System.out.println("The winner is player " + Logic.getWinner(n));
 
 /*
         Move m = new Move(PLAYER1, new Line(0, 1));

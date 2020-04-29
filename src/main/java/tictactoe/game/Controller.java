@@ -2,9 +2,7 @@ package tictactoe.game;
 
 import fftlib.FFT;
 import fftlib.FFTManager;
-import fftlib.game.FFTSolution;
 import fftlib.game.FFTSolver;
-import fftlib.game.StateMapping;
 import fftlib.gui.FFTInteractivePane;
 import fftlib.gui.FFTOverviewPane;
 import javafx.application.Platform;
@@ -17,12 +15,11 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import misc.Globals;
 import tictactoe.FFT.GameSpecifics;
-import tictactoe.FFT.InteractiveState;
+import tictactoe.FFT.InteractiveNode;
 import tictactoe.ai.AI;
 import tictactoe.ai.FFTFollower;
 import tictactoe.ai.PerfectPlayer;
 import tictactoe.gui.*;
-import tictactoe.gui.board.BoardTile;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -46,10 +43,10 @@ public class Controller {
     private CheckBox automaticFFTBox;
     private Thread aiThread;
     private NavPane navPane;
-    private tictactoe.game.State state;
+    private Node node;
     private PlayArea playArea;
     private boolean endGamePopup;
-    private ArrayList<StateAndMove> previousStates;
+    private ArrayList<NodeAndMove> previousStates;
     private Window window;
     private boolean fftAutomaticMode;
     private boolean fftUserInteraction;
@@ -58,19 +55,19 @@ public class Controller {
 
 
     public Controller(Stage primaryStage, int player1Instance, int player2Instance,
-                      State state) {
+                      Node node) {
         this.mode = setMode(player1Instance, player2Instance);
         this.player1Instance = player1Instance;
         this.player2Instance = player2Instance;
         this.turnNo = 0;
-        this.state = state;
+        this.node = node;
         this.primaryStage = primaryStage;
         this.endGamePopup = false;
         this.previousStates = new ArrayList<>();
 
         gameSpecifics = new GameSpecifics(this);
         FFTManager.initialize(gameSpecifics);
-        FFTSolver.solveGame(state);
+        FFTSolver.solveGame(node);
         // Autogenerate
         if (ENABLE_AUTOGEN)
             FFTManager.autogenFFT();
@@ -142,7 +139,7 @@ public class Controller {
         addRuleFFTButton.setOnAction(event -> {
             Scene scene = primaryStage.getScene();
             primaryStage.setScene(fftInteractivePane.getScene());
-            fftInteractivePane.update(this.state);
+            fftInteractivePane.update(this.node);
             fftInteractivePane.setPrevScene(scene);
         });
 
@@ -150,12 +147,12 @@ public class Controller {
         fftAutomaticMode = true;
         automaticFFTBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
             fftAutomaticMode = newValue;
-            if (fftAutomaticMode && (state.getTurn() == PLAYER2 && player2Instance == FFT) ||
-                    (state.getTurn() == PLAYER1 && player1Instance == FFT))
+            if (fftAutomaticMode && (node.getTurn() == PLAYER2 && player2Instance == FFT) ||
+                    (node.getTurn() == PLAYER1 && player1Instance == FFT))
                 doAITurn();
         });
 
-        if (mode == HUMAN_VS_AI && player1Instance != HUMAN && state.getTurn() == PLAYER1) {
+        if (mode == HUMAN_VS_AI && player1Instance != HUMAN && node.getTurn() == PLAYER1) {
             aiThread = new Thread(this::doAITurn);
             aiThread.setDaemon(true);
             aiThread.start();
@@ -196,17 +193,17 @@ public class Controller {
     // Is called when a tile is pressed by the user. If vs. the AI, it calls the doAITurn after. This function also highlights
     // the best pieces for the opponent, if it is human vs human.
     public void doHumanTurn(int row, int col) {
-        Move move = new Move(row, col, state.getTurn());
-        previousStates.add(new StateAndMove(state, move, turnNo));
-        state = state.getNextState(move);
+        Move move = new Move(row, col, node.getTurn());
+        previousStates.add(new NodeAndMove(node, move, turnNo));
+        node = node.getNextState(move);
         updatePostHumanTurn();
-        if (Logic.gameOver(state)) return;
-        if (state.getTurn() == move.team) {
-            String skipped = (state.getTurn() == PLAYER1) ? "Nought" : "Cross";
+        if (Logic.gameOver(node)) return;
+        if (node.getTurn() == move.team) {
+            String skipped = (node.getTurn() == PLAYER1) ? "Nought" : "Cross";
             System.out.println(skipped + "'s turn has been skipped!");
             playArea.getInfoPane().displaySkippedTurn(skipped);
-            if (player1Instance == FFT && state.getTurn() == PLAYER1 ||
-                    player2Instance == FFT && state.getTurn() == PLAYER2)
+            if (player1Instance == FFT && node.getTurn() == PLAYER1 ||
+                    player2Instance == FFT && node.getTurn() == PLAYER2)
                 doAITurn();
             else if (helpHumanBox.isSelected()) {
                 highlightHelp(true);
@@ -214,12 +211,12 @@ public class Controller {
             return;
         }
         // FFT vs AI
-        if (mode == AI_VS_AI && ((player1Instance == FFT && state.getTurn() == PLAYER2) ||
-                (player2Instance == FFT && state.getTurn() == PLAYER1))) {
+        if (mode == AI_VS_AI && ((player1Instance == FFT && node.getTurn() == PLAYER2) ||
+                (player2Instance == FFT && node.getTurn() == PLAYER1))) {
             startAIButton.fire();
         // Human vs. AI
-        } else if ((player2Instance != HUMAN && state.getTurn() == PLAYER2) ||
-                (player1Instance != HUMAN && state.getTurn() == PLAYER1)) {
+        } else if ((player2Instance != HUMAN && node.getTurn() == PLAYER2) ||
+                (player1Instance != HUMAN && node.getTurn() == PLAYER1)) {
             doAITurn();
         }
         // Human/FFT vs. Human
@@ -253,7 +250,7 @@ public class Controller {
 
         aiThread = new Thread(() -> {
             try {
-                while (!Logic.gameOver(state)) {
+                while (!Logic.gameOver(node)) {
                     doAITurn();
                     if (fftUserInteraction) {
                         stopAIButton.fire();
@@ -276,14 +273,14 @@ public class Controller {
     private void doAITurn() {
         fftUserInteraction = false;
         boolean makeDefaultMove = false;
-        int turn = state.getTurn();
+        int turn = node.getTurn();
         Move move;
         if (aiCross != null && turn == PLAYER1) {
-            move = aiCross.makeMove(state);
+            move = aiCross.makeMove(node);
             if (player1Instance == FFT && move == null)
                 makeDefaultMove = true;
         } else {
-            move = aiCircle.makeMove(state);
+            move = aiCircle.makeMove(node);
             if (player2Instance == FFT && move == null)
                 makeDefaultMove = true;
         }
@@ -299,11 +296,11 @@ public class Controller {
                 return;
             }
         }
-        state = state.getNextState(move);
+        node = node.getNextState(move);
         updatePostAITurn();
-        if (Logic.gameOver(state)) return;
+        if (Logic.gameOver(node)) return;
         if (mode == HUMAN_VS_AI) {
-            if (turn == state.getTurn()) {
+            if (turn == node.getTurn()) {
                 String skipped = (turn == PLAYER1) ? "Nought" : "Cross";
                 System.out.println(skipped + "'s turn has been skipped!");
                 playArea.getInfoPane().displaySkippedTurn(skipped);
@@ -311,15 +308,17 @@ public class Controller {
             } else if (helpHumanBox.isSelected()) {
                 highlightHelp(true);
             }
-        } else if (((state.getTurn() == PLAYER1 && player1Instance == FFT) ||
-                (state.getTurn() == PLAYER2 && player2Instance == FFT)) &&
+        } else if (((node.getTurn() == PLAYER1 && player1Instance == FFT) ||
+                (node.getTurn() == PLAYER2 && player2Instance == FFT)) &&
                 helpHumanBox.isSelected()) {
             highlightHelp(true);
         }
     }
 
+    // TODO
     private void highlightHelp(boolean highlight) {
-        State n = new State(state);
+        /*
+        Node n = new Node(state);
         Move fftChosenMove = null;
         ArrayList<Move> moves = Logic.legalMoves(state.getTurn(), state);
         if (highlight) {
@@ -336,7 +335,7 @@ public class Controller {
                     continue;
                 for (Move m : moves) {
                     if (m.col == aTile.getCol() && m.row == aTile.getRow()) {
-                        State next = n.getNextState(m);
+                        Node next = n.getNextState(m);
                         StateMapping sm = FFTSolution.queryState(next);
                         if (sm == null) {
                             if (Logic.getWinner(next) == n.getTurn())
@@ -358,6 +357,8 @@ public class Controller {
                 if (fftChosenMove != null && fftChosenMove.col == aTile.getCol() && fftChosenMove.row == aTile.getRow())
                     aTile.setFFTChosen();
             }
+
+
         }
 
         // Turns to terminal
@@ -371,35 +372,39 @@ public class Controller {
             }
             tiles[m.row][m.col].setTurnsToTerminal(turns);
         }
+
+         */
     }
 
+    // TODO
     private ArrayList<String> getScores(ArrayList<Move> moves) {
         ArrayList<String> turnsToTerminalList = new ArrayList<>();
         for (Move m : moves) {
-            State s = new State(state).getNextState(m);
-            if (Logic.gameOver(s)) {
+            Node n = new Node(node).getNextState(m);
+            if (Logic.gameOver(n)) {
                 turnsToTerminalList.add("0");
-            } else
-                turnsToTerminalList.add(FFTSolution.turnsToTerminal(state.getTurn(), s));
+            } else {
+                //turnsToTerminalList.add(FFTSolution.turnsToTerminal(state.getTurn(), s));
+            }
         }
         return turnsToTerminalList;
     }
 
     private Move getDefaultFFTMove() {
         Random r = new Random();
-        int moveSize = state.getLegalMoves().size();
+        int moveSize = node.getLegalMoves().size();
         int index = r.nextInt(moveSize);
-        return state.getLegalMoves().get(index);
+        return node.getLegalMoves().get(index);
     }
 
     // Checks if the game is over and shows a popup. Popup allows a restart, go to menu, or review game
     private void checkGameOver() {
-        if (Logic.gameOver(state) && !endGamePopup) {
+        if (Logic.gameOver(node) && !endGamePopup) {
             endGamePopup = true;
             Stage newStage = new Stage();
-            int winner = Logic.getWinner(state);
-            if (player1Instance == HUMAN) state.setTurn(PLAYER1);
-            else if (player2Instance == HUMAN) state.setTurn(PLAYER2);
+            int winner = Logic.getWinner(node);
+            if (player1Instance == HUMAN) node.setTurn(PLAYER1);
+            else if (player2Instance == HUMAN) node.setTurn(PLAYER2);
 
             newStage.setScene(new Scene(new EndGamePane(primaryStage, winner,
                     this), 500, 300));
@@ -410,8 +415,8 @@ public class Controller {
         }
     }
 
-    public State getState() {
-        return state;
+    public Node getNode() {
+        return node;
     }
 
     public int getPlayerInstance(int team) {
@@ -463,16 +468,16 @@ public class Controller {
         return fftUserInteraction;
     }
 
-    public ArrayList<StateAndMove> getPreviousStates() {
+    public ArrayList<NodeAndMove> getPreviousStates() {
         return previousStates;
     }
 
-    public void setPreviousStates(ArrayList<StateAndMove> stateAndMoves) {
-        this.previousStates = stateAndMoves;
+    public void setPreviousStates(ArrayList<NodeAndMove> nodeAndMoves) {
+        this.previousStates = nodeAndMoves;
     }
 
-    public InteractiveState getInteractiveState() {
-        return gameSpecifics.interactiveState;
+    public InteractiveNode getInteractiveNode() {
+        return gameSpecifics.interactiveNode;
     }
 
     public PlayArea getPlayArea() {

@@ -4,23 +4,21 @@ import fftlib.Action;
 import fftlib.Literal;
 import fftlib.auxiliary.Position;
 import fftlib.Rule;
-import fftlib.game.FFTState;
+import fftlib.game.FFTNode;
 import fftlib.game.LiteralSet;
-import fftlib.gui.InteractiveFFTState;
-import javafx.scene.Node;
+import fftlib.gui.interactiveFFTNode;
 import tictactoe.game.Controller;
 import tictactoe.game.Move;
-import tictactoe.game.State;
+import tictactoe.game.Node;
 import tictactoe.gui.board.BoardTile;
 import tictactoe.gui.board.PlayBox.InteractivePlayBox;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import static misc.Globals.*;
 import static tictactoe.gui.board.BoardTile.blueStr;
 
-public class InteractiveState implements InteractiveFFTState {
+public class InteractiveNode implements interactiveFFTNode {
     private Controller cont;
     private InteractivePlayBox pb;
     private Rule rule;
@@ -29,24 +27,24 @@ public class InteractiveState implements InteractiveFFTState {
     private Move move;
     private BoardTile actionTile;
 
-    InteractiveState(Controller cont) {
+    InteractiveNode(Controller cont) {
         this.cont = cont;
         this.rule = new Rule();
         this.tilesize = 60;
     }
     @Override
-    public Node getInteractiveNode(FFTState fftState) {
-        State s = (State) fftState;
-        this.perspective = s.getTurn();
-        this.rule = getRuleFromState(s);
+    public javafx.scene.Node getInteractiveNode(FFTNode fftNode) {
+        Node n = (Node) fftNode;
+        this.perspective = n.getTurn();
+        this.rule = getRuleFromState(n);
 
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
-        pb.update(s);
+        pb.update(n);
         return pb;
     }
 
     @Override
-    public Node getInteractiveNode(Rule r) {
+    public javafx.scene.Node getInteractiveNode(Rule r) {
         this.rule = new Rule(r);
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
         this.move = (Move) r.getAction().getMove();
@@ -99,9 +97,9 @@ public class InteractiveState implements InteractiveFFTState {
         actionTile.setAction(true);
         pb.update(rule);
     }
-    private Rule getRuleFromState(State s) {
+    private Rule getRuleFromState(Node n) {
         Rule r = new Rule();
-        LiteralSet literals = s.getLiterals();
+        LiteralSet literals = n.getState().getLiterals();
         ArrayList<Literal> literalList = new ArrayList<>(literals);
         // TODO - Only take boardplacement?
         LiteralSet lits = new LiteralSet(literalList);

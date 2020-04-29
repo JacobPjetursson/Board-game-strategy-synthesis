@@ -1,12 +1,12 @@
 package kulibrat.game;
 
-public class StateAndMove {
-    private State state;
+public class NodeAndMove {
+    private Node node;
     private Move move;
     private int turnNo;
 
-    public StateAndMove(State state, Move move, int turnNo) {
-        this.state = state;
+    public NodeAndMove(Node node, Move move, int turnNo) {
+        this.node = node;
         this.move = move;
         this.turnNo = turnNo;
     }
@@ -19,7 +19,7 @@ public class StateAndMove {
         return move;
     }
 
-    public State getState() {
-        return state;
+    public Node getNode() {
+        return node;
     }
 }

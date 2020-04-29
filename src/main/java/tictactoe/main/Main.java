@@ -7,7 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import misc.Globals;
 import tictactoe.FFT.GameSpecifics;
-import tictactoe.game.State;
+import tictactoe.game.Node;
 import tictactoe.gui.menu.MenuPane;
 
 import static misc.Config.TIC_TAC_TOE_SHOW_GUI;
@@ -21,7 +21,7 @@ public class Main extends Application {
         else {
             GameSpecifics specs = new GameSpecifics();
             FFTManager.initialize(specs);
-            FFTSolver.solveGame(new State());
+            FFTSolver.solveGame(new Node());
             FFTManager.autogenFFT();
         }
     }

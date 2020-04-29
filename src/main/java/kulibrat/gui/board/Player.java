@@ -2,7 +2,6 @@ package kulibrat.gui.board;
 
 
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -11,7 +10,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import kulibrat.game.Controller;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -94,8 +93,8 @@ public class Player extends VBox {
 
     }
 
-    public void update(Controller cont, State state) {
-        if (gridPaneBoard.getChildren().size() > state.getUnplaced(team)) {
+    public void update(Controller cont, Node node) {
+        if (gridPaneBoard.getChildren().size() > node.getUnplaced(team)) {
             if (cont.getSelected() != null) { //Human turn
                 BoardPiece bp = cont.getSelected();
                 pieces.remove(bp);
@@ -106,11 +105,11 @@ public class Player extends VBox {
                 pieces.remove(bp);
                 gridPaneBoard.getChildren().remove(parent);
             }
-        } else if (gridPaneBoard.getChildren().size() < state.getUnplaced(team)) {
+        } else if (gridPaneBoard.getChildren().size() < node.getUnplaced(team)) {
             for (int i = 0; i < 4; i++) {
                 boolean occupied = false;
-                for (Node node : gridPaneBoard.getChildren()) {
-                    if (GridPane.getColumnIndex(node) == i) {
+                for (javafx.scene.Node n : gridPaneBoard.getChildren()) {
+                    if (GridPane.getColumnIndex(n) == i) {
                         occupied = true;
                         break;
                     }

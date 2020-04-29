@@ -23,7 +23,6 @@ import kulibrat.misc.Database;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import static misc.Globals.*;
 
@@ -59,9 +58,9 @@ public class ReviewPane extends VBox {
                     e.printStackTrace();
                 }
             }
-            if (Logic.gameOver(currCont.getState())) {
+            if (Logic.gameOver(currCont.getNode())) {
                 Stage newStage = new Stage();
-                newStage.setScene(new Scene(new EndGamePane(primaryStage, Logic.getWinner(currCont.getState()),
+                newStage.setScene(new Scene(new EndGamePane(primaryStage, Logic.getWinner(currCont.getNode()),
                         currCont), 500, 300));
                 newStage.initModality(Modality.APPLICATION_MODAL);
                 newStage.initOwner(currCont.getWindow());
@@ -73,12 +72,12 @@ public class ReviewPane extends VBox {
         lw = new ListView<>();
         lw.setPickOnBounds(false);
         ObservableList<HBox> prevStateBoxes = FXCollections.observableArrayList();
-        for (StateAndMove ps : currCont.getPreviousStates()) {
+        for (NodeAndMove ps : currCont.getPreviousNodes()) {
             HBox h = new HBox(35);
             VBox vBox = new VBox(18);
             vBox.setAlignment(Pos.CENTER);
             vBox.setFillWidth(true);
-            State n = new State(ps.getState());
+            Node n = new Node(ps.getNode());
             ArrayList<Move> bestMoves = (ArrayList<Move>) Database.bestMoves(n);
             PlayBox playBox = getPlayBox(currCont, ps, bestMoves);
             Label turnL = new Label("Turns Played: " + (ps.getTurnNo()));
@@ -105,12 +104,12 @@ public class ReviewPane extends VBox {
             performance.setFont(Font.font("Verdana", 18));
             vBox.getChildren().add(performance);
 
-            State nextState = n.getNextState(ps.getMove());
+            Node nextState = n.getNextNode(ps.getMove());
             String scoreStr;
             if (Logic.gameOver(nextState)) {
                 scoreStr = "0";
             } else {
-                scoreStr = Database.turnsToTerminal(currCont.getState().getTurn(), nextState);
+                scoreStr = Database.turnsToTerminal(currCont.getNode().getTurn(), nextState);
             }
             int score;
             if (scoreStr.equals("∞")) score = 0;
@@ -133,30 +132,30 @@ public class ReviewPane extends VBox {
             stage.close();
 
             int index = lw.getSelectionModel().getSelectedIndex();
-            StateAndMove selected = currCont.getPreviousStates().get(index);
+            NodeAndMove selected = currCont.getPreviousNodes().get(index);
             Controller selectedCont = new Controller(primaryStage, currCont.getPlayerInstance(PLAYER1),
-                    currCont.getPlayerInstance(PLAYER2), selected.getState(),
+                    currCont.getPlayerInstance(PLAYER2), selected.getNode(),
                     currCont.getTime(PLAYER1), currCont.getTime(PLAYER2), false);
             selectedCont.setTurnNo(selected.getTurnNo());
             selectedCont.getPlayArea().update(selectedCont);
 
-            ArrayList<StateAndMove> stateAndMoves = new ArrayList<>();
-            for (StateAndMove ps : currCont.getPreviousStates()) {
+            ArrayList<NodeAndMove> nodeAndMoves = new ArrayList<>();
+            for (NodeAndMove ps : currCont.getPreviousNodes()) {
                 if (ps.getTurnNo() < selectedCont.getTurnNo()) {
-                    stateAndMoves.add(ps);
+                    nodeAndMoves.add(ps);
                 }
             }
-            selectedCont.setPreviousStates(stateAndMoves);
+            selectedCont.setPreviousNodes(nodeAndMoves);
         });
         setVgrow(lw, Priority.ALWAYS);
 
         getChildren().addAll(lw, bottomBox);
     }
 
-    private PlayBox getPlayBox(Controller cont, StateAndMove ps, ArrayList<Move> bestMoves) {
+    private PlayBox getPlayBox(Controller cont, NodeAndMove ps, ArrayList<Move> bestMoves) {
 
         PlayBox pb = new PlayBox(50, CLICK_DISABLED, cont);
-        pb.update(ps.getState());
+        pb.update(ps.getNode());
 
         pb.addArrow(ps.getMove(), Color.BLUE);
         for (Move m : bestMoves) {

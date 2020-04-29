@@ -3,7 +3,7 @@ package kulibrat.FFT;
 import fftlib.FFT_Follower;
 import kulibrat.ai.AI;
 import kulibrat.game.Move;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 
 // FIXME - dirty workaround
 public class FFTFollower extends AI {
@@ -15,7 +15,7 @@ public class FFTFollower extends AI {
     }
 
     @Override
-    public Move makeMove(State state) {
-        return (Move) fftFollower.makeMove(state);
+    public Move makeMove(Node node) {
+        return (Move) fftFollower.makeMove(node);
     }
 }

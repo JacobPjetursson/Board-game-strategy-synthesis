@@ -4,11 +4,9 @@ import javafx.stage.Stage;
 import kulibrat.misc.Database;
 
 public class OverwriteDBDialog extends ConfirmDialog {
-    boolean fft;
 
     public OverwriteDBDialog(String labelText) {
         super(labelText);
-
     }
 
     @Override

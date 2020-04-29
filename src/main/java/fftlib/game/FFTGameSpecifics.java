@@ -2,49 +2,39 @@ package fftlib.game;
 
 import fftlib.*;
 import fftlib.auxiliary.Position;
-import fftlib.gui.FFTFailState;
-import fftlib.gui.InteractiveFFTState;
+import fftlib.gui.FFTFailNode;
+import fftlib.gui.interactiveFFTNode;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
 public interface FFTGameSpecifics {
 
-    FFTMove actionToMove(Action a);
+    String getFFTFilePath(); // Misc
 
-    Action moveToAction(FFTMove m);
+    int[] getBoardDim(); // Domain specific
+    FFTLogic getLogic(); // Domain specific
+    FFTNode getInitialNode(); // Domain specific
+    HashSet<SymmetryRule> getSymmetryRules(Rule rule); // Domain specific
+    int getMaxStateLiterals(); // Domain specific
 
-    Rule gdlToRule(String precons, String action);
+    FFTMove actionToMove(Action a); // Interface
+    Action moveToAction(FFTMove m); // Interface
+    State nodeToState(FFTNode n); // Interface
+    Rule gdlToRule(String precons, String action); // Interface
 
-    String getFFTFilePath();
+    String[] getPlayerNames(); // Visual
+    FFTFailNode getFailNode(); // Visual
+    interactiveFFTNode getInteractiveNode(); // Visual
 
-    int[] getBoardDim(); // row, col
+    ArrayList<Integer> getGameAtoms(); // Logic
+    String getAtomName(int atom); // Logic
+    int getAtomId(String name); // Logic
+    int posToId(Position pos); // Logic
+    Position idToPos(int id); // Logic
+    LiteralSet getActionPreconditions(Action action); // Logic
 
-    String[] getPlayerNames(); // VISUAL
 
-    FFTState getInitialState();
-
-    FFTLogic getLogic();
-
-    ArrayList<Integer> getGameAtoms();
-
-    String getAtomName(int atom);
-
-    int getAtomId(String name);
-
-    FFTFailState getFailState(); // VISUAL
-
-    InteractiveFFTState getInteractiveState(); // VISUAL
-
-    HashSet<SymmetryRule> getSymmetryRules(Rule rule);
-
-    int posToId(Position pos);
-
-    Position idToPos(int id);
-
-    LiteralSet getActionPreconditions(Action action);
-
-    int getMaxStateLiterals();
 
     /** Similar to getNumberOfCoveredStates, this function uses domain-specifc
      * knowledge to find the covered states given a rule with free preconditions.

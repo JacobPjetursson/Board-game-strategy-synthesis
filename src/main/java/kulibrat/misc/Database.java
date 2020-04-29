@@ -3,11 +3,10 @@
 
 package kulibrat.misc;
 
-import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTSolution;
-import fftlib.game.FFTState;
-import fftlib.game.StateMapping;
+import fftlib.game.FFTNode;
+import fftlib.game.NodeMapping;
 import javafx.event.Event;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
@@ -15,7 +14,7 @@ import javafx.stage.Stage;
 import kulibrat.ai.Minimax.LookupTableMinimax;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 import kulibrat.gui.Dialogs.OverwriteDBDialog;
 import misc.Config;
 import misc.Globals;
@@ -25,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 
 
@@ -44,7 +42,7 @@ public class Database extends FFTSolution {
         System.out.println("Connection successful");
 
         String tableName = "plays_" + Globals.SCORELIMIT;
-        long key = new State(new State()).getZobristKey();
+        long key = new Node(new Node()).getZobristKey();
         boolean error = false;
         // Try query to check for table existance
         try {
@@ -90,23 +88,23 @@ public class Database extends FFTSolution {
 
     // Outputs a list of the best plays from a given node. Checks through the children of a node to find the ones
     // which have the least amount of turns to terminal for win, or most for loss.
-    public static ArrayList<Move> bestMoves(State n) {
+    public static ArrayList<Move> bestMoves(Node n) {
         ArrayList<Move> bestMoves = new ArrayList<>();
         if (Logic.gameOver(n))
             return bestMoves;
-        StateMapping mapping = queryState(n);
+        NodeMapping mapping = queryState(n);
         int bestScore = 0;
-        if (!Logic.gameOver((State)n.getNextState(mapping.getMove()))) {
-            bestScore = queryState((State)n.getNextState(mapping.getMove())).getScore();
+        if (!Logic.gameOver((Node)n.getNextNode(mapping.getMove()))) {
+            bestScore = queryState((Node)n.getNextNode(mapping.getMove())).getScore();
         }
-        for (FFTState child : n.getChildren()) {
+        for (FFTNode child : n.getChildren()) {
             FFTMove m = child.getMove();
 
-            FFTState state = n.getNextState(m);
-            if (Logic.gameOver((State)state)) {
-                if (Logic.getWinner((State)state) == m.getTeam())
+            FFTNode node = n.getNextNode(m);
+            if (Logic.gameOver((Node)node)) {
+                if (Logic.getWinner((Node)node) == m.getTeam())
                     bestMoves.add((Move)m);
-            } else if (queryState((State)child).getScore() == bestScore) {
+            } else if (queryState((Node)child).getScore() == bestScore) {
                 bestMoves.add((Move)m);
             }
         }
@@ -114,12 +112,14 @@ public class Database extends FFTSolution {
     }
 
     // Fetches the best play corresponding to the input node
-    public static StateMapping queryState(State n) {
-        HashMap<State, StateMapping> table = (HashMap<State, StateMapping>) FFTSolution.getLookupTable();
+    public static NodeMapping queryState(Node n) {
+        // todo
+        //HashMap<Node, StateMapping> table = (HashMap<Node, StateMapping>) FFTSolution.getLookupTable();
+        HashMap<Node, NodeMapping> table = null;
         if (table != null && !table.isEmpty())
             return table.get(n);
 
-        StateMapping play = null;
+        NodeMapping play = null;
         String tableName = "plays_" + Globals.SCORELIMIT;
         Long key = n.getZobristKey();
         try {
@@ -130,7 +130,7 @@ public class Database extends FFTSolution {
                 Move move = new Move(resultSet.getInt(1), resultSet.getInt(2),
                         resultSet.getInt(3), resultSet.getInt(4), resultSet.getInt(5));
                 int score = resultSet.getInt(6);
-                play = new StateMapping(move, score, 0);
+                play = new NodeMapping(move, score, 0);
             }
             statement.close();
         } catch (SQLException e) {
@@ -143,7 +143,7 @@ public class Database extends FFTSolution {
     }
 
     // Outputs a string which is the amount of turns to a terminal node, based on a score from the database entry
-    public static String turnsToTerminal(int turn, State n) {
+    public static String turnsToTerminal(int turn, Node n) {
         int score = queryState(n).score;
         if (score == 0) {
             return "∞";
@@ -165,6 +165,7 @@ public class Database extends FFTSolution {
 
     // Opens the overwrite pane for DB
     private static void showOverwritePane() {
+        /*
         Stage newStage = new Stage();
         String labelText = "The DB Table for this score limit has not been built.\n" +
                 "       Do you want to build it? It will take a while";
@@ -172,9 +173,11 @@ public class Database extends FFTSolution {
         newStage.initModality(Modality.APPLICATION_MODAL);
         newStage.setOnCloseRequest(Event::consume);
         newStage.show();
+
+         */
     }
 
-    public static void fillLookupTable(HashMap<Long, StateMapping> lookupTable) throws SQLException {
+    public static void fillLookupTable(HashMap<Long, NodeMapping> lookupTable) throws SQLException {
         System.out.println("Inserting data into table. This will take some time");
         String tableName = "plays_" + Globals.SCORELIMIT;
         long startTime = System.currentTimeMillis();
@@ -183,9 +186,9 @@ public class Database extends FFTSolution {
         final int batchSize = 1000;
         int count = 0;
         PreparedStatement stmt = dbConnection.prepareStatement("insert into " + tableName + " values (?, ?, ?, ?, ?, ?, ?)");
-        for (Map.Entry<Long, StateMapping> entry : lookupTable.entrySet()) {
+        for (Map.Entry<Long, NodeMapping> entry : lookupTable.entrySet()) {
             Long key = entry.getKey();
-            StateMapping value = entry.getValue();
+            NodeMapping value = entry.getValue();
             Move move = (Move) value.getMove();
             stmt.setLong(1, key);
             stmt.setInt(2, move.oldRow);
@@ -222,10 +225,10 @@ public class Database extends FFTSolution {
 
     // Builds the DB
     public static void buildLookupDB() {
-        State state = new State();
+        Node node = new Node();
         createLookupTable();
         try {
-            fillLookupTable(LookupTableMinimax.solveGame(state));
+            fillLookupTable(LookupTableMinimax.solveGame(node));
         } catch (SQLException e) {
             e.printStackTrace();
         }

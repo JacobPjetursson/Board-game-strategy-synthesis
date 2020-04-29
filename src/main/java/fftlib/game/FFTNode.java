@@ -1,77 +1,29 @@
 package fftlib.game;
 
-import fftlib.Action;
-import fftlib.Literal;
+import fftlib.FFTManager;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 
-// TODO - rename this to FFTState and rename FFTState to FFTNode
-public class FFTNode {
-    private LiteralSet literals;
-    private HashSet<FFTNode> reachableParents;
-    private boolean reachable;
-    private long bitString; // id
+public abstract class FFTNode {
+    public int turn;
 
-    // standard constructor
-    public FFTNode(LiteralSet literals) {
-        this.literals = new LiteralSet(literals);
-        bitString = initializeBitString();
+    public int getTurn() {
+        return turn;
     }
 
-    // duplicate constructor
-    public FFTNode(FFTNode dup) {
-        this.literals = new LiteralSet(dup.literals);
-        this.reachableParents = new HashSet<>(dup.reachableParents);
-        this.bitString = dup.bitString;
-        this.reachable = dup.reachable;
+    public State getState() {
+        return FFTManager.nodeToState.apply(this);
     }
 
-    public FFTNode getNextNode(Action action) {
-        FFTNode nextNode = new FFTNode(this);
-        nextNode.literals.addAll(action.adds);
-        nextNode.literals.removeAll(action.rems);
-        return nextNode;
+    public abstract ArrayList<? extends FFTMove> getLegalMoves();
 
-    }
+    public abstract ArrayList<? extends FFTNode> getChildren();
 
-    public void addReachableParent(FFTNode parent) {
-        if (reachableParents == null) {
-            reachableParents = new HashSet<>();
-        }
-        reachableParents.add(parent);
-        reachable = true;
-    }
+    public abstract FFTNode getNextNode(FFTMove move);
 
-    public void removeReachableParent(FFTNode parent) {
-        reachableParents.remove(parent);
-        if (reachableParents.isEmpty())
-            reachable = false;
-    }
-
-    public HashSet<FFTNode> getReachableParents() {
-        return reachableParents;
-    }
-
-    public long initializeBitString() {
-        long bs = 0;
-        for (Literal l : literals) {
-            if (l.negated)
-                continue;
-            bs |= (1 << l.id);
-        }
-        return bs;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FFTNode fftNode = (FFTNode) o;
-        return bitString == fftNode.bitString;
-    }
-
-    @Override
-    public int hashCode() {
-        return (int) bitString;
-    }
+    /**
+     *
+     * @return The move used by the parent to expand into this node
+     */
+    public abstract FFTMove getMove();
 }

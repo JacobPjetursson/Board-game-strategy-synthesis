@@ -2,7 +2,7 @@ package sim;
 
 import fftlib.game.FFTLogic;
 import fftlib.game.FFTMove;
-import fftlib.game.FFTState;
+import fftlib.game.FFTNode;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -15,21 +15,21 @@ import static sim.Line.NO_COLOR;
 public class Logic implements FFTLogic {
 
     // Outputs a list of legal moves from a state
-    static ArrayList<Move> legalMoves(int team, State state) {
+    static ArrayList<Move> legalMoves(int team, Node node) {
         ArrayList<Move> moves = new ArrayList<>();
-        for (Line line : state.lines) {
+        for (Line line : node.lines) {
             if (line.color == NO_COLOR)
                 moves.add(new Move(team, line));
         }
         return moves;
     }
 
-    public static boolean gameOver(State state) {
+    public static boolean gameOver(Node node) {
         // SMALLER STATESPACE FOR DEBUGGING
         if (SIM_SIMPLE_RULES) {
             int p1_count = 0;
             int p2_count = 0;
-            for (Line l : state.lines) {
+            for (Line l : node.lines) {
                 if (l.color == PLAYER1)
                     p1_count++;
                 else if (l.color == PLAYER2)
@@ -40,11 +40,11 @@ public class Logic implements FFTLogic {
         }
 
 
-        for (Line l : state.lines) {
+        for (Line l : node.lines) {
             if (l.color == Line.NO_COLOR)
                 continue;
-            ArrayList<Integer> n1Set = getLinesFromNode(state.lines, l, l.n1);
-            ArrayList<Integer> n2Set = getLinesFromNode(state.lines, l, l.n2);
+            ArrayList<Integer> n1Set = getLinesFromNode(node.lines, l, l.n1);
+            ArrayList<Integer> n2Set = getLinesFromNode(node.lines, l, l.n2);
             for (int n : n1Set)
                 if (n2Set.contains(n))
                     return true;
@@ -68,42 +68,42 @@ public class Logic implements FFTLogic {
     }
 
     // Finds the winner, granted that the game is over
-    public static int getWinner(State state) {
-        if (gameOver(state)) {
-            return state.getMove().team == PLAYER1 ? PLAYER2 : PLAYER1;
+    public static int getWinner(Node node) {
+        if (gameOver(node)) {
+            return node.getMove().team == PLAYER1 ? PLAYER2 : PLAYER1;
         }
         return 0;
     }
 
-    static void doTurn(Move m, State state) {
-        if (m.team != state.getTurn()) {
+    static void doTurn(Move m, Node node) {
+        if (m.team != node.getTurn()) {
             System.out.println("Not your turn");
             return;
         }
 
-        for (Line l : state.lines)
+        for (Line l : node.lines)
             if (l.samePos(m.line)) {
                 l.color = m.team;
                 break;
             }
 
         // Change turn
-        if (state.getTurn() == PLAYER1)
-            state.setTurn(PLAYER2);
+        if (node.getTurn() == PLAYER1)
+            node.setTurn(PLAYER2);
         else
-            state.setTurn(PLAYER1);
+            node.setTurn(PLAYER1);
     }
 
-    public boolean gameOver(FFTState state) {
-        return gameOver((State) state);
+    public boolean gameOver(FFTNode node) {
+        return gameOver((Node) node);
     }
 
-    public int getWinner(FFTState state) {
-        return getWinner((State) state);
+    public int getWinner(FFTNode node) {
+        return getWinner((Node) node);
     }
 
-    public boolean isLegalMove(FFTState state, FFTMove move) {
+    public boolean isLegalMove(FFTNode node, FFTMove move) {
         Move m = (Move) move;
-        return legalMoves(move.getTeam(), (State) state).contains(m);
+        return legalMoves(move.getTeam(), (Node) node).contains(m);
     }
 }

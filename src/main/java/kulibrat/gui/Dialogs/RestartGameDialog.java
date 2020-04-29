@@ -3,7 +3,7 @@ package kulibrat.gui.Dialogs;
 
 import javafx.stage.Stage;
 import kulibrat.game.Controller;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
@@ -25,6 +25,6 @@ public class RestartGameDialog extends ConfirmDialog {
         Stage stage = (Stage) getScene().getWindow();
         stage.close();
         new Controller(primaryStage, cont.getPlayerInstance(PLAYER1),
-                cont.getPlayerInstance(PLAYER2), new State(), cont.getTime(PLAYER1), cont.getTime(PLAYER2), cont.getOverwriteDB());
+                cont.getPlayerInstance(PLAYER2), new Node(), cont.getTime(PLAYER1), cont.getTime(PLAYER2), cont.getOverwriteDB());
     }
 }

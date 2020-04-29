@@ -1,9 +1,8 @@
 package tictactoe.ai;
 
-import fftlib.game.FFTSolution;
-import fftlib.game.StateMapping;
+import fftlib.game.NodeMapping;
 import tictactoe.game.Move;
-import tictactoe.game.State;
+import tictactoe.game.Node;
 
 import static misc.Globals.PLAYER2;
 
@@ -15,14 +14,16 @@ public class PerfectPlayer implements AI {
     }
     // This function fetches the best move from the DB, if it exists
     @Override
-    public Move makeMove(State state) {
+    public Move makeMove(Node node) {
         String teamstr = (team == PLAYER2) ? "Nought" : "Cross";
         System.out.println("Finding best play for " + teamstr);
-        if (state.getLegalMoves().size() == 1) {
-            return state.getLegalMoves().get(0);
+        if (node.getLegalMoves().size() == 1) {
+            return node.getLegalMoves().get(0);
         }
         // table lookup
-        StateMapping mapping = FFTSolution.queryState(state);
+        //NodeMapping mapping = FFTSolution.queryState(node);
+        // todo
+        NodeMapping mapping = null;
 
         return (Move)mapping.move;
     }

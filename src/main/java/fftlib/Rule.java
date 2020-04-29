@@ -1,8 +1,7 @@
 package fftlib;
 
 import fftlib.GGPAutogen.GGPManager;
-import fftlib.game.FFTMove;
-import fftlib.game.FFTState;
+import fftlib.game.State;
 import fftlib.game.LiteralSet;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
@@ -246,28 +245,28 @@ public class Rule {
         return FFTManager.getSymmetryRules.apply(this);
     }
 
-    public FFTMove apply(FFTState state) {
-        LiteralSet stLiterals = state.getAllLiterals();
-        FFTMove m = match(this, stLiterals);
-        if (m != null || !SYMMETRY_DETECTION) {
-            return m;
+    public Action apply(State state) {
+        LiteralSet stLiterals = state.getLiterals();
+        Action a = match(this, stLiterals);
+        if (a != null || !SYMMETRY_DETECTION) {
+            return a;
         }
         for (Rule rule : symmetryRules) {
-            m = match(rule, stLiterals);
+            a = match(rule, stLiterals);
             // returns the first symmetry with a legal move
             // We want to ensure that rule is optimal in all symmetric states, but since all these will be explored
             // by the algorithm, we are good. This is the case since we always start with checking the default state
             // (no applied symmetries), meaning every symmetric states will inevitably be checked.
             // Alternative is to check that all non-null moves here are legal.
             // TODO - check which method is fastest
-            if (m != null) {
-                return m;
+            if (a != null) {
+                return a;
             }
         }
         return null;
     }
 
-    private FFTMove match(Rule rule, LiteralSet stLiterals) {
+    private Action match(Rule rule, LiteralSet stLiterals) {
         boolean match = true;
         for (Literal l : rule.preconditions) {
             match = matchLiteral(l, stLiterals);
@@ -276,7 +275,7 @@ public class Rule {
 
         }
         if (match && rule.action.isLegal(stLiterals))
-            return rule.action.getMove();
+            return rule.action;
 
         return null;
     }
@@ -306,9 +305,10 @@ public class Rule {
 
     private boolean matchLiteral(Literal l, LiteralSet stLiterals) {
         if (l.negated) {
-            Literal temp = new Literal(l);
-            temp.negated = false;
-            return !stLiterals.contains(temp);
+            l.setNegated(false);
+            boolean match = !stLiterals.contains(l);
+            l.setNegated(true);
+            return match;
         }
         return stLiterals.contains(l);
     }

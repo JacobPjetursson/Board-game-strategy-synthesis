@@ -1,11 +1,9 @@
 package fftlib;
 
 import fftlib.game.FFTMove;
-import fftlib.game.FFTState;
 import fftlib.game.LiteralSet;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Objects;
 
 
@@ -73,7 +71,14 @@ public class Action {
 
     public boolean isLegal(LiteralSet stateLiterals)  {
         for (Literal l : getPreconditions()) {
-            if (!stateLiterals.contains(l)) {
+            if (l.negated) {
+                l.setNegated(false);
+                boolean legal = !stateLiterals.contains(l);
+                l.setNegated(true);
+                if (!legal)
+                    return false;
+            }
+            else if (!stateLiterals.contains(l)) {
                 return false;
             }
         }

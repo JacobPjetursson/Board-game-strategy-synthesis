@@ -4,7 +4,7 @@ import kulibrat.ai.AI;
 import kulibrat.ai.Minimax.Minimax;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,20 +19,20 @@ public class MCTS extends AI {
     private int minimaxDepth = 2;
     private Minimax minimax;
     private int simulationDepth = 0;
-    private Node curr_node; // used to keep track of the current game state/node, to save the statistics
+    private kulibrat.ai.MCTS.Node curr_node; // used to keep track of the current game state/node, to save the statistics
 
-    public MCTS(State startState, int team, int calculationTime) {
+    public MCTS(Node startState, int team, int calculationTime) {
         super(team);
         this.calculationTime = calculationTime;
         minimax = new Minimax(team, calculationTime);
         minimax.setUseTranspo(false);
-        curr_node = new Node(startState);
+        curr_node = new kulibrat.ai.MCTS.Node(startState);
     }
 
     // Main function for MCTS, which consist of all four steps in the algorithm.
-    private void run(Node startNode) {
-        Node sim_node = startNode;
-        Node terminalNode = null;
+    private void run(kulibrat.ai.MCTS.Node startNode) {
+        kulibrat.ai.MCTS.Node sim_node = startNode;
+        kulibrat.ai.MCTS.Node terminalNode = null;
         int winner = 0; // 1 is red, 2 is black
         boolean playOut = false;
         sim_node.incrementPlays();
@@ -60,8 +60,8 @@ public class MCTS extends AI {
                 if (useMinimax) {
                     // Shallow minimax search as rollout
                     minimax.setTeam(sim_node.getState().getTurn());
-                    State state = new State(sim_node.getState());
-                    Move move = (Move)minimax.minimax(state, minimaxDepth, Integer.MIN_VALUE,
+                    Node node = new Node(sim_node.getState());
+                    Move move = (Move)minimax.minimax(node, minimaxDepth, Integer.MIN_VALUE,
                             Integer.MAX_VALUE, System.currentTimeMillis()).move;
 
                     sim_node = sim_node.getNextNode(move);
@@ -73,18 +73,18 @@ public class MCTS extends AI {
                 }
                 continue;
             }
-            ArrayList<Node> unexplored = new ArrayList<>();
+            ArrayList<kulibrat.ai.MCTS.Node> unexplored = new ArrayList<>();
             boolean containsAll = true;
-            for (Node child : sim_node.getChildren()) {
+            for (kulibrat.ai.MCTS.Node child : sim_node.getChildren()) {
                 if (child.getPlays() == 0) {
                     containsAll = false;
                     unexplored.add(child);
                 }
             }
-            Node bestNode = null;
+            kulibrat.ai.MCTS.Node bestNode = null;
             if (containsAll) {
                 double bestUCB = 0.0;
-                for (Node child : sim_node.getChildren()) {
+                for (kulibrat.ai.MCTS.Node child : sim_node.getChildren()) {
                     if (child.UCB(1) >= bestUCB) {
                         bestUCB = child.UCB(1);
                         bestNode = child;
@@ -102,7 +102,7 @@ public class MCTS extends AI {
         terminalNode.backPropagate(winner);
     }
 
-    public Move makeMove(State currState) {
+    public Move makeMove(Node currState) {
         initialize(curr_node, calculationTime);
 
         Move move;
@@ -114,10 +114,10 @@ public class MCTS extends AI {
     }
 
     // Called when MCTS makes its final move based on the move with the highest chances of winning
-    private Move getBestMove(Node node) {
+    private Move getBestMove(kulibrat.ai.MCTS.Node node) {
         Move bestMove = null;
         double best_val = Integer.MIN_VALUE;
-        for (Node child : node.getChildren()) {
+        for (kulibrat.ai.MCTS.Node child : node.getChildren()) {
             double payOff = (child.getPlays() == 0) ? 0 : (child.getWins() / child.getPlays());
             if (child.getPlays() == 0) {
                 System.out.println("No records for play: " + "oldRow: " + child.getState().getMove().oldRow + ", oldCol: "
@@ -138,7 +138,7 @@ public class MCTS extends AI {
     }
 
     // Main loop of MCTS for statistic gathering
-    private void initialize(Node startNode, long calculationTime) {
+    private void initialize(kulibrat.ai.MCTS.Node startNode, long calculationTime) {
         int games = 0;
         simulationDepth = 0;
         startNode.setParent(null); // Deletes all the previous states by creating floating objects for garbage collection
@@ -154,7 +154,7 @@ public class MCTS extends AI {
         System.out.println("Games: " + games);
     }
 
-    public void update(State state) {
-        curr_node = curr_node.getNextNode(state.getMove());
+    public void update(Node node) {
+        curr_node = curr_node.getNextNode(node.getMove());
     }
 }

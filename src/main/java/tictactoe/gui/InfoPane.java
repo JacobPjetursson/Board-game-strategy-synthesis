@@ -1,7 +1,7 @@
 package tictactoe.gui;
 
 import fftlib.FFT;
-import fftlib.game.FFTState;
+import fftlib.game.FFTNode;
 import fftlib.gui.ShowFFTPane;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -22,7 +22,7 @@ public class InfoPane extends AnchorPane {
     private Label turnLabel;
     private ShowFFTPane showFFTPane;
 
-    private FFTState state;
+    private FFTNode node;
     private FFT currFFT;
 
     public InfoPane(int mode) {
@@ -61,12 +61,12 @@ public class InfoPane extends AnchorPane {
 
     public void update(Controller cont) {
         currFFT = cont.getCurrFFT();
-        state = cont.getState();
+        node = cont.getNode();
         if (mode != AI_VS_AI)
-            showFFTPane.update(currFFT, state);
+            showFFTPane.update(currFFT, node);
         turnNumberLabel.setText("Turns Played: " + cont.getTurnNo());
         skippedTurn.setText("");
-        if (state.getTurn() == PLAYER1)
+        if (node.getTurn() == PLAYER1)
             turnLabel.setText("Turn: Cross");
         else
             turnLabel.setText("Turn: Circle");

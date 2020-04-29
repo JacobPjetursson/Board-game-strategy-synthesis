@@ -1,7 +1,7 @@
 package kulibrat.ai;
 
 import kulibrat.game.Move;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 
 public abstract class AI {
     public int team;
@@ -10,8 +10,8 @@ public abstract class AI {
         this.team = team;
     }
 
-    public abstract Move makeMove(State state);
+    public abstract Move makeMove(Node node);
 
-    public void update(State state) {
+    public void update(Node node) {
     }
 }

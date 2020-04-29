@@ -1,8 +1,6 @@
 package tictactoe.gui;
 
 
-import fftlib.game.FFTSolution;
-import fftlib.game.StateMapping;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -11,15 +9,12 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import misc.Config;
 import tictactoe.game.*;
 import tictactoe.gui.board.PlayBox.PlayBox;
 
@@ -46,9 +41,9 @@ public class ReviewPane extends VBox {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
 
-            if (Logic.gameOver(cont.getState())) {
+            if (Logic.gameOver(cont.getNode())) {
                 Stage newStage = new Stage();
-                newStage.setScene(new Scene(new EndGamePane(primaryStage, Logic.getWinner(cont.getState()),
+                newStage.setScene(new Scene(new EndGamePane(primaryStage, Logic.getWinner(cont.getNode()),
                         cont), 500, 300));
                 newStage.initModality(Modality.APPLICATION_MODAL);
                 newStage.initOwner(cont.getWindow());
@@ -59,12 +54,15 @@ public class ReviewPane extends VBox {
 
         lw = new ListView<>();
         lw.setPickOnBounds(false);
+        // TODO
         ObservableList<HBox> prevStateBoxes = FXCollections.observableArrayList();
+        /*
         for (StateAndMove ps : cont.getPreviousStates()) {
-            State n = new State(ps.getState());
+            Node n = new Node(ps.getState());
             Move m = ps.getMove();
-            State next = n.getNextState(m);
-            ArrayList<Move> optimalMoves = (ArrayList<Move>) FFTSolution.optimalMoves(n);
+            Node next = n.getNextState(m);
+
+            ArrayList<Action> optimalActions = FFTSolution.getOptimalActions(n.getFFTState());
             StateMapping sm = FFTSolution.queryState(next);
             int winner = (sm == null) ? Logic.getWinner(next) : sm.getWinner();
             String winnerStr = (winner == n.getTurn()) ? "win" : (winner == PLAYER_NONE) ? "draw" : "loss";
@@ -109,6 +107,8 @@ public class ReviewPane extends VBox {
             h.getChildren().addAll(playBox, vBox);
             prevStateBoxes.add(h);
         }
+
+         */
         lw.setItems(prevStateBoxes);
         lw.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) ->
                 goToState.setDisable(false));
@@ -118,30 +118,30 @@ public class ReviewPane extends VBox {
             stage.close();
 
             int index = lw.getSelectionModel().getSelectedIndex();
-            StateAndMove selected = cont.getPreviousStates().get(index);
+            NodeAndMove selected = cont.getPreviousStates().get(index);
             Controller selectedCont = new Controller(primaryStage, cont.getPlayerInstance(PLAYER1),
-                    cont.getPlayerInstance(PLAYER2), selected.getState());
+                    cont.getPlayerInstance(PLAYER2), selected.getNode());
 
             selectedCont.setTurnNo(selected.getTurnNo());
             selectedCont.getPlayArea().update(selectedCont);
 
-            ArrayList<StateAndMove> stateAndMoves = new ArrayList<>();
-            for (StateAndMove ps : cont.getPreviousStates()) {
+            ArrayList<NodeAndMove> nodeAndMoves = new ArrayList<>();
+            for (NodeAndMove ps : cont.getPreviousStates()) {
                 if (ps.getTurnNo() < selectedCont.getTurnNo()) {
-                    stateAndMoves.add(ps);
+                    nodeAndMoves.add(ps);
                 }
             }
-            selectedCont.setPreviousStates(stateAndMoves);
+            selectedCont.setPreviousStates(nodeAndMoves);
         });
         setVgrow(lw, Priority.ALWAYS);
 
         getChildren().addAll(lw, bottomBox);
     }
 
-    private PlayBox getPlayBox(Controller cont, StateAndMove ps, ArrayList<Move> bestMoves) {
+    private PlayBox getPlayBox(Controller cont, NodeAndMove ps, ArrayList<Move> bestMoves) {
 
         PlayBox pb = new PlayBox(20, CLICK_DISABLED, cont);
-        pb.update(ps.getState());
+        pb.update(ps.getNode());
 
         Platform.runLater(() -> {
             pb.addHighlight(ps.getMove().row, ps.getMove().col, ps.getMove().team, blueStr);

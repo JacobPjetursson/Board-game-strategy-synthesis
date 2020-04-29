@@ -182,7 +182,9 @@ public class FFTOverviewPane extends VBox {
         verifyBtn.setOnMouseClicked(event -> {
             int team = teamChoice.getSelectionModel().getSelectedIndex() + 1;
             boolean wholeFFT = verificationChoice.getSelectionModel().getSelectedIndex() == 0;
-            boolean verified = FFTManager.currFFT.verify(team, wholeFFT);
+            // todo
+            //boolean verified = FFTManager.currFFT.verify(team, wholeFFT);
+            boolean verified = false;
             if (!verified) {
                 if (FFTManager.currFFT.failingPoint == null) {
                     Label verifiedLabel = new Label("Always loses to perfect player");

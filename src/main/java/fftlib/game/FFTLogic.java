@@ -1,10 +1,11 @@
 package fftlib.game;
 
+// TODO move into node class
 public interface FFTLogic {
 
-    boolean gameOver(FFTState state);
+    boolean gameOver(FFTNode node);
 
-    int getWinner(FFTState state);
+    int getWinner(FFTNode node);
 
-    boolean isLegalMove(FFTState state, FFTMove move);
+    boolean isLegalMove(FFTNode node, FFTMove move);
 }

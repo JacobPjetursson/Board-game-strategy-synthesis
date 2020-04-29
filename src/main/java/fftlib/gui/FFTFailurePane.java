@@ -4,7 +4,7 @@ import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
 import fftlib.game.FFTMove;
-import fftlib.game.FFTState;
+import fftlib.game.FFTNode;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -35,7 +35,7 @@ public class FFTFailurePane extends BorderPane {
     public FFTFailurePane(Scene prevScene, FFTInteractivePane interactivePane) {
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         this.interactivePane = interactivePane;
-        Label title = new Label("First encountered state where the strategy chose a sub-optimal move");
+        Label title = new Label("First encountered node where the strategy chose a sub-optimal move");
         title.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
         title.setAlignment(Pos.CENTER);
         title.setTextAlignment(TextAlignment.CENTER);
@@ -43,7 +43,7 @@ public class FFTFailurePane extends BorderPane {
         setTop(title);
         BorderPane.setAlignment(title, Pos.CENTER);
 
-        Node playBox = FFTManager.getFailState();
+        Node playBox = FFTManager.getFailNode();
 
         lw = new ListView<>();
         lw.setPickOnBounds(false);
@@ -66,9 +66,9 @@ public class FFTFailurePane extends BorderPane {
 
         String moveInfo;
         if (FFTManager.currFFT.failingPoint.random)
-            moveInfo = "The strategy did not apply to the above state, and a random, losing move existed";
+            moveInfo = "The strategy did not apply to the above node, and a random, losing move existed";
         else
-            moveInfo = "The strategy applied to the above state, but the move it chose was sub-optimal";
+            moveInfo = "The strategy applied to the above node, but the move it chose was sub-optimal";
         Label moveInfoLabel = new Label(moveInfo);
         moveInfoLabel.setFont(Font.font("Verdana", 16));
 
@@ -79,16 +79,16 @@ public class FFTFailurePane extends BorderPane {
             stage.setScene(prevScene);
         });
 
-        Button addRuleInteractiveBtn = new Button("Add rule for this state");
+        Button addRuleInteractiveBtn = new Button("Add rule for this node");
         addRuleInteractiveBtn.setFont(Font.font("Verdana", 16));
 
         // add rule to FFT button
         addRuleInteractiveBtn.setOnAction(event -> {
             Stage stage = (Stage) getScene().getWindow();
-            FFTState state = FFTManager.currFFT.failingPoint.getState();
+            FFTNode node = FFTManager.currFFT.failingPoint.getNode();
             FFTMove move = FFTManager.currFFT.failingPoint.getMove();
             stage.setScene(interactivePane.getScene());
-            interactivePane.update(state, move);
+            interactivePane.update(node, move);
             interactivePane.setPrevScene(getScene());
         });
 
@@ -116,11 +116,11 @@ public class FFTFailurePane extends BorderPane {
                 rLabel.setFont(Font.font("Verdana", 15));
                 // TODO - below is hacky
                 FFTMove failMove = FFTManager.currFFT.failingPoint.getMove();
-                FFTState failState = FFTManager.currFFT.failingPoint.getState();
+                FFTNode failNode = FFTManager.currFFT.failingPoint.getNode();
                 int tempTeam = failMove.getTeam();
                 failMove.setTeam(PLAYER_ANY);
                 if (!ruleApplied) {
-                    FFTMove ruleMove = r.apply(failState);
+                    FFTMove ruleMove = r.apply(failNode.getState()).getMove();
                     if (ruleMove != null) {
                         ruleMove.setTeam(PLAYER_ANY);
                         if (ruleMove.equals(failMove)) {

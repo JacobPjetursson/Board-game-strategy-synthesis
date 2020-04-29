@@ -2,25 +2,21 @@ package fftlib.game;
 
 import fftlib.*;
 import fftlib.FFT;
-import misc.Config;
 
 import java.util.*;
 
-import static misc.Config.*;
-import static misc.Globals.*;
-
 public class FFTAutoGenOld {
-    private static HashMap<? extends FFTState, ? extends StateMapping> lookupTable;
+    private static HashMap<? extends FFTNode, ? extends NodeMapping> lookupTable;
 
-    private static PriorityQueue<FFTState> states;
+    private static PriorityQueue<FFTNode> states;
 
-    private static HashMap<FFTState, StateMapping> strategy;
+    private static HashMap<FFTNode, NodeMapping> strategy;
     private static FFT fft;
     private static RuleGroup rg;
 
     private static int winner;
     private static int max_precons;
-
+/*
     public static FFT generateFFT(int team_) {
         AUTOGEN_TEAM = team_;
         fft = new FFT("Synthesis");
@@ -45,16 +41,16 @@ public class FFTAutoGenOld {
 
         long timeStart = System.currentTimeMillis();
         setup();
-        /* TODO - why doesn't it work?
-        System.out.println("Removing states that apply to current rules");
-        if (!GENERATE_ALL_RULES)
-            states.removeIf(s -> {
-                for (Rule r : fft.getRules())
-                    if (r.apply(s) != null)
-                        return true;
-                return false;
-            });
-        */
+        // TODO - why doesn't it work?
+        //System.out.println("Removing states that apply to current rules");
+        //if (!GENERATE_ALL_RULES)
+         //   states.removeIf(s -> {
+        //        for (Rule r : fft.getRules())
+        //            if (r.apply(s) != null)
+        //                return true;
+        //        return false;
+        //    });
+
         start();
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
         System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
@@ -67,7 +63,7 @@ public class FFTAutoGenOld {
         fft.addRuleGroup(rg);
         lookupTable = FFTSolution.getLookupTable();
         winner = FFTSolution.getWinner();
-        max_precons = FFTManager.initialFFTState.getLiterals().size();
+        max_precons = FFTManager.initialFFTNode.getLiterals().size();
         fft.USE_STRATEGY = SAVE_STRAT; // Only use this feature if autogenerating, e.g. not when simply loading from file
 
         System.out.println("Solution size: " + lookupTable.size());
@@ -101,8 +97,8 @@ public class FFTAutoGenOld {
     // TODO - this does not filter enough, e.g. it doesn't filter states that can only be reached with sub-optimal moves from player
     // TODO - instead, do an initial game tree search to identify all reachable states, which will be subset of this
     private static void filterSolution() {
-        for (Map.Entry<? extends FFTState, ? extends StateMapping> entry : lookupTable.entrySet()) {
-            FFTState state = entry.getKey();
+        for (Map.Entry<? extends FFTNode, ? extends StateMapping> entry : lookupTable.entrySet()) {
+            FFTNode node = entry.getKey();
             StateMapping mapping = entry.getValue();
             if (!USE_FILTERING) {
                 states.add(state);
@@ -137,9 +133,9 @@ public class FFTAutoGenOld {
 
     // States where all moves are correct should not be part of FFT
     private static void deleteIrrelevantStates() {
-        Iterator<FFTState> itr = states.iterator();
+        Iterator<FFTNode> itr = states.iterator();
         while (itr.hasNext()) {
-            FFTState s = itr.next();
+            FFTNode s = itr.next();
             ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(s);
             if (optimalMoves.size() == s.getLegalMoves().size()) {
                 itr.remove();
@@ -150,7 +146,7 @@ public class FFTAutoGenOld {
     private static void makeRules() {
         while (!states.isEmpty()) {
             System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + rg.rules.size());
-            FFTState state = states.iterator().next();
+            FFTNode node = states.iterator().next();
 
             if (!GENERATE_ALL_RULES && fft.verify(AUTOGEN_TEAM, true)) {
                 System.out.println("FFT verified before empty statespace");
@@ -178,7 +174,7 @@ public class FFTAutoGenOld {
         }
     }
 
-    private static Rule addRule(FFTState s) {
+    private static Rule addRule(FFTNode s) {
         LiteralSet minSet = new LiteralSet();
         LiteralSet literals = s.getLiterals();
         StateMapping mapping = lookupTable.get(s);
@@ -290,9 +286,9 @@ public class FFTAutoGenOld {
         return bestPath;
     }
 
-    private static class StateComparator implements Comparator<FFTState>{
+    private static class StateComparator implements Comparator<FFTNode>{
         @Override
-        public int compare(FFTState s1, FFTState s2) {
+        public int compare(FFTNode s1, FFTNode s2) {
             if (RULE_ORDERING == RULE_ORDERING_RANDOM)
                 return 0;
 
@@ -320,35 +316,35 @@ public class FFTAutoGenOld {
     }
 
     private static void filterToSingleStrat() {
-        LinkedList<FFTState> frontier = new LinkedList<>();
-        HashSet<FFTState> closedSet = new HashSet<>();
+        LinkedList<FFTNode> frontier = new LinkedList<>();
+        HashSet<FFTNode> closedSet = new HashSet<>();
         Random r = new Random();
         if (RANDOM_SEED) r.setSeed(SEED);
-        FFTState initialState = FFTManager.initialFFTState;
+        FFTNode initialState = FFTManager.initialFFTNode;
         frontier.add(initialState);
         while (!frontier.isEmpty()) {
-            FFTState state = frontier.pop();
+            FFTNode node = frontier.pop();
             if (FFTManager.logic.gameOver(state))
                 continue;
             if (AUTOGEN_TEAM != state.getTurn()) {
-                for (FFTState child : state.getChildren())
+                for (FFTNode child : state.getChildren())
                     if (!closedSet.contains(child)) {
                         closedSet.add(child);
                         frontier.add(child);
                     }
             } else {
                 states.add(state);
-                /* Taking random optimal move never works for some reason
-                ArrayList<? extends FFTMove> moves = FFTSolution.optimalMoves(state);
-                FFTMove move = moves.get(r.nextInt(moves.size()));
-                int score = lookupTable.get(state).score;
-                int depth = lookupTable.get(state).depth;
-                strategy.put(state, new StateMapping(move, score, depth));
-                FFTState nextState = state.getNextState(move);
-                 */
+                // Taking random optimal move never works for some reason
+                //ArrayList<? extends FFTMove> moves = FFTSolution.optimalMoves(state);
+                //FFTMove move = moves.get(r.nextInt(moves.size()));
+                //int score = lookupTable.get(state).score;
+                //int depth = lookupTable.get(state).depth;
+                //strategy.put(state, new StateMapping(move, score, depth));
+                //State nextState = state.getNextState(move);
+
                 StateMapping mapping = lookupTable.get(state);
                 strategy.put(state, mapping);
-                FFTState nextState = state.getNextState(mapping.getMove());
+                FFTNode nextState = state.getNextState(mapping.getMove());
                 if (!closedSet.contains(nextState)) {
                     closedSet.add(nextState);
                     frontier.add(nextState);
@@ -357,5 +353,6 @@ public class FFTAutoGenOld {
         }
         fft.setSingleStrategy(strategy);
     }
+    */
 
 }

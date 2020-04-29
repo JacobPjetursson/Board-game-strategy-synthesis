@@ -56,45 +56,74 @@ public class Transform {
                 refV = true;
         }
         HashSet<SymmetryRule> symmetryRules = new HashSet<>();
-        int [][] pBoard = preconsToBoard(rule.getPreconditions());
-        int [][] aBoard = actionToBoard(rule.getAction());
-        ArrayList<int[][]> pBoards = applyAll(refH, refV, rotate, pBoard);
-        ArrayList<int[][]> aBoards = applyAll(refH, refV, rotate, aBoard);
-        for (int i = 0; i < pBoards.size(); i++) {
-            LiteralSet precons = boardToPrecons(pBoards.get(i));
-            Action action = boardToAction(aBoards.get(i));
-            symmetryRules.add(new SymmetryRule(precons, action));
+        int [][] lBoard;
+        Literal transformed;
+        for (ArrayList<Integer> trans : getAllTransformations(refH, refV, rotate)) {
+            LiteralSet transformedSet = new LiteralSet();
+            for (Literal l : rule.getPreconditions()) {
+                lBoard = literalToBoard(l);
+                lBoard = apply(trans, lBoard);
+                transformed = boardToLiteral(lBoard);
+                transformedSet.add(transformed);
+            }
+            Action action = new Action();
+            for (Literal l : rule.getAction().adds) {
+                lBoard = literalToBoard(l);
+                lBoard = apply(trans, lBoard);
+                transformed = boardToLiteral(lBoard);
+                action.adds.add(transformed);
+            }
+            for (Literal l : rule.getAction().rems) {
+                lBoard = literalToBoard(l);
+                lBoard = apply(trans, lBoard);
+                transformed = boardToLiteral(lBoard);
+                action.rems.add(transformed);
+            }
+            symmetryRules.add(new SymmetryRule(transformedSet, action));
         }
 
         return symmetryRules;
     }
 
-    private static ArrayList<int[][]> applyAll(boolean refH, boolean refV, boolean rotate, int[][] board) {
-        ArrayList<int[][]> boards = new ArrayList<>(reflectAll(refH, refV, board));
-        int[][] copy = copyArray(board);
+    private static ArrayList<ArrayList<Integer>> getAllTransformations(
+            boolean refH, boolean refV, boolean rotate) {
+        ArrayList<Integer> transforms = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> allTransformations = new ArrayList<>(
+                reflectTransforms(refH, refV, transforms));
+
+
         if (rotate) {
             // Rotate 3 times
             for (int i = 0; i < 3; i++) {
-                copy = rotate(copy);
-                boards.addAll(reflectAll(refH, refV, copy));
+                transforms.add(TRANS_ROT);
+                allTransformations.addAll(reflectTransforms(refH, refV, transforms));
             }
         }
-        return boards;
+        return allTransformations;
     }
 
-    private static ArrayList<int[][]> reflectAll(boolean refH, boolean refV, int[][] board) {
-        ArrayList<int[][]> reflectedRules = new ArrayList<>();
-        int[][] copy = copyArray(board);
-        reflectedRules.add(copyArray(copy));
+    private static ArrayList<ArrayList<Integer>> reflectTransforms(
+            boolean refH, boolean refV,  ArrayList<Integer> currentTransforms) {
+        ArrayList<ArrayList<Integer>> allReflectTransforms = new ArrayList<>();
+        ArrayList<Integer> transforms;
+        allReflectTransforms.add(currentTransforms);
         if (refH) {
-            copy = reflectH(copy);
-            reflectedRules.add(copyArray(copy));
+            transforms = new ArrayList<>(currentTransforms);
+            transforms.add(TRANS_HREF);
+            allReflectTransforms.add(transforms);
         }
         if (refV) {
-            copy = reflectV(copy);
-            reflectedRules.add(copyArray(copy));
+            transforms = new ArrayList<>(currentTransforms);
+            transforms.add(TRANS_VREF);
+            allReflectTransforms.add(transforms);
         }
-        return reflectedRules;
+        if (refH && refV) {
+            transforms = new ArrayList<>(currentTransforms);
+            transforms.add(TRANS_HREF);
+            transforms.add(TRANS_VREF);
+            allReflectTransforms.add(transforms);
+        }
+        return allReflectTransforms;
     }
 
     public static int[][] apply(ArrayList<Integer> transformations, int[][] board) {
@@ -116,77 +145,33 @@ public class Transform {
     }
 
     // Returns a board with the literals on it, the value equals to the piece occ.
-    public static int[][] preconsToBoard(LiteralSet literals) {
+    public static int[][] literalToBoard(Literal l) {
         int height = FFTManager.gameBoardHeight;
         int width = FFTManager.gameBoardWidth;
         int[][] preconBoard = new int[height][width];
 
-        for (Literal l : literals) {
-            Position pos = getPosFromId.apply(l.id);
-            if (pos != null) {
-                preconBoard[pos.row][pos.col] = l.negated ? -pos.occ : pos.occ;
-            }
+        Position pos = getPosFromId.apply(l.id);
+        if (pos != null) {
+            preconBoard[pos.row][pos.col] = l.negated ? -pos.occ : pos.occ;
         }
+
         return preconBoard;
     }
 
-    // Takes as input copies of the add and remove lists and removes all the literals that are board placements
-    // It returns a board with the literals on it, the value equals to the piece occ.
-    private static int[][] actionToBoard(Action action) {
-        int[][] literalBoard = new int[gameBoardHeight][gameBoardWidth];
-
-        for (Literal l : action.adds) {
-            Position pos = getPosFromId.apply(l.id);
-            if (pos != null)
-                literalBoard[pos.row][pos.col] = pos.occ;
-        }
-        for (Literal l : action.rems) {
-            Position pos = getPosFromId.apply(l.id);
-            if (pos != null)
-                literalBoard[pos.row][pos.col] = -pos.occ;
-        }
-
-        return literalBoard;
-    }
-
     // returns preconditions derived from transformed integer matrix and non-boardplacement literals
-    private static LiteralSet boardToPrecons(int[][] board) {
-        LiteralSet literals = new LiteralSet();
+    private static Literal boardToLiteral(int[][] board) {
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
-
                 Position pos = new Position(i, j, board[i][j]);
                 if (pos.occ < 0) {
                     pos.occ = Math.abs(pos.occ);
-                    literals.add(new Literal(getIdFromPos.apply(pos), true));
+                    return new Literal(getIdFromPos.apply(pos), true);
                 }
                 else if (pos.occ > 0)
-                    literals.add(new Literal(getIdFromPos.apply(pos), false));
+                    return new Literal(getIdFromPos.apply(pos), false);
             }
         }
-        return literals;
-    }
-
-    // Takes empty addClause and remClause lists (except for constants),
-    // and fill them up with the rotated pieces from the cb array.
-    private static Action boardToAction(int[][] lb) {
-        LiteralSet adds = new LiteralSet();
-        LiteralSet rems = new LiteralSet();
-        // Add back to list
-        for (int i = 0; i < lb.length; i++) {
-            for (int j = 0; j < lb[i].length; j++) {
-                if (lb[i][j] == 0) continue;
-                Position pos = new Position(i, j, lb[i][j]);
-                int occ = pos.occ;
-                pos.occ = Math.abs(pos.occ); // no negative occ in id mapping
-                Literal l = new Literal(getIdFromPos.apply(pos), false);
-                if (occ < 0)
-                    rems.add(l);
-                else if (occ > 0)
-                    adds.add(l);
-            }
-        }
-        return new Action(adds, rems);
+        return null;
     }
 
     public static int[][] copyArray(int[][] arr) {

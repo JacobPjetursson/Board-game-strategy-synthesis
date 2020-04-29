@@ -2,7 +2,7 @@ package tictactoe.ai;
 
 import fftlib.FFT_Follower;
 import tictactoe.game.Move;
-import tictactoe.game.State;
+import tictactoe.game.Node;
 
 // FIXME - dirty workaround
 public class FFTFollower implements AI {
@@ -15,7 +15,7 @@ public class FFTFollower implements AI {
     }
 
     @Override
-    public Move makeMove(State state) {
-        return (Move) fftFollower.makeMove(state);
+    public Move makeMove(Node node) {
+        return (Move) fftFollower.makeMove(node);
     }
 }

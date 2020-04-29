@@ -1,7 +1,7 @@
 package fftlib;
 
 import fftlib.game.FFTMove;
-import fftlib.game.FFTState;
+import fftlib.game.FFTNode;
 
 public class FFT_Follower {
     public int team;
@@ -10,12 +10,12 @@ public class FFT_Follower {
         this.team = team;
     }
 
-    public FFTMove makeMove(FFTState state) {
+    public FFTMove makeMove(FFTNode node) {
         if (FFTManager.currFFT == null)
             return null;
         for (RuleGroup ruleGroup : FFTManager.currFFT.ruleGroups) {
             for (Rule rule : ruleGroup.rules) {
-                FFTMove move = rule.apply(state);
+                FFTMove move = rule.apply(node.getState()).getMove();
                 if (move != null) {
                     System.out.println("Applying rule: " + rule);
                     return move;

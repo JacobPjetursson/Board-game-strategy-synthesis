@@ -5,7 +5,7 @@ import javafx.scene.Group;
 import javafx.scene.layout.VBox;
 import tictactoe.game.Controller;
 import tictactoe.game.Move;
-import tictactoe.game.State;
+import tictactoe.game.Node;
 import tictactoe.gui.board.Board;
 import tictactoe.gui.board.BoardTile;
 import tictactoe.gui.board.Player;
@@ -37,8 +37,8 @@ public class PlayBox extends Group {
         updateBounds();
     }
 
-    public void update(State s) {
-        board.update(s);
+    public void update(Node n) {
+        board.update(n);
     }
 
     protected void layoutChildren() {

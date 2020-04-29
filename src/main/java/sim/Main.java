@@ -10,10 +10,10 @@ public class Main {
 
     public static void main(String[] args) {
         CURRENT_GAME = SIM;
-        State s = new State();
+        Node n = new Node();
         GameSpecifics specs = new GameSpecifics();
         FFTManager.initialize(specs);
-        FFTSolver.solveGame(s);
+        FFTSolver.solveGame(n);
 
         FFTManager.autogenFFT();
 

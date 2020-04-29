@@ -2,12 +2,11 @@ package kulibrat.ai.MCTS;
 
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
-import kulibrat.game.State;
 
 import java.util.ArrayList;
 
 class Node {
-    private State state;
+    private kulibrat.game.Node node;
     private ArrayList<Node> children;
     // UCB stuff
     private double plays = 0;
@@ -15,21 +14,21 @@ class Node {
     private Node parent;
 
     // Starting Root state
-    public Node(State startState) {
-        this.state = new State(startState);
+    public Node(kulibrat.game.Node startState) {
+        this.node = new kulibrat.game.Node(startState);
     }
 
     // Non-root state
     private Node(Node parent, Move m) {
-        this.state = new State(parent.getState());
+        this.node = new kulibrat.game.Node(parent.getState());
         this.parent = parent;
-        Logic.doTurn(m, this.state);
-        this.state.setMove(m);
+        Logic.doTurn(m, this.node);
+        this.node.setMove(m);
     }
 
     // Duplicate constructor
     private Node(Node node) {
-        this.state = new State(node.getState());
+        this.node = new kulibrat.game.Node(node.getState());
     }
 
     Node getNextNode(Move m) {
@@ -45,8 +44,8 @@ class Node {
         return null;
     }
 
-    public State getState() {
-        return state;
+    public kulibrat.game.Node getState() {
+        return node;
     }
 
     double getPlays() {
@@ -69,7 +68,7 @@ class Node {
     public ArrayList<Node> getChildren() {
         if (children != null) return children;
         children = new ArrayList<>();
-        for (Move m : state.getLegalMoves()) {
+        for (Move m : node.getLegalMoves()) {
             Node child = new Node(this, m);
             children.add(child);
         }

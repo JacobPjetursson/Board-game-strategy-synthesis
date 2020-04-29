@@ -1,33 +1,33 @@
 package fftlib.game;
 
-import fftlib.FFT;
 import fftlib.*;
 import misc.Config;
 
 import java.util.*;
 
 import static misc.Config.*;
-import static misc.Globals.*;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class FFTAutoGen {
-    private static HashMap<? extends FFTState, ? extends StateMapping> lookupTable;
+    private static HashMap<State, ArrayList<Action>> solution;
     // States that are reachable when playing with a partial or total strategy
-    private static HashMap<FFTState, FFTState> reachableStates; // TODO - consider doing (long, FFTState)
+    private static HashMap<State, State> reachableStates; // TODO - consider doing (long, State)
     // Subset of reachable states where strategy does not output a move, and player has the turn
     // This is the set of states that a new rule can potentially influence
     // Bitcode -> State
-    private static HashMap<Long, FFTState> reachableRelevantStates;
+    private static HashMap<Long, State> reachableRelevantStates;
 
     private static FFT fft;
     private static RuleGroup rg;
 
     public static FFT generateFFT(int team_) {
         // temp code
-        /*
+/*
         Scanner block = new Scanner(System.in);
         System.out.println("Press any button to continue");
         block.nextLine();
-         */
+*/
 
         fft = new FFT("Synthesis");
         AUTOGEN_TEAM = team_;
@@ -64,7 +64,7 @@ public class FFTAutoGen {
         fft = new FFT("Synthesis");
         rg = new RuleGroup("Synthesis");
         fft.addRuleGroup(rg);
-        lookupTable = FFTSolution.getLookupTable();
+        solution = FFTSolution.getSolution();
         fft.USE_STRATEGY = false; // TODO - remove somehow
 
         reachableStates = new HashMap<>();
@@ -73,7 +73,7 @@ public class FFTAutoGen {
         // Set reachable parents for all states
         initializeSets();
 
-        System.out.println("Solution size: " + lookupTable.size());
+        System.out.println("Solution size: " + solution.size());
         System.out.println("Number of reachable states: " + reachableStates.size());
         System.out.println("Number of reachable relevant states: " + reachableRelevantStates.size());
     }
@@ -106,7 +106,7 @@ public class FFTAutoGen {
         while (!reachableRelevantStates.isEmpty()) {
             System.out.println("Remaining relevant states: " + reachableRelevantStates.size() +
                     ". Current amount of rules: " + rg.rules.size());
-            FFTState state = reachableRelevantStates.values().iterator().next(); // TODO - correct?
+            State state = reachableRelevantStates.values().iterator().next();
 
             Rule r = addRule(state);
 
@@ -115,28 +115,26 @@ public class FFTAutoGen {
         }
     }
 
-    private static Rule addRule(FFTState s) {
+    private static Rule addRule(State s) {
         LiteralSet minSet = new LiteralSet();
         LiteralSet literals = s.getAllLiterals();
-        StateMapping mapping = lookupTable.get(s);
-        Action bestAction = mapping.getMove().getAction();
+        ArrayList<Action> optimalActions = solution.get(s);
+        Action rAction = optimalActions.get(0);
 
         for (Literal l : literals)
             minSet.add(new Literal(l));
 
-        Rule r = new Rule(minSet, bestAction);
+        Rule r = new Rule(minSet, rAction);
         rg.rules.add(r);
 
         // DEBUG
         if (DETAILED_DEBUG) {
-            System.out.println("ORIGINAL STATE: " + s + " , AND MOVE: " + mapping.getMove());
-            System.out.println("ORIGINAL PRECONDITIONS: " + s.getLiterals());
-            System.out.println("ORIGINAL SCORE: " + mapping.getScore());
+            System.out.println("ORIGINAL STATE: " + s + " , AND ACTION: " + rAction);
             System.out.println("ORIGINAL RULE: " + r);
         }
 
         for (Literal l : literals) {
-            if (DETAILED_DEBUG) System.out.println("ATTEMPING TO REMOVE: " + l.getName());
+            if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO REMOVE: " + l.getName());
             r.removePrecondition(l);
             boolean verified = verifyRule(r, false);
 
@@ -154,10 +152,10 @@ public class FFTAutoGen {
     }
 
     private static boolean verifyRule(Rule r, boolean safe) {
-        HashMap<FFTState, FFTMove> appliedMap = new HashMap<>();
-        HashSet<FFTState> suboptimalSet = new HashSet<>(); // contains states with sub-optimal moves
-        HashMap<FFTState, Boolean> deleteMap = new HashMap<>();
-        HashMap<FFTState, FFTMove> undoMap = new HashMap<>();
+        HashMap<State, Action> appliedMap = new HashMap<>();
+        HashSet<State> suboptimalSet = new HashSet<>(); // contains states with sub-optimal moves
+        HashMap<State, Boolean> deleteMap = new HashMap<>();
+        HashMap<State, Action> undoMap = new HashMap<>();
 
         long coveredStates = r.getNumberOfCoveredStates();
         if (DETAILED_DEBUG) {
@@ -169,19 +167,19 @@ public class FFTAutoGen {
             HashSet<Long> codes = r.getCoveredStateBitCodes();
             if (DETAILED_DEBUG) System.out.println("Exact no. of covered states: " + codes.size());
             for (long code : codes) {
-                FFTState s = reachableRelevantStates.get(code);
+                State s = reachableRelevantStates.get(code);
                 if (s == null) continue;
-                FFTMove m = r.apply(s);
-                if (m != null)
-                    appliedMap.put(s, m);
+                Action a = r.apply(s);
+                if (a != null)
+                    appliedMap.put(s, a);
             }
         }
         else {
             //System.out.println("Using reachable relevant states");
-            for (FFTState s : reachableRelevantStates.values()) {
-                FFTMove m = r.apply(s);
-                if (m != null) { // this is equivalent to checking that rule applies with legal move
-                    appliedMap.put(s, m);
+            for (State s : reachableRelevantStates.values()) {
+                Action a = r.apply(s);
+                if (a != null) { // this is equivalent to checking that rule applies with legal move
+                    appliedMap.put(s, a);
                 }
             }
         }
@@ -189,18 +187,18 @@ public class FFTAutoGen {
         if (DETAILED_DEBUG)
             System.out.println("appliedMap size: " + appliedMap.size());
 
-        for (Map.Entry<FFTState, FFTMove> entry : appliedMap.entrySet()) {
-            FFTState s = entry.getKey();
-            FFTMove m = entry.getValue();
-            //System.out.println("Updating set from state: " + s + ", and move: " + m);
-            updateSets(s, m, suboptimalSet, deleteMap, undoMap);
+        for (Map.Entry<State, Action> entry : appliedMap.entrySet()) {
+            State s = entry.getKey();
+            Action a = entry.getValue();
+            //System.out.println("Updating set from state: " + s + ", and action: " + a);
+            updateSets(s, a, suboptimalSet, deleteMap, undoMap);
             deleteMap.putIfAbsent(s, false);
         }
 
         //System.out.println("deleteMap size: " + deleteMap.size());
         //System.out.println("undoMap size: " + undoMap.size());
 
-        for (FFTState s : suboptimalSet) {
+        for (State s : suboptimalSet) {
             if (s.isReachable()) {
                 undoReachableParents(undoMap);
                 return false;
@@ -225,29 +223,32 @@ public class FFTAutoGen {
     }
 
     // Either remove states from applySet in addition to reachableSet, or check whether state is still reachable
-    private static void updateSets(FFTState s, FFTMove chosenMove,
-                                   HashSet<FFTState> suboptimalSet, HashMap<FFTState, Boolean> deleteMap,
-                                   HashMap<FFTState, FFTMove> undoMap) {
+    private static void updateSets(State s, Action chosenAction,
+                                   HashSet<State> suboptimalSet, HashMap<State, Boolean> deleteMap,
+                                   HashMap<State, Action> undoMap) {
         // s might've been set unreachable by another state in appliedSet
-        if (chosenMove != null && !s.isReachable()) {
+        if (chosenAction != null && !s.isReachable()) {
             //System.out.println("state is not reachable");
             return;
         }
-        ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(s);
-        if (chosenMove != null && !optimalMoves.contains(chosenMove)) { // we choose wrong move
+        ArrayList<Action> optimalActions = solution.get(s);
+        if (optimalActions == null) // terminal state
+            return;
+        if (chosenAction != null && !optimalActions.contains(chosenAction)) { // we choose wrong move
             //System.out.println("state chooses suboptimal move, adding to suboptimal set");
             suboptimalSet.add(s);
             return;
         }
-        //System.out.println("Removing pointers to all children except chosenMove, adding state: " + s + " , and move: " + chosenMove + ", to undoMap");
+        //System.out.println("Removing pointers to all children except chosenMove, adding state: "
+        //        + s + " , and action: " + chosenAction + ", to undoMap");
 
-        undoMap.put(s, chosenMove);
-        for (FFTMove m : optimalMoves) { // remove pointer to all children except chosen move
-            //System.out.println("Next state: " + s.getNextState(m) + ", from move: " + m);
-            if (m.equals(chosenMove)) { // chosen move
+        undoMap.put(s, chosenAction);
+        for (Action a : optimalActions) { // remove pointer to all children except chosen move
+            //System.out.println("Next state: " + s.getNextState(a) + ", from action: " + a);
+            if (a.equals(chosenAction)) { // chosen move
                 continue;
             }
-            FFTState existingChild = reachableStates.get(s.getNextState(m));
+            State existingChild = reachableStates.get(s.getNextState(a));
             // existingChild can be null if we re-visit a state where we already deleted it from
             // i.e. we deleted all but chosen move from this state, so it's still reachable, but children isn't
             // might also be the case that we already removed it once (deleteMap check)
@@ -255,7 +256,7 @@ public class FFTAutoGen {
                 //System.out.println("Existing child null or part of deleteMap");
                 continue;
             }
-            //System.out.println("Removing ptr to child from optimal move: " + existingChild);
+            //System.out.println("Removing ptr to child from optimal action: " + existingChild);
             existingChild.removeReachableParent(s);
             //System.out.println("remaining pointers: " + existingChild.getReachableParents());
             if (!existingChild.isReachable()) { // TODO - use something else instead of undoMap?
@@ -266,112 +267,93 @@ public class FFTAutoGen {
         }
     }
 
-    private static void deleteUnreachableStates(HashMap<FFTState, Boolean> deleteMap) {
+    private static void deleteUnreachableStates(HashMap<State, Boolean> deleteMap) {
         //System.out.println("Deleting unreachable states");
-        for (Map.Entry<FFTState, Boolean> entry : deleteMap.entrySet()) {
-            FFTState key = entry.getKey();
+        for (Map.Entry<State, Boolean> entry : deleteMap.entrySet()) {
+            State key = entry.getKey();
             if (entry.getValue()) { // del from both
                 reachableStates.remove(key);
             }
-
             reachableRelevantStates.remove(key.getBitString());
         }
     }
 
-    private static void undoReachableParents(HashMap<FFTState, FFTMove> undoMap) {
+    private static void undoReachableParents(HashMap<State, Action> undoMap) {
         //System.out.println("Undoing deletions of reachable parents");
-        for (Map.Entry<FFTState, FFTMove> entry : undoMap.entrySet()) {
-            FFTState state = entry.getKey();
-            FFTMove chosenMove = entry.getValue(); // may be null (if we want to add link to all children)
-            for (FFTMove move : FFTSolution.optimalMoves(state)) {
-                if (move.equals(chosenMove))
+        for (Map.Entry<State, Action> entry : undoMap.entrySet()) {
+            State state = entry.getKey();
+            Action chosenAction = entry.getValue(); // might be null (if we want to add link to all children)
+            for (Action action : solution.get(state)) {
+                if (action.equals(chosenAction))
                     continue;
-                FFTState child = reachableStates.get(state.getNextState(move));
-            //    System.out.println("For state: " + child + " , adding back parent: " + state);
+                State child = reachableStates.get(state.getNextState(action));
+                //System.out.println("For state: " + child + " , adding back parent: " + state);
                 // child can be null if choiceMove is not null
                 if (child != null) {
                     child.addReachableParent(state);
-
                 }
             }
         }
     }
 
+    // Interface between domain-specific and logic
+    // TODO - fix it somehow (by using solution before converting it?)
     private static void initializeSets() {
         int team = AUTOGEN_TEAM;
-        FFTState initialState = FFTManager.initialFFTState;
-        LinkedList<FFTState> frontier;
+        FFTNode initialNode = FFTManager.initialFFTNode;
+        int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
+        LinkedList<FFTNode> frontier;
         frontier = new LinkedList<>();
-        frontier.add(initialState);
-        reachableStates.put(initialState, initialState);
-        reachableRelevantStates.put(initialState.getLiterals().getBitString(),
-                                    initialState);
+        frontier.add(initialNode);
+        reachableStates.clear();
+        reachableRelevantStates.clear();
+        reachableStates.put(initialNode.getState(), initialNode.getState());
+        reachableRelevantStates.put(initialNode.getState().getBitString(), initialNode.getState());
 
         while (!frontier.isEmpty()) {
-            FFTState state = frontier.pop();
+            FFTNode node = frontier.pop();
             // game over
-            if (FFTManager.logic.gameOver(state))
+            if (FFTManager.logic.gameOver(node)) {
+                if (FFTManager.logic.getWinner(node) == opponent) {
+                    // Should not hit this given initial check
+                    System.err.println("No chance of winning vs. perfect player");
+                    System.exit(1);
+                }
                 continue;
+            }
+
             // Not our turn
-            if (team != state.getTurn()) {
-                for (FFTState child : state.getChildren()) {
-                    FFTState existingChild = reachableStates.get(child);
+            if (team != node.getTurn()) {
+                for (FFTNode child : node.getChildren()) {
+                    State stateChild = child.getState();
+                    State existingChild = reachableStates.get(stateChild);
                     if (existingChild == null) {
-                        reachableStates.put(child, child);
+                        reachableStates.put(stateChild, stateChild);
                         frontier.add(child);
                     }
                     // add reachableParent
-                    reachableStates.get(child).addReachableParent(state);
+                    reachableStates.get(stateChild).addReachableParent(node.getState());
 
                 }
                 continue;
             }
-            ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(state);
-            long code = state.getLiterals().getBitString();
-            reachableRelevantStates.put(code, state);
+            ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(node);
+            State state = node.getState();
+            reachableRelevantStates.put(state.getBitString(), state);
 
             // Our turn, add all states from optimal moves
             for (FFTMove m : optimalMoves) {
-                FFTState child = state.getNextState(m);
-                FFTState existingChild = reachableStates.get(child);
+                FFTNode child = node.getNextNode(m);
+                State stateChild = child.getState();
+                State existingChild = reachableStates.get(stateChild);
                 if (existingChild == null) {
-                    reachableStates.put(child, child);
+                    reachableStates.put(stateChild, stateChild);
                     frontier.add(child);
                 }
-                reachableStates.get(child).addReachableParent(state);
+                reachableStates.get(stateChild).addReachableParent(state);
 
             }
         }
     }
-
-    private static class StateComparator implements Comparator<FFTState>{
-        @Override
-        public int compare(FFTState s1, FFTState s2) {
-            if (RULE_ORDERING == RULE_ORDERING_RANDOM)
-                return 0;
-
-            if (RULE_ORDERING == RULE_ORDERING_TERMINAL_LAST ||
-                    RULE_ORDERING == RULE_ORDERING_TERMINAL_FIRST) {
-                int s1_score = lookupTable.get(s1).getScore();
-                int s2_score = lookupTable.get(s2).getScore();
-
-                if (Math.abs(s1_score) > 1000)
-                    s1_score = Math.abs(Math.abs(s1_score) - 2000);
-                if (Math.abs(s2_score) > 1000)
-                    s2_score = Math.abs(Math.abs(s2_score) - 2000);
-
-                if (RULE_ORDERING == RULE_ORDERING_TERMINAL_FIRST)
-                    return s1_score - s2_score; // s1 - s2 means states closer to terminal first
-                else if (RULE_ORDERING == RULE_ORDERING_TERMINAL_LAST)
-                    return s2_score - s1_score;
-            }
-            int s1_precons_amount = s1.getLiterals().size(); // TODO - doesnt
-            int s2_precons_amount = s2.getLiterals().size();
-            if (RULE_ORDERING == RULE_ORDERING_FEWEST_PRECONS_FIRST)
-                return s1_precons_amount - s2_precons_amount;
-            return s2_precons_amount - s1_precons_amount;
-        }
-    }
-
 }
 

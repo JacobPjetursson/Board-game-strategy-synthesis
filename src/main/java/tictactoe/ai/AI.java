@@ -2,9 +2,9 @@ package tictactoe.ai;
 
 
 import tictactoe.game.Move;
-import tictactoe.game.State;
+import tictactoe.game.Node;
 
 public interface AI {
 
-    Move makeMove(State state);
+    Move makeMove(Node node);
 }

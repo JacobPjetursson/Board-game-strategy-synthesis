@@ -18,7 +18,7 @@ import javafx.stage.Stage;
 import misc.Config;
 import misc.Globals;
 import tictactoe.game.Controller;
-import tictactoe.game.State;
+import tictactoe.game.Node;
 
 import static misc.Globals.*;
 
@@ -179,7 +179,7 @@ public class NewGamePane extends AnchorPane {
             if (playerCrossMode != Globals.FFT && playerCircleMode != Globals.FFT)
                 Globals.ENABLE_AUTOGEN = false;
             new Controller(stage, playerCrossMode,
-                    playerCircleMode, new State());
+                    playerCircleMode, new Node());
         });
 
         Button back = new Button("Back");

@@ -1,10 +1,10 @@
 package kulibrat.ai.Minimax;
 
-import fftlib.game.StateMapping;
+import fftlib.game.NodeMapping;
 import kulibrat.ai.AI;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -18,8 +18,8 @@ public class Minimax extends AI {
     private int CURR_MAX_DEPTH;
     private boolean moveOrdering = true;
     private boolean useTranspo = true;
-    private HashMap<Long, StateMapping> transTable;
-    private State prevBestState;
+    private HashMap<Long, NodeMapping> transTable;
+    private Node prevBestState;
 
     public Minimax(int team, int calculationTime) {
         super(team);
@@ -28,57 +28,57 @@ public class Minimax extends AI {
     }
 
     // Runs the iterative deepening minimax with a set timelimit
-    public Move makeMove(State state) {
+    public Move makeMove(Node node) {
         long startTime = System.currentTimeMillis();
-        if (state.getLegalMoves().size() == 1) {
+        if (node.getLegalMoves().size() == 1) {
             chill(startTime);
-            return state.getLegalMoves().get(0);
+            return node.getLegalMoves().get(0);
         }
-        Move move = (Move) iterativeDeepeningMinimax(state, startTime).move;
+        Move move = (Move) iterativeDeepeningMinimax(node, startTime).move;
         // This happens when the minimax returns faster after having found a winning move
         chill(startTime);
         return move;
     }
 
     // Iteratively increases the depth limit while called minimax continuously. Stops when win is ensured or time is up.
-    private StateMapping iterativeDeepeningMinimax(kulibrat.game.State state, long startTime) {
+    private NodeMapping iterativeDeepeningMinimax(Node node, long startTime) {
         resetVariables();
-        StateMapping info = null;
+        NodeMapping info = null;
         boolean winCutOff = false;
         while (!outOfTime(startTime) && !winCutOff) {
-            State simState = new State(state); // Start from fresh (Don't reuse previous game tree in new iterations)
+            Node simState = new Node(node); // Start from fresh (Don't reuse previous game tree in new iterations)
             CURR_MAX_DEPTH++;
-            StateMapping mapping = minimax(simState, CURR_MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, startTime);
+            NodeMapping mapping = minimax(simState, CURR_MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, startTime);
             if (!searchCutOff) info = mapping;
             if (Math.abs(mapping.score) >= 1000) winCutOff = true;
         }
         // random move if null (No time to calculate minimax)
         if (info == null) {
-            int r = new Random().nextInt(state.getLegalMoves().size());
-            info = new StateMapping(state.getLegalMoves().get(r), Integer.MIN_VALUE, 0);
+            int r = new Random().nextInt(node.getLegalMoves().size());
+            info = new NodeMapping(node.getLegalMoves().get(r), Integer.MIN_VALUE, 0);
         }
         System.out.println(info);
         return info;
     }
 
     // Minimax with pruning, move ordering and a detailed heuristic
-    public StateMapping minimax(State state, int depth, int alpha, int beta, long startTime) {
+    public NodeMapping minimax(Node node, int depth, int alpha, int beta, long startTime) {
         Move bestMove = null;
-        int bestScore = (state.getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        int bestScore = (node.getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int score;
         if (outOfTime(startTime)) searchCutOff = true;
-        if (Logic.gameOver(state) || depth <= 0 || searchCutOff)
-            return new StateMapping(null, heuristic(state), depth);
-        StateMapping mapping = null;
+        if (Logic.gameOver(node) || depth <= 0 || searchCutOff)
+            return new NodeMapping(null, heuristic(node), depth);
+        NodeMapping mapping = null;
         if (useTranspo) {
-            mapping = transTable.get(state.getZobristKey());
+            mapping = transTable.get(node.getZobristKey());
             if (mapping != null && (depth <= mapping.depth || Math.abs(mapping.score) >= 1000)) {
                 return mapping;
             }
         }
         if (moveOrdering && depth == CURR_MAX_DEPTH && prevBestState != null) {
             score = minimax(prevBestState, depth - 1, alpha, beta, startTime).score;
-            if (state.getTurn() == team) {
+            if (node.getTurn() == team) {
                 if (score > bestScore) {
                     bestScore = score;
                     bestMove = prevBestState.getMove();
@@ -92,10 +92,10 @@ public class Minimax extends AI {
                 beta = Math.min(score, beta);
             }
         }
-        for (State child : state.getChildren()) {
+        for (Node child : node.getChildren()) {
             if (moveOrdering && depth == CURR_MAX_DEPTH) if (child.equals(prevBestState)) continue;
             score = minimax(child, depth - 1, alpha, beta, startTime).score;
-            if (state.getTurn() == team) {
+            if (node.getTurn() == team) {
                 if (score > bestScore) {
                     bestScore = score;
                     bestMove = child.getMove();
@@ -111,14 +111,14 @@ public class Minimax extends AI {
             if (beta <= alpha) break;
         }
         if (moveOrdering && depth == CURR_MAX_DEPTH) {
-            prevBestState = state.getNextState(bestMove);
+            prevBestState = node.getNextNode(bestMove);
         }
         if (useTranspo && !searchCutOff) {
             if (mapping == null || depth > mapping.depth) {
-                transTable.put(state.getZobristKey(), new StateMapping(bestMove, bestScore, depth));
+                transTable.put(node.getZobristKey(), new NodeMapping(bestMove, bestScore, depth));
             }
         }
-        return new StateMapping(bestMove, bestScore, depth);
+        return new NodeMapping(bestMove, bestScore, depth);
     }
 
     private boolean outOfTime(long startTime) {
@@ -140,16 +140,16 @@ public class Minimax extends AI {
 
     // Either returns 1000 or -1000 if terminal, or the material of a state, if intermediate.
     // The material is the objective value of a state
-    private int heuristic(kulibrat.game.State state) {
+    private int heuristic(Node node) {
         int opponent = (team == PLAYER2) ? PLAYER2 : PLAYER1;
-        if (Logic.gameOver(state)) {
-            int winner = Logic.getWinner(state);
+        if (Logic.gameOver(node)) {
+            int winner = Logic.getWinner(node);
             if (winner == team) {
                 return 1000;
             } else if (winner == opponent) return -1000;
         }
-        if (state.getTurn() == team) return state.getMaterial();
-        else return -state.getMaterial();
+        if (node.getTurn() == team) return node.getMaterial();
+        else return -node.getMaterial();
     }
 
     // Used if a win has been ensured, to make sure the algorithm fulfills all its allocated time.

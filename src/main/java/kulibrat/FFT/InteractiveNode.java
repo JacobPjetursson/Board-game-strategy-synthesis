@@ -2,13 +2,12 @@ package kulibrat.FFT;
 
 import fftlib.Action;
 import fftlib.Rule;
-import fftlib.game.FFTState;
-import fftlib.gui.InteractiveFFTState;
-import javafx.scene.Node;
+import fftlib.game.FFTNode;
+import fftlib.gui.interactiveFFTNode;
 import javafx.scene.paint.Color;
 import kulibrat.game.Controller;
 import kulibrat.game.Move;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 import kulibrat.gui.board.BoardPiece;
 import kulibrat.gui.board.BoardTile;
 import kulibrat.gui.board.PlayBox.InteractivePlayBox;
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 import static misc.Globals.*;
 
 
-public class InteractiveState implements InteractiveFFTState {
+public class InteractiveNode implements interactiveFFTNode {
     private InteractivePlayBox pb;
     private BoardPiece selected;
     private ArrayList<Move> curHighLights;
@@ -28,7 +27,7 @@ public class InteractiveState implements InteractiveFFTState {
     private Controller cont;
     private int tilesize;
 
-    InteractiveState(Controller cont) {
+    InteractiveNode(Controller cont) {
         this.rule = new Rule();
         this.cont = cont;
         this.tilesize = 52;
@@ -36,18 +35,18 @@ public class InteractiveState implements InteractiveFFTState {
     }
 
     @Override
-    public Node getInteractiveNode(FFTState fftState) {
-        State s = (State) fftState;
-        this.perspective = s.getTurn();
-        this.rule = getRuleFromState(s);
+    public javafx.scene.Node getInteractiveNode(FFTNode fftNode) {
+        Node n = (Node) fftNode;
+        this.perspective = n.getTurn();
+        this.rule = getRuleFromState(n);
 
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
-        pb.update(s);
+        pb.update(n);
         return pb;
     }
 
     // Assume correct and unambigious format
-    public Node getInteractiveNode(Rule r) {
+    public javafx.scene.Node getInteractiveNode(Rule r) {
         this.rule = new Rule(r);
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
         if (r.getAction() != null)
@@ -79,7 +78,7 @@ public class InteractiveState implements InteractiveFFTState {
     }
 
     // This is called when the add rule button is pressed from game screen
-    private Rule getRuleFromState(State s) { // TODO
+    private Rule getRuleFromState(Node n) { // TODO
         /*
         Rule r = new Rule();
         LiteralSet literals = s.getAllLiterals();

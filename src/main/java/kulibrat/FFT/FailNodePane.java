@@ -1,13 +1,12 @@
 package kulibrat.FFT;
 
 import fftlib.game.FFTMove;
-import fftlib.game.FFTStateAndMove;
-import fftlib.gui.FFTFailState;
-import javafx.scene.Node;
+import fftlib.game.FFTNodeAndMove;
+import fftlib.gui.FFTFailNode;
 import javafx.scene.paint.Color;
 import kulibrat.game.Controller;
 import kulibrat.game.Move;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 import kulibrat.gui.board.PlayBox.PlayBox;
 import kulibrat.gui.board.PlayBox.StaticPlayBox;
 
@@ -15,18 +14,18 @@ import java.util.ArrayList;
 
 import static misc.Globals.CLICK_DISABLED;
 
-public class FailStatePane implements FFTFailState {
+public class FailNodePane implements FFTFailNode {
 
     Controller cont;
 
-    FailStatePane(Controller cont) {
+    FailNodePane(Controller cont) {
         this.cont = cont;
     }
 
-    private PlayBox getFailState(State s, Move move, ArrayList<Move> optimalMoves) {
+    private PlayBox getFailState(Node n, Move move, ArrayList<Move> optimalMoves) {
         int tilesize = 60;
         StaticPlayBox pb = new StaticPlayBox(tilesize, CLICK_DISABLED, cont);
-        pb.update(s);
+        pb.update(n);
 
         pb.addArrow(move, Color.BLUE);
         for (Move m : optimalMoves) {
@@ -39,7 +38,7 @@ public class FailStatePane implements FFTFailState {
     }
 
     @Override
-    public Node getFailState(FFTStateAndMove ps, ArrayList<? extends FFTMove> optimalMoves) {
-        return getFailState((State) ps.getState(), (Move) ps.getMove(), (ArrayList<Move>) optimalMoves);
+    public javafx.scene.Node getFailNode(FFTNodeAndMove ps, ArrayList<? extends FFTMove> optimalMoves) {
+        return getFailState((Node) ps.getNode(), (Move) ps.getMove(), (ArrayList<Move>) optimalMoves);
     }
 }

@@ -66,7 +66,7 @@ public class BoardTile extends StackPane {
         turnsToTerminalLabel.setTextFill(Color.BLACK);
         setOnMouseEntered(me -> {
             if (isClickable() && hoverNode == null && piece == null) {
-                addHover(cont.getState().getTurn());
+                addHover(cont.getNode().getTurn());
             }
         });
 
@@ -82,7 +82,7 @@ public class BoardTile extends StackPane {
             }
             else if (clickMode == CLICK_DEFAULT && piece == null) {
                 getChildren().clear();
-                addPiece(cont.getState().getTurn());
+                addPiece(cont.getNode().getTurn());
                 cont.doHumanTurn(row, col);
 
             }
@@ -104,8 +104,8 @@ public class BoardTile extends StackPane {
     private boolean isClickable() {
         if (clickMode == CLICK_INTERACTIVE)
             return false;
-        return clickMode != CLICK_DISABLED && (cont.getPlayerInstance(cont.getState().getTurn()) == HUMAN ||
-                (cont.getPlayerInstance(cont.getState().getTurn()) == FFT && cont.getFFTAllowInteraction()));
+        return clickMode != CLICK_DISABLED && (cont.getPlayerInstance(cont.getNode().getTurn()) == HUMAN ||
+                (cont.getPlayerInstance(cont.getNode().getTurn()) == FFT && cont.getFFTAllowInteraction()));
     }
 
     public void setGreen() {
@@ -373,7 +373,7 @@ public class BoardTile extends StackPane {
             mandatoryCheckBox.setPrefSize(22, 22);
             mandatoryCheckBox.pressedProperty().addListener((observableValue, oldValue, newValue) -> {
                 setMandatory(!mandatory);
-                cont.getInteractiveState().updateRuleFromTile(bt);
+                cont.getInteractiveNode().updateRuleFromTile(bt);
                 close();
             });
             HBox mandatoryHBox = new HBox(5, mandatoryLabel, mandatoryCheckBox);
@@ -389,9 +389,9 @@ public class BoardTile extends StackPane {
                 isAction = !isAction;
                 setAction(isAction);
                 if (isAction)
-                    cont.getInteractiveState().setActionFromTile(bt);
+                    cont.getInteractiveNode().setActionFromTile(bt);
                 else
-                    cont.getInteractiveState().removeAction();
+                    cont.getInteractiveNode().removeAction();
                 close();
             });
 
@@ -443,14 +443,14 @@ public class BoardTile extends StackPane {
                 setMandatory(true);
                 bt.addPiece(PLAYER1);
                 close();
-                cont.getInteractiveState().updateRuleFromTile(bt);
+                cont.getInteractiveNode().updateRuleFromTile(bt);
             });
 
             bpPane2.setOnMouseClicked(event -> {
                 setMandatory(true);
                 bt.addPiece(PLAYER2);
                 close();
-                cont.getInteractiveState().updateRuleFromTile(bt);
+                cont.getInteractiveNode().updateRuleFromTile(bt);
             });
 
             VBox paneGray = new VBox();
@@ -458,7 +458,7 @@ public class BoardTile extends StackPane {
             paneGray.setOnMouseClicked(event -> {
                 setNegated(true);
                 close();
-                cont.getInteractiveState().updateRuleFromTile(bt);
+                cont.getInteractiveNode().updateRuleFromTile(bt);
             });
 
             VBox paneWhite = new VBox();
@@ -467,7 +467,7 @@ public class BoardTile extends StackPane {
                 setNegated(false);
                 setMandatory(true);
                 removePiece();
-                cont.getInteractiveState().updateRuleFromTile(bt);
+                cont.getInteractiveNode().updateRuleFromTile(bt);
 
                 close();
             });

@@ -2,7 +2,7 @@ package tictactoe.game;
 
 import fftlib.game.FFTLogic;
 import fftlib.game.FFTMove;
-import fftlib.game.FFTState;
+import fftlib.game.FFTNode;
 
 import java.util.ArrayList;
 
@@ -12,9 +12,9 @@ import static misc.Globals.*;
 
 public class Logic implements FFTLogic {
 
-    static ArrayList<Move> legalMoves(int team, State state) {
+    static ArrayList<Move> legalMoves(int team, Node node) {
         ArrayList<Move> list = new ArrayList<>();
-        int[][] board = state.getBoard();
+        int[][] board = node.getBoard();
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 if (board[i][j] == 0) {
@@ -25,25 +25,25 @@ public class Logic implements FFTLogic {
         return list;
     }
 
-    public static void doTurn(Move m, State state) {
-        if (getWinner(state) != 0) return;
+    public static void doTurn(Move m, Node node) {
+        if (getWinner(node) != 0) return;
 
-        state.setBoardEntry(m.row, m.col, m.team);
+        node.setBoardEntry(m.row, m.col, m.team);
 
         // Change turn
-        if (state.getTurn() == PLAYER1) state.setTurn(PLAYER2);
-        else state.setTurn(PLAYER1);
+        if (node.getTurn() == PLAYER1) node.setTurn(PLAYER2);
+        else node.setTurn(PLAYER1);
     }
 
-    public static boolean gameOver(State state) {
-        if (getWinner(state) != 0)
+    public static boolean gameOver(Node node) {
+        if (getWinner(node) != 0)
             return true;
-        else return isDraw(state);
+        else return isDraw(node);
     }
 
-    private static boolean isDraw(State state) {
+    private static boolean isDraw(Node node) {
         boolean draw = true;
-        for (int[] aBoard : state.getBoard()) {
+        for (int[] aBoard : node.getBoard()) {
             for (int anABoard : aBoard) {
                 if (anABoard == 0) {
                     draw = false;
@@ -53,13 +53,13 @@ public class Logic implements FFTLogic {
         return draw;
     }
 
-    public static int getWinner(State state) {
-        int[][] board = state.getBoard();
+    public static int getWinner(Node node) {
+        int[][] board = node.getBoard();
         if (TIC_TAC_TOE_RULES == TIC_TAC_TOE_SIMPLE_RULES)
-            return getSimpleRuleWinner(state);
+            return getSimpleRuleWinner(node);
 
         if (TIC_TAC_TOE_RULES == TIC_TAC_TOE_STUPID_RULES)
-            return getStupidRuleWinner(state);
+            return getStupidRuleWinner(node);
 
         for (int team = 1; team < 3; team++) {
             if (board[0][0] == team && board[1][1] == team && board[2][2] == team) {
@@ -83,24 +83,24 @@ public class Logic implements FFTLogic {
         return 0;
     }
 
-    private static boolean isLegalMove(State state, Move move) {
-        return legalMoves(move.team, state).contains(move);
+    private static boolean isLegalMove(Node node, Move move) {
+        return legalMoves(move.team, node).contains(move);
     }
 
-    public boolean gameOver(FFTState state) {
-        return gameOver((State) state);
+    public boolean gameOver(FFTNode node) {
+        return gameOver((Node) node);
     }
 
-    public int getWinner(FFTState state) {
-        return getWinner((State) state);
+    public int getWinner(FFTNode node) {
+        return getWinner((Node) node);
     }
 
-    public boolean isLegalMove(FFTState state, FFTMove move) {
-        return isLegalMove((State) state, (Move) move);
+    public boolean isLegalMove(FFTNode node, FFTMove move) {
+        return isLegalMove((Node) node, (Move) move);
     }
 
-    public static int getSimpleRuleWinner(State state) {
-        int[][] board = state.getBoard();
+    public static int getSimpleRuleWinner(Node node) {
+        int[][] board = node.getBoard();
         for (int team = 1; team < 3; team++) {
             if (board[0][0] == team && board[1][1] == team) {
                 return team;
@@ -150,8 +150,8 @@ public class Logic implements FFTLogic {
         return 0;
     }
 
-    public static int getStupidRuleWinner(State state) {
-        int [][] board = state.getBoard();
+    public static int getStupidRuleWinner(Node node) {
+        int [][] board = node.getBoard();
         for (int[] ints : board) {
             for (int anInt : ints) {
                 if (anInt == 0)

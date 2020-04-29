@@ -1,10 +1,7 @@
 package kulibrat.game;
 
-import fftlib.Literal;
-import fftlib.auxiliary.Position;
 import fftlib.game.FFTMove;
-import fftlib.game.FFTState;
-import fftlib.game.LiteralSet;
+import fftlib.game.FFTNode;
 import kulibrat.ai.Minimax.Zobrist;
 import misc.Globals;
 
@@ -12,14 +9,14 @@ import java.awt.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 
 import static kulibrat.game.Logic.POS_NONBOARD;
 import static misc.Config.BHEIGHT;
 import static misc.Config.BWIDTH;
-import static misc.Globals.*;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
-public class State implements Serializable, FFTState {
+public class Node extends FFTNode implements Serializable {
     private int[][] board;
     private int turn;
     private int redScore;
@@ -32,7 +29,7 @@ public class State implements Serializable, FFTState {
     private long zobrist_key;
 
     // Starting Root state
-    public State() {
+    public Node() {
         board = new int[BHEIGHT][BWIDTH];
         redScore = 0;
         blackScore = 0;
@@ -45,32 +42,32 @@ public class State implements Serializable, FFTState {
     }
 
     // Non-root state
-    private State(State parent, Move m) {
+    private Node(Node parent, Move m) {
         this(parent);
         this.move = m;
         Logic.doTurn(m, this);
     }
 
-    // Duplicate constructor, for "root" state
-    public State(State state) {
-        board = new int[state.board.length][];
-        for (int i = 0; i < state.board.length; i++) {
-            board[i] = Arrays.copyOf(state.board[i], state.board[i].length);
+    // Duplicate constructor, for "root" node
+    public Node(Node node) {
+        board = new int[node.board.length][];
+        for (int i = 0; i < node.board.length; i++) {
+            board[i] = Arrays.copyOf(node.board[i], node.board[i].length);
         }
-        redScore = state.redScore;
-        blackScore = state.blackScore;
-        unplacedRed = state.unplacedRed;
-        unplacedBlack = state.unplacedBlack;
-        turn = state.turn;
-        move = state.move;
-        zobrist_key = state.zobrist_key;
+        redScore = node.redScore;
+        blackScore = node.blackScore;
+        unplacedRed = node.unplacedRed;
+        unplacedBlack = node.unplacedBlack;
+        turn = node.turn;
+        move = node.move;
+        zobrist_key = node.zobrist_key;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof State)) return false;
-        State state = (State) obj;
-        return this.zobrist_key == state.zobrist_key;
+        if (!(obj instanceof Node)) return false;
+        Node node = (Node) obj;
+        return this.zobrist_key == node.zobrist_key;
     }
 
     @Override
@@ -83,26 +80,6 @@ public class State implements Serializable, FFTState {
         return this.zobrist_key;
     }
 
-/*
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof State)) return false;
-        State state = (State) o;
-        return getTurn() == state.getTurn() &&
-                redScore == state.redScore &&
-                blackScore == state.blackScore &&
-                Arrays.deepEquals(getBoard(), state.getBoard());
-    }
-
-    @Override
-    public int hashCode() {
-
-        int result = Objects.hash(getTurn(), redScore, blackScore);
-        result = 31 * result + Arrays.deepHashCode(getBoard());
-        return result;
-    }
-*/
     private long initZobrist() {
         long hash = 0L;
         for (int i = 0; i < board.length; i++)
@@ -147,36 +124,6 @@ public class State implements Serializable, FFTState {
 
     public Move getMove() {
         return move;
-    }
-
-    @Override
-    public void addReachableParent(FFTState parent) {
-
-    }
-
-    @Override
-    public void removeReachableParent(FFTState parent) {
-
-    }
-
-    @Override
-    public HashSet<? extends FFTState> getReachableParents() {
-        return null;
-    }
-
-    @Override
-    public long getBitString() {
-        return getLiterals().getBitString();
-    }
-
-    @Override
-    public boolean isReachable() {
-        return false;
-    }
-
-    @Override
-    public FFTState clone() {
-        return new State(this);
     }
 
     public void setMove(Move move) {
@@ -263,22 +210,22 @@ public class State implements Serializable, FFTState {
         }
     }
 
-    public ArrayList<State> getChildren() {
-        ArrayList<State> children = new ArrayList<>();
+    public ArrayList<Node> getChildren() {
+        ArrayList<Node> children = new ArrayList<>();
         for (Move m : getLegalMoves()) {
-            State child = new State(this, m);
+            Node child = new Node(this, m);
             children.add(child);
         }
         return children;
     }
 
     @Override
-    public FFTState getNextState(FFTMove move) {
-        return getNextState((Move) move);
+    public FFTNode getNextNode(FFTMove move) {
+        return getNextNode((Move) move);
     }
 
-    public State getNextState(Move m) {
-        return new State(this, m);
+    public Node getNextNode(Move m) {
+        return new Node(this, m);
     }
 
     // Creates and/or returns a list of new state objects which correspond to the children of the given state.
@@ -286,27 +233,6 @@ public class State implements Serializable, FFTState {
         if (legalMoves != null) return legalMoves;
         legalMoves = Logic.legalMoves(turn, this);
         return legalMoves;
-    }
-
-    public LiteralSet getLiterals() {
-        LiteralSet literals = new LiteralSet();
-
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                int occ = board[i][j];
-                Position pos = new Position(i, j, occ);
-                // TODO - do eet
-
-            }
-        }
-        literals.add(new Literal("P1SCORE=" + redScore));
-        literals.add(new Literal("P2SCORE=" + blackScore));
-        return literals;
-    }
-
-    @Override
-    public LiteralSet getAllLiterals() {
-        return getLiterals();
     }
 
     public String toString() {

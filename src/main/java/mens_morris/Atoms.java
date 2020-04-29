@@ -1,8 +1,6 @@
 package mens_morris;
 
-import fftlib.Action;
 import fftlib.auxiliary.Position;
-import fftlib.game.LiteralSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +20,8 @@ public class Atoms {
         idToPos = new HashMap<>();
         posToId = new HashMap<>();
         gameAtoms = new ArrayList<>();
-        int counter = 0;
+
+        int counter = 1;
         String s;
         gameAtoms.add(counter);
         stringToId.put("phase2", counter);
@@ -32,9 +31,9 @@ public class Atoms {
             stringToId.put("canRemove", counter);
             idToString.put(counter++, "canRemove");
         }
-        for (int i = 0; i < State.BOARD_SIZE; i++) {
-            for (int j = 0; j < State.BOARD_SIZE; j++) {
-                if (!State.validPos(i, j))
+        for (int i = 0; i < Node.BOARD_SIZE; i++) {
+            for (int j = 0; j < Node.BOARD_SIZE; j++) {
+                if (!Node.validPos(i, j))
                     continue;
                 s = String.format("P1(%s, %s)", i, j);
                 gameAtoms.add(counter);

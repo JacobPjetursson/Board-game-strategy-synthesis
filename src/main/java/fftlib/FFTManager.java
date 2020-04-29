@@ -2,8 +2,8 @@ package fftlib;
 
 import fftlib.auxiliary.Position;
 import fftlib.game.*;
-import fftlib.gui.FFTFailState;
-import fftlib.gui.InteractiveFFTState;
+import fftlib.gui.FFTFailNode;
+import fftlib.gui.interactiveFFTNode;
 import javafx.scene.Node;
 import javafx.scene.input.DataFormat;
 import misc.Config;
@@ -25,32 +25,37 @@ import static misc.Config.USE_OLD_VERIFICATION;
 
 
 public class FFTManager {
+    // Misc
+    private static int fft_index = 0;
     public static ArrayList<FFT> ffts;
+    private static String fftPath;
+    public static FFT currFFT;
+    // Domain specific
     public static FFTLogic logic;
     public static int gameBoardWidth;
     public static int gameBoardHeight;
-    private static String path;
-    public static FFTState initialFFTState;
-    public static FFT currFFT;
-    private static FFTFailState failState;
-    public static InteractiveFFTState interactiveState;
+    public static FFTNode initialFFTNode;
+    public static Function<Rule, HashSet<SymmetryRule>> getSymmetryRules;
+    public static int maxStateLiterals;
+    public static int winner; // set by solver
+    // Visual tool
+    private static FFTFailNode failNode;
+    public static interactiveFFTNode interactiveNode;
+    public static String[] playerNames;
+    // Interface between domain specific and logic
     public static Function<Action, FFTMove> actionToMove;
     public static Function<FFTMove, Action> moveToAction;
     public static BiFunction<String, String, Rule> gdlToRule;
-    public static Function<Rule, HashSet<SymmetryRule>> getSymmetryRules;
-    public static Function<Position, Integer> getIdFromPos;
-    public static Function<Integer, Position> getPosFromId;
-
-    // Game atoms
+    public static Function<FFTNode, State> nodeToState;
+    // Logic representation
     public static Supplier<ArrayList<Integer>> getGameAtoms;
     public static Function<String, Integer> getAtomId;
     public static Function<Integer, String> getAtomName;
+    public static Function<Position, Integer> getIdFromPos;
+    public static Function<Integer, Position> getPosFromId;
+    public static Function<Action, LiteralSet> getActionPreconditions;
     public static Function<Rule, Long> getNumberOfCoveredStates;
     public static Function<Rule, HashSet<Long>> getCoveredStateBitCodes;
-    public static Function<Action, LiteralSet> getActionPreconditions;
-    public static String[] playerNames;
-    private static int fft_index = 0;
-    public static int maxStateLiterals;
 
     public static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     public static final String blueBtnStyle = "-fx-border-color: #000000; -fx-background-color: #4444ff;";
@@ -60,33 +65,39 @@ public class FFTManager {
 
     // Most game-related classes are processed here
     public static void initialize(FFTGameSpecifics gameSpecifics) {
+        // Misc
         ffts = new ArrayList<>();
+        fftPath = gameSpecifics.getFFTFilePath();
+        // Interface
+        actionToMove = gameSpecifics::actionToMove;
+        moveToAction = gameSpecifics::moveToAction;
+        gdlToRule = gameSpecifics::gdlToRule;
+        nodeToState = gameSpecifics::nodeToState;
+        // Domain Specific
+        initialFFTNode = gameSpecifics.getInitialNode();
+        maxStateLiterals = gameSpecifics.getMaxStateLiterals();
+        logic = gameSpecifics.getLogic();
+        getSymmetryRules = gameSpecifics::getSymmetryRules;
+        int[] dim = gameSpecifics.getBoardDim();
+        gameBoardHeight = dim[0];
+        gameBoardWidth = dim[1];
+        // Visual Tool
+        failNode = gameSpecifics.getFailNode();
+        interactiveNode = gameSpecifics.getInteractiveNode();
+        playerNames = gameSpecifics.getPlayerNames();
+        // Logic representation
         getGameAtoms = gameSpecifics::getGameAtoms;
         getAtomId = gameSpecifics::getAtomId;
         getAtomName = gameSpecifics::getAtomName;
         getPosFromId = gameSpecifics::idToPos;
         getIdFromPos = gameSpecifics::posToId;
         getActionPreconditions = gameSpecifics::getActionPreconditions;
-
-        initialFFTState = gameSpecifics.getInitialState();
-        maxStateLiterals = gameSpecifics.getMaxStateLiterals();
-        logic = gameSpecifics.getLogic();
-        path = gameSpecifics.getFFTFilePath();
-        int[] dim = gameSpecifics.getBoardDim();
-        gameBoardHeight = dim[0];
-        gameBoardWidth = dim[1];
-        actionToMove = gameSpecifics::actionToMove;
-        moveToAction = gameSpecifics::moveToAction;
-        gdlToRule = gameSpecifics::gdlToRule;
-        failState = gameSpecifics.getFailState();
-        interactiveState = gameSpecifics.getInteractiveState();
-        playerNames = gameSpecifics.getPlayerNames();
-        getSymmetryRules = gameSpecifics::getSymmetryRules;
         getNumberOfCoveredStates = gameSpecifics::getNumberOfCoveredStates;
         getCoveredStateBitCodes = gameSpecifics::getCoveredStateBitCodes;
 
+
         // Try loading ffts from file in working directory
-        ffts = load(path);
+        ffts = load(fftPath);
         if (!ffts.isEmpty())
             currFFT = ffts.get(fft_index);
     }
@@ -94,7 +105,7 @@ public class FFTManager {
     public static void save() {
         BufferedWriter writer;
         try {
-            writer = new BufferedWriter(new FileWriter(path));
+            writer = new BufferedWriter(new FileWriter(fftPath));
             StringBuilder fft_file = new StringBuilder();
             for (FFT fft : ffts) {
                 fft_file.append("{").append(fft.name).append("}\n");
@@ -182,17 +193,19 @@ public class FFTManager {
         save();
     }
 
-    public static Node getFailState() {
-        FFTStateAndMove ps = currFFT.failingPoint;
-        FFTState s = ps.getState();
-        ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(s);
-        return failState.getFailState(ps, optimalMoves);
+    // TODO
+    public static Node getFailNode() {
+        FFTNodeAndMove ps = currFFT.failingPoint;
+        FFTNode n = ps.getNode();
+        //ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(s);
+        //return failNode.getFailState(ps, optimalMoves);
+        return null;
     }
 
     public static FFT autogenFFT() {
-        FFT fft;
+        FFT fft = null;
         if (USE_OLD_VERIFICATION) {
-            fft = FFTAutoGenOld.generateFFT(Config.AUTOGEN_TEAM);
+            //fft = FFTAutoGenOld.generateFFT(Config.AUTOGEN_TEAM);
         } else {
             fft = FFTAutoGen.generateFFT(Config.AUTOGEN_TEAM);
         }

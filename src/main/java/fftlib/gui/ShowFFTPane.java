@@ -2,28 +2,25 @@ package fftlib.gui;
 
 
 import fftlib.FFT;
-import fftlib.FFTManager;
 import fftlib.Rule;
 import fftlib.RuleGroup;
 import fftlib.game.FFTMove;
-import fftlib.game.FFTState;
+import fftlib.game.FFTNode;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
-import javafx.stage.Stage;
 
 public class ShowFFTPane extends VBox {
     Label title;
     FFT fft;
-    FFTState state;
+    FFTNode node;
     private ListView<VBox> lw;
     private static final double ROW_SIZE = 25.5;
 
@@ -46,9 +43,9 @@ public class ShowFFTPane extends VBox {
         getChildren().addAll(title, lw);
     }
 
-    public void update(FFT fft, FFTState state) {
+    public void update(FFT fft, FFTNode node) {
         this.fft = fft;
-        this.state = state;
+        this.node = node;
         title.setText(fft.name);
         showRuleGroups();
     }
@@ -70,7 +67,7 @@ public class ShowFFTPane extends VBox {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r);
                 rLabel.setFont(Font.font("Verdana", 13));
-                FFTMove move = r.apply(state);
+                FFTMove move = r.apply(node.getState()).getMove();
                 if (!ruleApplied && move != null) {
                     rLabel.setTextFill(Color.BLUE);
                     ruleApplied = true;

@@ -1,21 +1,14 @@
 package fftlib;
 
-import fftlib.GGPAutogen.Database;
-import fftlib.GGPAutogen.GGPManager;
 import fftlib.game.*;
 import misc.Config;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
-import org.ggp.base.util.statemachine.Role;
-import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
-import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
-import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveTask;
 
 import static misc.Config.*;
 import static misc.Globals.*;
@@ -24,18 +17,18 @@ import static misc.Globals.*;
 public class FFT {
     public String name;
     public ArrayList<RuleGroup> ruleGroups;
-    public FFTStateAndMove failingPoint = null;
+    public FFTNodeAndMove failingPoint = null;
 
     // For concurrency purposes
     private static ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
-    private ConcurrentHashMap<FFTState, Boolean> closedMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<FFTNode, Boolean> closedMap = new ConcurrentHashMap<>();
     private ConcurrentHashMap<MachineState, Boolean> closedMapGGP = new ConcurrentHashMap<>();
     private boolean failed; // failed is set to true if verification failed
 
-    public HashMap<FFTState, StateMapping> singleStrategy; // used for alternative version of program
+    public HashMap<FFTNode, NodeMapping> singleStrategy; // used for alternative version of program
 
     // used for optimization
-    private ConcurrentHashMap<FFTState, FFTMove> strategy = new ConcurrentHashMap<>(); // used for storing verification results, e.g. moves from strat
+    private ConcurrentHashMap<FFTNode, FFTMove> strategy = new ConcurrentHashMap<>(); // used for storing verification results, e.g. moves from strat
     private ConcurrentHashMap<MachineState, Move> strategyGGP = new ConcurrentHashMap<>();
     public boolean SAFE_RUN; // used as flag to signal that current run is a safe run, e.g. verification guaranteed to succeed
     public boolean USE_STRATEGY;
@@ -61,7 +54,7 @@ public class FFT {
         return size;
     }
 
-    public void setSingleStrategy(HashMap<FFTState, StateMapping> strat) {
+    public void setSingleStrategy(HashMap<FFTNode, NodeMapping> strat) {
         singleStrategy = strat;
     }
 
@@ -86,7 +79,7 @@ public class FFT {
     }
 
     public boolean isValid(int team) {
-        int winner = FFTSolution.queryState(FFTManager.initialFFTState).getWinner();
+        int winner = FFTManager.winner;
         if (team == PLAYER1 && winner == PLAYER2) {
             System.out.println("A perfect player 2 has won from start of the game");
             return false;
@@ -95,172 +88,6 @@ public class FFT {
             return false;
         }
         return true;
-    }
-
-    public boolean verify(int team, boolean complete) {
-        if (!Config.ENABLE_GGP && SINGLE_THREAD) {
-            return verifySingleThread(team, complete);
-        }
-        else {
-            return (Config.ENABLE_GGP) ? verifyGGP(team, complete) : verify_(team, complete);
-        }
-    }
-
-    public boolean verifySingleThread(int team, boolean complete) {
-        if (team == PLAYER_ANY)
-            return verifySingleThread(PLAYER1, complete) && verifySingleThread(PLAYER2, complete);
-        FFTState initialState = FFTManager.initialFFTState;
-        LinkedList<FFTState> frontier;
-        frontier = new LinkedList<>();
-        HashSet<FFTState> closedSet = new HashSet<>();
-        frontier.add(initialState);
-        int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
-        if (!isValid(team))
-            return false;
-        while (!frontier.isEmpty()) {
-            FFTState state = frontier.pop();
-            if (FFTManager.logic.gameOver(state)) {
-                if (FFTManager.logic.getWinner(state) == opponent) {
-                    // Should not hit this given initial check
-                    System.out.println("No chance of winning vs. perfect player");
-                    return false;
-                }
-            } else if (team != state.getTurn()) {
-                for (FFTState child : state.getChildren())
-                    if (!closedSet.contains(child)) {
-                        closedSet.add(child);
-                        frontier.add(child);
-                    }
-            } else {
-                FFTMove move;
-                Rule newRule = this.getLastRule();
-                if (!USE_STRATEGY || newRule == null) {
-                    move = apply(state);
-                }
-                else {
-                    // re-use move from strategy if it's from a previous rule, otherwise apply with new rule
-                    move = strategy.get(state);
-                    if (move == null) {
-                        move = newRule.apply(state);
-                    }
-                }
-                ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(state);
-                // If move is null, check that all possible (random) moves are ok
-                if (move == null) {
-                    if (!complete && singleStrategy != null) { // only expand on move from strategy
-                        StateMapping info = singleStrategy.get(state);
-                        if (info == null) {
-                            System.out.println("Given strategy is not a winning strategy");
-                            return false;
-                        }
-                        FFTState nextState = state.getNextState(info.getMove());
-                        if (!closedSet.contains(nextState)) {
-                            closedSet.add(nextState);
-                            frontier.add(nextState);
-                        }
-                        continue;
-                    }
-
-                    for (FFTMove m : state.getLegalMoves()) {
-                        if (optimalMoves.contains(m)) {
-                            FFTState nextState = state.getNextState(m);
-                            if (!closedSet.contains(nextState)) {
-                                closedSet.add(nextState);
-                                frontier.add(nextState);
-                            }
-                        } else if (complete) {
-                            failingPoint = new FFTStateAndMove(state, m, true);
-                            return false;
-                        }
-                    }
-                } else if (!optimalMoves.contains(move)) {
-                    failingPoint = new FFTStateAndMove(state, move, false);
-                    return false;
-                } else { // move is not null, expand on state from that move
-                    if (!complete && singleStrategy != null) { // check that move is same as from strategy
-                        StateMapping info = singleStrategy.get(state);
-                        if (info == null) {
-                            System.out.println("Given strategy is not a winning strategy");
-                            return false;
-                        }
-                        if (!info.getMove().equals(move)) { // DOESN'T WORK BECAUSE OF TRANSFORMATIONS!
-                            return false;
-                        }
-
-                    }
-                    // insert into strategy if we know verification will succeed
-                    if (USE_STRATEGY && SAFE_RUN)
-                        strategy.put(state, move);
-                    FFTState nextState = state.getNextState(move);
-                    if (!closedSet.contains(nextState)) {
-                        closedSet.add(nextState);
-                        frontier.add(nextState);
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-    public boolean verify_(int team, boolean complete) {
-        if (team == PLAYER_ANY)
-            return verify_(PLAYER1, complete) && verify_(PLAYER2, complete);
-        FFTState initialState = FFTManager.initialFFTState;
-        closedMap.clear();
-        failed = false;
-        // Check if win or draw is even possible
-        int winner = FFTSolution.queryState(initialState).getWinner();
-        if (team == PLAYER1 && winner == PLAYER2) {
-            System.out.println("A perfect player 2 has won from start of the game");
-            return false;
-        } else if (team == PLAYER2 && winner == PLAYER1) {
-            System.out.println("A perfect player 1 has won from the start of the game");
-            return false;
-        }
-        return forkJoinPool.invoke(new VerificationTask(initialState, team, complete));
-    }
-
-
-    private boolean verifyGGP(int team, boolean complete) {
-        if (team == PLAYER_ANY)
-            return verifyGGP(PLAYER1, complete) && verifyGGP(PLAYER2, complete);
-        MachineState initialState = GGPManager.getInitialState();
-        closedMapGGP.clear();
-        failed = false;
-        // Check if win or draw is even possible
-        int winner = Database.queryState(initialState).getWinner();
-        if (team == PLAYER1 && winner == PLAYER2) {
-            System.out.println("A perfect player 2 has won from start of the game");
-            return false;
-        } else if (team == PLAYER2 && winner == PLAYER1) {
-            System.out.println("A perfect player 1 has won from the start of the game");
-            return false;
-        }
-        return forkJoinPool.invoke(new GGPVerificationTask(initialState, team, complete));
-    }
-
-    public Move apply(MachineState state) throws MoveDefinitionException {
-        for (RuleGroup ruleGroup : ruleGroups) {
-            for (Rule rule : ruleGroup.rules) {
-                    Move move = rule.apply(state);
-                    if (move != null) {
-                        return move;
-                    }
-            }
-        }
-        return null;
-    }
-
-    public FFTMove apply(FFTState state) {
-        for (RuleGroup rg : ruleGroups) {
-            for (Rule r : rg.rules) {
-                FFTMove m = r.apply(state);
-                if (m != null) {
-                    return m;
-                }
-            }
-        }
-        return null;
     }
 
     public int getAmountOfRules() {
@@ -277,6 +104,27 @@ public class FFT {
             precSize += rg.getAmountOfPreconditions();
         }
         return precSize;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (RuleGroup rg : ruleGroups) {
+            sb.append(rg.name).append(":\n");
+            for (Rule r : rg.rules)
+                sb.append(r).append("\n");
+        }
+        return sb.toString();
+    }
+
+    public FFTMove apply(FFTNode node) {
+        for (RuleGroup rg : ruleGroups) {
+            for (Rule r : rg.rules) {
+                Action a = r.apply(node.getState());
+                if (a != null)
+                    return a.getMove();
+            }
+        }
+        return null;
     }
 
     public int minimize(int team, boolean minimize_precons) { // Returns amount of iterations
@@ -400,24 +248,134 @@ public class FFT {
         }
     }
 
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (RuleGroup rg : ruleGroups) {
-            sb.append(rg.name).append(":\n");
-            for (Rule r : rg.rules)
-                sb.append(r).append("\n");
+    public boolean verify(int team, boolean complete) {
+        if (!Config.ENABLE_GGP && SINGLE_THREAD) {
+            return verifySingleThread(team, complete);
         }
-        return sb.toString();
+        //else {
+        //    return (Config.ENABLE_GGP) ? verifyGGP(team, complete) : verify_(team, complete);
+        //}
+        // todo
+        System.err.println("unsupported");
+        System.exit(1);
+        return false;
+    }
+
+    public boolean verifySingleThread(int team, boolean complete) {
+        if (team == PLAYER_ANY)
+            return verifySingleThread(PLAYER1, complete) && verifySingleThread(PLAYER2, complete);
+        FFTNode initialNode = FFTManager.initialFFTNode;
+        LinkedList<FFTNode> frontier;
+        frontier = new LinkedList<>();
+        HashSet<FFTNode> closedSet = new HashSet<>();
+        frontier.add(initialNode);
+        int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
+        if (!isValid(team))
+            return false;
+        while (!frontier.isEmpty()) {
+            FFTNode node = frontier.pop();
+            if (FFTManager.logic.gameOver(node)) {
+                if (FFTManager.logic.getWinner(node) == opponent) {
+                    // Should not hit this given initial check
+                    System.out.println("No chance of winning vs. perfect player");
+                    return false;
+                }
+            } else if (team != node.getTurn()) {
+                for (FFTNode child : node.getChildren())
+                    if (!closedSet.contains(child)) {
+                        closedSet.add(child);
+                        frontier.add(child);
+                    }
+            } else {
+                FFTMove move = apply(node);
+                ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(node);
+                // If move is null, check that all possible (random) moves are ok
+                if (move == null) {
+                    for (FFTMove m : node.getLegalMoves()) {
+                        if (optimalMoves.contains(m)) {
+                            FFTNode nextState = node.getNextNode(m);
+                            if (!closedSet.contains(nextState)) {
+                                closedSet.add(nextState);
+                                frontier.add(nextState);
+                            }
+                        } else if (complete) {
+                            failingPoint = new FFTNodeAndMove(node, m, true);
+                            return false;
+                        }
+                    }
+                } else if (!optimalMoves.contains(move)) {
+                    failingPoint = new FFTNodeAndMove(node, move, false);
+                    return false;
+                } else { // move is not null, expand on state from that move
+                    FFTNode nextState = node.getNextNode(move);
+                    if (!closedSet.contains(nextState)) {
+                        closedSet.add(nextState);
+                        frontier.add(nextState);
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+/*
+    public boolean verify_(int team, boolean complete) {
+        if (team == PLAYER_ANY)
+            return verify_(PLAYER1, complete) && verify_(PLAYER2, complete);
+        FFTNode initialState = FFTManager.initialFFTNode;
+        closedMap.clear();
+        failed = false;
+        // Check if win or draw is even possible
+        int winner = FFTSolution.queryState(initialState).getWinner();
+        if (team == PLAYER1 && winner == PLAYER2) {
+            System.out.println("A perfect player 2 has won from start of the game");
+            return false;
+        } else if (team == PLAYER2 && winner == PLAYER1) {
+            System.out.println("A perfect player 1 has won from the start of the game");
+            return false;
+        }
+        return forkJoinPool.invoke(new VerificationTask(initialState, team, complete));
+    }
+
+
+    private boolean verifyGGP(int team, boolean complete) {
+        if (team == PLAYER_ANY)
+            return verifyGGP(PLAYER1, complete) && verifyGGP(PLAYER2, complete);
+        MachineState initialState = GGPManager.getInitialState();
+        closedMapGGP.clear();
+        failed = false;
+        // Check if win or draw is even possible
+        int winner = Database.queryState(initialState).getWinner();
+        if (team == PLAYER1 && winner == PLAYER2) {
+            System.out.println("A perfect player 2 has won from start of the game");
+            return false;
+        } else if (team == PLAYER2 && winner == PLAYER1) {
+            System.out.println("A perfect player 1 has won from the start of the game");
+            return false;
+        }
+        return forkJoinPool.invoke(new GGPVerificationTask(initialState, team, complete));
+    }
+
+    public Move apply(MachineState state) throws MoveDefinitionException {
+        for (RuleGroup ruleGroup : ruleGroups) {
+            for (Rule rule : ruleGroup.rules) {
+                    Move move = rule.apply(state);
+                    if (move != null) {
+                        return move;
+                    }
+            }
+        }
+        return null;
     }
 
     public class VerificationTask extends RecursiveTask<Boolean> {
 
         int team, opponent;
-        FFTState state;
+        FFTNode node;
         List<RecursiveTask<Boolean>> forks;
         boolean complete;
 
-        VerificationTask(FFTState state, int team, boolean complete) {
+        VerificationTask(FFTNode node, int team, boolean complete) {
             this.state = state;
             this.team = team;
             this.complete = complete;
@@ -438,7 +396,7 @@ public class FFT {
                     return false;
                 }
             } else if (team != state.getTurn()) {
-                for (FFTState child : state.getChildren()) {
+                for (FFTNode child : state.getChildren()) {
                     addTask(child);
                 }
             } else {
@@ -511,7 +469,7 @@ public class FFT {
             return result;
         }
 
-        private void addTask(FFTState state) {
+        private void addTask(FFTNode node) {
             if (!closedMap.containsKey(state)) {
                 closedMap.put(state, true);
                 VerificationTask t = new VerificationTask(state, team, complete);
@@ -519,6 +477,7 @@ public class FFT {
                 t.fork();
             }
         }
+
     }
 
     public class GGPVerificationTask extends RecursiveTask<Boolean> {
@@ -613,5 +572,6 @@ public class FFT {
             }
         }
     }
+    */
 }
 

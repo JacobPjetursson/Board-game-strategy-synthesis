@@ -1,22 +1,17 @@
 package mens_morris;
 
-import fftlib.Literal;
-import fftlib.auxiliary.Position;
 import fftlib.game.FFTMove;
-import fftlib.game.FFTState;
-import fftlib.game.LiteralSet;
-import tictactoe.FFT.Atoms;
+import fftlib.game.FFTNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 
 import static mens_morris.Logic.POS_NONBOARD;
 import static misc.Config.THREE_MENS;
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 
-public class State implements FFTState {
+public class Node extends FFTNode {
     private Move move;
     private int turn;
     private long zobrist_key;
@@ -25,16 +20,12 @@ public class State implements FFTState {
     boolean phase2; // did phase 2 start?
     int unplaced; // need to place 12 pieces for phase2 (half for each player)
 
-    // Reachability
-    HashSet<State> reachableParents;
-    boolean reachable;
-
     // varies depending on game type
     private static final int MEN = (THREE_MENS) ? 3*2 : 6*2;
     public static final int BOARD_SIZE = (THREE_MENS) ? 3 : 5;
 
     // initial state
-    public State () {
+    public Node() {
         turn = PLAYER1;
         board = initBoard();
         phase2 = false;
@@ -42,30 +33,28 @@ public class State implements FFTState {
         // each player starts with specific amount of men
         unplaced = MEN;
         this.zobrist_key = initZobrist();
-        reachable = true; // initial state always reachable;
     }
 
     // next state
-    public State(State parent, Move m) {
+    public Node(Node parent, Move m) {
         this(parent);
         this.move = m;
         Logic.doTurn(m, this);
-        reachableParents = new HashSet<>();
         updateHashCode(parent);
     }
 
-    // Duplicate constructor, for "root" state
-    public State(State state) {
+    // Duplicate constructor, for "root" node
+    public Node(Node node) {
         board = new int[BOARD_SIZE][BOARD_SIZE];
-        for (int i = 0; i < state.board.length; i++) {
-            board[i] = Arrays.copyOf(state.board[i], state.board[i].length);
+        for (int i = 0; i < node.board.length; i++) {
+            board[i] = Arrays.copyOf(node.board[i], node.board[i].length);
         }
-        turn = state.turn;
-        move = state.move;
-        this.phase2 = state.phase2;
-        this.canRemove = state.canRemove;
-        unplaced = state.unplaced;
-        zobrist_key = state.zobrist_key;
+        turn = node.turn;
+        move = node.move;
+        this.phase2 = node.phase2;
+        this.canRemove = node.canRemove;
+        unplaced = node.unplaced;
+        zobrist_key = node.zobrist_key;
     }
 
     @Override
@@ -75,14 +64,14 @@ public class State implements FFTState {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof State)) return false;
+        if (!(obj instanceof Node)) return false;
 
-        State state = (State) obj;
-        return this == state ||
-                this.zobrist_key == state.zobrist_key;
+        Node node = (Node) obj;
+        return this == node ||
+                this.zobrist_key == node.zobrist_key;
     }
 
-    @Override
+    /*
     public LiteralSet getLiterals() { // Including negatives, used for creating rules
         LiteralSet literals = new LiteralSet();
         if (phase2)
@@ -102,19 +91,7 @@ public class State implements FFTState {
         return literals;
     }
 
-    @Override
-    public LiteralSet getAllLiterals() {
-        LiteralSet literals = getLiterals();
-        literals.add(new Literal("phase2", phase2));
-        if (!THREE_MENS)
-            literals.add(new Literal("canRemove", canRemove));
-        return literals;
-    }
-
-    @Override
-    public long getZobristKey() {
-        return this.zobrist_key;
-    }
+     */
 
     private long initZobrist() {
         long hash = 0L;
@@ -131,8 +108,8 @@ public class State implements FFTState {
         return hash;
     }
 
-    private void updateHashCode(State parent) {
-        zobrist_key ^= Zobrist.turn[parent.getTurn()];
+    private void updateHashCode(Node parent) {
+        zobrist_key ^= Zobrist.turn[parent.turn];
         zobrist_key ^= Zobrist.turn[turn];
 
         if (move.newRow != POS_NONBOARD) {
@@ -167,33 +144,28 @@ public class State implements FFTState {
                 (i != 4 || j != 3);
     }
 
-    @Override
-    public int getTurn() {
-        return turn;
-    }
-
     public void setTurn(int newTurn) {
         zobrist_key ^= Zobrist.turn[turn];
         zobrist_key ^= Zobrist.turn[newTurn];
         this.turn = newTurn;
     }
 
-    public ArrayList<State> getChildren() {
-        ArrayList<State> children = new ArrayList<>();
+    public ArrayList<Node> getChildren() {
+        ArrayList<Node> children = new ArrayList<>();
         for (Move m : getLegalMoves()) {
-            State child = new State(this, m);
+            Node child = new Node(this, m);
             children.add(child);
         }
         return children;
     }
 
     @Override
-    public FFTState getNextState(FFTMove move) {
+    public FFTNode getNextNode(FFTMove move) {
         return getNextState((Move) move);
     }
 
-    public State getNextState(Move m) {
-        return new State(this, m);
+    public Node getNextState(Move m) {
+        return new Node(this, m);
     }
 
     // Creates and/or returns a list of new state objects which correspond to the children of the given state.
@@ -219,48 +191,8 @@ public class State implements FFTState {
         return board;
     }
 
-    @Override
     public Move getMove() {
         return move;
-    }
-
-    public void addReachableParent(State parent) {
-        if (reachableParents == null) {
-            reachableParents = new HashSet<>();
-        }
-        reachableParents.add(parent);
-        reachable = true;
-    }
-
-    public void removeReachableParent(State parent) {
-        reachableParents.remove(parent);
-        if (reachableParents.isEmpty())
-            reachable = false;
-    }
-
-    @Override
-    public HashSet<State> getReachableParents() {
-        return reachableParents;
-    }
-
-    @Override
-    public void addReachableParent(FFTState parent) {
-        addReachableParent((State) parent);
-    }
-
-    @Override
-    public void removeReachableParent(FFTState parent) {
-        removeReachableParent((State) parent);
-    }
-
-    @Override
-    public long getBitString() {
-        return getLiterals().getBitString();
-    }
-
-    @Override
-    public boolean isReachable() {
-        return reachable;
     }
 
     public void changeTurn() {
@@ -272,11 +204,6 @@ public class State implements FFTState {
 
     public void setBoardEntry(int row, int col, int team) {
         board[row][col] = team;
-    }
-
-    @Override
-    public FFTState clone() {
-        return new State(this);
     }
 
     public String toString() {

@@ -6,7 +6,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import kulibrat.FFT.GameSpecifics;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 import kulibrat.gui.menu.MenuPane;
 import misc.Globals;
 
@@ -22,7 +22,7 @@ public class Main extends Application {
         else {
             GameSpecifics specs = new GameSpecifics();
             FFTManager.initialize(specs);
-            FFTSolver.solveGame(new State());
+            FFTSolver.solveGame(new Node());
             FFTManager.autogenFFT();
         }
     }

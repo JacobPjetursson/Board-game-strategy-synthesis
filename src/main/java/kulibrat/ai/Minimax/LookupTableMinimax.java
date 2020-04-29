@@ -1,9 +1,9 @@
 package kulibrat.ai.Minimax;
 
-import fftlib.game.StateMapping;
+import fftlib.game.NodeMapping;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
-import kulibrat.game.State;
+import kulibrat.game.Node;
 
 import java.util.HashMap;
 
@@ -15,17 +15,17 @@ public class LookupTableMinimax {
     private static int team = PLAYER1;
     private static int CURR_MAX_DEPTH;
     private static int unevaluatedNodes = 0;
-    private static HashMap<Long, StateMapping> lookupTable;
+    private static HashMap<Long, NodeMapping> lookupTable;
 
     // Runs an iterative deepening minimax as the exhaustive brute-force for the lookupDB. The data is saved in the transpo table
-    public static HashMap<Long, StateMapping> solveGame(State state) {
+    public static HashMap<Long, NodeMapping> solveGame(Node node) {
         CURR_MAX_DEPTH = 0;
         lookupTable = new HashMap<>();
         boolean done = false;
-        StateMapping play;
+        NodeMapping play;
         int doneCounter = 0;
         while (!done) {
-            State simState = new State(state); // Start from fresh (Don't reuse previous game tree in new iterations)
+            Node simState = new Node(node); // Start from fresh (Don't reuse previous game tree in new iterations)
             int prevSize = lookupTable.size();
             int prevUnevaluatedNodes = unevaluatedNodes;
             unevaluatedNodes = 0;
@@ -50,25 +50,25 @@ public class LookupTableMinimax {
     }
 
     // Is called for every depth limit of the iterative deepening function. Classic minimax with no pruning
-    private static StateMapping minimax(State state, int depth) {
+    private static NodeMapping minimax(Node node, int depth) {
         Move bestMove = null;
-        int bestScore = (state.getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        int bestScore = (node.getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int score;
-        if (Logic.gameOver(state) || depth == 0) {
-            return new StateMapping(bestMove, heuristic(state), depth);
+        if (Logic.gameOver(node) || depth == 0) {
+            return new NodeMapping(bestMove, heuristic(node), depth);
         }
-        StateMapping mapping = lookupTable.get(state.getZobristKey());
+        NodeMapping mapping = lookupTable.get(node.getZobristKey());
         if (mapping != null && depth <= mapping.depth) {
             return mapping;
         }
         boolean evaluated = true;
-        for (State child : state.getChildren()) {
+        for (Node child : node.getChildren()) {
             score = minimax(child, depth - 1).score;
             if (score > 1000) score--;
             else if (score < -1000) score++;
             else evaluated = false;
 
-            if (state.getTurn() == team) {
+            if (node.getTurn() == team) {
                 if (score > bestScore) {
                     bestScore = score;
                     bestMove = child.getMove();
@@ -81,18 +81,18 @@ public class LookupTableMinimax {
             }
         }
         if (mapping == null || depth > mapping.depth) {
-            lookupTable.put(state.getZobristKey(),
-                    new StateMapping(bestMove, bestScore, depth));
+            lookupTable.put(node.getZobristKey(),
+                    new NodeMapping(bestMove, bestScore, depth));
         }
         if (!evaluated) unevaluatedNodes++;
-        return new StateMapping(bestMove, bestScore, depth);
+        return new NodeMapping(bestMove, bestScore, depth);
     }
 
     // Heuristic function which values red with 2000 for a win, and -2000 for a loss. All other nodes are 0
-    private static int heuristic(State state) {
+    private static int heuristic(Node node) {
         int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
-        if (Logic.gameOver(state)) {
-            int winner = Logic.getWinner(state);
+        if (Logic.gameOver(node)) {
+            int winner = Logic.getWinner(node);
             if (winner == team)
                 return 2000;
             else if (winner == opponent)
