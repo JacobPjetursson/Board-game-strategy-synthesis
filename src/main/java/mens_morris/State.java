@@ -1,9 +1,11 @@
 package mens_morris;
 
 import fftlib.Literal;
+import fftlib.auxiliary.Position;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTState;
 import fftlib.game.LiteralSet;
+import tictactoe.FFT.Atoms;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,7 +13,8 @@ import java.util.HashSet;
 
 import static mens_morris.Logic.POS_NONBOARD;
 import static misc.Config.THREE_MENS;
-import static misc.Globals.*;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class State implements FFTState {
     private Move move;
@@ -21,6 +24,10 @@ public class State implements FFTState {
     boolean canRemove; // can the player remove opponent piece?
     boolean phase2; // did phase 2 start?
     int unplaced; // need to place 12 pieces for phase2 (half for each player)
+
+    // Reachability
+    HashSet<State> reachableParents;
+    boolean reachable;
 
     // varies depending on game type
     private static final int MEN = (THREE_MENS) ? 3*2 : 6*2;
@@ -35,6 +42,7 @@ public class State implements FFTState {
         // each player starts with specific amount of men
         unplaced = MEN;
         this.zobrist_key = initZobrist();
+        reachable = true; // initial state always reachable;
     }
 
     // next state
@@ -42,6 +50,7 @@ public class State implements FFTState {
         this(parent);
         this.move = m;
         Logic.doTurn(m, this);
+        reachableParents = new HashSet<>();
         updateHashCode(parent);
     }
 
@@ -74,27 +83,31 @@ public class State implements FFTState {
     }
 
     @Override
-    public LiteralSet getLiterals() { // TODO
+    public LiteralSet getLiterals() { // Including negatives, used for creating rules
         LiteralSet literals = new LiteralSet();
-
+        if (phase2)
+            literals.add(new Literal("phase2"));
+        if (!THREE_MENS && canRemove)
+            literals.add(new Literal("canRemove"));
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
-                int pieceOcc = board[i][j];
-                if (pieceOcc > 0) {
-                    if (turn != PLAYER1) {
-                        pieceOcc = (pieceOcc == 1) ? 2 : 1;
-                    }
-                    //literals.add(new Literal(i, j, pieceOcc, false));
-                } else if (pieceOcc == 0) {
-                    //literals.add(new Literal(i, j, PLAYER_ANY, true));
-                }
+                if (!validPos(i, j))
+                    continue;
+                int occ = board[i][j];
+                Position pos = new Position(i, j, occ);
+                int id = Atoms.posToId.get(pos);
+                literals.add(new Literal(id, false));
             }
         }
+        return literals;
+    }
 
-        String phaseStr = (phase2) ? "" : "!";
-        String removeStr = (canRemove) ? "" : "!";
-        if (!THREE_MENS) literals.add(new Literal(phaseStr + "phase2"));
-        if (!THREE_MENS) literals.add(new Literal(removeStr + "canRemove"));
+    @Override
+    public LiteralSet getAllLiterals() {
+        LiteralSet literals = getLiterals();
+        literals.add(new Literal("phase2", phase2));
+        if (!THREE_MENS)
+            literals.add(new Literal("canRemove", canRemove));
         return literals;
     }
 
@@ -142,6 +155,16 @@ public class State implements FFTState {
         if (parent.phase2 != this.phase2)
             zobrist_key ^= Zobrist.phase2;
 
+    }
+
+    public static boolean validPos(int i, int j) {
+        if (THREE_MENS)
+            return true;
+        return (i != 0 || j != 1) && (i != 0 || j != 3) &&
+                (i != 1 || j != 0) && (i != 1 || j != 4) &&
+                (i != 2 || j != 2) && (i != 3 || j != 0) &&
+                (i != 3 || j != 4) && (i != 4 || j != 1) &&
+                (i != 4 || j != 3);
     }
 
     @Override
@@ -201,19 +224,33 @@ public class State implements FFTState {
         return move;
     }
 
+    public void addReachableParent(State parent) {
+        if (reachableParents == null) {
+            reachableParents = new HashSet<>();
+        }
+        reachableParents.add(parent);
+        reachable = true;
+    }
+
+    public void removeReachableParent(State parent) {
+        reachableParents.remove(parent);
+        if (reachableParents.isEmpty())
+            reachable = false;
+    }
+
+    @Override
+    public HashSet<State> getReachableParents() {
+        return reachableParents;
+    }
+
     @Override
     public void addReachableParent(FFTState parent) {
-
+        addReachableParent((State) parent);
     }
 
     @Override
     public void removeReachableParent(FFTState parent) {
-
-    }
-
-    @Override
-    public HashSet<? extends FFTState> getReachableParents() {
-        return null;
+        removeReachableParent((State) parent);
     }
 
     @Override
@@ -223,7 +260,7 @@ public class State implements FFTState {
 
     @Override
     public boolean isReachable() {
-        return false;
+        return reachable;
     }
 
     public void changeTurn() {

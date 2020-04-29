@@ -92,8 +92,10 @@ public class FFTAutoGen {
         int i = fft.minimize(AUTOGEN_TEAM, Config.MINIMIZE_PRECONDITIONS);
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
 
-        System.out.println("Final amount of rules after " + i + " minimize iterations: " + fft.getAmountOfRules());
-        System.out.println("Final amount of preconditions after " + i + " minimize iterations: " + fft.getAmountOfPreconditions());
+        System.out.println("Final amount of rules after " + i +
+                " minimize iterations: " + fft.getAmountOfRules());
+        System.out.println("Final amount of preconditions after " + i +
+                " minimize iterations: " + fft.getAmountOfPreconditions());
         System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
         System.out.println("Final rules: \n" + fft);
 
@@ -102,7 +104,8 @@ public class FFTAutoGen {
     private static void makeRules() {
         // TODO - try with iterator hasNext() and then skip states with all moves optimal
         while (!reachableRelevantStates.isEmpty()) {
-            System.out.println("Remaining relevant states: " + reachableRelevantStates.size() + ". Current amount of rules: " + rg.rules.size());
+            System.out.println("Remaining relevant states: " + reachableRelevantStates.size() +
+                    ". Current amount of rules: " + rg.rules.size());
             FFTState state = reachableRelevantStates.values().iterator().next(); // TODO - correct?
 
             Rule r = addRule(state);
@@ -114,7 +117,7 @@ public class FFTAutoGen {
 
     private static Rule addRule(FFTState s) {
         LiteralSet minSet = new LiteralSet();
-        LiteralSet literals = s.getLiterals();
+        LiteralSet literals = s.getAllLiterals();
         StateMapping mapping = lookupTable.get(s);
         Action bestAction = mapping.getMove().getAction();
 
@@ -129,6 +132,7 @@ public class FFTAutoGen {
             System.out.println("ORIGINAL STATE: " + s + " , AND MOVE: " + mapping.getMove());
             System.out.println("ORIGINAL PRECONDITIONS: " + s.getLiterals());
             System.out.println("ORIGINAL SCORE: " + mapping.getScore());
+            System.out.println("ORIGINAL RULE: " + r);
         }
 
         for (Literal l : literals) {
@@ -254,7 +258,7 @@ public class FFTAutoGen {
             //System.out.println("Removing ptr to child from optimal move: " + existingChild);
             existingChild.removeReachableParent(s);
             //System.out.println("remaining pointers: " + existingChild.getReachableParents());
-            if (!existingChild.isReachable()) {
+            if (!existingChild.isReachable()) { // TODO - use something else instead of undoMap?
                 //System.out.println("Child no longer reachable, removing from set and checking recursively");
                 deleteMap.put(existingChild, true);
                 updateSets(existingChild, null, suboptimalSet, deleteMap, undoMap); // FIXME - tail-end?

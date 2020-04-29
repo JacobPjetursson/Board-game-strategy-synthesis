@@ -50,7 +50,7 @@ public class FFTManager {
     public static Function<Action, LiteralSet> getActionPreconditions;
     public static String[] playerNames;
     private static int fft_index = 0;
-    public static int max_precons;
+    public static int maxStateLiterals;
 
     public static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     public static final String blueBtnStyle = "-fx-border-color: #000000; -fx-background-color: #4444ff;";
@@ -69,7 +69,7 @@ public class FFTManager {
         getActionPreconditions = gameSpecifics::getActionPreconditions;
 
         initialFFTState = gameSpecifics.getInitialState();
-        max_precons = initialFFTState.getLiterals().size();
+        maxStateLiterals = gameSpecifics.getMaxStateLiterals();
         logic = gameSpecifics.getLogic();
         path = gameSpecifics.getFFTFilePath();
         int[] dim = gameSpecifics.getBoardDim();

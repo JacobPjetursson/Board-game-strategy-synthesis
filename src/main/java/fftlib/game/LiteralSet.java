@@ -20,9 +20,9 @@ public class LiteralSet extends HashSet<Literal> {
         super();
     }
 
-    public LiteralSet(String literalName) {
+    public LiteralSet(Literal l) {
         super();
-        add(new Literal(literalName));
+        add(l);
     }
 
     public LiteralSet(int literalId, boolean negated) {
@@ -36,6 +36,10 @@ public class LiteralSet extends HashSet<Literal> {
         if (added && !l.negated)
             bitString |= (1 << l.id);
         return added;
+    }
+
+    public boolean add(String literalName) {
+        return add(new Literal(literalName));
     }
 
     public boolean remove(Literal l) {

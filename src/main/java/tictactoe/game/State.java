@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import static fftlib.auxiliary.Position.OCC_BLANK;
 import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 
 public class State implements FFTState {
@@ -167,11 +167,37 @@ public class State implements FFTState {
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
-
-                int occ = board[i][j] != 0 ? board[i][j] : OCC_BLANK;
+                int occ = board[i][j];
+                if (occ == 0)
+                    continue;
                 Position pos = new Position(i, j, occ);
                 int id = Atoms.posToId.get(pos);
                 literals.add(new Literal(id, false));
+            }
+        }
+        return literals;
+    }
+
+    @Override
+    public LiteralSet getAllLiterals() {
+        LiteralSet literals = new LiteralSet();
+
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                int occ = board[i][j];
+                if (occ == 0) { // add negation of both
+                    Position pos = new Position(i, j, PLAYER1);
+                    int id = Atoms.posToId.get(pos);
+                    literals.add(new Literal(id, true));
+
+                    pos = new Position(i, j, PLAYER2);
+                    id = Atoms.posToId.get(pos);
+                    literals.add(new Literal(id, true));
+                } else {
+                    Position pos = new Position(i, j, occ);
+                    int id = Atoms.posToId.get(pos);
+                    literals.add(new Literal(id, false));
+                }
             }
         }
         return literals;

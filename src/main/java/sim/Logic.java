@@ -76,8 +76,6 @@ public class Logic implements FFTLogic {
     }
 
     static void doTurn(Move m, State state) {
-        if (gameOver(state)) return;
-
         if (m.team != state.getTurn()) {
             System.out.println("Not your turn");
             return;

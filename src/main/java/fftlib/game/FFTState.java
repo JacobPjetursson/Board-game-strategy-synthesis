@@ -7,7 +7,19 @@ import java.util.HashSet;
 
 public interface FFTState {
 
+    /**
+     *
+     * @return Set of positive literals that uniquely defines this state
+     * Negative literals are not included
+     */
     LiteralSet getLiterals();
+
+    /**
+     *
+     * @return Set of all literals where negative literals are included
+     * This function is used when creating rules based on states
+     */
+    LiteralSet getAllLiterals();
 
     long getZobristKey();
 

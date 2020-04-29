@@ -137,6 +137,11 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
+    public int getMaxStateLiterals() {
+        return 0;
+    }
+
+    @Override
     public HashSet<Long> getCoveredStateBitCodes(Rule rule) {
         return null;
     }

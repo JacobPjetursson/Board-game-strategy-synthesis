@@ -44,6 +44,8 @@ public interface FFTGameSpecifics {
 
     LiteralSet getActionPreconditions(Action action);
 
+    int getMaxStateLiterals();
+
     /** Similar to getNumberOfCoveredStates, this function uses domain-specifc
      * knowledge to find the covered states given a rule with free preconditions.
      * The domain-free version computes the powerset of all free preconditions and

@@ -2,16 +2,12 @@ package fftlib.auxiliary;
 
 import java.util.Objects;
 
-
-
 // Is useful for all position-based games
 // team is the occupation of the position, e.g. cross or nought for tic-tac-toe
 public class Position {
-    // Zero is reserved for unfilled, e.g. when finding symmetric rules through
     // rotation/reflection of matrices
     public static final int OCC_PLAYER1 = 1;
     public static final int OCC_PLAYER2 = 2;
-    public static final int OCC_BLANK = 3;
 
     public int row, col, occ;
 

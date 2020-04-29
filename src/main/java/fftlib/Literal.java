@@ -26,6 +26,11 @@ public class Literal {
         }
     }
 
+    public Literal(String name, boolean negated) {
+        this(name);
+        this.negated = negated;
+    }
+
     public Literal(Literal duplicate) {
         this.id = duplicate.id;
         this.negated = duplicate.negated;
@@ -57,7 +62,8 @@ public class Literal {
     }
 
     public String getName() {
-        return FFTManager.getAtomName.apply(id);
+        String negPfx = negated ? "!" : "";
+        return negPfx + FFTManager.getAtomName.apply(id);
     }
 
     @Override

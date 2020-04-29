@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import static fftlib.auxiliary.Position.OCC_BLANK;
 import static kulibrat.game.Logic.POS_NONBOARD;
 import static misc.Config.BHEIGHT;
 import static misc.Config.BWIDTH;
@@ -294,7 +293,7 @@ public class State implements Serializable, FFTState {
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
-                int occ = board[i][j] != 0 ? board[i][j] : OCC_BLANK;
+                int occ = board[i][j];
                 Position pos = new Position(i, j, occ);
                 // TODO - do eet
 
@@ -303,6 +302,11 @@ public class State implements Serializable, FFTState {
         literals.add(new Literal("P1SCORE=" + redScore));
         literals.add(new Literal("P2SCORE=" + blackScore));
         return literals;
+    }
+
+    @Override
+    public LiteralSet getAllLiterals() {
+        return getLiterals();
     }
 
     public String toString() {

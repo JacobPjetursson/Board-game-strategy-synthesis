@@ -63,7 +63,7 @@ public class FFTSolver{
         int score;
         boolean gameover = FFTManager.logic.gameOver(state);
         if (gameover || depth == 0) {
-            return new StateMapping(bestMove, heuristic(state), depth, gameover);
+            return new StateMapping(bestMove, heuristic(state), depth);
         }
         StateMapping mapping = lookupTable.get(state);
         if (mapping != null && depth <= mapping.getDepth()) {
@@ -73,10 +73,11 @@ public class FFTSolver{
         for (FFTState child : state.getChildren()) {
             StateMapping childMapping = minimax(child, depth - 1);
             score = childMapping.getScore();
-            if (!childMapping.explored)
-                explored = false;
+
             if (childMapping.getWinner() == PLAYER1) score--;
-            else score++;
+            else if (childMapping.getWinner() == PLAYER2) score++;
+            else explored = false;
+
             if (state.getTurn() == team) {
                 if (score > bestScore) {
                     bestScore = score;
@@ -91,11 +92,11 @@ public class FFTSolver{
         }
         if (mapping == null || depth > mapping.getDepth()) {
             lookupTable.put(state,
-                    new StateMapping(bestMove, bestScore, depth, explored));
+                    new StateMapping(bestMove, bestScore, depth));
         }
         if (!explored)
             unexploredNodes++;
-        return new StateMapping(bestMove, bestScore, depth, explored);
+        return new StateMapping(bestMove, bestScore, depth);
     }
 
     // Heuristic function which values player1 with 2000 for a win, and -2000 for a loss. All other nodes are 0

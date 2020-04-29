@@ -1,12 +1,13 @@
-package sim;
+package mens_morris;
 
 import fftlib.Action;
-import fftlib.Literal;
 import fftlib.auxiliary.Position;
 import fftlib.game.LiteralSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static misc.Config.THREE_MENS;
 
 public class Atoms {
     public static HashMap<Integer, String> idToString;
@@ -14,7 +15,6 @@ public class Atoms {
     public static HashMap<Integer, Position> idToPos;
     public static HashMap<Position, Integer> posToId;
     public static ArrayList<Integer> gameAtoms;
-    public static HashMap<Action, LiteralSet> actionToPrecons;
 
     static {
         stringToId = new HashMap<>();
@@ -22,11 +22,20 @@ public class Atoms {
         idToPos = new HashMap<>();
         posToId = new HashMap<>();
         gameAtoms = new ArrayList<>();
-        actionToPrecons = new HashMap<>();
         int counter = 0;
         String s;
-        for (int i = 0; i < 6; i++) {
-            for (int j = i+1; j < 6; j++) {
+        gameAtoms.add(counter);
+        stringToId.put("phase2", counter);
+        idToString.put(counter++, "phase2");
+        if (!THREE_MENS) {
+            gameAtoms.add(counter);
+            stringToId.put("canRemove", counter);
+            idToString.put(counter++, "canRemove");
+        }
+        for (int i = 0; i < State.BOARD_SIZE; i++) {
+            for (int j = 0; j < State.BOARD_SIZE; j++) {
+                if (!State.validPos(i, j))
+                    continue;
                 s = String.format("P1(%s, %s)", i, j);
                 gameAtoms.add(counter);
                 stringToId.put(s, counter);
@@ -47,14 +56,6 @@ public class Atoms {
                 idToPos.put(counter, new Position(i, j, 3));
                 posToId.put(new Position(i, j, 3), counter);
                 idToString.put(counter++, s);
-
-
-                Action p1 = new Action(String.format("P1(%s, %s)", i, j));
-                Action p2 = new Action(String.format("P2(%s, %s)", i, j));
-                String actionPrecon = String.format("B(%s, %s)", i, j);
-                actionToPrecons.put(p1, new LiteralSet(new Literal(actionPrecon)));
-
-                actionToPrecons.put(p2, new LiteralSet(new Literal(actionPrecon)));
             }
         }
     }

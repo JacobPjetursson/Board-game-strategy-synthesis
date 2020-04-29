@@ -206,9 +206,6 @@ public class FFTAutoGenOld {
 
         // DEBUG
         if (DETAILED_DEBUG) {
-            System.out.print("ORIGINAL LITERALS: ");
-            for (Literal l : literals)
-                System.out.print(l.getName() + " ");
             System.out.println();
             System.out.println("ORIGINAL STATE: " + s);
             System.out.println("ORIGINAL MOVE: " + mapping.getMove());

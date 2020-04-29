@@ -2,7 +2,6 @@ package sim;
 
 import com.google.common.collect.Sets;
 import fftlib.*;
-import fftlib.auxiliary.Aux;
 import fftlib.auxiliary.Position;
 import fftlib.auxiliary.Transform;
 import fftlib.game.*;
@@ -14,6 +13,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class GameSpecifics implements FFTGameSpecifics {
 
@@ -117,6 +119,11 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
+    public int getMaxStateLiterals() {
+        return 15;
+    }
+
+    @Override
     public HashSet<Long> getCoveredStateBitCodes(Rule rule) {
         HashSet<Long> bitCodes = new HashSet<>();
         List<Set<Literal>> subsets = new ArrayList<>();
@@ -130,7 +137,7 @@ public class GameSpecifics implements FFTGameSpecifics {
                 boolean setExists = false;
                 LiteralSet litSet = new LiteralSet();
                 // make set of all relevant literals from this cell
-                for (occ = 1; occ < 4; occ++) {
+                for (occ = PLAYER1; occ <= PLAYER2; occ++) {
                     pos = new Position(n1, n2, occ);
                     l = new Literal(posToId(pos), false);
                     if (precons.contains(l)) {
@@ -161,13 +168,34 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public long getNumberOfCoveredStates(Rule rule) {
         LiteralSet precons = rule.getAllPreconditions();
-        int no_of_negated = 0;
-        for (Literal l : precons) {
-            if (l.negated)
-                no_of_negated++;
+        long coveredStates = 1;
+        int n1, n2, occ;
+        Position pos;
+        Literal l;
+        // find sets of preconditions that can not co-exist
+        for (n1 = 0; n1 < 6; n1++) {
+            for (n2 = n1 + 1; n2 < 6; n2++) {
+                boolean setExists = false;
+                int setSize = 0;
+                LiteralSet litSet = new LiteralSet();
+                // make set of all relevant literals from this cell
+                for (occ = PLAYER1; occ <= PLAYER2; occ++) {
+
+                    pos = new Position(n1, n2, occ);
+                    l = new Literal(posToId(pos), false);
+                    if (precons.contains(l)) {
+                        setExists = true;
+                        break;
+                    }
+                    Literal negLit = new Literal(posToId(pos), true);
+                    if (!precons.contains(negLit))
+                        setSize++;
+                }
+                if (!setExists) {
+                    coveredStates *= setSize;
+                }
+            }
         }
-        int free_slots = FFTManager.max_precons - precons.size();
-        // this assumes they are from different cells
-        return Aux.pow2(2, no_of_negated) * Aux.pow2(3, free_slots);
+        return coveredStates;
     }
 }

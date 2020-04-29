@@ -37,12 +37,14 @@ public class Rule {
             this.action = getAction(actionStr);
             this.preconditions = getPreconditions(preconStr);
         }
+        removeActionPrecons();
         this.symmetryRules = getSymmetryRules();
     }
 
     public Rule(LiteralSet precons, Action action) {
         this.action = action;
         this.preconditions = precons;
+        removeActionPrecons();
         this.symmetryRules = getSymmetryRules();
     }
 
@@ -71,7 +73,8 @@ public class Rule {
     }
 
     public void addPrecondition(Literal l) {
-        preconditions.add(l);
+        if (!action.getPreconditions().contains(l)) // do not include precondition from action
+            preconditions.add(l);
         this.symmetryRules = getSymmetryRules();
     }
 
@@ -110,6 +113,7 @@ public class Rule {
             this.action = new Action();
         else
             this.action = a;
+        removeActionPrecons();
         this.symmetryRules = getSymmetryRules();
     }
 
@@ -167,6 +171,11 @@ public class Rule {
         }
 
         return corrected_parts;
+    }
+
+    private void removeActionPrecons() {
+        for (Literal l : action.getPreconditions())
+            preconditions.remove(l);
     }
 
     // This is an upper bound due to how symmetry works (may lead to duplicate states
@@ -238,7 +247,7 @@ public class Rule {
     }
 
     public FFTMove apply(FFTState state) {
-        LiteralSet stLiterals = state.getLiterals();
+        LiteralSet stLiterals = state.getAllLiterals();
         FFTMove m = match(this, stLiterals);
         if (m != null || !SYMMETRY_DETECTION) {
             return m;

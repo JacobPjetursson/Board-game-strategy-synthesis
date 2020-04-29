@@ -2,7 +2,6 @@ package tictactoe.FFT;
 
 import com.google.common.collect.Sets;
 import fftlib.*;
-import fftlib.auxiliary.Aux;
 import fftlib.auxiliary.Position;
 import fftlib.auxiliary.Transform;
 import fftlib.game.*;
@@ -20,6 +19,8 @@ import java.util.List;
 import java.util.Set;
 
 import static fftlib.auxiliary.Transform.*;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 
 public class GameSpecifics implements FFTGameSpecifics {
@@ -90,7 +91,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public ArrayList<Integer> getGameAtoms() {
-        return Atoms.getGameAtoms();
+        return Atoms.gameAtoms;
     }
 
     @Override
@@ -136,8 +137,11 @@ public class GameSpecifics implements FFTGameSpecifics {
         return Atoms.actionToPrecons.get(action);
     }
 
-    // TODO - can we do this smarter and more domain-independent?
-    // TODO - does there exist a more general version of this that is less ad-hoc?
+    @Override
+    public int getMaxStateLiterals() {
+        return 9;
+    }
+
     @Override
     public HashSet<Long> getCoveredStateBitCodes(Rule rule) {
         HashSet<Long> bitCodes = new HashSet<>();
@@ -152,7 +156,7 @@ public class GameSpecifics implements FFTGameSpecifics {
                 boolean setExists = false;
                 LiteralSet litSet = new LiteralSet();
                 // make set of all relevant literals from this cell
-                for (occ = 1; occ < 4; occ++) {
+                for (occ = PLAYER1; occ <= PLAYER2; occ++) {
                     pos = new Position(row, col, occ);
                     l = new Literal(posToId(pos), false);
                     if (precons.contains(l)) {
@@ -160,10 +164,13 @@ public class GameSpecifics implements FFTGameSpecifics {
                         break;
                     }
                     Literal negLit = new Literal(posToId(pos), true);
-                    if (!precons.contains(negLit))
+                    if (!precons.contains(negLit)) {
+                        System.out.println("adding literal: " + l);
                         litSet.add(l);
+                    }
                 }
-                if (!setExists) {
+                if (!setExists && !litSet.isEmpty()) {
+                    System.out.println("adding litset: " + litSet);
                     subsets.add(litSet);
                 }
             }
@@ -183,13 +190,29 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public long getNumberOfCoveredStates(Rule rule) {
         LiteralSet precons = rule.getAllPreconditions();
-        int no_of_negated = 0;
-        for (Literal l : precons) {
-            if (l.negated)
-                no_of_negated++;
+        long coveredStates = 1;
+        int row, col, occ;
+        Position pos;
+        Literal l;
+
+        for (row = 0; row < 3; row++) {
+            for (col = 0; col < 3; col++) {
+                int combinations = 3;
+                // make set of all relevant literals from this cell
+                for (occ = PLAYER1; occ <= PLAYER2; occ++) {
+                    pos = new Position(row, col, occ);
+                    l = new Literal(posToId(pos), false);
+                    if (precons.contains(l)) {
+                        combinations = 1;
+                        break;
+                    }
+                    Literal negLit = new Literal(posToId(pos), true);
+                    if (precons.contains(negLit))
+                        combinations--;
+                }
+                coveredStates *= combinations;
+            }
         }
-        int free_slots = FFTManager.max_precons - precons.size();
-        // this assumes they are from different cells
-        return Aux.pow2(2, no_of_negated) * Aux.pow2(3, free_slots);
+        return coveredStates;
     }
 }

@@ -37,25 +37,22 @@ public class ApplyDemo {
         System.out.println(ss.getLiterals().getBitString());
 
         System.out.println();
-        State test1 = new State(new int[][] {{0, 2, 1}, {1, 2, 2}, {2, 1, 0}}, 1);
-        State test2 = new State(new int[][] {{0, 2, 1}, {1, 2, 2}, {2, 1, 1}}, 1);
-        State test3 = new State(new int[][] {{0, 2, 1}, {1, 2, 2}, {2, 1, 2}}, 1);
-        LiteralSet precons = new LiteralSet();
-        precons.add(new Literal("B(0, 0)"));
-        precons.add(new Literal("P2(0, 1)"));
-        precons.add(new Literal("P1(0, 2)"));
-        precons.add(new Literal("P1(1, 0)"));
-        precons.add(new Literal("P2(1, 1)"));
-        precons.add(new Literal("P2(1, 2)"));
-        precons.add(new Literal("P2(2, 0)"));
-        precons.add(new Literal("P1(2, 1)"));
+        State test = new State();
+        State test1 = new State(new int[][] {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, 1);
+        State test2 = new State(new int[][] {{0, 0, 0}, {0, 0, 0}, {0, 0, 1}}, 1);
+        State test3 = new State(new int[][] {{0, 0, 0}, {0, 0, 0}, {0, 0, 2}}, 1);
+        LiteralSet precons = test.getAllLiterals();
         Action action = new Action("P1(0, 0)");
-        Rule test = new Rule(precons, action);
-        System.out.println(test.getNumberOfCoveredStates());
+        Rule testRule = new Rule(precons, action);
+        testRule.removePrecondition(new Literal("!P1(2, 2)"));
+        testRule.removePrecondition(new Literal("!P2(2, 2)"));
+        System.out.println("testRule: " + testRule);
+        System.out.println(testRule.getNumberOfCoveredStates());
+        System.out.println(test.getLiterals().getBitString());
         System.out.println(test1.getLiterals().getBitString());
         System.out.println(test2.getLiterals().getBitString());
         System.out.println(test3.getLiterals().getBitString());
-        System.out.println(test.getCoveredStateBitCodes());
+        System.out.println(testRule.getCoveredStateBitCodes());
 
 
 

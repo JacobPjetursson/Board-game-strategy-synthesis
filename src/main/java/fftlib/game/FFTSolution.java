@@ -37,6 +37,10 @@ public class FFTSolution{
         }
     }
 
+    public static void setSolution(HashMap<? extends FFTState, StateMapping> lookupTable) {
+
+    }
+
     public static ArrayList<? extends FFTMove> optimalMoves(FFTState state) {
         ArrayList<? extends FFTMove> optMoves = optimalMovesMap.get(state);
         if (optMoves != null)

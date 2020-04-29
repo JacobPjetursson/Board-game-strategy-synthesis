@@ -1,7 +1,9 @@
 package mens_morris;
 
+import com.google.common.collect.Sets;
 import fftlib.*;
 import fftlib.auxiliary.Position;
+import fftlib.auxiliary.Transform;
 import fftlib.game.*;
 import fftlib.gui.FFTFailState;
 import fftlib.gui.InteractiveFFTState;
@@ -9,7 +11,10 @@ import misc.Config;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+import static fftlib.auxiliary.Transform.*;
 import static misc.Config.THREE_MENS;
 
 public class GameSpecifics implements FFTGameSpecifics {
@@ -60,17 +65,17 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public ArrayList<Integer> getGameAtoms() {
-        return null;
+        return Atoms.gameAtoms;
     }
 
     @Override
     public String getAtomName(int atom) {
-        return null;
+        return Atoms.idToString.get(atom);
     }
 
     @Override
     public int getAtomId(String name) {
-        return 0;
+        return Atoms.stringToId.get(name);
     }
 
     @Override
@@ -85,17 +90,18 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public HashSet<SymmetryRule> getSymmetryRules(Rule rule) {
-        return null;
+        int[] transformations = new int[] {TRANS_HREF, TRANS_VREF, TRANS_ROT};
+        return Transform.getSymmetryRules(transformations, rule);
     }
 
     @Override
     public int posToId(Position pos) {
-        return 0;
+        return Atoms.posToId.get(pos);
     }
 
     @Override
     public Position idToPos(int id) {
-        return null;
+        return Atoms.idToPos.get(id);
     }
 
     @Override
@@ -104,12 +110,61 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
+    public int getMaxStateLiterals() {
+        if (THREE_MENS)
+            return 10; // 9 + 1
+        return 18; // 16 + 2
+    }
+
+    @Override
     public HashSet<Long> getCoveredStateBitCodes(Rule rule) {
-        return null;
+        HashSet<Long> bitCodes = new HashSet<>();
+        List<Set<Literal>> subsets = new ArrayList<>();
+        LiteralSet precons = rule.getAllPreconditions();
+        int row, col, occ;
+        Position pos;
+        Literal l, negLit;
+        // find sets of preconditions that can not co-exist
+        // TODO - canRemove and phase2
+
+        for (row = 0; row < State.BOARD_SIZE; row++) {
+            for (col = 0; col < State.BOARD_SIZE; col++) {
+                if (!State.validPos(row, col))
+                    continue;
+                boolean setExists = false;
+                LiteralSet litSet = new LiteralSet();
+                // make set of all relevant literals from this cell
+                for (occ = 1; occ < 4; occ++) {
+                    pos = new Position(row, col, occ);
+                    l = new Literal(posToId(pos), false);
+                    if (precons.contains(l)) {
+                        setExists = true;
+                        break;
+                    }
+                    negLit = new Literal(posToId(pos), true);
+                    if (!precons.contains(negLit))
+                        litSet.add(l);
+                }
+                if (!setExists) {
+                    subsets.add(litSet);
+                }
+            }
+        }
+        // Find the cartesian product of those sets (combination of sets where
+        // we only pick one from each set)
+        Set<List<Literal>> cartesianSet = Sets.cartesianProduct(subsets);
+        // Add each
+        for (List<Literal> literals : cartesianSet) {
+            LiteralSet newSet = new LiteralSet(precons);
+            newSet.addAll(literals);
+            bitCodes.add(newSet.getBitString());
+        }
+        return bitCodes;
     }
 
     @Override
     public long getNumberOfCoveredStates(Rule rule) {
+
         return 0;
     }
 }

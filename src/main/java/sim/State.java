@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-import static fftlib.auxiliary.Position.OCC_BLANK;
 import static misc.Globals.*;
 
 public class State implements FFTState {
@@ -117,11 +116,16 @@ public class State implements FFTState {
     public LiteralSet getLiterals() {
         LiteralSet literals = new LiteralSet();
         for (Line l : lines) {
-            int occ = l.color != 0 ? l.color : OCC_BLANK;
+            int occ = l.color;
             Position pos = new Position(l.n1, l.n2, occ);
             literals.add(new Literal(Atoms.posToId.get(pos), false));
         }
         return literals;
+    }
+
+    @Override
+    public LiteralSet getAllLiterals() {
+        return getLiterals();
     }
 
     @Override
