@@ -24,9 +24,9 @@ public class FFTSolution{
             ArrayList<Action> optimalActions = new ArrayList<>();
             ArrayList<? extends FFTMove> optimalMoves = optimalMoves(node);
             for (FFTMove m : optimalMoves) {
-                optimalActions.add(new Action(m.getAction()));
+                optimalActions.add(new Action(m.convert()));
             }
-            solution.put(node.getState(), optimalActions);
+            solution.put(node.convert(), optimalActions);
         }
     }
 

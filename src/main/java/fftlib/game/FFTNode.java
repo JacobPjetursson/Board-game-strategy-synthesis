@@ -11,7 +11,7 @@ public abstract class FFTNode {
         return turn;
     }
 
-    public State getState() {
+    public State convert() {
         return FFTManager.nodeToState.apply(this);
     }
 

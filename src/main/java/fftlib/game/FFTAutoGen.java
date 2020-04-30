@@ -65,7 +65,6 @@ public class FFTAutoGen {
         rg = new RuleGroup("Synthesis");
         fft.addRuleGroup(rg);
         solution = FFTSolution.getSolution();
-        fft.USE_STRATEGY = false; // TODO - remove somehow
 
         reachableStates = new HashMap<>();
         reachableRelevantStates = new HashMap<>();
@@ -296,8 +295,7 @@ public class FFTAutoGen {
         }
     }
 
-    // Interface between domain-specific and logic
-    // TODO - fix it somehow (by using solution before converting it?)
+    // TODO - fix it somehow
     private static void initializeSets() {
         int team = AUTOGEN_TEAM;
         FFTNode initialNode = FFTManager.initialFFTNode;
@@ -307,11 +305,12 @@ public class FFTAutoGen {
         frontier.add(initialNode);
         reachableStates.clear();
         reachableRelevantStates.clear();
-        reachableStates.put(initialNode.getState(), initialNode.getState());
-        reachableRelevantStates.put(initialNode.getState().getBitString(), initialNode.getState());
+        reachableStates.put(initialNode.convert(), initialNode.convert());
+        reachableRelevantStates.put(initialNode.convert().getBitString(), initialNode.convert());
 
         while (!frontier.isEmpty()) {
             FFTNode node = frontier.pop();
+            State state = node.convert();
             // game over
             if (FFTManager.logic.gameOver(node)) {
                 if (FFTManager.logic.getWinner(node) == opponent) {
@@ -325,26 +324,25 @@ public class FFTAutoGen {
             // Not our turn
             if (team != node.getTurn()) {
                 for (FFTNode child : node.getChildren()) {
-                    State stateChild = child.getState();
-                    State existingChild = reachableStates.get(stateChild);
-                    if (existingChild == null) {
+                    State stateChild = child.convert();
+                    State existingStateChild = reachableStates.get(stateChild);
+                    if (existingStateChild == null) {
                         reachableStates.put(stateChild, stateChild);
                         frontier.add(child);
                     }
                     // add reachableParent
-                    reachableStates.get(stateChild).addReachableParent(node.getState());
+                    reachableStates.get(stateChild).addReachableParent(state);
 
                 }
                 continue;
             }
             ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(node);
-            State state = node.getState();
             reachableRelevantStates.put(state.getBitString(), state);
 
             // Our turn, add all states from optimal moves
             for (FFTMove m : optimalMoves) {
                 FFTNode child = node.getNextNode(m);
-                State stateChild = child.getState();
+                State stateChild = child.convert();
                 State existingChild = reachableStates.get(stateChild);
                 if (existingChild == null) {
                     reachableStates.put(stateChild, stateChild);

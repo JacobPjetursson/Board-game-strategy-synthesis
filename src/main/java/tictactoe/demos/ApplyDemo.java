@@ -2,7 +2,6 @@ package tictactoe.demos;
 
 import fftlib.Action;
 import fftlib.FFTManager;
-import fftlib.Literal;
 import fftlib.Rule;
 import fftlib.game.LiteralSet;
 import tictactoe.FFT.GameSpecifics;
@@ -17,7 +16,7 @@ public class ApplyDemo {
         Node test1 = new Node();
         Node test2 = new Node(new int[][] {{0, 0, 0}, {0, 0, 0}, {0, 0, 1}}, 1);
         Node test3 = new Node(new int[][] {{0, 0, 0}, {0, 0, 0}, {0, 0, 2}}, 1);
-        LiteralSet precons = test1.getState().getAllLiterals();
+        LiteralSet precons = test1.convert().getAllLiterals();
         Action action = new Action("P1(0, 0)");
         Rule testRule = new Rule(precons, action);
         //testRule.removePrecondition(new Literal("!P1(2, 2)"));

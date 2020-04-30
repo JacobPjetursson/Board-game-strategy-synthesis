@@ -19,13 +19,13 @@ public class Action {
     public Action(int id) {
         this.adds = new LiteralSet();
         this.rems = new LiteralSet();
-        this.adds.add(new Literal(id, false));
+        this.adds.add(new Literal(id));
     }
 
     public Action(String name) {
         this.adds = new LiteralSet();
         this.rems = new LiteralSet();
-        this.adds.add(new Literal(FFTManager.getAtomId.apply(name), false));
+        this.adds.add(new Literal(FFTManager.getAtomId.apply(name)));
     }
 
     public Action(Action duplicate) {
@@ -85,7 +85,7 @@ public class Action {
         return true;
     }
 
-    public FFTMove getMove() {
+    public FFTMove convert() {
         return FFTManager.actionToMove.apply(this);
     }
 

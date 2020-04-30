@@ -67,7 +67,7 @@ public class ShowFFTPane extends VBox {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r);
                 rLabel.setFont(Font.font("Verdana", 13));
-                FFTMove move = r.apply(node.getState()).getMove();
+                FFTMove move = r.apply(node.convert()).convert();
                 if (!ruleApplied && move != null) {
                     rLabel.setTextFill(Color.BLUE);
                     ruleApplied = true;

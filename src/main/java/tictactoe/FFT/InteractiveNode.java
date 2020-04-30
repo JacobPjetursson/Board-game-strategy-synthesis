@@ -47,7 +47,7 @@ public class InteractiveNode implements interactiveFFTNode {
     public javafx.scene.Node getInteractiveNode(Rule r) {
         this.rule = new Rule(r);
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
-        this.move = (Move) r.getAction().getMove();
+        this.move = (Move) r.getAction().convert();
         actionTile = pb.getBoard().getTiles()[move.row][move.col];
         actionTile.setAction(true);
 
@@ -70,7 +70,7 @@ public class InteractiveNode implements interactiveFFTNode {
         }
         actionTile = bt;
         this.move = new Move(bt.getRow(), bt.getCol(), perspective);
-        this.rule.setAction(move.getAction());
+        this.rule.setAction(move.convert());
         pb.addHighlight(actionTile.getRow(), actionTile.getCol(), perspective, blueStr);
     }
 
@@ -92,14 +92,14 @@ public class InteractiveNode implements interactiveFFTNode {
         if (a == null)
             this.move = new Move();
         else
-            this.move = (Move) a.getMove();
+            this.move = (Move) a.convert();
         actionTile = pb.getBoard().getTiles()[move.row][move.col];
         actionTile.setAction(true);
         pb.update(rule);
     }
     private Rule getRuleFromState(Node n) {
         Rule r = new Rule();
-        LiteralSet literals = n.getState().getLiterals();
+        LiteralSet literals = n.convert().getLiterals();
         ArrayList<Literal> literalList = new ArrayList<>(literals);
         // TODO - Only take boardplacement?
         LiteralSet lits = new LiteralSet(literalList);

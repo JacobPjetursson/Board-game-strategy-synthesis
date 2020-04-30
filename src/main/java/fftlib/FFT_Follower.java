@@ -15,7 +15,7 @@ public class FFT_Follower {
             return null;
         for (RuleGroup ruleGroup : FFTManager.currFFT.ruleGroups) {
             for (Rule rule : ruleGroup.rules) {
-                FFTMove move = rule.apply(node.getState()).getMove();
+                FFTMove move = rule.apply(node.convert()).convert();
                 if (move != null) {
                     System.out.println("Applying rule: " + rule);
                     return move;

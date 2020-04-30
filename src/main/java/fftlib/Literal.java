@@ -10,6 +10,11 @@ public class Literal {
     // used for cartesian product to allow the option of not picking any literal
     public static Literal NULL = new Literal(0, false);
 
+    public Literal(int id) {
+        this.id = id;
+        this.negated = false;
+    }
+
     public Literal(int id, boolean neg) {
         this.id = id;
         this.negated = neg;
@@ -27,11 +32,6 @@ public class Literal {
             e.printStackTrace();
             System.exit(1);
         }
-    }
-
-    public Literal(String name, boolean negated) {
-        this(name);
-        this.negated = negated;
     }
 
     public Literal(Literal duplicate) {

@@ -26,7 +26,7 @@ public class Move implements FFTMove {
     }
 
     @Override
-    public Action getAction() {
+    public Action convert() {
         return FFTManager.moveToAction.apply(this);
     }
 

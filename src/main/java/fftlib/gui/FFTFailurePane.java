@@ -120,7 +120,7 @@ public class FFTFailurePane extends BorderPane {
                 int tempTeam = failMove.getTeam();
                 failMove.setTeam(PLAYER_ANY);
                 if (!ruleApplied) {
-                    FFTMove ruleMove = r.apply(failNode.getState()).getMove();
+                    FFTMove ruleMove = r.apply(failNode.convert()).convert();
                     if (ruleMove != null) {
                         ruleMove.setTeam(PLAYER_ANY);
                         if (ruleMove.equals(failMove)) {

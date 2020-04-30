@@ -50,7 +50,7 @@ public class InteractiveNode implements interactiveFFTNode {
         this.rule = new Rule(r);
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
         if (r.getAction() != null)
-            this.move = (Move) r.getAction().getMove();
+            this.move = (Move) r.getAction().convert();
         pb.update(r);
 
         return pb;
@@ -66,7 +66,7 @@ public class InteractiveNode implements interactiveFFTNode {
         if (a == null)
             this.move = null;
         else
-            this.move = (Move) a.getMove();
+            this.move = (Move) a.convert();
 
         pb.update(rule);
     }
@@ -172,7 +172,7 @@ public class InteractiveNode implements interactiveFFTNode {
 
     public void setArrowEndpoint(int row, int col) {
         move = new Move(selected.getRow(), selected.getCol(), row, col, perspective);
-        rule.setAction(move.getAction());
+        rule.setAction(move.convert());
 
         pb.removeArrows();
         highlightMoves(move.oldRow, move.oldCol, perspective,false);

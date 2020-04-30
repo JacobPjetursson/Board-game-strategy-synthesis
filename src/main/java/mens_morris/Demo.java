@@ -14,7 +14,7 @@ public class Demo {
             System.out.println("State: ");
             System.out.println(n);
             System.out.println("Literals:");
-            System.out.println(n.getState());
+            System.out.println(n.convert());
             System.out.println("Legal moves: ");
             System.out.println(n.getLegalMoves());
             System.out.println("Player " + n.getTurn() + ", please make your move");

@@ -464,7 +464,7 @@ public class FFTInteractivePane extends BorderPane {
 
     public void update(FFTNode node, FFTMove move) {
         update(node);
-        FFTManager.interactiveNode.setAction(move.getAction());
+        FFTManager.interactiveNode.setAction(move.convert());
     }
 
     public void setPrevScene(Scene scene) {

@@ -1,14 +1,21 @@
 package fftlib;
 
+import fftlib.GGPAutogen.Database;
+import fftlib.GGPAutogen.GGPManager;
 import fftlib.game.*;
 import misc.Config;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
+import org.ggp.base.util.statemachine.Role;
+import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
+import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
+import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveTask;
 
 import static misc.Config.*;
 import static misc.Globals.*;
@@ -26,12 +33,6 @@ public class FFT {
     private boolean failed; // failed is set to true if verification failed
 
     public HashMap<FFTNode, NodeMapping> singleStrategy; // used for alternative version of program
-
-    // used for optimization
-    private ConcurrentHashMap<FFTNode, FFTMove> strategy = new ConcurrentHashMap<>(); // used for storing verification results, e.g. moves from strat
-    private ConcurrentHashMap<MachineState, Move> strategyGGP = new ConcurrentHashMap<>();
-    public boolean SAFE_RUN; // used as flag to signal that current run is a safe run, e.g. verification guaranteed to succeed
-    public boolean USE_STRATEGY;
 
     public FFT(String name) {
         this.name = name;
@@ -52,19 +53,6 @@ public class FFT {
         for (RuleGroup rg : ruleGroups)
             size += rg.rules.size();
         return size;
-    }
-
-    public void setSingleStrategy(HashMap<FFTNode, NodeMapping> strat) {
-        singleStrategy = strat;
-    }
-
-    public Rule getLastRule() {
-        if (ruleGroups.isEmpty())
-            return null;
-        RuleGroup rg = ruleGroups.get(ruleGroups.size() - 1);
-        if (rg.rules.isEmpty())
-            return null;
-        return rg.rules.get(rg.rules.size() - 1);
     }
 
     public ArrayList<Rule> getRules() {
@@ -117,11 +105,12 @@ public class FFT {
     }
 
     public FFTMove apply(FFTNode node) {
+        State state = node.convert();
         for (RuleGroup rg : ruleGroups) {
             for (Rule r : rg.rules) {
-                Action a = r.apply(node.getState());
+                Action a = r.apply(state);
                 if (a != null)
-                    return a.getMove();
+                    return a.convert();
             }
         }
         return null;
@@ -132,8 +121,6 @@ public class FFT {
             System.out.println("FFT is not a winning strategy, so it can not be minimized");
             return -1;
         }
-        // Once we've started minimizing, we can't use our strategy hashset anymore
-        USE_STRATEGY = false;
 
         int ruleSize = getAmountOfRules();
         int precSize = getAmountOfPreconditions();
@@ -164,9 +151,6 @@ public class FFT {
 
     private ArrayList<Rule> minimizeRules(int team) {
         ArrayList<Rule> redundantRules = new ArrayList<>();
-        if (MINIMIZE_BOTTOMS_UP)
-            return minimizeRulesBottomsUp(team);
-
 
         for (RuleGroup rg : ruleGroups) {
             if (rg.locked) // don't minimize if rulegroup is locked
@@ -180,31 +164,6 @@ public class FFT {
                 }
                 else {
                     itr.add(r);
-                    if (MINIMIZE_RULE_BY_RULE)
-                        minimizePreconditions(r, team);
-
-                }
-            }
-        }
-        return redundantRules;
-    }
-
-    private ArrayList<Rule> minimizeRulesBottomsUp(int team) {
-        ArrayList<Rule> redundantRules = new ArrayList<>();
-        for (int i = ruleGroups.size() - 1; i >= 0; i--) {
-            RuleGroup rg = ruleGroups.get(i);
-            if (rg.locked) // don't minimize if rulegroup is locked
-                continue;
-            ListIterator<Rule> itr = rg.rules.listIterator(rg.rules.size());
-            while(itr.hasPrevious()) {
-                Rule r = itr.previous();
-                itr.remove();
-                if (verify(team, true)) {
-                    redundantRules.add(r);
-                }
-                else {
-                    itr.add(r);
-                    itr.previous();
                     if (MINIMIZE_RULE_BY_RULE)
                         minimizePreconditions(r, team);
 
@@ -252,13 +211,9 @@ public class FFT {
         if (!Config.ENABLE_GGP && SINGLE_THREAD) {
             return verifySingleThread(team, complete);
         }
-        //else {
-        //    return (Config.ENABLE_GGP) ? verifyGGP(team, complete) : verify_(team, complete);
-        //}
-        // todo
-        System.err.println("unsupported");
-        System.exit(1);
-        return false;
+        else {
+            return (Config.ENABLE_GGP) ? verifyGGP(team, complete) : verify_(team, complete);
+        }
     }
 
     public boolean verifySingleThread(int team, boolean complete) {
@@ -293,10 +248,10 @@ public class FFT {
                 if (move == null) {
                     for (FFTMove m : node.getLegalMoves()) {
                         if (optimalMoves.contains(m)) {
-                            FFTNode nextState = node.getNextNode(m);
-                            if (!closedSet.contains(nextState)) {
-                                closedSet.add(nextState);
-                                frontier.add(nextState);
+                            FFTNode nextNode = node.getNextNode(m);
+                            if (!closedSet.contains(nextNode)) {
+                                closedSet.add(nextNode);
+                                frontier.add(nextNode);
                             }
                         } else if (complete) {
                             failingPoint = new FFTNodeAndMove(node, m, true);
@@ -306,11 +261,11 @@ public class FFT {
                 } else if (!optimalMoves.contains(move)) {
                     failingPoint = new FFTNodeAndMove(node, move, false);
                     return false;
-                } else { // move is not null, expand on state from that move
-                    FFTNode nextState = node.getNextNode(move);
-                    if (!closedSet.contains(nextState)) {
-                        closedSet.add(nextState);
-                        frontier.add(nextState);
+                } else { // move is not null, expand on node from that move
+                    FFTNode nextNode = node.getNextNode(move);
+                    if (!closedSet.contains(nextNode)) {
+                        closedSet.add(nextNode);
+                        frontier.add(nextNode);
                     }
                 }
             }
@@ -318,48 +273,36 @@ public class FFT {
         return true;
     }
 
-/*
     public boolean verify_(int team, boolean complete) {
         if (team == PLAYER_ANY)
             return verify_(PLAYER1, complete) && verify_(PLAYER2, complete);
-        FFTNode initialState = FFTManager.initialFFTNode;
+        FFTNode initialNode = FFTManager.initialFFTNode;
         closedMap.clear();
         failed = false;
         // Check if win or draw is even possible
-        int winner = FFTSolution.queryState(initialState).getWinner();
-        if (team == PLAYER1 && winner == PLAYER2) {
-            System.out.println("A perfect player 2 has won from start of the game");
+        if (!isValid(team))
             return false;
-        } else if (team == PLAYER2 && winner == PLAYER1) {
-            System.out.println("A perfect player 1 has won from the start of the game");
-            return false;
-        }
-        return forkJoinPool.invoke(new VerificationTask(initialState, team, complete));
+
+        return forkJoinPool.invoke(new VerificationTask(initialNode, team, complete));
     }
 
 
     private boolean verifyGGP(int team, boolean complete) {
         if (team == PLAYER_ANY)
             return verifyGGP(PLAYER1, complete) && verifyGGP(PLAYER2, complete);
-        MachineState initialState = GGPManager.getInitialState();
+        MachineState initial_ms = GGPManager.getInitialState();
         closedMapGGP.clear();
         failed = false;
-        // Check if win or draw is even possible
-        int winner = Database.queryState(initialState).getWinner();
-        if (team == PLAYER1 && winner == PLAYER2) {
-            System.out.println("A perfect player 2 has won from start of the game");
+        if (!isValid(team))
             return false;
-        } else if (team == PLAYER2 && winner == PLAYER1) {
-            System.out.println("A perfect player 1 has won from the start of the game");
-            return false;
-        }
-        return forkJoinPool.invoke(new GGPVerificationTask(initialState, team, complete));
+
+        return forkJoinPool.invoke(new GGPVerificationTask(initial_ms, team, complete));
     }
 
-    public Move apply(MachineState state) throws MoveDefinitionException {
+    public Move apply(MachineState ms) throws MoveDefinitionException {
         for (RuleGroup ruleGroup : ruleGroups) {
             for (Rule rule : ruleGroup.rules) {
-                    Move move = rule.apply(state);
+                    Move move = rule.apply(ms);
                     if (move != null) {
                         return move;
                     }
@@ -376,7 +319,7 @@ public class FFT {
         boolean complete;
 
         VerificationTask(FFTNode node, int team, boolean complete) {
-            this.state = state;
+            this.node = node;
             this.team = team;
             this.complete = complete;
             forks = new LinkedList<>();
@@ -388,78 +331,37 @@ public class FFT {
         protected Boolean compute() {
             if (failed)
                 return false;
-            if (FFTManager.logic.gameOver(state)) {
-                if (FFTManager.logic.getWinner(state) == opponent) {
+            if (FFTManager.logic.gameOver(node)) {
+                if (FFTManager.logic.getWinner(node) == opponent) {
                     // Should not hit this given initial check
                     System.out.println("No chance of winning vs. perfect player");
                     failed = true;
                     return false;
                 }
-            } else if (team != state.getTurn()) {
-                for (FFTNode child : state.getChildren()) {
+            } else if (team != node.getTurn()) {
+                for (FFTNode child : node.getChildren()) {
                     addTask(child);
                 }
             } else {
-                FFTMove move;
-                Rule newRule = getLastRule();
-                if (!USE_STRATEGY || newRule == null) {
-                    move = apply(state);
-                }
-                else {
-                    // re-use move from strategy if it's from a previous rule, otherwise apply with new rule
-                    move = strategy.get(state);
-                    if (move == null) {
-                        move = newRule.apply(state);
-                    }
-                }
-                ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(state);
+                FFTMove move = apply(node);
+                ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(node);
                 // If move is null, check that all possible (random) moves are ok
                 if (move == null) {
-                    if (!complete && singleStrategy != null) { // only expand on move from strategy
-                        StateMapping info = singleStrategy.get(state);
-                        if (info == null) {
-                            System.out.println("Given strategy is not a winning strategy");
-                            failed = true;
-                            return false;
-                        }
-                        addTask(state.getNextState(info.getMove()));
-                        boolean result = true;
-                        for (RecursiveTask<Boolean> t : forks) {
-                            result = result && t.join();
-                        }
-                        return result;
-                    }
-
-                    for (FFTMove m : state.getLegalMoves()) {
+                    for (FFTMove m : node.getLegalMoves()) {
                         if (optimalMoves.contains(m)) {
-                            addTask(state.getNextState(m));
+                            addTask(node.getNextNode(m));
                         } else if (complete) {
-                            failingPoint = new FFTStateAndMove(state, m, true);
+                            failingPoint = new FFTNodeAndMove(node, m, true);
                             failed = true;
                             return false;
                         }
                     }
                 } else if (!optimalMoves.contains(move)) {
-                    failingPoint = new FFTStateAndMove(state, move, false);
+                    failingPoint = new FFTNodeAndMove(node, move, false);
                     failed = true;
                     return false;
                 } else {
-                    if (!complete && singleStrategy != null) { // check that move is same as from strategy
-                        StateMapping info = singleStrategy.get(state);
-                        if (info == null) {
-                            System.out.println("Given strategy is not a winning strategy");
-                            failed = true;
-                            return false;
-                        }
-                        if (!info.getMove().equals(move)) { // DOESN'T WORK BECAUSE OF TRANSFORMATIONS!
-                            failed = true;
-                            return false;
-                        }
-
-                    }
-                    if (USE_STRATEGY && SAFE_RUN)
-                        strategy.put(state, move);
-                    addTask(state.getNextState(move));
+                    addTask(node.getNextNode(move));
                 }
             }
             boolean result = true;
@@ -470,9 +372,9 @@ public class FFT {
         }
 
         private void addTask(FFTNode node) {
-            if (!closedMap.containsKey(state)) {
-                closedMap.put(state, true);
-                VerificationTask t = new VerificationTask(state, team, complete);
+            if (!closedMap.containsKey(node)) {
+                closedMap.put(node, true);
+                VerificationTask t = new VerificationTask(node, team, complete);
                 forks.add(t);
                 t.fork();
             }
@@ -521,18 +423,7 @@ public class FFT {
                     for (MachineState child : GGPManager.getNextStates(ms))
                         addTask(child);
                 } else {
-                    Move move;
-                    Rule newRule = getLastRule();
-                    if (!USE_STRATEGY || newRule == null) {
-                        move = apply(ms);
-                    }
-                    else {
-                        // re-use move from strategy if it's from a previous rule, otherwise apply with new rule
-                        move = strategyGGP.get(ms);
-                        if (move == null) {
-                            move = newRule.apply(ms);
-                        }
-                    }
+                    Move move = apply(ms);
                     Set<Move> optimalMoves = Database.optimalMoves(ms);
                     // If move is null, check that all possible (random) moves are ok
                     if (move == null) {
@@ -548,12 +439,10 @@ public class FFT {
                         failed = true;
                         return false;
                     } else {
-                        if (USE_STRATEGY && SAFE_RUN)
-                            strategyGGP.put(ms, move);
                         addTask(GGPManager.getNextState(ms, move));
                     }
                 }
-            } catch (GoalDefinitionException | TransitionDefinitionException | MoveDefinitionException e) {
+            } catch (GoalDefinitionException | MoveDefinitionException | TransitionDefinitionException e) {
                 e.printStackTrace();
             }
             boolean result = true;
@@ -572,6 +461,5 @@ public class FFT {
             }
         }
     }
-    */
 }
 
