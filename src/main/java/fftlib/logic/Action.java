@@ -111,13 +111,16 @@ public class Action {
 
         Action action = (Action) obj;
         return this == action ||
-                (this.adds.equals(action.adds) && (this.rems.equals(action.rems)));
+                (this.getCode() == action.getCode());
     }
 
     @Override
     public int hashCode() {
-        int hash = Objects.hash(adds, rems);
-        return 31 * hash;
+        return (int) getCode();
+    }
+
+    private long getCode() {
+        return this.adds.getBitString() + this.rems.getBitString();
     }
 
     public String toString() {

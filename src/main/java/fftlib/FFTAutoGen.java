@@ -196,20 +196,20 @@ public class FFTAutoGen {
 
         for (FFTNode n : suboptimalSet) {
             if (n.isReachable()) {
+                //System.out.println("suboptimal node is reachable: " + n);
                 undoReachableParents(undoMap);
                 return false;
             }
         }
 
-/*
+        /*
         if (!fft.verify(AUTOGEN_TEAM, false)) {
             System.out.println("ERROR: Old verification failed where new did not");
             System.out.println("Failing point: " + fft.failingPoint);
             System.exit(1);
             return false;
         }
-
- */
+         */
 
 
         if (safe) {
@@ -267,8 +267,8 @@ public class FFTAutoGen {
         }
     }
 
-    private static void removePointers(FFTNode parent,
-                                       HashMap<FFTNode, Boolean> deleteMap, HashMap<FFTNode, FFTMove> undoMap) {
+    private static void removePointers(FFTNode parent, HashMap<FFTNode, Boolean> deleteMap,
+                                       HashMap<FFTNode, FFTMove> undoMap) {
         deleteMap.put(parent, true);
         undoMap.put(parent, null);
         for (FFTNode child : parent.getChildren()) {

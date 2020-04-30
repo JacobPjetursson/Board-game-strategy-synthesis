@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import static misc.Globals.PLAYER1;
+import static sim.Line.NO_COLOR;
 
 public class Node extends FFTNode {
     private Move move;
@@ -106,7 +107,7 @@ public class Node extends FFTNode {
 
     @Override
     public FFTNode getNextNode(FFTMove move) {
-        return getNextState((Move) move);
+        return getNextNode((Move) move);
     }
 
     @Override
@@ -119,7 +120,7 @@ public class Node extends FFTNode {
         return Logic.getWinner(this);
     }
 
-    public Node getNextState(Move m) {
+    public Node getNextNode(Move m) {
         return new Node(this, m);
     }
 
@@ -141,9 +142,11 @@ public class Node extends FFTNode {
 
     public String toString() {
         StringBuilder s = new StringBuilder();
-        s.append("TURN:").append(turn).append("\t");
-        for (Line l : lines)
-            s.append(l.toString()).append(";\t");
+        s.append("TURN:").append(turn).append("; ");
+        for (Line l : lines) {
+            if (l.color != NO_COLOR)
+                s.append(l.toString()).append("; ");
+        }
         return s.toString();
     }
 }

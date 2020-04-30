@@ -34,8 +34,6 @@ public class FFT {
     private ConcurrentHashMap<MachineState, Boolean> closedMapGGP = new ConcurrentHashMap<>();
     private boolean failed; // failed is set to true if verification failed
 
-    public HashMap<FFTNode, NodeMapping> singleStrategy; // used for alternative version of program
-
     public FFT(String name) {
         this.name = name;
         ruleGroups = new ArrayList<>();
@@ -96,6 +94,11 @@ public class FFT {
         return precSize;
     }
 
+    public Rule getLastRule() {
+        RuleGroup last = ruleGroups.get(ruleGroups.size() - 1);
+        return last.rules.get(last.rules.size() - 1);
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (RuleGroup rg : ruleGroups) {
@@ -106,7 +109,8 @@ public class FFT {
         return sb.toString();
     }
 
-    public FFTMove apply(FFTNode node) {
+    // FIXME - We should make apply concurrent or somehow allow multiple access here
+    public synchronized FFTMove apply(FFTNode node) {
         for (RuleGroup rg : ruleGroups) {
             for (Rule r : rg.rules) {
                 FFTMove m = r.apply(node);
@@ -312,18 +316,17 @@ public class FFT {
     }
 
     public class VerificationTask extends RecursiveTask<Boolean> {
-
         int team, opponent;
         FFTNode node;
-        List<RecursiveTask<Boolean>> forks;
         boolean complete;
+        LinkedList<VerificationTask> forks;
 
         VerificationTask(FFTNode node, int team, boolean complete) {
             this.node = node;
             this.team = team;
             this.complete = complete;
-            forks = new LinkedList<>();
             this.opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
+            forks = new LinkedList<>();
 
         }
 
@@ -365,21 +368,20 @@ public class FFT {
                 }
             }
             boolean result = true;
-            for (RecursiveTask<Boolean> t : forks) {
+            for (VerificationTask t : forks) {
                 result = result && t.join();
             }
             return result;
         }
 
-        private void addTask(FFTNode node) {
-            if (!closedMap.containsKey(node)) {
-                closedMap.put(node, true);
-                VerificationTask t = new VerificationTask(node, team, complete);
+        private void addTask(FFTNode n) {
+            if (!closedMap.containsKey(n)) {
+                closedMap.put(n, true);
+                VerificationTask t = new VerificationTask(n, team, complete);
                 forks.add(t);
                 t.fork();
             }
         }
-
     }
 
     public class GGPVerificationTask extends RecursiveTask<Boolean> {

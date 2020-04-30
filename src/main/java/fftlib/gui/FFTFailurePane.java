@@ -1,6 +1,8 @@
 package fftlib.gui;
 
 import fftlib.FFTManager;
+import fftlib.FFTSolution;
+import fftlib.game.FFTSolver;
 import fftlib.logic.Rule;
 import fftlib.logic.RuleGroup;
 import fftlib.game.FFTMove;

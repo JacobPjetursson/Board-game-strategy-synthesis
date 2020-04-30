@@ -66,7 +66,6 @@ public class FFTAutoGenOld {
         lookupTable = FFTSolution.getLookupTable();
         winner = FFTSolution.getWinner();
         max_precons = FFTManager.initialFFTNode.getLiterals().size();
-        fft.USE_STRATEGY = SAVE_STRAT; // Only use this feature if autogenerating, e.g. not when simply loading from file
 
         System.out.println("Solution size: " + lookupTable.size());
 
@@ -79,8 +78,7 @@ public class FFTAutoGenOld {
         } else {
             System.out.println("Filtering for all strategies");
             filterSolution();
-            if (USE_FILTERING)
-                deleteIrrelevantStates();
+            deleteIrrelevantStates();
         }
         System.out.println("Amount of states after filtering: " + states.size());
     }
@@ -102,10 +100,6 @@ public class FFTAutoGenOld {
         for (Map.Entry<? extends FFTNode, ? extends StateMapping> entry : lookupTable.entrySet()) {
             FFTNode node = entry.getKey();
             StateMapping mapping = entry.getValue();
-            if (!USE_FILTERING) {
-                states.add(state);
-                continue;
-            }
             if (AUTOGEN_TEAM == PLAYER1 && mapping.getMove().getTeam() != PLAYER1)
                 continue;
             else if (AUTOGEN_TEAM == PLAYER2 && mapping.getMove().getTeam() != PLAYER2)

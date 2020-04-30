@@ -19,6 +19,7 @@ import java.util.Set;
 
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
+import static sim.Line.NO_COLOR;
 
 public class GameSpecifics implements FFTGameSpecifics {
 
@@ -50,7 +51,7 @@ public class GameSpecifics implements FFTGameSpecifics {
         LiteralSet literals = new LiteralSet();
         for (Line l : node.lines) {
             int occ = l.color;
-            if (occ == 0)
+            if (occ == NO_COLOR)
                 continue;
             Position pos = new Position(l.n1, l.n2, occ);
             literals.add(new Literal(Atoms.posToId.get(pos)));

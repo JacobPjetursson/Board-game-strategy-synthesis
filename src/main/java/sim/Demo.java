@@ -1,10 +1,11 @@
 package sim;
 
 import fftlib.*;
-import fftlib.game.FFTSolver;
-import fftlib.logic.FFT;
+import fftlib.game.LiteralSet;
+import fftlib.logic.Action;
+import fftlib.logic.Literal;
+import fftlib.logic.Rule;
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Demo {
@@ -18,11 +19,20 @@ public class Demo {
             playGame(n);
             return;
         }
+        LiteralSet precons = new LiteralSet();
+        precons.add(new Literal("!P1(2, 3)"));
+        precons.add(new Literal("!P2(2, 3)"));
+        Action action = new Action("P2(0, 1)");
+        Rule rule = new Rule(precons, action);
+        System.out.println(rule.getSymmetryRules());
         // Make strategy with meta rules
-        ArrayList<FFT> ffts = FFTManager.load("FFTs/simFFT.txt");
-        FFTSolver.solveGame(n);
-        FFTManager.autogenFFT(ffts.get(0));
+        //ArrayList<FFT> ffts = FFTManager.load("FFTs/simFFT.txt");
+        //FFTSolver.solveGame(n);
+        //FFTManager.autogenFFT(ffts.get(0));
     }
+
+
+
 
     public static void playGame(Node n) {
         Scanner scan = new Scanner(System.in);
@@ -36,7 +46,7 @@ public class Demo {
                 int u = Integer.parseInt(vertices[0]);
                 int v = Integer.parseInt(vertices[1]);
                 Move move = new Move(n.getTurn(), new Line(u, v));
-                n = n.getNextState(move);
+                n = n.getNextNode(move);
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Incorrect format, please try again");
@@ -44,33 +54,5 @@ public class Demo {
         }
         System.out.println("The winner is player " + Logic.getWinner(n));
     }
-/*
-    public static HashSet<LiteralSet> findAutomorphismsTest(LiteralSet literals) {
-        int [] vertices = new int[gameBoardHeight];
-        for (int i = 0; i < gameBoardHeight; i++) {
-            vertices[i] = i;
-        }
-        ArrayList<int[]> permutations = Transform.findPermutations(vertices);
-        HashSet<LiteralSet> transformations = new HashSet<>();
-        System.out.println("PERMUTATIONS SIZE: " + permutations.size());
-        for(int[] arr : permutations) {
-            System.out.print("permutations: ");
-            for (int i : arr) System.out.print(i + ", ");
-            System.out.println();
 
-            LiteralSet precons = new HashSet<>();
-
-            Action action = null;
-            for (Literal lit : rule.action.addClause.literals) {
-                action = new Action(arr[lit.row], arr[lit.col], lit.pieceOcc, lit.negation);
-            }
-
-            for (Literal lit : literals) {
-                precons.add(new Literal(arr[lit.row], arr[lit.col], lit.pieceOcc, lit.negation));
-            }
-            transformations.add(precons);
-        }
-        return transformations;
-    }
-    */
 }

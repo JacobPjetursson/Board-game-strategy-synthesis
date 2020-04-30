@@ -23,11 +23,9 @@ public class Config {
     public static int RULE_ORDERING;
     public static boolean MINIMIZE_PRECONDITIONS;
     public static boolean SYMMETRY_DETECTION;
-    public static boolean SAVE_STRAT;
     public static boolean GENERATE_ALL_RULES;
     public static boolean MINIMIZE_RULE_BY_RULE;
     public static boolean SINGLE_THREAD;
-    public static boolean USE_FILTERING;
     public static boolean SHOW_RULE_GROUPS;
     public static boolean USE_DEBUG_FILE;
     public static String DEBUG_FILENAME;
@@ -122,7 +120,6 @@ public class Config {
         GENERATE_ALL_RULES = Boolean.parseBoolean(global.getProperty("generate_all_rules"));
         MINIMIZE_RULE_BY_RULE = Boolean.parseBoolean(global.getProperty("minimize_rule_by_rule"));
         SYMMETRY_DETECTION = Boolean.parseBoolean(global.getProperty("symmetry_detection"));
-        SAVE_STRAT = Boolean.parseBoolean(global.getProperty("save_intermediate_strategy"));
         SHOW_RULE_GROUPS = Boolean.parseBoolean(global.getProperty("show_rule_groups"));
         // DEBUG AND TEST
         DETAILED_DEBUG = Boolean.parseBoolean(global.getProperty("detailedDebug"));
@@ -132,7 +129,6 @@ public class Config {
         DEBUG_FILENAME = global.getProperty("debug_filename");
         VERIFY_SINGLE_STRATEGY = Boolean.parseBoolean(global.getProperty("verify_single_strategy"));
         SINGLE_THREAD = Boolean.parseBoolean(global.getProperty("single_thread"));
-        USE_FILTERING = Boolean.parseBoolean(global.getProperty("use_filtering"));
         USE_APPLYSET_OPT = Boolean.parseBoolean(global.getProperty("use_applyset_opt"));
 
         // KULIBRAT
@@ -194,7 +190,6 @@ public class Config {
         System.out.printf("%-30.40s %-30.40s\n", "Benchmark mode:", BENCHMARK_MODE);
         System.out.printf("%-30.40s %-30.40s\n", "Single thread:", SINGLE_THREAD);
         System.out.printf("%-30.40s %-30.40s\n", "Verify single strategy:", VERIFY_SINGLE_STRATEGY);
-        System.out.printf("%-30.40s %-30.40s\n", "Use filtering:", USE_FILTERING);
     }
 
     private static void setupDebugFile() {
