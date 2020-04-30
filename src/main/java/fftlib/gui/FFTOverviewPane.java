@@ -1,9 +1,9 @@
 package fftlib.gui;
 
-import fftlib.FFT;
+import fftlib.logic.FFT;
 import fftlib.FFTManager;
-import fftlib.Rule;
-import fftlib.RuleGroup;
+import fftlib.logic.Rule;
+import fftlib.logic.RuleGroup;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;

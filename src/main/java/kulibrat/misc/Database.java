@@ -4,18 +4,13 @@
 package kulibrat.misc;
 
 import fftlib.game.FFTMove;
-import fftlib.game.FFTSolution;
+import fftlib.FFTSolution;
 import fftlib.game.FFTNode;
 import fftlib.game.NodeMapping;
-import javafx.event.Event;
-import javafx.scene.Scene;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import kulibrat.ai.Minimax.LookupTableMinimax;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
 import kulibrat.game.Node;
-import kulibrat.gui.Dialogs.OverwriteDBDialog;
 import misc.Config;
 import misc.Globals;
 

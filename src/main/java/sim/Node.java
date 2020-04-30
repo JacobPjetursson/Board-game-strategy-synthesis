@@ -1,26 +1,17 @@
 package sim;
 
-import fftlib.Literal;
-import fftlib.auxiliary.Position;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
-import fftlib.game.LiteralSet;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 
-import static misc.Globals.*;
+import static misc.Globals.PLAYER1;
 
 public class Node extends FFTNode {
     private Move move;
-    private int turn;
     private long zobrist_key;
     LinkedList<Line> lines;
-
-    // Reachability
-    HashSet<Node> reachableParents;
-    boolean reachable;
 
     // initial state
     public Node() {
@@ -46,7 +37,6 @@ public class Node extends FFTNode {
 
         lines.add(new Line(4, 5));
         this.zobrist_key = initZobrist();
-        reachable = true; // initial state always reachable;
     }
 
     // next state
@@ -54,7 +44,6 @@ public class Node extends FFTNode {
         this(parent);
         this.move = m;
         Logic.doTurn(m, this);
-        reachableParents = new HashSet<>();
         updateHashCode(parent);
     }
 
@@ -82,19 +71,6 @@ public class Node extends FFTNode {
         return this == node ||
                 this.zobrist_key == node.zobrist_key;
     }
-
-/*
-    public LiteralSet getLiterals() {
-        LiteralSet literals = new LiteralSet();
-        for (Line l : lines) {
-            int occ = l.color;
-            Position pos = new Position(l.n1, l.n2, occ);
-            literals.add(new Literal(Atoms.posToId.get(pos), false));
-        }
-        return literals;
-    }
-
- */
 
     private long initZobrist() {
         long hash = 0L;
@@ -128,18 +104,19 @@ public class Node extends FFTNode {
         this.turn = newTurn;
     }
 
-    public ArrayList<Node> getChildren() {
-        ArrayList<Node> children = new ArrayList<>();
-        for (Move m : getLegalMoves()) {
-            Node child = new Node(this, m);
-            children.add(child);
-        }
-        return children;
-    }
-
     @Override
     public FFTNode getNextNode(FFTMove move) {
         return getNextState((Move) move);
+    }
+
+    @Override
+    public boolean isTerminal() {
+        return Logic.gameOver(this);
+    }
+
+    @Override
+    public int getWinner() {
+        return Logic.getWinner(this);
     }
 
     public Node getNextState(Move m) {

@@ -1,6 +1,6 @@
 package tictactoe.gui;
 
-import fftlib.FFT;
+import fftlib.logic.FFT;
 import fftlib.game.FFTNode;
 import fftlib.gui.ShowFFTPane;
 import javafx.geometry.Pos;

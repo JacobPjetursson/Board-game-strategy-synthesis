@@ -2,6 +2,7 @@ package sim;
 
 import fftlib.*;
 import fftlib.game.FFTSolver;
+import fftlib.logic.FFT;
 
 import java.util.ArrayList;
 import java.util.Scanner;

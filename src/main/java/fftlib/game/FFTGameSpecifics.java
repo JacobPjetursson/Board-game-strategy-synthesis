@@ -1,9 +1,11 @@
 package fftlib.game;
 
-import fftlib.*;
 import fftlib.auxiliary.Position;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
+import fftlib.logic.Action;
+import fftlib.logic.Rule;
+import fftlib.logic.SymmetryRule;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,14 +15,13 @@ public interface FFTGameSpecifics {
     String getFFTFilePath(); // Misc
 
     int[] getBoardDim(); // Domain specific
-    FFTLogic getLogic(); // Domain specific
     FFTNode getInitialNode(); // Domain specific
     HashSet<SymmetryRule> getSymmetryRules(Rule rule); // Domain specific
     int getMaxStateLiterals(); // Domain specific
 
     FFTMove actionToMove(Action a); // Interface
     Action moveToAction(FFTMove m); // Interface
-    State nodeToState(FFTNode n); // Interface
+    LiteralSet nodeToLiterals(FFTNode n); // Interface
     Rule gdlToRule(String precons, String action); // Interface
 
     String[] getPlayerNames(); // Visual

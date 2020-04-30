@@ -1,6 +1,6 @@
 package fftlib.game;
 
-import fftlib.Action;
+import fftlib.logic.Action;
 
 public interface FFTMove {
 

@@ -1,6 +1,6 @@
 package tictactoe.gui.board.PlayBox;
 
-import fftlib.Rule;
+import fftlib.logic.Rule;
 import tictactoe.game.Controller;
 
 public class InteractivePlayBox extends PlayBox {

@@ -1,6 +1,7 @@
 package fftlib.game;
 
 import fftlib.FFTManager;
+import fftlib.FFTSolution;
 
 import java.util.HashMap;
 
@@ -61,7 +62,7 @@ public class FFTSolver{
         FFTMove bestMove = null;
         int bestScore = (node.getTurn() == team) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         int score;
-        boolean gameover = FFTManager.logic.gameOver(node);
+        boolean gameover = node.isTerminal();
         if (gameover || depth == 0) {
             return new NodeMapping(bestMove, heuristic(node), depth);
         }
@@ -102,8 +103,8 @@ public class FFTSolver{
     // Heuristic function which values player1 with 2000 for a win, and -2000 for a loss. All other nodes are 0
     private static int heuristic(FFTNode node) {
         int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
-        if (FFTManager.logic.gameOver(node)) {
-            int winner = FFTManager.logic.getWinner(node);
+        if (node.isTerminal()) {
+            int winner = node.getWinner();
             if (winner == team)
                 return 2000;
             else if (winner == opponent)

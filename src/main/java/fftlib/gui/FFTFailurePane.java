@@ -1,8 +1,8 @@
 package fftlib.gui;
 
 import fftlib.FFTManager;
-import fftlib.Rule;
-import fftlib.RuleGroup;
+import fftlib.logic.Rule;
+import fftlib.logic.RuleGroup;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 import javafx.collections.FXCollections;
@@ -120,7 +120,7 @@ public class FFTFailurePane extends BorderPane {
                 int tempTeam = failMove.getTeam();
                 failMove.setTeam(PLAYER_ANY);
                 if (!ruleApplied) {
-                    FFTMove ruleMove = r.apply(failNode.convert()).convert();
+                    FFTMove ruleMove = r.apply(failNode);
                     if (ruleMove != null) {
                         ruleMove.setTeam(PLAYER_ANY);
                         if (ruleMove.equals(failMove)) {

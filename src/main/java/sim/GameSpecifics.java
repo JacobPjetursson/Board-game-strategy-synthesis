@@ -1,7 +1,10 @@
 package sim;
 
 import com.google.common.collect.Sets;
-import fftlib.*;
+import fftlib.logic.Action;
+import fftlib.logic.Literal;
+import fftlib.logic.Rule;
+import fftlib.logic.SymmetryRule;
 import fftlib.auxiliary.Position;
 import fftlib.auxiliary.Transform;
 import fftlib.game.*;
@@ -42,8 +45,17 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public State nodeToState(FFTNode n) {
-        return null;
+    public LiteralSet nodeToLiterals(FFTNode n) {
+        Node node = (Node) n;
+        LiteralSet literals = new LiteralSet();
+        for (Line l : node.lines) {
+            int occ = l.color;
+            if (occ == 0)
+                continue;
+            Position pos = new Position(l.n1, l.n2, occ);
+            literals.add(new Literal(Atoms.posToId.get(pos)));
+        }
+        return new LiteralSet(literals);
     }
 
     @Override
@@ -71,11 +83,6 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public FFTNode getInitialNode() {
         return new Node();
-    }
-
-    @Override
-    public FFTLogic getLogic() {
-        return new Logic();
     }
 
     @Override
@@ -135,7 +142,6 @@ public class GameSpecifics implements FFTGameSpecifics {
         LiteralSet precons = rule.getAllPreconditions();
         int n1, n2, occ;
         Position pos;
-        Literal l;
         // find sets of preconditions that can not co-exist
         for (n1 = 0; n1 < 6; n1++) {
             for (n2 = n1+1; n2 < 6; n2++) {
@@ -144,16 +150,18 @@ public class GameSpecifics implements FFTGameSpecifics {
                 // make set of all relevant literals from this cell
                 for (occ = PLAYER1; occ <= PLAYER2; occ++) {
                     pos = new Position(n1, n2, occ);
-                    l = new Literal(posToId(pos), false);
+                    Literal l = new Literal(posToId(pos), false);
                     if (precons.contains(l)) {
                         setExists = true;
                         break;
                     }
                     Literal negLit = new Literal(posToId(pos), true);
-                    if (!precons.contains(negLit))
+                    if (!precons.contains(negLit)) {
                         litSet.add(l);
+                    }
                 }
                 if (!setExists) {
+                    litSet.add(Literal.NULL);
                     subsets.add(litSet);
                 }
             }
@@ -161,10 +169,13 @@ public class GameSpecifics implements FFTGameSpecifics {
         // Find the cartesian product of those sets (combination of sets where
         // we only pick one from each set)
         Set<List<Literal>> cartesianSet = Sets.cartesianProduct(subsets);
-        // Add each
+        // Add each if not null literal
         for (List<Literal> literals : cartesianSet) {
             LiteralSet newSet = new LiteralSet(precons);
-            newSet.addAll(literals);
+            for (Literal l : literals) {
+                if (!l.equals(Literal.NULL))
+                    newSet.add(l);
+            }
             bitCodes.add(newSet.getBitString());
         }
         return bitCodes;
@@ -176,29 +187,23 @@ public class GameSpecifics implements FFTGameSpecifics {
         long coveredStates = 1;
         int n1, n2, occ;
         Position pos;
-        Literal l;
-        // find sets of preconditions that can not co-exist
+
         for (n1 = 0; n1 < 6; n1++) {
-            for (n2 = n1 + 1; n2 < 6; n2++) {
-                boolean setExists = false;
-                int setSize = 0;
-                LiteralSet litSet = new LiteralSet();
+            for (n2 = n1+1; n2 < 6; n2++) {
+                int combinations = 3;
                 // make set of all relevant literals from this cell
                 for (occ = PLAYER1; occ <= PLAYER2; occ++) {
-
                     pos = new Position(n1, n2, occ);
-                    l = new Literal(posToId(pos), false);
+                    Literal l = new Literal(posToId(pos), false);
                     if (precons.contains(l)) {
-                        setExists = true;
+                        combinations = 1;
                         break;
                     }
                     Literal negLit = new Literal(posToId(pos), true);
-                    if (!precons.contains(negLit))
-                        setSize++;
+                    if (precons.contains(negLit))
+                        combinations--;
                 }
-                if (!setExists) {
-                    coveredStates *= setSize;
-                }
+                coveredStates *= combinations;
             }
         }
         return coveredStates;

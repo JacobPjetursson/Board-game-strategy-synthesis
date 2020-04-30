@@ -1,6 +1,5 @@
 package tictactoe.game;
 
-import fftlib.game.FFTLogic;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 
@@ -10,7 +9,7 @@ import static misc.Config.TIC_TAC_TOE_RULES;
 import static misc.Globals.*;
 
 
-public class Logic implements FFTLogic {
+public class Logic {
 
     static ArrayList<Move> legalMoves(int team, Node node) {
         ArrayList<Move> list = new ArrayList<>();

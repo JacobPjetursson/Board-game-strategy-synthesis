@@ -1,9 +1,9 @@
 package tictactoe.FFT;
 
-import fftlib.Action;
-import fftlib.Literal;
+import fftlib.logic.Action;
+import fftlib.logic.Literal;
 import fftlib.auxiliary.Position;
-import fftlib.Rule;
+import fftlib.logic.Rule;
 import fftlib.game.FFTNode;
 import fftlib.game.LiteralSet;
 import fftlib.gui.interactiveFFTNode;
@@ -99,7 +99,7 @@ public class InteractiveNode implements interactiveFFTNode {
     }
     private Rule getRuleFromState(Node n) {
         Rule r = new Rule();
-        LiteralSet literals = n.convert().getLiterals();
+        LiteralSet literals = n.convert();
         ArrayList<Literal> literalList = new ArrayList<>(literals);
         // TODO - Only take boardplacement?
         LiteralSet lits = new LiteralSet(literalList);

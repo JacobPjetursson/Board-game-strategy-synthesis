@@ -1,5 +1,6 @@
 package kulibrat.ai.Minimax;
 
+import fftlib.game.FFTNode;
 import fftlib.game.NodeMapping;
 import kulibrat.game.Logic;
 import kulibrat.game.Move;
@@ -62,8 +63,8 @@ public class LookupTableMinimax {
             return mapping;
         }
         boolean evaluated = true;
-        for (Node child : node.getChildren()) {
-            score = minimax(child, depth - 1).score;
+        for (FFTNode child : node.getChildren()) {
+            score = minimax((Node)child, depth - 1).score;
             if (score > 1000) score--;
             else if (score < -1000) score++;
             else evaluated = false;
@@ -71,12 +72,12 @@ public class LookupTableMinimax {
             if (node.getTurn() == team) {
                 if (score > bestScore) {
                     bestScore = score;
-                    bestMove = child.getMove();
+                    bestMove = (Move)child.getMove();
                 }
             } else {
                 if (score < bestScore) {
                     bestScore = score;
-                    bestMove = child.getMove();
+                    bestMove = (Move)child.getMove();
                 }
             }
         }

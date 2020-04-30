@@ -1,6 +1,6 @@
 package mens_morris;
 
-import fftlib.Action;
+import fftlib.logic.Action;
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 

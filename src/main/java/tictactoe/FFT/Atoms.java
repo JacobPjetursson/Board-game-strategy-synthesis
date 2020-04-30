@@ -1,13 +1,12 @@
 package tictactoe.FFT;
 
-import fftlib.Action;
-import fftlib.Literal;
+import fftlib.logic.Action;
+import fftlib.logic.Literal;
 import fftlib.auxiliary.Position;
 import fftlib.game.LiteralSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class Atoms {
 
@@ -44,14 +43,14 @@ public class Atoms {
                 idToPos.put(counter, new Position(i, j, 2));
                 posToId.put(new Position(i, j, 2), counter++);
 
-                Action action = new Action(String.format("P1(%s, %s)", i, j));
                 LiteralSet actionPrecons = new LiteralSet();
                 actionPrecons.add(new Literal(String.format("!P1(%s, %s)", i, j)));
                 actionPrecons.add(new Literal(String.format("!P2(%s, %s)", i, j)));
-                actionToPrecons.put(action, actionPrecons);
 
-                action = new Action(String.format("P2(%s, %s)", i, j));
-                actionToPrecons.put(action, actionPrecons);
+                Action p1 = new Action(String.format("P1(%s, %s)", i, j));
+                Action p2 = new Action(String.format("P2(%s, %s)", i, j));
+                actionToPrecons.put(p1, actionPrecons);
+                actionToPrecons.put(p2, actionPrecons);
             }
         }
     }

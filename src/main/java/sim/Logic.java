@@ -1,6 +1,5 @@
 package sim;
 
-import fftlib.game.FFTLogic;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 
@@ -12,7 +11,7 @@ import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 import static sim.Line.NO_COLOR;
 
-public class Logic implements FFTLogic {
+public class Logic {
 
     // Outputs a list of legal moves from a state
     static ArrayList<Move> legalMoves(int team, Node node) {

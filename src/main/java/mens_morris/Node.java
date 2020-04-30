@@ -150,18 +150,19 @@ public class Node extends FFTNode {
         this.turn = newTurn;
     }
 
-    public ArrayList<Node> getChildren() {
-        ArrayList<Node> children = new ArrayList<>();
-        for (Move m : getLegalMoves()) {
-            Node child = new Node(this, m);
-            children.add(child);
-        }
-        return children;
-    }
-
     @Override
     public FFTNode getNextNode(FFTMove move) {
         return getNextState((Move) move);
+    }
+
+    @Override
+    public boolean isTerminal() {
+        return Logic.gameOver(this);
+    }
+
+    @Override
+    public int getWinner() {
+        return Logic.getWinner(this);
     }
 
     public Node getNextState(Move m) {

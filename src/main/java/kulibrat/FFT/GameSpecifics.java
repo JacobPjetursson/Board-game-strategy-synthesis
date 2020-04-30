@@ -1,9 +1,9 @@
 package kulibrat.FFT;
 
-import fftlib.Action;
+import fftlib.logic.Action;
 import fftlib.auxiliary.Position;
-import fftlib.Rule;
-import fftlib.SymmetryRule;
+import fftlib.logic.Rule;
+import fftlib.logic.SymmetryRule;
 import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
@@ -59,7 +59,7 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public State nodeToState(FFTNode n) {
+    public LiteralSet nodeToLiterals(FFTNode n) {
         return null;
     }
 
@@ -86,11 +86,6 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public FFTNode getInitialNode() {
         return new Node();
-    }
-
-    @Override
-    public FFTLogic getLogic() {
-        return new Logic();
     }
 
     @Override

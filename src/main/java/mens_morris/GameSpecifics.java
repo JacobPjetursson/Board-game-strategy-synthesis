@@ -1,12 +1,15 @@
 package mens_morris;
 
 import com.google.common.collect.Sets;
-import fftlib.*;
 import fftlib.auxiliary.Position;
 import fftlib.auxiliary.Transform;
 import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
+import fftlib.logic.Action;
+import fftlib.logic.Literal;
+import fftlib.logic.Rule;
+import fftlib.logic.SymmetryRule;
 import misc.Config;
 
 import java.util.ArrayList;
@@ -29,7 +32,7 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public State nodeToState(FFTNode n) {
+    public LiteralSet nodeToLiterals(FFTNode n) {
         return null;
     }
 
@@ -61,11 +64,6 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public FFTNode getInitialNode() {
         return new Node();
-    }
-
-    @Override
-    public FFTLogic getLogic() {
-        return new Logic();
     }
 
     @Override

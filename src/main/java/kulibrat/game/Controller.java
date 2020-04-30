@@ -1,6 +1,6 @@
 package kulibrat.game;
 
-import fftlib.FFT;
+import fftlib.logic.FFT;
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTSolver;

@@ -1,8 +1,8 @@
 package fftlib.GGPAutogen;
 
-import fftlib.FFT;
-import fftlib.Rule;
-import fftlib.RuleGroup;
+import fftlib.logic.FFT;
+import fftlib.logic.Rule;
+import fftlib.logic.RuleGroup;
 import misc.Config;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;

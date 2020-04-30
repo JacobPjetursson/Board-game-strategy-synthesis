@@ -1,8 +1,9 @@
-package fftlib;
+package fftlib.logic;
 
 import fftlib.game.LiteralSet;
+import fftlib.logic.Action;
+import fftlib.logic.Rule;
 
-import java.util.HashSet;
 import java.util.Objects;
 
 public class SymmetryRule extends Rule { // Simpler rule class for rules in symmetry hashset

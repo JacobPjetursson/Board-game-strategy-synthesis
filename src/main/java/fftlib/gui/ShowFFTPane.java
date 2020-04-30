@@ -1,9 +1,9 @@
 package fftlib.gui;
 
 
-import fftlib.FFT;
-import fftlib.Rule;
-import fftlib.RuleGroup;
+import fftlib.logic.FFT;
+import fftlib.logic.Rule;
+import fftlib.logic.RuleGroup;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 import javafx.collections.FXCollections;
@@ -67,7 +67,7 @@ public class ShowFFTPane extends VBox {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r);
                 rLabel.setFont(Font.font("Verdana", 13));
-                FFTMove move = r.apply(node.convert()).convert();
+                FFTMove move = r.apply(node);
                 if (!ruleApplied && move != null) {
                     rLabel.setTextFill(Color.BLUE);
                     ruleApplied = true;

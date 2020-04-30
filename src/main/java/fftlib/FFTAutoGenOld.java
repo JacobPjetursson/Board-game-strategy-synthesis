@@ -1,7 +1,9 @@
-package fftlib.game;
+package fftlib;
 
-import fftlib.*;
-import fftlib.FFT;
+import fftlib.game.FFTNode;
+import fftlib.game.NodeMapping;
+import fftlib.logic.FFT;
+import fftlib.logic.RuleGroup;
 
 import java.util.*;
 

@@ -77,17 +77,18 @@ public class Node extends FFTNode {
         return getNextState((Move) move);
     }
 
-    public Node getNextState(Move m) {
-        return new Node(this, m);
+    @Override
+    public boolean isTerminal() {
+        return Logic.gameOver(this);
     }
 
-    public ArrayList<Node> getChildren() {
-        ArrayList<Node> children = new ArrayList<>();
-        for (Move m : getLegalMoves()) {
-            Node child = new Node(this, m);
-            children.add(child);
-        }
-        return children;
+    @Override
+    public int getWinner() {
+        return Logic.getWinner(this);
+    }
+
+    public Node getNextState(Move m) {
+        return new Node(this, m);
     }
 
     public int[][] getBoard() {
@@ -108,10 +109,6 @@ public class Node extends FFTNode {
 
     public String toString() {
         return Arrays.deepToString(board) + " , TEAM: " + turn;
-    }
-
-    public int getTurn() {
-        return turn;
     }
 
     public void setTurn(int turn) {

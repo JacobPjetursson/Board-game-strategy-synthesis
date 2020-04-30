@@ -1,6 +1,5 @@
 package kulibrat.game;
 
-import fftlib.game.FFTLogic;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 
@@ -10,7 +9,7 @@ import java.util.ArrayList;
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 
-public class Logic implements FFTLogic {
+public class Logic {
     public static final int POS_NONBOARD = -1;
 
     // Outputs a list of legal moves from a state

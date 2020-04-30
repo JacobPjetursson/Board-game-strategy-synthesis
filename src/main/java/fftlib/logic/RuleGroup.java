@@ -1,4 +1,4 @@
-package fftlib;
+package fftlib.logic;
 
 import misc.Config;
 

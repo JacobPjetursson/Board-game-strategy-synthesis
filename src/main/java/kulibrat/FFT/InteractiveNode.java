@@ -1,7 +1,7 @@
 package kulibrat.FFT;
 
-import fftlib.Action;
-import fftlib.Rule;
+import fftlib.logic.Action;
+import fftlib.logic.Rule;
 import fftlib.game.FFTNode;
 import fftlib.gui.interactiveFFTNode;
 import javafx.scene.paint.Color;

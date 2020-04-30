@@ -1,6 +1,6 @@
 package kulibrat.gui.info;
 
-import fftlib.FFT;
+import fftlib.logic.FFT;
 import fftlib.gui.ShowFFTPane;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;

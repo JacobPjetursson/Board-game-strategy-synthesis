@@ -2,6 +2,8 @@ package fftlib;
 
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
+import fftlib.logic.Rule;
+import fftlib.logic.RuleGroup;
 
 public class FFT_Follower {
     public int team;
@@ -15,7 +17,7 @@ public class FFT_Follower {
             return null;
         for (RuleGroup ruleGroup : FFTManager.currFFT.ruleGroups) {
             for (Rule rule : ruleGroup.rules) {
-                FFTMove move = rule.apply(node.convert()).convert();
+                FFTMove move = rule.apply(node);
                 if (move != null) {
                     System.out.println("Applying rule: " + rule);
                     return move;

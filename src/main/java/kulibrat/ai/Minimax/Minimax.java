@@ -1,5 +1,6 @@
 package kulibrat.ai.Minimax;
 
+import fftlib.game.FFTNode;
 import fftlib.game.NodeMapping;
 import kulibrat.ai.AI;
 import kulibrat.game.Logic;
@@ -92,19 +93,19 @@ public class Minimax extends AI {
                 beta = Math.min(score, beta);
             }
         }
-        for (Node child : node.getChildren()) {
+        for (FFTNode child : node.getChildren()) {
             if (moveOrdering && depth == CURR_MAX_DEPTH) if (child.equals(prevBestState)) continue;
-            score = minimax(child, depth - 1, alpha, beta, startTime).score;
+            score = minimax((Node)child, depth - 1, alpha, beta, startTime).score;
             if (node.getTurn() == team) {
                 if (score > bestScore) {
                     bestScore = score;
-                    bestMove = child.getMove();
+                    bestMove = (Move)child.getMove();
                 }
                 alpha = Math.max(score, alpha);
             } else {
                 if (score < bestScore) {
                     bestScore = score;
-                    bestMove = child.getMove();
+                    bestMove = (Move)child.getMove();
                 }
                 beta = Math.min(score, beta);
             }

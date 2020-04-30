@@ -1,15 +1,17 @@
 package tictactoe.FFT;
 
 import com.google.common.collect.Sets;
-import fftlib.*;
 import fftlib.auxiliary.Position;
 import fftlib.auxiliary.Transform;
 import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
+import fftlib.logic.Action;
+import fftlib.logic.Literal;
+import fftlib.logic.Rule;
+import fftlib.logic.SymmetryRule;
 import misc.Config;
 import tictactoe.game.Controller;
-import tictactoe.game.Logic;
 import tictactoe.game.Move;
 import tictactoe.game.Node;
 
@@ -57,7 +59,7 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public State nodeToState(FFTNode n) {
+    public LiteralSet nodeToLiterals(FFTNode n) {
         Node node = (Node) n;
         LiteralSet literals = new LiteralSet();
         for (int i = 0; i < 3; i++) {
@@ -69,7 +71,7 @@ public class GameSpecifics implements FFTGameSpecifics {
                 literals.add(new Literal(Atoms.posToId.get(pos), false));
             }
         }
-        return new State(literals);
+        return new LiteralSet(literals);
     }
 
     @Override
@@ -98,11 +100,6 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public FFTNode getInitialNode() {
         return new Node();
-    }
-
-    @Override
-    public FFTLogic getLogic() {
-        return new Logic();
     }
 
     @Override
@@ -210,7 +207,6 @@ public class GameSpecifics implements FFTGameSpecifics {
         long coveredStates = 1;
         int row, col, occ;
         Position pos;
-        Literal l;
 
         for (row = 0; row < 3; row++) {
             for (col = 0; col < 3; col++) {
@@ -218,7 +214,7 @@ public class GameSpecifics implements FFTGameSpecifics {
                 // make set of all relevant literals from this cell
                 for (occ = PLAYER1; occ <= PLAYER2; occ++) {
                     pos = new Position(row, col, occ);
-                    l = new Literal(posToId(pos), false);
+                    Literal l = new Literal(posToId(pos), false);
                     if (precons.contains(l)) {
                         combinations = 1;
                         break;

@@ -2,6 +2,10 @@ package fftlib.auxiliary;
 
 import fftlib.*;
 import fftlib.game.LiteralSet;
+import fftlib.logic.Action;
+import fftlib.logic.Literal;
+import fftlib.logic.Rule;
+import fftlib.logic.SymmetryRule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -188,32 +192,32 @@ public class Transform {
         }
         ArrayList<int[]> permutations = findPermutations(vertices);
         HashSet<SymmetryRule> transformations = new HashSet<>();
+        Position pos, newPos;
+        int n1, n2;
         for(int[] arr : permutations) {
-
             LiteralSet precons = new LiteralSet();
-            Action action = null;
-            for (Literal lit : rule.getAction().adds) {
-                Position pos = getPosFromId.apply(lit.id);
-                int n1 = arr[pos.row];
-                int n2 = arr[pos.col];
-                if (Math.abs(n1) > Math.abs(n2)) { // enforce lowest number first
-                    int temp = n1;
-                    n1 = n2;
-                    n2 = temp;
-                }
-                Position newPos = new Position(n1, n2, pos.occ);
-                action = new Action(getIdFromPos.apply(newPos));
+            Literal literal = rule.getAction().adds.iterator().next();
+            pos = getPosFromId.apply(literal.id);
+            n1 = arr[pos.row];
+            n2 = arr[pos.col];
+            if (Math.abs(n1) > Math.abs(n2)) { // enforce lowest number first
+                int temp = n1;
+                n1 = n2;
+                n2 = temp;
             }
+            newPos = new Position(n1, n2, pos.occ);
+            Action action = new Action(getIdFromPos.apply(newPos));
+
             for (Literal lit : rule.getPreconditions()) {
-                Position pos = getPosFromId.apply(lit.id);
-                int n1 = arr[pos.row];
-                int n2 = arr[pos.col];
+                pos = getPosFromId.apply(lit.id);
+                n1 = arr[pos.row];
+                n2 = arr[pos.col];
                 if (Math.abs(n1) > Math.abs(n2)) { // enforce lowest number first
                     int temp = n1;
                     n1 = n2;
                     n2 = temp;
                 }
-                Position newPos = new Position(n1, n2, pos.occ);
+                newPos = new Position(n1, n2, pos.occ);
                 precons.add(new Literal(getIdFromPos.apply(newPos), lit.negated));
             }
             transformations.add(new SymmetryRule(precons, action));
@@ -229,7 +233,7 @@ public class Transform {
         int i = 0;
         while (i < elements.length) {
             if (indexes[i] < i) {
-                swap(elements, i % 2 == 0 ?  0: indexes[i], i);
+                swap(elements, i % 2 == 0 ?  0 : indexes[i], i);
                 permutations.add(elements.clone());
                 indexes[i]++;
                 i = 0;

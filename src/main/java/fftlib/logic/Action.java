@@ -1,5 +1,6 @@
-package fftlib;
+package fftlib.logic;
 
+import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 import fftlib.game.LiteralSet;
 

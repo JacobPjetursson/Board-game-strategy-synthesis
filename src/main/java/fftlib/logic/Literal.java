@@ -1,7 +1,6 @@
-package fftlib;
+package fftlib.logic;
 
-import java.util.HashSet;
-import java.util.Objects;
+import fftlib.FFTManager;
 
 public class Literal {
     public int id;

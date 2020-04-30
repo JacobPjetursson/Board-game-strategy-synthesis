@@ -1,7 +1,9 @@
-package fftlib;
+package fftlib.logic;
 
+import fftlib.FFTManager;
 import fftlib.GGPAutogen.GGPManager;
-import fftlib.game.State;
+import fftlib.game.FFTMove;
+import fftlib.game.FFTNode;
 import fftlib.game.LiteralSet;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
@@ -245,28 +247,28 @@ public class Rule {
         return FFTManager.getSymmetryRules.apply(this);
     }
 
-    public Action apply(State state) {
-        LiteralSet stLiterals = state.getLiterals();
-        Action a = match(this, stLiterals);
-        if (a != null || !SYMMETRY_DETECTION) {
-            return a;
+    public FFTMove apply(FFTNode node) {
+        LiteralSet stLiterals = node.convert();
+        FFTMove m = match(this, stLiterals);
+        if (m != null || !SYMMETRY_DETECTION) {
+            return m;
         }
         for (Rule rule : symmetryRules) {
-            a = match(rule, stLiterals);
+            m = match(rule, stLiterals);
             // returns the first symmetry with a legal move
             // We want to ensure that rule is optimal in all symmetric states, but since all these will be explored
             // by the algorithm, we are good. This is the case since we always start with checking the default state
             // (no applied symmetries), meaning every symmetric states will inevitably be checked.
             // Alternative is to check that all non-null moves here are legal.
             // TODO - check which method is fastest
-            if (a != null) {
-                return a;
+            if (m != null) {
+                return m;
             }
         }
         return null;
     }
 
-    private Action match(Rule rule, LiteralSet stLiterals) {
+    private FFTMove match(Rule rule, LiteralSet stLiterals) {
         boolean match = true;
         for (Literal l : rule.preconditions) {
             match = matchLiteral(l, stLiterals);
@@ -275,11 +277,14 @@ public class Rule {
 
         }
         if (match && rule.action.isLegal(stLiterals))
-            return rule.action;
+            return rule.action.convert();
 
         return null;
     }
 
+
+
+    
     public Move apply(MachineState ms) throws MoveDefinitionException {
         Set<GdlSentence> stSentences = ms.getContents();
         // TODO - transformations of sentences

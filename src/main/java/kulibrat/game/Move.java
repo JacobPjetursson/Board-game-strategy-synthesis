@@ -1,11 +1,9 @@
 package kulibrat.game;
 
-import fftlib.Action;
+import fftlib.logic.Action;
 import fftlib.FFTManager;
-import fftlib.Literal;
 import fftlib.game.FFTMove;
 
-import java.util.HashSet;
 import java.util.Objects;
 
 public class Move implements FFTMove {

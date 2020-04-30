@@ -1,5 +1,7 @@
-package fftlib;
+package fftlib.logic;
 
+import fftlib.FFTManager;
+import fftlib.FFTSolution;
 import fftlib.GGPAutogen.Database;
 import fftlib.GGPAutogen.GGPManager;
 import fftlib.game.*;
@@ -105,12 +107,11 @@ public class FFT {
     }
 
     public FFTMove apply(FFTNode node) {
-        State state = node.convert();
         for (RuleGroup rg : ruleGroups) {
             for (Rule r : rg.rules) {
-                Action a = r.apply(state);
-                if (a != null)
-                    return a.convert();
+                FFTMove m = r.apply(node);
+                if (m != null)
+                    return m;
             }
         }
         return null;
@@ -211,9 +212,8 @@ public class FFT {
         if (!Config.ENABLE_GGP && SINGLE_THREAD) {
             return verifySingleThread(team, complete);
         }
-        else {
-            return (Config.ENABLE_GGP) ? verifyGGP(team, complete) : verify_(team, complete);
-        }
+
+        return (Config.ENABLE_GGP) ? verifyGGP(team, complete) : verify_(team, complete);
     }
 
     public boolean verifySingleThread(int team, boolean complete) {
@@ -229,8 +229,8 @@ public class FFT {
             return false;
         while (!frontier.isEmpty()) {
             FFTNode node = frontier.pop();
-            if (FFTManager.logic.gameOver(node)) {
-                if (FFTManager.logic.getWinner(node) == opponent) {
+            if (node.isTerminal()) {
+                if (node.getWinner() == opponent) {
                     // Should not hit this given initial check
                     System.out.println("No chance of winning vs. perfect player");
                     return false;
@@ -331,8 +331,8 @@ public class FFT {
         protected Boolean compute() {
             if (failed)
                 return false;
-            if (FFTManager.logic.gameOver(node)) {
-                if (FFTManager.logic.getWinner(node) == opponent) {
+            if (node.isTerminal()) {
+                if (node.getWinner() == opponent) {
                     // Should not hit this given initial check
                     System.out.println("No chance of winning vs. perfect player");
                     failed = true;

@@ -1,9 +1,9 @@
 package fftlib.gui;
 
-import fftlib.FFT;
+import fftlib.logic.FFT;
 import fftlib.FFTManager;
-import fftlib.Rule;
-import fftlib.RuleGroup;
+import fftlib.logic.Rule;
+import fftlib.logic.RuleGroup;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 import javafx.animation.Animation;

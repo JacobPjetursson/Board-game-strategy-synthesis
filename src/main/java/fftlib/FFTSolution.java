@@ -1,8 +1,10 @@
-package fftlib.game;
+package fftlib;
 
 
-import fftlib.Action;
 import fftlib.FFTManager;
+import fftlib.game.FFTMove;
+import fftlib.game.FFTNode;
+import fftlib.game.NodeMapping;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,62 +14,49 @@ import static misc.Globals.PLAYER2;
 
 public class FFTSolution{
 
-    // fixme: this should be deleted first in case of any memory issues
-    private static HashMap<? extends FFTNode, NodeMapping> lookupTable;
-    // fixme: this should be shrinked in case of further memory issues (only reachable states)
-    private static HashMap<State, ArrayList<Action>> solution;
+    private static HashMap<? extends FFTNode, NodeMapping> solution;
 
-    public static void setSolution(HashMap<? extends FFTNode, NodeMapping> table) {
-        lookupTable = table;
-        solution = new HashMap<>();
-        for (FFTNode node : lookupTable.keySet()) {
-            ArrayList<Action> optimalActions = new ArrayList<>();
-            ArrayList<? extends FFTMove> optimalMoves = optimalMoves(node);
-            for (FFTMove m : optimalMoves) {
-                optimalActions.add(new Action(m.convert()));
-            }
-            solution.put(node.convert(), optimalActions);
-        }
+    public static void setSolution(HashMap<? extends FFTNode, NodeMapping> lookupTable) {
+        solution = lookupTable;
     }
 
-    public static ArrayList<? extends FFTMove> optimalMoves(
-            FFTNode node) {
+    public static ArrayList<? extends FFTMove> optimalMoves(FFTNode node) {
         ArrayList<FFTMove> optimalMoves = new ArrayList<>();
-        NodeMapping mapping = lookupTable.get(node);
+        NodeMapping mapping = solution.get(node);
         if (mapping == null || mapping.getMove() == null) {
             return optimalMoves;
         }
         FFTNode next = node.getNextNode(mapping.getMove());
         // Cant assume that best move will end the game, in fact its the opposite
         // In case of game over
-        if (FFTManager.logic.gameOver(next)) {
-            int winner = FFTManager.logic.getWinner(next);
+        if (next.isTerminal()) {
+            int winner = next.getWinner();
             for (FFTNode child : node.getChildren()) {
                 FFTMove m = child.getMove();
-                if (FFTManager.logic.gameOver(child)) {
-                    if (FFTManager.logic.getWinner(child) == winner)
+                if (child.isTerminal()) {
+                    if (child.getWinner() == winner)
                         optimalMoves.add(m);
                 } else {
-                    if (winner == lookupTable.get(child).getWinner())
+                    if (winner == solution.get(child).getWinner())
                         optimalMoves.add(m);
                 }
             }
             return optimalMoves;
         }
 
-        int bestMoveWinner = lookupTable.get(next).getWinner();
+        int bestMoveWinner = solution.get(next).getWinner();
         int team = node.getTurn();
 
         for (FFTNode child : node.getChildren()) {
             FFTMove m = child.getMove();
-            if (FFTManager.logic.gameOver(child)) {
+            if (child.isTerminal()) {
                 if (team == PLAYER1 && bestMoveWinner == PLAYER2)
                     optimalMoves.add(m);
                 else if (team == PLAYER2 && bestMoveWinner == PLAYER1)
                     optimalMoves.add(m);
                 continue;
             }
-            int childWinner = lookupTable.get(child).getWinner();
+            int childWinner = solution.get(child).getWinner();
             if (team == PLAYER1) {
                 if (bestMoveWinner == childWinner)
                     optimalMoves.add(m);
@@ -83,18 +72,12 @@ public class FFTSolution{
         return optimalMoves;
     }
 
-    public static ArrayList<Action> getOptimalActions(State state) {
-        return solution.get(state);
-    }
-
-
-    public static HashMap<State, ArrayList<Action>> getSolution() {
-        return solution;
+    public static NodeMapping queryState(FFTNode n) {
+        return solution.get(n);
     }
 
     // Outputs a string which is the amount of turns to a terminal node, based on a score from the database entry
-    /*
-    public static String turnsToTerminal(int turn, State n) {
+    public static String turnsToTerminal(int turn, FFTNode n) {
         if (queryState(n) == null)
             return "0";
         int score = queryState(n).getScore();
@@ -117,5 +100,7 @@ public class FFTSolution{
         }
     }
 
-     */
+    public static int size() {
+        return solution.size();
+    }
 }
