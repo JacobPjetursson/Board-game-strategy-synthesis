@@ -28,10 +28,11 @@ public class FFTAutoGen {
 
     public static FFT generateFFT(int team_) {
         // temp code
-
+/*
         Scanner block = new Scanner(System.in);
         System.out.println("Press any button to continue");
         block.nextLine();
+ */
 
 
         fft = new FFT("Synthesis");
