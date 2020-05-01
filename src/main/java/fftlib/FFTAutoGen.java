@@ -28,11 +28,11 @@ public class FFTAutoGen {
 
     public static FFT generateFFT(int team_) {
         // temp code
-/*
+
         Scanner block = new Scanner(System.in);
         System.out.println("Press any button to continue");
         block.nextLine();
-*/
+
 
         fft = new FFT("Synthesis");
         AUTOGEN_TEAM = team_;
@@ -152,9 +152,6 @@ public class FFTAutoGen {
 
     private static boolean verifyRule(Rule r, boolean safe) {
         HashMap<FFTNode, FFTMove> appliedMap = new HashMap<>();
-        HashSet<FFTNode> suboptimalSet = new HashSet<>(); // contains states with sub-optimal moves
-        HashMap<FFTNode, Boolean> deleteMap = new HashMap<>();
-        HashMap<FFTNode, FFTMove> undoMap = new HashMap<>();
 
         long coveredStates = r.getNumberOfCoveredStates();
         if (DETAILED_DEBUG) {
@@ -173,9 +170,11 @@ public class FFTAutoGen {
             }
         }
         else {
+            //System.out.println("ApplyMap: ");
             for (FFTNode n : reachableRelevantStates.values()) {
                 FFTMove m = r.apply(n);
                 if (m != null) { // this is equivalent to checking that rule applies with legal move
+                    //System.out.println(n + " , and move: " + m);
                     appliedMap.put(n, m);
                 }
             }
@@ -188,62 +187,46 @@ public class FFTAutoGen {
             FFTNode n = entry.getKey();
             FFTMove m = entry.getValue();
             //System.out.println("Updating set from node: " + n + ", and move: " + m);
-            updateSets(n, m, suboptimalSet, deleteMap, undoMap);
-        }
-
-        //System.out.println("deleteMap size: " + deleteMap.size());
-        //System.out.println("undoMap size: " + undoMap.size());
-
-        for (FFTNode n : suboptimalSet) {
-            if (n.isReachable()) {
-                //System.out.println("suboptimal node is reachable: " + n);
-                undoReachableParents(undoMap);
+            if (!updateSets(n, m, appliedMap, safe)) {
                 return false;
             }
         }
 
-        /*
+/*
         if (!fft.verify(AUTOGEN_TEAM, false)) {
             System.out.println("ERROR: Old verification failed where new did not");
             System.out.println("Failing point: " + fft.failingPoint);
             System.exit(1);
             return false;
         }
-         */
+ */
 
-
-        if (safe) {
-            deleteUnreachableStates(deleteMap);
-        } else {
-            // When simplifying rules, they might apply to previous states with a different symmetry
-            // (and thus a different action), which means we need to undo the changes made
-            undoReachableParents(undoMap);
-        }
         return true;
     }
 
     // Either remove states from applySet in addition to reachableSet, or check whether state is still reachable
-    private static void updateSets(FFTNode n, FFTMove chosenMove,
-                                   HashSet<FFTNode> suboptimalSet, HashMap<FFTNode, Boolean> deleteMap,
-                                   HashMap<FFTNode, FFTMove> undoMap) {
-        deleteMap.putIfAbsent(n, false);
+    private static boolean updateSets(FFTNode n, FFTMove chosenMove, HashMap<FFTNode, FFTMove> appliedMap,
+                                      boolean safe) {
+        if (safe) reachableRelevantStates.remove(n.convert().getBitString());
         // s might've been set unreachable by another state in appliedSet
         if (!n.isReachable()) {
-            //System.out.println("state is not reachable");
-            return;
+            //System.out.println("state has no reachable parents");
+            return true;
         }
         ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(n);
         if (optimalMoves.isEmpty()) // terminal state
-            return;
+            return true;
         if (!optimalMoves.contains(chosenMove)) { // we choose wrong move
-            //System.out.println("state chooses suboptimal move, adding to suboptimal set");
-            suboptimalSet.add(n);
-            return;
+            //System.out.print("state chooses suboptimal move");
+            if (isReachable(n, appliedMap))
+                return false;
+            else
+                chosenMove = null;
         }
-        //System.out.println("Removing pointers to all children except chosenMove, adding state: "
-        //        + n + " , and move: " + chosenMove + ", to undoMap");
+        if (!safe) // only update sets in a safe run
+            return true;
+        //System.out.println("Removing pointers to all children except chosenMove");
 
-        undoMap.put(n, chosenMove);
         for (FFTMove m : optimalMoves) { // remove pointer to all children except chosen move
             //System.out.println("Next node: " + n.getNextNode(m) + ", from move: " + m);
             if (m.equals(chosenMove)) { // chosen move
@@ -252,69 +235,70 @@ public class FFTAutoGen {
             FFTNode existingChild = reachableStates.get(n.getNextNode(m));
             // existingChild can be null if we re-visit a state where we already deleted it from
             // i.e. we deleted all but chosen move from this state, so it's still reachable, but children isn't
-            // Might also be the case that we already removed it once (deleteMap check)
-            if (existingChild == null || deleteMap.getOrDefault(existingChild, false)) {
-                //System.out.println("Existing child null or part of deleteMap");
+            if (existingChild == null) {
+                //System.out.println("Existing child null");
                 continue;
             }
-            //System.out.println("Removing ptr to child" + existingChild + " , from node: " + n);
+            //System.out.println("Removing ptrs to child" + existingChild + " , from node: " + n);
             existingChild.removeReachableParent(n);
             //System.out.println("remaining pointers: " + existingChild.getReachableParents());
             if (!existingChild.isReachable()) {
                 //System.out.println("Child no longer reachable, removing from set and checking recursively");
-                removePointers(existingChild, deleteMap, undoMap);
+                removePointers(existingChild);
             }
         }
+        return true;
     }
 
-    private static void removePointers(FFTNode parent, HashMap<FFTNode, Boolean> deleteMap,
-                                       HashMap<FFTNode, FFTMove> undoMap) {
-        deleteMap.put(parent, true);
-        undoMap.put(parent, null);
+    // walk upwards through reachable parents until either initial state is found
+    private static boolean isReachable(FFTNode node, HashMap<FFTNode, FFTMove> appliedMap) {
+        LinkedList<FFTNode> frontier = new LinkedList<>();
+        HashSet<FFTNode> closedSet = new HashSet<>();
+        frontier.add(node);
+        closedSet.add(node);
+
+        while (!frontier.isEmpty()) {
+            FFTNode n = frontier.pop();
+            if (n.equals(FFTNode.getInitialNode())) {
+                return true;
+            }
+            for (FFTNode parent : n.getReachableParents()) {
+                FFTNode existingParent = reachableStates.get(parent);
+                FFTMove chosenMove = appliedMap.get(parent);
+                // either not in appliedMap or chooses correct move
+                if (chosenMove == null || parent.getNextNode(chosenMove).equals(n)) {
+                    if (existingParent != null && !closedSet.contains(parent)) {
+                        closedSet.add(parent);
+                        frontier.add(existingParent);
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static void removePointers(FFTNode parent) {
+        reachableStates.remove(parent);
+        reachableRelevantStates.remove(parent.convert().getBitString());
         for (FFTNode child : parent.getChildren()) {
             FFTNode existingChild = reachableStates.get(child);
-            if (existingChild == null || deleteMap.getOrDefault(existingChild, false)) {
-                //System.out.println("Existing child null or part of deleteMap");
+            if (existingChild == null) {
+                //System.out.println("Existing child null");
                 continue;
             }
 
             //System.out.println("Removing ptr to child" + existingChild + " , from node: " + parent);
             existingChild.removeReachableParent(parent);
             //System.out.println("remaining pointers: " + existingChild.getReachableParents());
-            if (!existingChild.isReachable()) { // TODO - use something else instead of undoMap?
+            if (!existingChild.isReachable()) {
                 //System.out.println("Child no longer reachable, removing from set and checking recursively");
-                removePointers(existingChild, deleteMap, undoMap);
+                removePointers(existingChild);
             }
         }
         // FIXME - tail-end?
     }
 
-    private static void deleteUnreachableStates(HashMap<FFTNode, Boolean> deleteMap) {
-        //System.out.println("Deleting unreachable states");
-        for (Map.Entry<FFTNode, Boolean> entry : deleteMap.entrySet()) {
-            FFTNode key = entry.getKey();
-            if (entry.getValue()) { // del from both
-                reachableStates.remove(key);
-            }
-            reachableRelevantStates.remove(key.convert().getBitString());
-        }
-    }
-
-    private static void undoReachableParents(HashMap<FFTNode, FFTMove> undoMap) {
-        //System.out.println("Undoing deletions of reachable parents");
-        for (Map.Entry<FFTNode, FFTMove> entry : undoMap.entrySet()) {
-            FFTNode state = entry.getKey();
-            FFTMove chosenMove = entry.getValue(); // might be null (if we want to add link to all children)
-            for (FFTMove m : state.getLegalMoves()) {
-                if (m.equals(chosenMove))
-                    continue;
-                FFTNode child = reachableStates.get(state.getNextNode(m));
-                // child can be null if choiceMove is not null
-                if (child != null)
-                    child.addReachableParent(state);
-            }
-        }
-    }
 
     private static void initializeSets() {
         int team = AUTOGEN_TEAM;

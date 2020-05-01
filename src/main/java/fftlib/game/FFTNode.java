@@ -65,4 +65,8 @@ public abstract class FFTNode {
      * @return The move used by the parent to expand into this node
      */
     public abstract FFTMove getMove();
+
+    public static FFTNode getInitialNode() {
+        return FFTManager.initialFFTNode;
+    }
 }
