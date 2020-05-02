@@ -112,7 +112,12 @@ public class FFTAutoGen {
                     ". Current amount of rules: " + rg.rules.size());
             FFTNode node = reachableRelevantStates.values().iterator().next();
 
+            int prevSize = reachableRelevantStates.size();
             Rule r = addRule(node);
+            if (prevSize == reachableRelevantStates.size()) {
+                System.out.println("Error: Size of reachable relevant states unchanged after adding new rule");
+                System.exit(1);
+            }
 
             if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
             System.out.println();
@@ -160,10 +165,10 @@ public class FFTAutoGen {
             System.out.println("Size of reachable relevant states: " + reachableRelevantStates.size());
         }
         if (USE_APPLYSET_OPT && coveredStates < reachableRelevantStates.size()) {
-            HashSet<Long> codes = r.getCoveredStateBitCodes();
-            if (DETAILED_DEBUG) System.out.println("Exact no. of covered states: " + codes.size());
-            for (long code : codes) {
-                FFTNode n = reachableRelevantStates.get(code);
+            HashSet<LiteralSet> states = r.getCoveredStates();
+            if (DETAILED_DEBUG) System.out.println("Exact no. of covered states: " + states.size());
+            for (LiteralSet state : states) {
+                FFTNode n = reachableRelevantStates.get(state.getBitString());
                 if (n == null) continue;
                 FFTMove m = r.apply(n);
                 if (m != null)
@@ -171,11 +176,9 @@ public class FFTAutoGen {
             }
         }
         else {
-            //System.out.println("ApplyMap: ");
             for (FFTNode n : reachableRelevantStates.values()) {
                 FFTMove m = r.apply(n);
                 if (m != null) { // this is equivalent to checking that rule applies with legal move
-                    //System.out.println(n + " , and move: " + m);
                     appliedMap.put(n, m);
                 }
             }
@@ -200,6 +203,7 @@ public class FFTAutoGen {
             System.exit(1);
             return false;
         }
+
  */
 
         return true;
@@ -218,7 +222,7 @@ public class FFTAutoGen {
         if (optimalMoves.isEmpty()) // terminal state
             return true;
         if (!optimalMoves.contains(chosenMove)) { // we choose wrong move
-            //System.out.print("state chooses suboptimal move");
+            //System.out.println("state chooses suboptimal move");
             if (isReachable(n, appliedMap))
                 return false;
             else
@@ -240,7 +244,7 @@ public class FFTAutoGen {
                 //System.out.println("Existing child null");
                 continue;
             }
-            //System.out.println("Removing ptrs to child" + existingChild + " , from node: " + n);
+            //System.out.println("Removing ptr to child" + existingChild + " , from parent: " + n);
             existingChild.removeReachableParent(n);
             //System.out.println("remaining pointers: " + existingChild.getReachableParents());
             if (!existingChild.isReachable()) {
@@ -289,7 +293,7 @@ public class FFTAutoGen {
                 continue;
             }
 
-            //System.out.println("Removing ptr to child" + existingChild + " , from node: " + parent);
+            //System.out.println("Removing ptr to child " + existingChild + " , from parent: " + parent);
             existingChild.removeReachableParent(parent);
             //System.out.println("remaining pointers: " + existingChild.getReachableParents());
             if (!existingChild.isReachable()) {

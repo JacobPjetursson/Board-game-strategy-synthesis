@@ -130,26 +130,33 @@ public class FFT {
         int ruleSize = getAmountOfRules();
         int precSize = getAmountOfPreconditions();
 
+        int i = 0;
+        if (DETAILED_DEBUG)
+            System.out.println("Minimizing, iteration no. " + i);
         minimizeRules(team);
         if (!MINIMIZE_RULE_BY_RULE && minimize_precons) {
+            if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
             minimizePreconditions(team);
         }
 
         int minRuleSize = getAmountOfRules();
         int minPrecSize = getAmountOfPreconditions();
 
-        int i = 0;
         while (ruleSize != minRuleSize || precSize != minPrecSize) {
+            i++;
+            if (DETAILED_DEBUG)
+                System.out.println("Minimizing, iteration no. " + i);
+            minimizeRules(team);
             ruleSize = minRuleSize;
             precSize = minPrecSize;
 
-            minimizeRules(team);
-            if (!MINIMIZE_RULE_BY_RULE && minimize_precons)
+            if (!MINIMIZE_RULE_BY_RULE && minimize_precons) {
+                if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
                 minimizePreconditions(team);
+            }
 
             minRuleSize = getAmountOfRules();
             minPrecSize = getAmountOfPreconditions();
-            i++;
         }
         return i;
     }

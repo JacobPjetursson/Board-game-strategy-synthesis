@@ -194,15 +194,15 @@ public class Rule {
         return number;
     }
 
-    public HashSet<Long> getCoveredStateBitCodes() {
+    public HashSet<LiteralSet> getCoveredStates() {
         if (!SYMMETRY_DETECTION)
-            return FFTManager.getCoveredStateBitCodes.apply(this);
+            return FFTManager.getCoveredStates.apply(this);
 
-        HashSet<Long> bitCodes = new HashSet<>();
+        HashSet<LiteralSet> states = new HashSet<>();
         for (Rule r : symmetryRules) {
-            bitCodes.addAll(FFTManager.getCoveredStateBitCodes.apply(r));
+            states.addAll(FFTManager.getCoveredStates.apply(r));
         }
-        return bitCodes;
+        return states;
     }
 
     private static LiteralSet getPreconditions(String preconStr) {

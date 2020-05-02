@@ -2,6 +2,7 @@ package kulibrat.FFT;
 
 import fftlib.logic.Action;
 import fftlib.auxiliary.Position;
+import fftlib.logic.Literal;
 import fftlib.logic.Rule;
 import fftlib.logic.SymmetryRule;
 import fftlib.game.*;
@@ -141,7 +142,7 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public HashSet<Long> getCoveredStateBitCodes(Rule rule) {
+    public HashSet<LiteralSet> getCoveredStates(Rule rule) {
         return null;
     }
 

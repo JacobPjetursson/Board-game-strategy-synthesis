@@ -48,7 +48,7 @@ public interface FFTGameSpecifics {
      */
     // TODO - can we do this smarter and more domain-independent?
     // TODO - does there exist a more general version of this that is less ad-hoc?
-    HashSet<Long> getCoveredStateBitCodes(Rule rule);
+    HashSet<LiteralSet> getCoveredStates(Rule rule);
 
     /** Find the numer of covered states given a set of preconditions
      * It is quite easy to find an upper bound by using a domain-free method

@@ -137,8 +137,8 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public HashSet<Long> getCoveredStateBitCodes(Rule rule) {
-        HashSet<Long> bitCodes = new HashSet<>();
+    public HashSet<LiteralSet> getCoveredStates(Rule rule) {
+        HashSet<LiteralSet> coveredStates = new HashSet<>();
         List<Set<Literal>> subsets = new ArrayList<>();
         LiteralSet precons = rule.getAllPreconditions();
         int n1, n2, occ;
@@ -177,9 +177,9 @@ public class GameSpecifics implements FFTGameSpecifics {
                 if (!l.equals(Literal.NULL))
                     newSet.add(l);
             }
-            bitCodes.add(newSet.getBitString());
+            coveredStates.add(newSet);
         }
-        return bitCodes;
+        return coveredStates;
     }
 
     @Override

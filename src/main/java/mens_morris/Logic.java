@@ -15,6 +15,8 @@ public class Logic {
     // Outputs a list of legal moves from a node
     static ArrayList<Move> legalMoves(int team, Node node) {
         ArrayList<Move> moves = new ArrayList<>();
+        if (gameOver(node))
+            return moves;
         int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
 
         for (int i = 0; i < node.board.length; i++) {
@@ -133,8 +135,6 @@ public class Logic {
     }
 
     public static boolean gameOver(Node node) {
-        if (legalMoves(node.getTurn(), node).isEmpty())
-            return true;
         if (THREE_MENS) {
             Move m = node.getMove();
             if (m == null)
@@ -165,7 +165,10 @@ public class Logic {
     }
 
     static void doTurn(Move m, Node node) {
-        if (gameOver(node)) return;
+        if (gameOver(node))
+            return;
+        //if (node.canRemove)
+        //    System.out.println("canRemove true!");
 
         if (m.team != node.getTurn()) {
             System.out.println("Not your turn");
@@ -186,7 +189,8 @@ public class Logic {
 
         node.phase2 = isPhase2(node);
         if (isMill(m.newRow, m.newCol, m.team, node)) {
-            node.canRemove = true;
+            if (THREE_MENS)
+                node.canRemove = true;
             return;
         }
 
@@ -204,11 +208,6 @@ public class Logic {
 
     public int getWinner(FFTNode node) {
         return getWinner((Node) node);
-    }
-
-    public boolean isLegalMove(FFTNode node, FFTMove move) {
-        Move m = (Move) move;
-        return legalMoves(move.getTeam(), (Node) node).contains(m);
     }
 
     public static boolean isMillThreeMens(int row, int col, int team, Node node) {

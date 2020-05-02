@@ -60,12 +60,18 @@ public class Transform {
                 refV = true;
         }
         HashSet<SymmetryRule> symmetryRules = new HashSet<>();
+        // add itself
+        symmetryRules.add(new SymmetryRule(rule.getPreconditions(), rule.getAction()));
         int [][] lBoard;
         Literal transformed;
         for (ArrayList<Integer> trans : getAllTransformations(refH, refV, rotate)) {
             LiteralSet transformedSet = new LiteralSet();
             for (Literal l : rule.getPreconditions()) {
                 lBoard = literalToBoard(l);
+                if (lBoard == null) { // not a board literal
+                    transformedSet.add(l);
+                    continue;
+                }
                 lBoard = apply(trans, lBoard);
                 transformed = boardToLiteral(lBoard);
                 transformedSet.add(transformed);
@@ -73,12 +79,20 @@ public class Transform {
             Action action = new Action();
             for (Literal l : rule.getAction().adds) {
                 lBoard = literalToBoard(l);
+                if (lBoard == null) { // not a board literal
+                    transformedSet.add(l);
+                    continue;
+                }
                 lBoard = apply(trans, lBoard);
                 transformed = boardToLiteral(lBoard);
                 action.adds.add(transformed);
             }
             for (Literal l : rule.getAction().rems) {
                 lBoard = literalToBoard(l);
+                if (lBoard == null) { // not a board literal
+                    transformedSet.add(l);
+                    continue;
+                }
                 lBoard = apply(trans, lBoard);
                 transformed = boardToLiteral(lBoard);
                 action.rems.add(transformed);
@@ -155,10 +169,9 @@ public class Transform {
         int[][] preconBoard = new int[height][width];
 
         Position pos = getPosFromId.apply(l.id);
-        if (pos != null) {
-            preconBoard[pos.row][pos.col] = l.negated ? -pos.occ : pos.occ;
-        }
-
+        if (pos == null)
+            return null;
+        preconBoard[pos.row][pos.col] = l.negated ? -pos.occ : pos.occ;
         return preconBoard;
     }
 

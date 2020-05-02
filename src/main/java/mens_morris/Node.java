@@ -13,7 +13,6 @@ import static misc.Globals.PLAYER2;
 
 public class Node extends FFTNode {
     private Move move;
-    private int turn;
     private long zobrist_key;
     int[][] board;
     boolean canRemove; // can the player remove opponent piece?
@@ -70,28 +69,6 @@ public class Node extends FFTNode {
         return this == node ||
                 this.zobrist_key == node.zobrist_key;
     }
-
-    /*
-    public LiteralSet getLiterals() { // Including negatives, used for creating rules
-        LiteralSet literals = new LiteralSet();
-        if (phase2)
-            literals.add(new Literal("phase2"));
-        if (!THREE_MENS && canRemove)
-            literals.add(new Literal("canRemove"));
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                if (!validPos(i, j))
-                    continue;
-                int occ = board[i][j];
-                Position pos = new Position(i, j, occ);
-                int id = Atoms.posToId.get(pos);
-                literals.add(new Literal(id, false));
-            }
-        }
-        return literals;
-    }
-
-     */
 
     private long initZobrist() {
         long hash = 0L;
@@ -208,15 +185,8 @@ public class Node extends FFTNode {
     }
 
     public String toString() {
-        StringBuilder s = new StringBuilder();
         String phaseStr = (phase2) ? "2" : "1";
-        s.append("TURN: ").append(turn).append(", PHASE: ").append(phaseStr).append("\n");
-        for (int[] ints : board) {
-            for (int anInt : ints) {
-                s.append(anInt).append("\t");
-            }
-            s.append("\n");
-        }
-        return s.toString();
+        return "TURN: " + turn + ", PHASE: " + phaseStr + "\n" +
+                Arrays.deepToString(board);
     }
 }
