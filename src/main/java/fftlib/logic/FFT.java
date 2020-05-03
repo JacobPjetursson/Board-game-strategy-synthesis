@@ -109,7 +109,6 @@ public class FFT {
         return sb.toString();
     }
 
-    // FIXME - We should make apply concurrent or somehow allow multiple access here
     public synchronized FFTMove apply(FFTNode node) {
         for (RuleGroup rg : ruleGroups) {
             for (Rule r : rg.rules) {

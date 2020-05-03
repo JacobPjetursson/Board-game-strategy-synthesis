@@ -10,6 +10,7 @@ import fftlib.logic.RuleGroup;
 import misc.Config;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static misc.Config.*;
 import static misc.Globals.PLAYER1;
@@ -157,7 +158,7 @@ public class FFTAutoGen {
     }
 
     private static boolean verifyRule(Rule r, boolean safe) {
-        HashMap<FFTNode, FFTMove> appliedMap = new HashMap<>();
+        ConcurrentHashMap<FFTNode, FFTMove> appliedMap = new ConcurrentHashMap<>();
 
         long coveredStates = r.getNumberOfCoveredStates();
         if (DETAILED_DEBUG) {
@@ -165,23 +166,10 @@ public class FFTAutoGen {
             System.out.println("Size of reachable relevant states: " + reachableRelevantStates.size());
         }
         if (USE_APPLYSET_OPT && coveredStates < reachableRelevantStates.size()) {
-            HashSet<LiteralSet> states = r.getCoveredStates();
-            if (DETAILED_DEBUG) System.out.println("Exact no. of covered states: " + states.size());
-            for (LiteralSet state : states) {
-                FFTNode n = reachableRelevantStates.get(state.getBitString());
-                if (n == null) continue;
-                FFTMove m = r.apply(n);
-                if (m != null)
-                    appliedMap.put(n, m);
-            }
+            fillFromCoveredStates(r, appliedMap);
         }
         else {
-            for (FFTNode n : reachableRelevantStates.values()) {
-                FFTMove m = r.apply(n);
-                if (m != null) { // this is equivalent to checking that rule applies with legal move
-                    appliedMap.put(n, m);
-                }
-            }
+            fillByIterating(r, appliedMap);
         }
 
         if (DETAILED_DEBUG)
@@ -205,12 +193,38 @@ public class FFTAutoGen {
         }
 
  */
-
         return true;
     }
 
+    private static void fillFromCoveredStates(Rule r, ConcurrentHashMap<FFTNode, FFTMove> appliedMap) {
+        HashSet<LiteralSet> states = r.getCoveredStates();
+        if (DETAILED_DEBUG) System.out.println("Exact no. of covered states: " + states.size());
+        for (LiteralSet state : states) {
+            FFTNode n = reachableRelevantStates.get(state.getBitString());
+            insert(n, r, appliedMap);
+        }
+    }
+
+    private static void fillByIterating(Rule r, ConcurrentHashMap<FFTNode, FFTMove> appliedMap) {
+        if (!SINGLE_THREAD) {
+            reachableRelevantStates.values().parallelStream().forEach(node ->
+                    insert(node, r, appliedMap));
+        } else {
+            for (FFTNode n : reachableRelevantStates.values())
+                insert(n, r, appliedMap);
+        }
+    }
+
+    private static void insert(FFTNode n, Rule r, ConcurrentHashMap<FFTNode, FFTMove> appliedMap) {
+        if (n == null)
+            return;
+        FFTMove m = r.apply(n);
+        if (m != null)
+            appliedMap.put(n, m);
+    }
+
     // Either remove states from applySet in addition to reachableSet, or check whether state is still reachable
-    private static boolean updateSets(FFTNode n, FFTMove chosenMove, HashMap<FFTNode, FFTMove> appliedMap,
+    private static boolean updateSets(FFTNode n, FFTMove chosenMove, ConcurrentHashMap<FFTNode, FFTMove> appliedMap,
                                       boolean safe) {
         if (safe) reachableRelevantStates.remove(n.convert().getBitString());
         // s might've been set unreachable by another state in appliedSet
@@ -255,8 +269,29 @@ public class FFTAutoGen {
         return true;
     }
 
+    private static void removePointers(FFTNode parent) {
+        reachableStates.remove(parent);
+        reachableRelevantStates.remove(parent.convert().getBitString());
+        for (FFTNode child : parent.getChildren()) {
+            FFTNode existingChild = reachableStates.get(child);
+            if (existingChild == null) {
+                //System.out.println("Existing child null");
+                continue;
+            }
+
+            //System.out.println("Removing ptr to child " + existingChild + " , from parent: " + parent);
+            existingChild.removeReachableParent(parent);
+            //System.out.println("remaining pointers: " + existingChild.getReachableParents());
+            if (!existingChild.isReachable()) {
+                //System.out.println("Child no longer reachable, removing from set and checking recursively");
+                removePointers(existingChild);
+            }
+        }
+        // FIXME - tail-end?
+    }
+
     // walk upwards through reachable parents until either initial state is found
-    private static boolean isReachable(FFTNode node, HashMap<FFTNode, FFTMove> appliedMap) {
+    private static boolean isReachable(FFTNode node, ConcurrentHashMap<FFTNode, FFTMove> appliedMap) {
         LinkedList<FFTNode> frontier = new LinkedList<>();
         HashSet<FFTNode> closedSet = new HashSet<>();
         frontier.add(node);
@@ -281,27 +316,6 @@ public class FFTAutoGen {
         }
 
         return false;
-    }
-
-    private static void removePointers(FFTNode parent) {
-        reachableStates.remove(parent);
-        reachableRelevantStates.remove(parent.convert().getBitString());
-        for (FFTNode child : parent.getChildren()) {
-            FFTNode existingChild = reachableStates.get(child);
-            if (existingChild == null) {
-                //System.out.println("Existing child null");
-                continue;
-            }
-
-            //System.out.println("Removing ptr to child " + existingChild + " , from parent: " + parent);
-            existingChild.removeReachableParent(parent);
-            //System.out.println("remaining pointers: " + existingChild.getReachableParents());
-            if (!existingChild.isReachable()) {
-                //System.out.println("Child no longer reachable, removing from set and checking recursively");
-                removePointers(existingChild);
-            }
-        }
-        // FIXME - tail-end?
     }
 
 

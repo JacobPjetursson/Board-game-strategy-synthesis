@@ -247,12 +247,13 @@ public class Rule {
         return FFTManager.getSymmetryRules.apply(this);
     }
 
-    public FFTMove apply(FFTNode node) {
+    public synchronized FFTMove apply(FFTNode node) {
         LiteralSet stLiterals = node.convert();
         FFTMove m = match(this, stLiterals);
         if (m != null || !SYMMETRY_DETECTION) {
             return m;
         }
+
         for (Rule rule : symmetryRules) {
             m = match(rule, stLiterals);
             // returns the first symmetry with a legal move
