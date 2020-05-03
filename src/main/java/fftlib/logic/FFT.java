@@ -109,7 +109,7 @@ public class FFT {
         return sb.toString();
     }
 
-    public synchronized FFTMove apply(FFTNode node) {
+    public FFTMove apply(FFTNode node) {
         for (RuleGroup rg : ruleGroups) {
             for (Rule r : rg.rules) {
                 FFTMove m = r.apply(node);

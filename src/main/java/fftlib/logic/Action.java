@@ -73,9 +73,8 @@ public class Action {
     public boolean isLegal(LiteralSet stateLiterals)  {
         for (Literal l : getPreconditions()) {
             if (l.negated) {
-                l.setNegated(false);
-                boolean legal = !stateLiterals.contains(l);
-                l.setNegated(true);
+                Literal lit = new Literal(l.id);
+                boolean legal = !stateLiterals.contains(lit);
                 if (!legal)
                     return false;
             }

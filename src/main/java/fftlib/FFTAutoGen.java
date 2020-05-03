@@ -18,11 +18,11 @@ import static misc.Globals.PLAYER2;
 
 public class FFTAutoGen {
     // States that are reachable when playing with a partial or total strategy
-    private static HashMap<FFTNode, FFTNode> reachableStates; // TODO - consider doing (long, State)
+    private static ConcurrentHashMap<FFTNode, FFTNode> reachableStates; // TODO - consider doing (long, State)
     // Subset of reachable states where strategy does not output a move, and player has the turn
     // This is the set of states that a new rule can potentially influence
     // Bitcode -> FFTNode
-    private static HashMap<Long, FFTNode> reachableRelevantStates;
+    private static ConcurrentHashMap<Long, FFTNode> reachableRelevantStates;
 
     private static FFT fft;
     private static RuleGroup rg;
@@ -72,8 +72,8 @@ public class FFTAutoGen {
         rg = new RuleGroup("Synthesis");
         fft.addRuleGroup(rg);
 
-        reachableStates = new HashMap<>();
-        reachableRelevantStates = new HashMap<>();
+        reachableStates = new ConcurrentHashMap<>();
+        reachableRelevantStates = new ConcurrentHashMap<>();
 
         // Set reachable parents for all states
         initializeSets();
@@ -199,6 +199,12 @@ public class FFTAutoGen {
     private static void fillFromCoveredStates(Rule r, ConcurrentHashMap<FFTNode, FFTMove> appliedMap) {
         HashSet<LiteralSet> states = r.getCoveredStates();
         if (DETAILED_DEBUG) System.out.println("Exact no. of covered states: " + states.size());
+        if (!SINGLE_THREAD) {
+            states.parallelStream().forEach(set -> {
+                FFTNode n = reachableRelevantStates.get(set.getBitString());
+                insert(n, r, appliedMap);
+            });
+        }
         for (LiteralSet state : states) {
             FFTNode n = reachableRelevantStates.get(state.getBitString());
             insert(n, r, appliedMap);

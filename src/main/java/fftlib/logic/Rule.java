@@ -247,7 +247,7 @@ public class Rule {
         return FFTManager.getSymmetryRules.apply(this);
     }
 
-    public synchronized FFTMove apply(FFTNode node) {
+    public FFTMove apply(FFTNode node) {
         LiteralSet stLiterals = node.convert();
         FFTMove m = match(this, stLiterals);
         if (m != null || !SYMMETRY_DETECTION) {
@@ -283,8 +283,13 @@ public class Rule {
         return null;
     }
 
-
-
+    private boolean matchLiteral(Literal lit, LiteralSet stLiterals) {
+        if (lit.negated) {
+            Literal l = new Literal(lit.id);
+            return !stLiterals.contains(l);
+        }
+        return stLiterals.contains(lit);
+    }
     
     public Move apply(MachineState ms) throws MoveDefinitionException {
         Set<GdlSentence> stSentences = ms.getContents();
@@ -307,16 +312,6 @@ public class Rule {
             }
 
         return null;
-    }
-
-    private boolean matchLiteral(Literal l, LiteralSet stLiterals) {
-        if (l.negated) {
-            l.setNegated(false);
-            boolean match = !stLiterals.contains(l);
-            l.setNegated(true);
-            return match;
-        }
-        return stLiterals.contains(l);
     }
 
     private boolean matchSentence(GdlSentence s, Set<GdlSentence> stSentences) {
