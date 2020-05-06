@@ -52,10 +52,8 @@ public class Node extends FFTNode {
         long hash = 0L;
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
-                if (board[i][j] != 0) {
-                    int k = board[i][j]; // team occupying spot
-                    hash = hash ^ Zobrist.board[i][j][k];
-                }
+                int k = board[i][j]; // team occupying spot
+                hash = hash ^ Zobrist.board[i][j][k];
             }
         }
         hash = hash ^ Zobrist.turn[turn];

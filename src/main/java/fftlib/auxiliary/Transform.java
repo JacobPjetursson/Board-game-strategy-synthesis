@@ -1,6 +1,7 @@
 package fftlib.auxiliary;
 
 import fftlib.*;
+import fftlib.game.FFTNode;
 import fftlib.game.LiteralSet;
 import fftlib.logic.Action;
 import fftlib.logic.Literal;
@@ -45,6 +46,27 @@ public class Transform {
             for (int j = 0; j < board.length; ++j)
                 rot[i][j] = board[board.length - j - 1][i];
         return rot;
+    }
+
+    public static HashSet<int[][]> getSymmetryBoards(int[] transformations, int[][] board) {
+        boolean rotate = false;
+        boolean refH = false;
+        boolean refV = false;
+        for (int transformation : transformations) {
+            if (transformation == TRANS_ROT)
+                rotate = true;
+            else if (transformation == TRANS_HREF)
+                refH = true;
+            else if (transformation == TRANS_VREF)
+                refV = true;
+        }
+        HashSet<int[][]> symmetryBoards = new HashSet<>();
+        symmetryBoards.add(board);
+        for (ArrayList<Integer> trans : getAllTransformations(refH, refV, rotate)) {
+            int[][] tBoard = apply(trans, board);
+            symmetryBoards.add(tBoard);
+        }
+        return symmetryBoards;
     }
 
     public static HashSet<SymmetryRule> getSymmetryRules(int[] transformations, Rule rule) {

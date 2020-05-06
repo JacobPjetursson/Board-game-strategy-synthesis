@@ -56,7 +56,7 @@ public class GameSpecifics implements FFTGameSpecifics {
             Position pos = new Position(l.n1, l.n2, occ);
             literals.add(new Literal(Atoms.posToId.get(pos)));
         }
-        return new LiteralSet(literals);
+        return literals;
     }
 
     @Override

@@ -184,15 +184,14 @@ public class FFTAutoGen {
             }
         }
 
-/*
+        /*
         if (!fft.verify(AUTOGEN_TEAM, false)) {
             System.out.println("ERROR: Old verification failed where new did not");
             System.out.println("Failing point: " + fft.failingPoint);
             System.exit(1);
             return false;
         }
-
- */
+         */
         return true;
     }
 
