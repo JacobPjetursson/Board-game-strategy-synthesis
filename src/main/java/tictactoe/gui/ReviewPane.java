@@ -1,6 +1,9 @@
 package tictactoe.gui;
 
 
+import fftlib.FFTSolution;
+import fftlib.game.FFTMove;
+import fftlib.game.NodeMapping;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -9,12 +12,15 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import misc.Config;
 import tictactoe.game.*;
 import tictactoe.gui.board.PlayBox.PlayBox;
 
@@ -54,16 +60,15 @@ public class ReviewPane extends VBox {
 
         lw = new ListView<>();
         lw.setPickOnBounds(false);
-        // TODO
         ObservableList<HBox> prevStateBoxes = FXCollections.observableArrayList();
-        /*
-        for (StateAndMove ps : cont.getPreviousStates()) {
-            Node n = new Node(ps.getState());
+
+        for (NodeAndMove ps : cont.getPreviousStates()) {
+            Node n = new Node(ps.getNode());
             Move m = ps.getMove();
             Node next = n.getNextState(m);
 
-            ArrayList<Action> optimalActions = FFTSolution.getOptimalActions(n.getFFTState());
-            StateMapping sm = FFTSolution.queryState(next);
+            ArrayList<Move> optimalMoves = (ArrayList<Move>) FFTSolution.optimalMoves(n);
+            NodeMapping sm = FFTSolution.queryNode(next);
             int winner = (sm == null) ? Logic.getWinner(next) : sm.getWinner();
             String winnerStr = (winner == n.getTurn()) ? "win" : (winner == PLAYER_NONE) ? "draw" : "loss";
 
@@ -96,7 +101,7 @@ public class ReviewPane extends VBox {
             performance.setAlignment(Pos.CENTER);
             vBox.getChildren().add(performance);
 
-            String turnsToTerminalStr = FFTSolution.turnsToTerminal(cont.getState().getTurn(), next);
+            String turnsToTerminalStr = FFTSolution.turnsToTerminal(cont.getNode().getTurn(), next);
             if (turnsToTerminalStr.startsWith("-"))
                 turnsToTerminalStr = turnsToTerminalStr.substring(1);
             Label turnsToTerminal = new Label("Turns to " + winnerStr +
@@ -107,8 +112,6 @@ public class ReviewPane extends VBox {
             h.getChildren().addAll(playBox, vBox);
             prevStateBoxes.add(h);
         }
-
-         */
         lw.setItems(prevStateBoxes);
         lw.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) ->
                 goToState.setDisable(false));

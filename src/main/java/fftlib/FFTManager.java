@@ -204,11 +204,10 @@ public class FFTManager {
         return currFFT;
     }
 
-    // TODO - support existing fft
     public static FFT autogenFFT(FFT fft) { // autogen using a current fft
-        //FFT newFFT = FFTAutoGen.generateFFT(Config.AUTOGEN_PERSPECTIVE, fft);
-        //ffts.add(0, newFFT);
-        //currFFT = newFFT;
+        FFT newFFT = FFTAutoGen.generateFFT(Config.AUTOGEN_TEAM, fft);
+        ffts.add(0, newFFT);
+        currFFT = newFFT;
         return currFFT;
     }
 

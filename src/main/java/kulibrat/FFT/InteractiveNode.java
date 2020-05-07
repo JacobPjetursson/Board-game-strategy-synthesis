@@ -1,6 +1,8 @@
 package kulibrat.FFT;
 
+import fftlib.game.LiteralSet;
 import fftlib.logic.Action;
+import fftlib.logic.Literal;
 import fftlib.logic.Rule;
 import fftlib.game.FFTNode;
 import fftlib.gui.interactiveFFTNode;
@@ -78,17 +80,18 @@ public class InteractiveNode implements interactiveFFTNode {
     }
 
     // This is called when the add rule button is pressed from game screen
-    private Rule getRuleFromState(Node n) { // TODO
+    private Rule getRuleFromState(Node n) { // TODO - requires Atoms class
         /*
-        Rule r = new Rule();
-        LiteralSet literals = s.getAllLiterals();
-        ArrayList<Literal> literalList = new ArrayList<>(literals);
-        // Remove scorelimit and points
-        LiteralSet lits = new HashSet<>();
-        for (Literal l : literalList)
-            if (l.boardPlacement)
-                lits.add(l);
 
+        Rule r = new Rule();
+        LiteralSet literals = n.convert().getAll();
+        // Remove scorelimit and points
+        LiteralSet lits = new LiteralSet();
+        for (Literal l : literals) {
+            Position pos = Atoms.idToPos(l.id);
+            if (pos != null)
+                lits.add(l);
+        }
         r.setPreconditions(lits);
         return r;
 

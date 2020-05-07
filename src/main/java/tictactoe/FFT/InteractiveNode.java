@@ -99,11 +99,7 @@ public class InteractiveNode implements interactiveFFTNode {
     }
     private Rule getRuleFromState(Node n) {
         Rule r = new Rule();
-        LiteralSet literals = n.convert();
-        ArrayList<Literal> literalList = new ArrayList<>(literals);
-        // TODO - Only take boardplacement?
-        LiteralSet lits = new LiteralSet(literalList);
-        r.setPreconditions(lits);
+        r.setPreconditions(n.convert());
         return r;
     }
     @Override
@@ -116,7 +112,10 @@ public class InteractiveNode implements interactiveFFTNode {
     // TODO
     public void updateRuleFromTile(BoardTile bt) {
         /*
-        //rule.removeLiterals(bt.getRow(), bt.getCol());
+        String p1Str = String.format("P1(%s, %s)", bt.getRow(), bt.getCol());
+        rule.removePrecondition(new Literal(p1Str));
+        String p2Str = String.format("P2(%s, %s)", bt.getRow(), bt.getCol());
+        rule.removePrecondition(new Literal(p2Str));
         if (move != null && (move.col == bt.getCol() && move.row == bt.getRow())) {
             removeAction();
         }

@@ -4,9 +4,9 @@ import fftlib.logic.Action;
 import fftlib.logic.Literal;
 import fftlib.auxiliary.Position;
 import fftlib.game.LiteralSet;
+import misc.Config;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 public class Atoms {
     public static HashMap<Integer, String> idToString;
@@ -24,23 +24,34 @@ public class Atoms {
         gameAtoms = new ArrayList<>();
         actionToPrecons = new HashMap<>();
 
-        int counter = 1;
+        // Make ids random
+        Random random = new Random();
+        if (!Config.RANDOM_SEED)
+            random.setSeed(Config.SEED);
+        LinkedList<Integer> ids = new LinkedList<>();
+        for (int i = 1; i <= 30; i++)
+            ids.add(i);
+        Collections.shuffle(ids, random);
+
+        int id;
         String s;
         for (int i = 0; i < 6; i++) {
             for (int j = i+1; j < 6; j++) {
+                id = ids.pop();
                 s = String.format("P1(%s, %s)", i, j);
-                gameAtoms.add(counter);
-                stringToId.put(s, counter);
-                idToPos.put(counter, new Position(i, j, 1));
-                posToId.put(new Position(i, j, 1), counter);
-                idToString.put(counter++, s);
+                gameAtoms.add(id);
+                stringToId.put(s, id);
+                idToPos.put(id, new Position(i, j, 1));
+                posToId.put(new Position(i, j, 1), id);
+                idToString.put(id, s);
 
+                id = ids.pop();
                 s = String.format("P2(%s, %s)", i, j);
-                gameAtoms.add(counter);
-                stringToId.put(s, counter);
-                idToPos.put(counter, new Position(i, j, 2));
-                posToId.put(new Position(i, j, 2), counter);
-                idToString.put(counter++, s);
+                gameAtoms.add(id);
+                stringToId.put(s, id);
+                idToPos.put(id, new Position(i, j, 2));
+                posToId.put(new Position(i, j, 2), id);
+                idToString.put(id, s);
 
 
                 LiteralSet actionPrecons = new LiteralSet();

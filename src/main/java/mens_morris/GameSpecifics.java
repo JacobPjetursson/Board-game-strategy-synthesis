@@ -209,8 +209,8 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public int getMaxStateLiterals() {
         if (THREE_MENS)
-            return 10; // 9 + 1
-        return 18; // 16 + 2
+            return 11; // 9 + 2
+        return 19; // 16 + 3
     }
 
     @Override

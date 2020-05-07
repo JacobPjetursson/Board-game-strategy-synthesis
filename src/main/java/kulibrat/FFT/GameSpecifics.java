@@ -49,7 +49,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
  */
 
-    @Override // TODO
+    @Override
     public FFTMove actionToMove(Action a) {
         return null;
     }
@@ -64,7 +64,7 @@ public class GameSpecifics implements FFTGameSpecifics {
         return null;
     }
 
-    @Override // TODO
+    @Override
     public Rule gdlToRule(String precons, String action) {
         return null;
     }

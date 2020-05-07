@@ -1,7 +1,6 @@
 package fftlib;
 
 
-import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 import fftlib.game.NodeMapping;
@@ -72,15 +71,15 @@ public class FFTSolution{
         return optimalMoves;
     }
 
-    public static NodeMapping queryState(FFTNode n) {
+    public static NodeMapping queryNode(FFTNode n) {
         return solution.get(n);
     }
 
     // Outputs a string which is the amount of turns to a terminal node, based on a score from the database entry
     public static String turnsToTerminal(int turn, FFTNode n) {
-        if (queryState(n) == null)
+        if (queryNode(n) == null)
             return "0";
-        int score = queryState(n).getScore();
+        int score = queryNode(n).getScore();
 
         if (score > 0 && score < 1000) { // Draw
             return "" + score;

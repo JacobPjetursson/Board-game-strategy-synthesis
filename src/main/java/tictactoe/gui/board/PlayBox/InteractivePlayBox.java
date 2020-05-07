@@ -9,7 +9,8 @@ public class InteractivePlayBox extends PlayBox {
         super(tilesize, clickMode, cont);
     }
 
-    public void update(Rule r) { // TODO
+    // TODO
+    public void update(Rule r) {
         /*
         int[][] preconBoard = Transform.preconsToBoard(r.preconditions);
         Move m = (Move) r.action.getMove();
@@ -45,7 +46,6 @@ public class InteractivePlayBox extends PlayBox {
             }
         });
 
-*/
-
+         */
     }
 }

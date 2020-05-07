@@ -69,15 +69,10 @@ public class Runner {
         states = new PriorityQueue<>(new StateComparator());
 
         System.out.println("Filtering...");
-        if (VERIFY_SINGLE_STRATEGY) {
-            strategy = new HashMap<>();
-            System.out.println("Filtering for single strategy");
-            filterToSingleStrat();
-        } else {
-            System.out.println("Filtering for all strategies");
-            filterSolution();
-            deleteIrrelevantStates();
-        }
+        System.out.println("Filtering for all strategies");
+        filterSolution();
+        deleteIrrelevantStates();
+
         System.out.println("Amount of states after filtering: " + states.size());
         System.out.println("Making rules");
         makeRules();
@@ -183,23 +178,15 @@ public class Runner {
             if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
             System.out.println();
 
-            // todo
-            if (!GENERATE_ALL_RULES && false) {//fft.verify(AUTOGEN_TEAM, true)) {
-                System.out.println("FFT verified before empty statespace");
-                return;
-            }
-
             // Delete states that apply
-            if (!GENERATE_ALL_RULES) {
-                states.removeIf(s -> {
-                    try {
-                        return r.apply(s) != null;
-                    } catch (MoveDefinitionException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
-                });
-            }
+            states.removeIf(s -> {
+                try {
+                    return r.apply(s) != null;
+                } catch (MoveDefinitionException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            });
         }
     }
 
@@ -215,12 +202,6 @@ public class Runner {
 
         ArrayList<Move> moves = new ArrayList<>(Database.optimalMoves(ms));
         ArrayList<Move> movesCopy = new ArrayList<>(moves);
-
-        if (GENERATE_ALL_RULES) {
-            Rule r = new Rule(minSet, bestMove);
-            rg.rules.add(r);
-            return r;
-        }
 
         Rule r;
         if (!GREEDY_AUTOGEN) {
@@ -268,7 +249,7 @@ public class Runner {
                 r.removePrecondition(s);
 
                 // todo
-                boolean verify = false; // fft.verify(AUTOGEN_TEAM, false); // strategy is null if VERIFY_SINGLE_STRAT is false
+                boolean verify = false;
                 if (!verify) {
                     if (DETAILED_DEBUG) System.out.println("FAILED TO VERIFY RULE!");
                     r.addPrecondition(s);
@@ -315,8 +296,6 @@ public class Runner {
     private static class StateComparator implements Comparator<MachineState>{
         @Override
         public int compare(MachineState s1, MachineState s2) {
-            if (RULE_ORDERING == RULE_ORDERING_RANDOM)
-                return 0;
 
             if (RULE_ORDERING == RULE_ORDERING_TERMINAL_LAST ||
                     RULE_ORDERING == RULE_ORDERING_TERMINAL_FIRST) {

@@ -1,7 +1,5 @@
 package misc;
 
-import org.apache.xpath.operations.Bool;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,7 +21,6 @@ public class Config {
     public static int RULE_ORDERING;
     public static boolean MINIMIZE_PRECONDITIONS;
     public static boolean SYMMETRY_DETECTION;
-    public static boolean GENERATE_ALL_RULES;
     public static boolean MINIMIZE_RULE_BY_RULE;
     public static boolean SINGLE_THREAD;
     public static boolean SHOW_RULE_GROUPS;
@@ -32,6 +29,7 @@ public class Config {
     public static boolean BENCHMARK_MODE;
     public static int BENCHMARK_NUMBER;
     public static boolean USE_APPLYSET_OPT;
+    public static boolean USE_RULE_ORDERING;
 
     // KULIBRAT PROPERTIES
     public static int BWIDTH;
@@ -52,7 +50,6 @@ public class Config {
 
     // GGP-FFT PROPERTIES
     public static boolean DETAILED_DEBUG;
-    public static boolean VERIFY_SINGLE_STRATEGY;
     public static String GGP_GAME;
 
     static {
@@ -108,16 +105,16 @@ public class Config {
                 RULE_ORDERING = Globals.RULE_ORDERING_FEWEST_PRECONS_LAST;
                 break;
             default:
-                RULE_ORDERING = Globals.RULE_ORDERING_RANDOM;
+                RULE_ORDERING = RULE_ORDERING_TERMINAL_FIRST;
         }
 
+        USE_RULE_ORDERING = Boolean.parseBoolean(global.getProperty("use_rule_ordering"));
         GREEDY_AUTOGEN = Boolean.parseBoolean(global.getProperty("greedy_autogen"));
         RANDOM_SEED = Boolean.parseBoolean(global.getProperty("random_seed"));
         SEED = Integer.parseInt(global.getProperty("seed"));
         ENABLE_GGP = Boolean.parseBoolean(global.getProperty("enable_ggp"));
         ENABLE_GGP_PARSER = Boolean.parseBoolean(global.getProperty("enable_ggp_parser"));
         MINIMIZE_PRECONDITIONS = Boolean.parseBoolean(global.getProperty("minimize_preconditions"));
-        GENERATE_ALL_RULES = Boolean.parseBoolean(global.getProperty("generate_all_rules"));
         MINIMIZE_RULE_BY_RULE = Boolean.parseBoolean(global.getProperty("minimize_rule_by_rule"));
         SYMMETRY_DETECTION = Boolean.parseBoolean(global.getProperty("symmetry_detection"));
         SHOW_RULE_GROUPS = Boolean.parseBoolean(global.getProperty("show_rule_groups"));
@@ -127,7 +124,6 @@ public class Config {
         BENCHMARK_NUMBER = Integer.parseInt(global.getProperty("no_of_benchmarks"));
         USE_DEBUG_FILE = Boolean.parseBoolean(global.getProperty("use_debug_file"));
         DEBUG_FILENAME = global.getProperty("debug_filename");
-        VERIFY_SINGLE_STRATEGY = Boolean.parseBoolean(global.getProperty("verify_single_strategy"));
         SINGLE_THREAD = Boolean.parseBoolean(global.getProperty("single_thread"));
         USE_APPLYSET_OPT = Boolean.parseBoolean(global.getProperty("use_applyset_opt"));
 
@@ -167,18 +163,17 @@ public class Config {
         System.out.println("--------------------------");
         String perspectiveStr = (AUTOGEN_TEAM == PLAYER1) ? "Player 1" :
                 (AUTOGEN_TEAM == PLAYER2) ? "Player 2" : "Both";
-        String ruleOrderingStr = (RULE_ORDERING == RULE_ORDERING_RANDOM) ? "Random" :
-                (RULE_ORDERING == RULE_ORDERING_FEWEST_PRECONS_FIRST) ? "Fewest preconditions first" :
+        String ruleOrderingStr = (RULE_ORDERING == RULE_ORDERING_FEWEST_PRECONS_FIRST) ? "Fewest preconditions first" :
                         (RULE_ORDERING == RULE_ORDERING_FEWEST_PRECONS_LAST) ? "Fewest preconditions last" :
                                 (RULE_ORDERING == RULE_ORDERING_TERMINAL_FIRST) ? "Close to terminal first" :
                                         "Close to terminal last";
 
         System.out.printf("%-30.40s %-30.40s\n", "Autogen perspective:", perspectiveStr);
-        System.out.printf("%-30.40s %-30.40s\n", "Rule ordering:", ruleOrderingStr);
-        System.out.printf("%-30.40s %-30.40s\n", "Minimize preconditions:", MINIMIZE_PRECONDITIONS);
         System.out.printf("%-30.40s %-30.40s\n", "Symmetry detection:", SYMMETRY_DETECTION);
+        System.out.printf("%-30.40s %-30.40s\n", "Minimize preconditions:", MINIMIZE_PRECONDITIONS);
+        System.out.printf("%-30.40s %-30.40s\n", "Rule ordering:", ruleOrderingStr);
+        System.out.printf("%-30.40s %-30.40s\n", "Use rule ordering:", USE_RULE_ORDERING);
         System.out.printf("%-30.40s %-30.40s\n", "Greedy Autogeneration:", GREEDY_AUTOGEN);
-        System.out.printf("%-30.40s %-30.40s\n", "Generate all rules:", GENERATE_ALL_RULES);
         System.out.printf("%-30.40s %-30.40s\n", "Minimize rule by rule:", MINIMIZE_RULE_BY_RULE);
         System.out.printf("%-30.40s %-30.40s\n", "Use applySet optimization:", USE_APPLYSET_OPT);
 
@@ -189,7 +184,6 @@ public class Config {
         System.out.printf("%-30.40s %-30.40s\n", "Using debug file:", USE_DEBUG_FILE);
         System.out.printf("%-30.40s %-30.40s\n", "Benchmark mode:", BENCHMARK_MODE);
         System.out.printf("%-30.40s %-30.40s\n", "Single thread:", SINGLE_THREAD);
-        System.out.printf("%-30.40s %-30.40s\n", "Verify single strategy:", VERIFY_SINGLE_STRATEGY);
     }
 
     private static void setupDebugFile() {

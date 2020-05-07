@@ -1,5 +1,6 @@
 package kulibrat.ai.Minimax;
 
+import fftlib.FFTSolution;
 import fftlib.game.NodeMapping;
 import kulibrat.ai.AI;
 import kulibrat.game.Move;
@@ -25,13 +26,12 @@ public class PerfectPlayer extends AI {
             return node.getLegalMoves().get(0);
         }
         // table lookup
-        Node simState = new Node(node);
+        Node simNode = new Node(node);
         NodeMapping mapping;
         if (USE_DB) {
-            mapping = Database.queryState(simState);
+            mapping = Database.queryState(simNode);
         } else {
-            // todo
-            //mapping = FFTSolution.queryState(state);
+            mapping = FFTSolution.queryNode(simNode);
             mapping = null;
         }
         if (mapping == null) {

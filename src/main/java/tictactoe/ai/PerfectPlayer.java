@@ -1,5 +1,6 @@
 package tictactoe.ai;
 
+import fftlib.FFTSolution;
 import fftlib.game.NodeMapping;
 import tictactoe.game.Move;
 import tictactoe.game.Node;
@@ -21,10 +22,7 @@ public class PerfectPlayer implements AI {
             return node.getLegalMoves().get(0);
         }
         // table lookup
-        //NodeMapping mapping = FFTSolution.queryState(node);
-        // todo
-        NodeMapping mapping = null;
-
+        NodeMapping mapping = FFTSolution.queryNode(node);
         return (Move)mapping.move;
     }
 }

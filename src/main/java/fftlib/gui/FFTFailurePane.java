@@ -116,7 +116,6 @@ public class FFTFailurePane extends BorderPane {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r);
                 rLabel.setFont(Font.font("Verdana", 15));
-                // TODO - below is hacky
                 FFTMove failMove = FFTManager.currFFT.failingPoint.getMove();
                 FFTNode failNode = FFTManager.currFFT.failingPoint.getNode();
                 int tempTeam = failMove.getTeam();

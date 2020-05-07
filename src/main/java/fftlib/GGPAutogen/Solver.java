@@ -1,6 +1,5 @@
 package fftlib.GGPAutogen;
 
-
 import kulibrat.game.Node;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;

@@ -4,9 +4,9 @@ import fftlib.auxiliary.Position;
 import fftlib.game.LiteralSet;
 import fftlib.logic.Action;
 import fftlib.logic.Literal;
+import misc.Config;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 import static misc.Config.THREE_MENS;
 
@@ -28,38 +28,52 @@ public class Atoms {
         addToPrecons = new HashMap<>();
         remToPrecons = new HashMap<>();
 
-        int counter = 1;
+        // Make ids random
+        Random random = new Random();
+        if (!Config.RANDOM_SEED)
+            random.setSeed(Config.SEED);
+        LinkedList<Integer> ids = new LinkedList<>();
+        int max = (THREE_MENS) ? 20 : 35;
+        for (int i = 1; i <= max; i++)
+            ids.add(i);
+        Collections.shuffle(ids, random);
+
+        int id;
         String s;
+        id = ids.pop();
+        gameAtoms.add(id);
+        stringToId.put("p1Turn", id);
+        idToString.put(id, "p1Turn");
 
-        gameAtoms.add(counter);
-        stringToId.put("p1Turn", counter);
-        idToString.put(counter++, "p1Turn");
-
-        gameAtoms.add(counter);
-        stringToId.put("phase2", counter);
-        idToString.put(counter++, "phase2");
+        id = ids.pop();
+        gameAtoms.add(id);
+        stringToId.put("phase2", id);
+        idToString.put(id, "phase2");
         if (!THREE_MENS) {
-            gameAtoms.add(counter);
-            stringToId.put("canRemove", counter);
-            idToString.put(counter++, "canRemove");
+            id = ids.pop();
+            gameAtoms.add(id);
+            stringToId.put("canRemove", id);
+            idToString.put(id, "canRemove");
         }
         for (int i = 0; i < Node.BOARD_SIZE; i++) {
             for (int j = 0; j < Node.BOARD_SIZE; j++) {
                 if (!Node.validPos(i, j))
                     continue;
+                id = ids.pop();
                 s = String.format("P1(%s, %s)", i, j);
-                gameAtoms.add(counter);
-                stringToId.put(s, counter);
-                idToPos.put(counter, new Position(i, j, 1));
-                posToId.put(new Position(i, j, 1), counter);
-                idToString.put(counter++, s);
+                gameAtoms.add(id);
+                stringToId.put(s, id);
+                idToPos.put(id, new Position(i, j, 1));
+                posToId.put(new Position(i, j, 1), id);
+                idToString.put(id, s);
 
+                id = ids.pop();
                 s = String.format("P2(%s, %s)", i, j);
-                gameAtoms.add(counter);
-                stringToId.put(s, counter);
-                idToPos.put(counter, new Position(i, j, 2));
-                posToId.put(new Position(i, j, 2), counter);
-                idToString.put(counter++, s);
+                gameAtoms.add(id);
+                stringToId.put(s, id);
+                idToPos.put(id, new Position(i, j, 2));
+                posToId.put(new Position(i, j, 2), id);
+                idToString.put(id, s);
 
                 // Make sure new position is empty
                 LiteralSet addPrecons = new LiteralSet();

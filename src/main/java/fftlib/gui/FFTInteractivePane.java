@@ -151,9 +151,7 @@ public class FFTInteractivePane extends BorderPane {
         verifyBtn.setOnMouseClicked(event -> {
             int team = teamChoice.getSelectionModel().getSelectedIndex() + 1;
             boolean wholeFFT = verificationChoice.getSelectionModel().getSelectedIndex() == 0;
-            // todo
-            //boolean verified =  FFTManager.currFFT.verify(team, wholeFFT);
-            boolean verified = false;
+            boolean verified =  FFTManager.currFFT.verify(team, wholeFFT);
 
             if (!verified) {
                 if (FFTManager.currFFT.failingPoint == null) {
@@ -785,9 +783,7 @@ public class FFTInteractivePane extends BorderPane {
             pushUndoStack();
             int ruleSize = FFTManager.currFFT.getAmountOfRules();
             int precSize = FFTManager.currFFT.getAmountOfPreconditions();
-            // todo
-            //int iterations = FFTManager.currFFT.minimize(team, minimizeBox.isSelected());
-            int iterations = -1;
+            int iterations = FFTManager.currFFT.minimize(team, minimizeBox.isSelected());
 
             int diffRules = ruleSize - FFTManager.currFFT.getAmountOfRules();
             int diffPrecs = precSize - FFTManager.currFFT.getAmountOfPreconditions();
@@ -853,17 +849,13 @@ public class FFTInteractivePane extends BorderPane {
             boolean tempChanges = changes;
             pushUndoStack();
 
-            // todo
             String msg;
-            boolean verify = false;
-            //if (!currFFT.verify(team, false)) { // error, not a winning strategy
-            if (!verify) {
+            if (!currFFT.verify(team, false)) { // error, not a winning strategy
                 msg = "The exiting strategy was not weakly verified, so can't generate an optimal strategy";
                 popUndoStack();
                 changes = tempChanges;
             }
-            //else if (currFFT.verify(team, true)) {
-            else if (!verify) {
+            else if (currFFT.verify(team, true)) {
                 msg = "Strategy is already strongly optimal";
                 popUndoStack();
                 changes = tempChanges;

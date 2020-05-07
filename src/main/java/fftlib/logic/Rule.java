@@ -181,8 +181,6 @@ public class Rule {
 
     // This is an upper bound due to how symmetry works (may lead to duplicate states
     // that are hard to detect)
-    // FIXME - make it work with negative preconditions
-    // TODO - somehow make it more precise (do a pre-run to compute size?)
     public long getNumberOfCoveredStates() {
         int number = 0;
         if (!SYMMETRY_DETECTION)
@@ -260,8 +258,7 @@ public class Rule {
             // We want to ensure that rule is optimal in all symmetric states, but since all these will be explored
             // by the algorithm, we are good. This is the case since we always start with checking the default state
             // (no applied symmetries), meaning every symmetric states will inevitably be checked.
-            // Alternative is to check that all non-null moves here are legal.
-            // TODO - check which method is fastest
+            // Alternative is to check that all non-null moves here are legal, but that is significantly slower
             if (m != null) {
                 return m;
             }

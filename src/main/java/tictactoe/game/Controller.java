@@ -1,5 +1,7 @@
 package tictactoe.game;
 
+import fftlib.FFTSolution;
+import fftlib.game.NodeMapping;
 import fftlib.logic.FFT;
 import fftlib.FFTManager;
 import fftlib.game.FFTSolver;
@@ -20,6 +22,7 @@ import tictactoe.ai.AI;
 import tictactoe.ai.FFTFollower;
 import tictactoe.ai.PerfectPlayer;
 import tictactoe.gui.*;
+import tictactoe.gui.board.BoardTile;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -315,15 +318,14 @@ public class Controller {
         }
     }
 
-    // TODO
     private void highlightHelp(boolean highlight) {
-        /*
-        Node n = new Node(state);
+
+        Node n = new Node(node);
         Move fftChosenMove = null;
-        ArrayList<Move> moves = Logic.legalMoves(state.getTurn(), state);
+        ArrayList<Move> moves = Logic.legalMoves(node.getTurn(), node);
         if (highlight) {
             if (FFTManager.currFFT != null)
-                fftChosenMove = (Move) FFTManager.currFFT.apply(state);
+                fftChosenMove = (Move) FFTManager.currFFT.apply(node);
         }
         BoardTile[][] tiles = playArea.getPlayBox().getBoard().getTiles();
 
@@ -336,8 +338,8 @@ public class Controller {
                 for (Move m : moves) {
                     if (m.col == aTile.getCol() && m.row == aTile.getRow()) {
                         Node next = n.getNextState(m);
-                        StateMapping sm = FFTSolution.queryState(next);
-                        if (sm == null) {
+                        NodeMapping nm = FFTSolution.queryNode(next);
+                        if (nm == null) {
                             if (Logic.getWinner(next) == n.getTurn())
                                 aTile.setGreen();
                             else if (Logic.getWinner(next) == PLAYER_NONE)
@@ -345,9 +347,9 @@ public class Controller {
                             else
                                 aTile.setRed();
                         } else {
-                            if (sm.getWinner() == n.getTurn())
+                            if (nm.getWinner() == n.getTurn())
                                 aTile.setGreen();
-                            else if (sm.getWinner() == PLAYER_NONE)
+                            else if (nm.getWinner() == PLAYER_NONE)
                                 aTile.setYellow();
                             else
                                 aTile.setRed();
@@ -357,8 +359,6 @@ public class Controller {
                 if (fftChosenMove != null && fftChosenMove.col == aTile.getCol() && fftChosenMove.row == aTile.getRow())
                     aTile.setFFTChosen();
             }
-
-
         }
 
         // Turns to terminal
@@ -372,11 +372,8 @@ public class Controller {
             }
             tiles[m.row][m.col].setTurnsToTerminal(turns);
         }
-
-         */
     }
 
-    // TODO
     private ArrayList<String> getScores(ArrayList<Move> moves) {
         ArrayList<String> turnsToTerminalList = new ArrayList<>();
         for (Move m : moves) {
@@ -384,7 +381,7 @@ public class Controller {
             if (Logic.gameOver(n)) {
                 turnsToTerminalList.add("0");
             } else {
-                //turnsToTerminalList.add(FFTSolution.turnsToTerminal(state.getTurn(), s));
+                turnsToTerminalList.add(FFTSolution.turnsToTerminal(node.getTurn(), n));
             }
         }
         return turnsToTerminalList;
