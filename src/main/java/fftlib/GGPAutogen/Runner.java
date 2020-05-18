@@ -22,14 +22,11 @@ public class Runner {
 
     private static PriorityQueue<MachineState> states;
 
-    private static HashMap<MachineState, GGPMapping> strategy;
     private static FFT fft;
     private static RuleGroup rg;
     private static Role p1Role, p2Role;
-    private static Move noop;
 
     private static int winner;
-    private static int max_precons;
 
     public static void main(String[] args) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
 
@@ -41,7 +38,6 @@ public class Runner {
         GGPManager.loadGDL(game_path);
         p1Role = GGPManager.p1role;
         p2Role = GGPManager.p2role;
-        noop = GGPManager.noop;
         System.out.println("Gdl rules validated. Autogenerating FFT");
         
         setup();
@@ -59,7 +55,6 @@ public class Runner {
 
         GGPMapping result = lookupTable.get(initialState);
         winner = result.getWinner();
-        max_precons = initialState.getContents().size();
         String winnerStr = winner == PLAYER1 ? "Player 1" : winner == PLAYER2 ? "Player 2" : "Draw";
         System.out.println("Winner of game: " + winnerStr);
         Database.initialize(lookupTable);
@@ -79,9 +74,7 @@ public class Runner {
 
         System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
-        // todo
-        //int it = fft.minimize(AUTOGEN_TEAM, Config.MINIMIZE_PRECONDITIONS);
-        int it = -1;
+        int it = fft.minimize(AUTOGEN_TEAM, Config.MINIMIZE_PRECONDITIONS);
         System.out.println("Amount of rules after " + it + " minimize iterations: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions after " + it + " minimize iterations: " + fft.getAmountOfPreconditions());
 
@@ -138,37 +131,7 @@ public class Runner {
         }
     }
 
-    private static void filterToSingleStrat() throws MoveDefinitionException, TransitionDefinitionException {
-        LinkedList<MachineState> frontier = new LinkedList<>();
-        HashSet<MachineState> closedSet = new HashSet<>();
-        MachineState initialState = (MachineState) GGPManager.getInitialState();
-        frontier.add(initialState);
-        while (!frontier.isEmpty()) {
-            MachineState ms = frontier.pop();
-            Role r = GGPManager.getRole(ms);
-            if (GGPManager.isTerminal(ms))
-                continue;
-            if (AUTOGEN_TEAM != GGPManager.roleToPlayer(r)) {
-                for (MachineState child : GGPManager.getNextStates(ms))
-                    if (!closedSet.contains(child)) {
-                        closedSet.add(child);
-                        frontier.add(child);
-                    }
-            } else {
-                states.add(ms);
-                GGPMapping mapping = lookupTable.get(ms);
-                strategy.put(ms, mapping);
-                Move m = mapping.getMove();
-                MachineState nextState = GGPManager.getNextState(ms, m);
-                if (!closedSet.contains(nextState)) {
-                    closedSet.add(nextState);
-                    frontier.add(nextState);
-                }
-            }
-        }
-    }
-
-    private static void makeRules() throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
+    private static void makeRules() {
         while (!states.isEmpty()) {
 
             System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + rg.rules.size());
@@ -190,7 +153,7 @@ public class Runner {
         }
     }
 
-    private static Rule addRule(MachineState ms) throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
+    private static Rule addRule(MachineState ms) {
         Set<GdlSentence> sentences = ms.getContents();
         Set<GdlSentence> minSet = new HashSet<>();
         for (GdlSentence s : sentences) {
@@ -199,17 +162,7 @@ public class Runner {
         GGPMapping mapping = lookupTable.get(ms);
         Move bestMove = mapping.getMove();
 
-
-        ArrayList<Move> moves = new ArrayList<>(Database.optimalMoves(ms));
-        ArrayList<Move> movesCopy = new ArrayList<>(moves);
-
-        Rule r;
-        if (!GREEDY_AUTOGEN) {
-            r = new Rule(minSet);
-        } else {
-            r = new Rule(minSet, bestMove);
-        }
-
+        Rule r = new Rule(minSet, bestMove);
         rg.rules.add(r);
 
         // DEBUG
@@ -219,78 +172,16 @@ public class Runner {
             System.out.println("ORIGINAL SCORE: " + mapping.getScore());
         }
 
-        if (!GREEDY_AUTOGEN) {
-            LinkedList<GdlSentence> copy = new LinkedList<>(sentences);
-            LinkedList<GdlSentence> bestPath = new LinkedList<>();
-            Move chosenMove = null;
-            for (Move m : movesCopy) {
-                r.setMove(m);
-                LinkedList<GdlSentence> path = getBestRemovalPath(copy, r, new LinkedList<>());
-                if (path.size() > bestPath.size()) {
-                    chosenMove = m;
-                    bestPath = path;
-                }
-                if (path.size() >= max_precons) // Everything has been removed
-                    break;
-            }
-            r.setMove(chosenMove);
-            if (DETAILED_DEBUG) {
-                System.out.println("Best removal path (removed " + bestPath.size() + "): ");
-                for (GdlSentence s : bestPath)
-                    System.out.print(s + " ");
-                System.out.println();
-            }
-            for (GdlSentence s : bestPath)
-                r.removePrecondition(s);
-        }
-        else {
-            for (GdlSentence s : sentences) {
-                if (DETAILED_DEBUG) System.out.println("INSPECTING: " + s);
-                r.removePrecondition(s);
-
-                // todo
-                boolean verify = false;
-                if (!verify) {
-                    if (DETAILED_DEBUG) System.out.println("FAILED TO VERIFY RULE!");
-                    r.addPrecondition(s);
-                } else if (DETAILED_DEBUG)
-                    System.out.println("REMOVING: " + s);
-            }
-        }
-
-        return r;
-    }
-
-    private static LinkedList<GdlSentence> getBestRemovalPath(LinkedList<GdlSentence> sentences, Rule r, LinkedList<GdlSentence> path) {
-        ListIterator<GdlSentence> it = sentences.listIterator();
-        LinkedList<GdlSentence> bestPath = path;
-
-        while(it.hasNext()) {
-            GdlSentence s = it.next();
+        for (GdlSentence s : sentences) {
+            if (DETAILED_DEBUG) System.out.println("INSPECTING: " + s);
             r.removePrecondition(s);
-            //todo
-            boolean verify = false; //fft.verify(AUTOGEN_TEAM, false);
-            if (!verify) {
+            if (!fft.verify(AUTOGEN_TEAM, false)) {
+                if (DETAILED_DEBUG) System.out.println("FAILED TO VERIFY RULE!");
                 r.addPrecondition(s);
-                continue;
-            }
-            it.remove();
-
-            LinkedList<GdlSentence> copy = new LinkedList<>(path);
-            copy.add(s);
-            LinkedList<GdlSentence> p = getBestRemovalPath(new LinkedList<>(sentences), r, copy);
-
-            if (p.size() > bestPath.size())
-                bestPath = p;
-
-            it.add(s);
-            r.addPrecondition(s);
-
-            if (bestPath.size() >= max_precons) { // Everything removed, no better path exists
-                break;
-            }
+            } else if (DETAILED_DEBUG)
+                System.out.println("REMOVING: " + s);
         }
-        return bestPath;
+        return r;
     }
 
     private static class StateComparator implements Comparator<MachineState>{
