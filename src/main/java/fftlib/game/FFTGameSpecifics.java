@@ -18,6 +18,7 @@ public interface FFTGameSpecifics {
     FFTNode getInitialNode(); // Domain specific
     HashSet<SymmetryRule> getSymmetryRules(Rule rule); // Domain specific
     int getMaxStateLiterals(); // Domain specific
+    ArrayList<Integer> legalIndices(); // Domain specific
 
     FFTMove actionToMove(Action a); // Interface
     Action moveToAction(FFTMove m); // Interface

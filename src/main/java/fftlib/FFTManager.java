@@ -32,6 +32,7 @@ public class FFTManager {
     // Domain specific
     public static int gameBoardWidth;
     public static int gameBoardHeight;
+    public static ArrayList<Integer> legalIndices;
     public static FFTNode initialFFTNode;
     public static Function<Rule, HashSet<SymmetryRule>> getSymmetryRules;
     public static int maxStateLiterals;
@@ -78,6 +79,7 @@ public class FFTManager {
         int[] dim = gameSpecifics.getBoardDim();
         gameBoardHeight = dim[0];
         gameBoardWidth = dim[1];
+        legalIndices = gameSpecifics.legalIndices();
         // Visual Tool
         failNode = gameSpecifics.getFailNode();
         interactiveNode = gameSpecifics.getInteractiveNode();

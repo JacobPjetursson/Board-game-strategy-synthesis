@@ -11,6 +11,7 @@ import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 import static misc.Config.ENABLE_GGP_PARSER;
@@ -211,6 +212,59 @@ public class Rule {
        return literals;
     }
 
+    // Lifts a single propositional symbol to a predicate symbol
+    // Takes as arg the index to lift
+    public PredRule liftAll(int prop) {
+        LiteralSet newPrecs = new LiteralSet();
+        for (Literal l : preconditions) {
+            newPrecs.add(l.liftAll(prop));
+        }
+        LiteralSet addSet = new LiteralSet();
+        LiteralSet remSet = new LiteralSet();
+        for (Literal l : action.adds)
+            addSet.add(l.liftAll(prop));
+        for (Literal l : action.rems)
+            remSet.add(l.liftAll(prop));
+        Action a = new Action(addSet, remSet);
+        return new PredRule(newPrecs, a);
+    }
+
+    // returns sorted list based on most reoccurring index (which we will prioritize when lifting)
+    public ArrayList<Integer> getSortedProps() {
+        TreeMap<Integer, Integer> occMap = new TreeMap<>();
+        // map idx -> occ and then reverse map
+        addToOccMap(occMap, preconditions);
+        addToOccMap(occMap, action.adds);
+        addToOccMap(occMap, action.rems);
+        TreeMap<Integer, ArrayList<Integer>> reverseMap = new TreeMap<>(Comparator.reverseOrder());
+        for (Map.Entry<Integer, Integer> entry : occMap.entrySet()) {
+            int occ = entry.getValue();
+            int idx = entry.getKey();
+            if (reverseMap.containsKey(occ))
+                reverseMap.get(occ).add(idx);
+            else {
+                ArrayList<Integer> newList = new ArrayList<>();
+                newList.add(idx);
+                reverseMap.put(occ, newList);
+            }
+        }
+        ArrayList<Integer> props = new ArrayList<>();
+        for (ArrayList<Integer> vals : reverseMap.values())
+            props.addAll(vals);
+        return props;
+    }
+
+    private void addToOccMap(TreeMap<Integer, Integer> occMap, LiteralSet litSet) {
+        for (Literal l : litSet) {
+            for (int i : l.getIndices()) {
+                if (occMap.containsKey(i))
+                    occMap.put(i, occMap.get(i)+1);
+                else
+                    occMap.put(i, 1);
+            }
+        }
+    }
+
     private static Action getAction(String actionStr) {
         return new Action(prepAction(actionStr));
     }
@@ -245,12 +299,18 @@ public class Rule {
         return FFTManager.getSymmetryRules.apply(this);
     }
 
-    public FFTMove apply(FFTNode node) {
+    public HashSet<FFTMove> apply(FFTNode node) {
         LiteralSet stLiterals = node.convert();
+        HashSet<FFTMove> moves = new HashSet<>();
+
         FFTMove m = match(this, stLiterals);
-        if (m != null || !SYMMETRY_DETECTION) {
-            return m;
+        if (m != null)
+            moves.add(m);
+        if (/*m != null || */!SYMMETRY_DETECTION) {
+            return moves;
         }
+
+
 
         for (Rule rule : symmetryRules) {
             m = match(rule, stLiterals);
@@ -260,10 +320,10 @@ public class Rule {
             // (no applied symmetries), meaning every symmetric states will inevitably be checked.
             // Alternative is to check that all non-null moves here are legal, but that is significantly slower
             if (m != null) {
-                return m;
+                moves.add(m);
             }
         }
-        return null;
+        return moves;
     }
 
     private FFTMove match(Rule rule, LiteralSet stLiterals) {
@@ -324,13 +384,16 @@ public class Rule {
         Rule rule = (Rule) obj;
         if (this == rule)
             return true;
-
-        return this.symmetryRules.equals(rule.symmetryRules);
+        if (SYMMETRY_DETECTION)
+            return this.symmetryRules.equals(rule.symmetryRules);
+        return this.preconditions.equals(rule.preconditions) && this.action.equals(rule.action);
     }
 
     @Override
     public int hashCode() {
-        return 31 * Objects.hashCode(symmetryRules);
+        if (SYMMETRY_DETECTION)
+            return 31 * Objects.hashCode(symmetryRules);
+        return 31 * Objects.hash(preconditions, action);
     }
 
 }

@@ -67,7 +67,10 @@ public class Action {
     }
 
     public LiteralSet getPreconditions() {
-        return FFTManager.getActionPreconditions.apply(this);
+        LiteralSet precons = FFTManager.getActionPreconditions.apply(this);
+        if (precons == null)
+            return new LiteralSet();
+        return precons;
     }
 
     public boolean isLegal(LiteralSet stateLiterals)  {

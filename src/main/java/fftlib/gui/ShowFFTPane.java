@@ -17,6 +17,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 
+import java.util.HashSet;
+
 public class ShowFFTPane extends VBox {
     Label title;
     FFT fft;
@@ -67,8 +69,8 @@ public class ShowFFTPane extends VBox {
                 Rule r = rg.rules.get(j);
                 Label rLabel = new Label((j + 1) + ": " + r);
                 rLabel.setFont(Font.font("Verdana", 13));
-                FFTMove move = r.apply(node);
-                if (!ruleApplied && move != null) {
+                HashSet<FFTMove> moves = r.apply(node);
+                if (!ruleApplied && !moves.isEmpty()) {
                     rLabel.setTextFill(Color.BLUE);
                     ruleApplied = true;
                 }

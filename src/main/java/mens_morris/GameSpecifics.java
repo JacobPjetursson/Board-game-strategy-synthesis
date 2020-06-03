@@ -139,7 +139,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public int getAtomId(String name) {
-        return Atoms.stringToId.get(name);
+        return Atoms.stringToId.getOrDefault(name, 0);
     }
 
     @Override
@@ -211,6 +211,11 @@ public class GameSpecifics implements FFTGameSpecifics {
         if (THREE_MENS)
             return 11; // 9 + 2
         return 19; // 16 + 3
+    }
+
+    @Override
+    public ArrayList<Integer> legalIndices() {
+        return null;
     }
 
     @Override

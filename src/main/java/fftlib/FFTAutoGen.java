@@ -4,10 +4,7 @@ import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 import fftlib.game.LiteralSet;
 import fftlib.game.NodeMapping;
-import fftlib.logic.FFT;
-import fftlib.logic.Literal;
-import fftlib.logic.Rule;
-import fftlib.logic.RuleGroup;
+import fftlib.logic.*;
 import misc.Config;
 
 import java.util.*;
@@ -26,6 +23,10 @@ public class FFTAutoGen {
 
     private static FFT fft;
     private static RuleGroup rg;
+
+    // used for checking whether lifting a rule applies to more states
+    private static int groundedAppliedMapSize;
+    private static int liftedAppliedMapSize;
 
     public static FFT generateFFT(int team_) {
         fft = new FFT("Synthesis");
@@ -122,8 +123,7 @@ public class FFTAutoGen {
         LiteralSet minSet = new LiteralSet(n.convert().getAll());
         FFTMove bestMove = FFTSolution.queryNode(n).move;
 
-        Rule r = new Rule(minSet, bestMove.convert());
-        rg.rules.add(r);
+        Rule r = new Rule(minSet, bestMove.convert()); // rule from state-move pair
 
         // DEBUG
         if (DETAILED_DEBUG) {
@@ -131,14 +131,32 @@ public class FFTAutoGen {
             System.out.println("NODE SCORE: " + FFTSolution.queryNode(n).score);
             System.out.println("ORIGINAL RULE: " + r);
         }
+        if (LIFT_BEFORE_SIMPLIFY)
+            r = liftRule(r);
+
+        simplifyRule(r);
+
+        if (!LIFT_BEFORE_SIMPLIFY) {
+            Rule pr = liftRule(r);
+            // simplify again?
+            if (pr != r)
+                simplifyRule(pr); // TODO - benchmark
+            r = pr;
+        }
+        rg.rules.add(r);
+        verifyRule(r, true); // safe run where we know we have the final rule
+        return r;
+    }
+
+    private static void simplifyRule(Rule r) {
+        if (DETAILED_DEBUG) System.out.println("SIMPLIFYING RULE: " + r);
         // make copy to avoid concurrentModificationException
         LiteralSet rulePreconditions = new LiteralSet(r.getPreconditions());
         for (Literal l : rulePreconditions) {
             if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO REMOVE: " + l.getName());
             r.removePrecondition(l);
-            boolean verified = verifyRule(r, false);
 
-            if (!verified) {
+            if (!verifyRule(r, false)) {
                 if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.getName());
                 r.addPrecondition(l);
             } else {
@@ -146,48 +164,76 @@ public class FFTAutoGen {
             }
             if (DETAILED_DEBUG) System.out.println("RULE IS NOW: " + r);
         }
-        if (DETAILED_DEBUG) System.out.println("DOING SAFE RUN");
-        verifyRule(r, true); // safe run where we know we have the final rule
-        return r;
     }
 
     private static boolean verifyRule(Rule r, boolean safe) {
-        ConcurrentHashMap<FFTNode, FFTMove> appliedMap = new ConcurrentHashMap<>();
+        if (safe && DETAILED_DEBUG)
+            System.out.println("DOING SAFE RUN");
+        ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap = new ConcurrentHashMap<>();
 
-        long coveredStates = r.getNumberOfCoveredStates();
+        //long coveredStates = r.getNumberOfCoveredStates();
+        long coveredStates = 0;
         if (DETAILED_DEBUG) {
-            System.out.println("Upper bound for no. of covered states: " + coveredStates);
+            //System.out.println("Upper bound for no. of covered states: " + coveredStates);
             System.out.println("Size of reachable relevant states: " + reachableRelevantStates.size());
         }
+
         if (USE_APPLYSET_OPT && coveredStates < reachableRelevantStates.size()) {
             fillFromCoveredStates(r, appliedMap);
         }
         else {
             fillByIterating(r, appliedMap);
         }
-
         if (DETAILED_DEBUG)
             System.out.println("appliedMap size: " + appliedMap.size());
 
-        for (Map.Entry<FFTNode, FFTMove> entry : appliedMap.entrySet()) {
+        for (Map.Entry<FFTNode, HashSet<FFTMove>> entry : appliedMap.entrySet()) {
             FFTNode n = entry.getKey();
-            FFTMove m = entry.getValue();
-            if (!updateSets(n, m, appliedMap, safe)) {
+            HashSet<FFTMove> moves = entry.getValue();
+            if (!updateSets(n, moves, appliedMap, safe)) {
                 return false;
             }
         }
-        /*
+/*
         if (!fft.verify(AUTOGEN_TEAM, false)) {
             System.out.println("ERROR: Old verification failed where new did not");
             System.out.println("Failing point: " + fft.failingPoint);
             System.exit(1);
             return false;
         }
-         */
+
+ */
+        if (r instanceof PredRule)
+            liftedAppliedMapSize = appliedMap.size();
+        else
+            groundedAppliedMapSize = appliedMap.size();
+
         return true;
     }
 
-    private static void fillFromCoveredStates(Rule r, ConcurrentHashMap<FFTNode, FFTMove> appliedMap) {
+    private static Rule liftRule(Rule r) {
+        if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO LIFT RULE");
+        // attempt to lift propositional variables one at a time, sorted by the most occurring variable 1st
+        for (int prop : r.getSortedProps()) {
+            PredRule pr = r.liftAll(prop);
+            System.out.println("predrule: " + pr);
+            System.out.println("rules:");
+            for (Rule ru : pr.groundedRules)
+                System.out.println(ru);
+            // we do not want to lift if the lifted rule does not apply to more states
+            if (verifyRule(pr, false) && groundedAppliedMapSize != liftedAppliedMapSize) {
+                if (liftedAppliedMapSize < groundedAppliedMapSize) {
+                    System.out.println("ERROR! Lifted rule applies to less states than grounded rule!");
+                }
+                if (DETAILED_DEBUG) System.out.println("RULE SUCCESSFULLY LIFTED TO: " + pr);
+                return pr;
+            }
+        }
+        if (DETAILED_DEBUG) System.out.println("FAILED TO LIFT RULE");
+        return r;
+    }
+
+    private static void fillFromCoveredStates(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
         HashSet<LiteralSet> states = r.getCoveredStates();
         if (DETAILED_DEBUG) System.out.println("Exact no. of covered states: " + states.size());
         if (!SINGLE_THREAD) {
@@ -202,7 +248,7 @@ public class FFTAutoGen {
         }
     }
 
-    private static void fillByIterating(Rule r, ConcurrentHashMap<FFTNode, FFTMove> appliedMap) {
+    private static void fillByIterating(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
         if (!SINGLE_THREAD) {
             reachableRelevantStates.values().parallelStream().forEach(node ->
                     insert(node, r, appliedMap));
@@ -212,16 +258,16 @@ public class FFTAutoGen {
         }
     }
 
-    private static void insert(FFTNode n, Rule r, ConcurrentHashMap<FFTNode, FFTMove> appliedMap) {
+    private static void insert(FFTNode n, Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
         if (n == null)
             return;
-        FFTMove m = r.apply(n);
-        if (m != null)
-            appliedMap.put(n, m);
+        HashSet<FFTMove> moves = r.apply(n);
+        if (!moves.isEmpty())
+            appliedMap.put(n, moves);
     }
 
     // Either remove states from applySet in addition to reachableSet, or check whether state is still reachable
-    private static boolean updateSets(FFTNode n, FFTMove chosenMove, ConcurrentHashMap<FFTNode, FFTMove> appliedMap,
+    private static boolean updateSets(FFTNode n, HashSet<FFTMove> chosenMoves, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap,
                                       boolean safe) {
         if (safe) reachableRelevantStates.remove(n);
         // s might've been set unreachable by another state in appliedSet
@@ -231,17 +277,21 @@ public class FFTAutoGen {
         ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(n);
         if (optimalMoves.isEmpty()) // terminal state
             return true;
-        if (!optimalMoves.contains(chosenMove)) { // we choose wrong move
-            if (isReachable(n, appliedMap))
-                return false;
-            else
-                chosenMove = null;
+        for (FFTMove chosenMove : chosenMoves) {
+            if (!optimalMoves.contains(chosenMove)) {
+                if (isReachable(n, appliedMap))
+                    return false;
+                else {
+                    chosenMoves.clear();
+                    break;
+                }
+            }
         }
         if (!safe) // only update sets in a safe run
             return true;
 
-        for (FFTMove m : optimalMoves) { // remove pointer to all children except chosen move
-            if (m.equals(chosenMove)) { // chosen move
+        for (FFTMove m : optimalMoves) { // remove pointer to all children except chosen moves
+            if (chosenMoves.contains(m)) { // chosen move
                 continue;
             }
             FFTNode existingChild = reachableStates.get(n.getNextNode(m));
@@ -270,7 +320,7 @@ public class FFTAutoGen {
     }
 
     // walk upwards through reachable parents until either initial state is found
-    private static boolean isReachable(FFTNode node, ConcurrentHashMap<FFTNode, FFTMove> appliedMap) {
+    private static boolean isReachable(FFTNode node, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
         LinkedList<FFTNode> frontier = new LinkedList<>();
         HashSet<FFTNode> closedSet = new HashSet<>();
         frontier.add(node);
@@ -283,12 +333,21 @@ public class FFTAutoGen {
             }
             for (FFTNode parent : n.getReachableParents()) {
                 FFTNode existingParent = reachableStates.get(parent);
-                FFTMove chosenMove = appliedMap.get(parent);
-                // either not in appliedMap or chooses correct move
-                if (chosenMove == null || parent.getNextNode(chosenMove).equals(n)) {
-                    if (existingParent != null && !closedSet.contains(parent)) {
-                        closedSet.add(parent);
-                        frontier.add(existingParent);
+                if (existingParent == null || closedSet.contains(parent))
+                    continue;
+                HashSet<FFTMove> chosenMoves = appliedMap.get(parent);
+                // not in appliedMap, add parent
+                if (chosenMoves == null) {
+                    closedSet.add(parent);
+                    frontier.add(existingParent);
+                } else{
+                    // chooses correct move
+                    for (FFTMove chosenMove : chosenMoves) {
+                        if (parent.getNextNode(chosenMove).equals(n)) {
+                            closedSet.add(parent);
+                            frontier.add(existingParent);
+                            break;
+                        }
                     }
                 }
             }
@@ -332,9 +391,10 @@ public class FFTAutoGen {
                     addNode(frontier, node, child);
                 continue;
             }
-            FFTMove chosenMove = fft.apply(node);
-            if (chosenMove != null) {
-                addNode(frontier, node, node.getNextNode(chosenMove));
+            HashSet<FFTMove> chosenMoves = fft.apply(node);
+            if (!chosenMoves.isEmpty()) {
+                for (FFTMove m : chosenMoves)
+                    addNode(frontier, node, node.getNextNode(m));
             } else {
                 ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(node);
                 reachableRelevantStates.put(node, node);

@@ -30,6 +30,8 @@ public class Config {
     public static int BENCHMARK_NUMBER;
     public static boolean USE_APPLYSET_OPT;
     public static boolean USE_RULE_ORDERING;
+    public static boolean USE_LIFTING;
+    public static boolean LIFT_BEFORE_SIMPLIFY;
 
     // KULIBRAT PROPERTIES
     public static int BWIDTH;
@@ -109,6 +111,8 @@ public class Config {
         }
 
         USE_RULE_ORDERING = Boolean.parseBoolean(global.getProperty("use_rule_ordering"));
+        USE_LIFTING = Boolean.parseBoolean(global.getProperty("use_lifting"));
+        LIFT_BEFORE_SIMPLIFY = Boolean.parseBoolean(global.getProperty("lift_before_simplify"));
         GREEDY_AUTOGEN = Boolean.parseBoolean(global.getProperty("greedy_autogen"));
         RANDOM_SEED = Boolean.parseBoolean(global.getProperty("random_seed"));
         SEED = Integer.parseInt(global.getProperty("seed"));
@@ -173,6 +177,8 @@ public class Config {
         System.out.printf("%-30.40s %-30.40s\n", "Minimize preconditions:", MINIMIZE_PRECONDITIONS);
         System.out.printf("%-30.40s %-30.40s\n", "Rule ordering:", ruleOrderingStr);
         System.out.printf("%-30.40s %-30.40s\n", "Use rule ordering:", USE_RULE_ORDERING);
+        System.out.printf("%-30.40s %-30.40s\n", "Use lifting:", USE_LIFTING);
+        System.out.printf("%-30.40s %-30.40s\n", "Lift before simplify:", LIFT_BEFORE_SIMPLIFY);
         System.out.printf("%-30.40s %-30.40s\n", "Greedy Autogeneration:", GREEDY_AUTOGEN);
         System.out.printf("%-30.40s %-30.40s\n", "Minimize rule by rule:", MINIMIZE_RULE_BY_RULE);
         System.out.printf("%-30.40s %-30.40s\n", "Use applySet optimization:", USE_APPLYSET_OPT);

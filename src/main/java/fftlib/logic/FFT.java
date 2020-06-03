@@ -109,15 +109,16 @@ public class FFT {
         return sb.toString();
     }
 
-    public FFTMove apply(FFTNode node) {
+    public HashSet<FFTMove> apply(FFTNode node) {
+        HashSet<FFTMove> moves = new HashSet<>();
         for (RuleGroup rg : ruleGroups) {
             for (Rule r : rg.rules) {
-                FFTMove m = r.apply(node);
-                if (m != null)
-                    return m;
+                moves = r.apply(node);
+                if (!moves.isEmpty())
+                    return moves;
             }
         }
-        return null;
+        return moves;
     }
 
     public int minimize(int team, boolean minimize_precons) { // Returns amount of iterations
@@ -252,10 +253,10 @@ public class FFT {
                         frontier.add(child);
                     }
             } else {
-                FFTMove move = apply(node);
+                HashSet<FFTMove> moves = apply(node);
                 ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(node);
                 // If move is null, check that all possible (random) moves are ok
-                if (move == null) {
+                if (moves.isEmpty()) {
                     for (FFTMove m : node.getLegalMoves()) {
                         if (optimalMoves.contains(m)) {
                             FFTNode nextNode = node.getNextNode(m);
@@ -268,14 +269,17 @@ public class FFT {
                             return false;
                         }
                     }
-                } else if (!optimalMoves.contains(move)) {
-                    failingPoint = new FFTNodeAndMove(node, move, false);
-                    return false;
-                } else { // move is not null, expand on node from that move
-                    FFTNode nextNode = node.getNextNode(move);
-                    if (!closedSet.contains(nextNode)) {
-                        closedSet.add(nextNode);
-                        frontier.add(nextNode);
+                } else {
+                    for (FFTMove m : moves) {
+                        if (!optimalMoves.contains(m)) {
+                            failingPoint = new FFTNodeAndMove(node, m, false);
+                            return false;
+                        }
+                        FFTNode nextNode = node.getNextNode(m);
+                        if (!closedSet.contains(nextNode)) {
+                            closedSet.add(nextNode);
+                            frontier.add(nextNode);
+                        }
                     }
                 }
             }
@@ -352,10 +356,10 @@ public class FFT {
                     addTask(child);
                 }
             } else {
-                FFTMove move = apply(node);
+                HashSet<FFTMove> moves = apply(node);
                 ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(node);
                 // If move is null, check that all possible (random) moves are ok
-                if (move == null) {
+                if (moves.isEmpty()) {
                     for (FFTMove m : node.getLegalMoves()) {
                         if (optimalMoves.contains(m)) {
                             addTask(node.getNextNode(m));
@@ -365,12 +369,15 @@ public class FFT {
                             return false;
                         }
                     }
-                } else if (!optimalMoves.contains(move)) {
-                    failingPoint = new FFTNodeAndMove(node, move, false);
-                    failed = true;
-                    return false;
                 } else {
-                    addTask(node.getNextNode(move));
+                    for (FFTMove m : moves) {
+                        if (!optimalMoves.contains(m)) {
+                            failingPoint = new FFTNodeAndMove(node, m, false);
+                            failed = true;
+                            return false;
+                        }
+                        addTask(node.getNextNode(m));
+                    }
                 }
             }
             boolean result = true;

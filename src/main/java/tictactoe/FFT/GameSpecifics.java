@@ -114,7 +114,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public int getAtomId(String name) {
-        return Atoms.stringToId.get(name);
+        return Atoms.stringToId.getOrDefault(name, 0);
     }
 
     @Override
@@ -153,6 +153,15 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public int getMaxStateLiterals() {
         return 9;
+    }
+
+    @Override
+    public ArrayList<Integer> legalIndices() {
+        ArrayList<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            indices.add(i);
+        }
+        return indices;
     }
 
     @Override

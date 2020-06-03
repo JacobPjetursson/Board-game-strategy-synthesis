@@ -325,7 +325,7 @@ public class Controller {
         ArrayList<Move> moves = Logic.legalMoves(node.getTurn(), node);
         if (highlight) {
             if (FFTManager.currFFT != null)
-                fftChosenMove = (Move) FFTManager.currFFT.apply(node);
+                fftChosenMove = (Move) FFTManager.currFFT.apply(node).iterator().next(); // TODO
         }
         BoardTile[][] tiles = playArea.getPlayBox().getBoard().getTiles();
 
