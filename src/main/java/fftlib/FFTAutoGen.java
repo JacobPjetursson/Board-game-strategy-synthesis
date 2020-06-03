@@ -131,12 +131,12 @@ public class FFTAutoGen {
             System.out.println("NODE SCORE: " + FFTSolution.queryNode(n).score);
             System.out.println("ORIGINAL RULE: " + r);
         }
-        if (LIFT_BEFORE_SIMPLIFY)
+        if (USE_LIFTING && LIFT_BEFORE_SIMPLIFY)
             r = liftRule(r);
 
         simplifyRule(r);
 
-        if (!LIFT_BEFORE_SIMPLIFY) {
+        if (USE_LIFTING && !LIFT_BEFORE_SIMPLIFY) {
             Rule pr = liftRule(r);
             // simplify again?
             if (pr != r)
@@ -216,15 +216,9 @@ public class FFTAutoGen {
         // attempt to lift propositional variables one at a time, sorted by the most occurring variable 1st
         for (int prop : r.getSortedProps()) {
             PredRule pr = r.liftAll(prop);
-            System.out.println("predrule: " + pr);
-            System.out.println("rules:");
-            for (Rule ru : pr.groundedRules)
-                System.out.println(ru);
+            if (DETAILED_DEBUG) System.out.println("VERIFYING LIFTED RULE: " + pr);
             // we do not want to lift if the lifted rule does not apply to more states
             if (verifyRule(pr, false) && groundedAppliedMapSize != liftedAppliedMapSize) {
-                if (liftedAppliedMapSize < groundedAppliedMapSize) {
-                    System.out.println("ERROR! Lifted rule applies to less states than grounded rule!");
-                }
                 if (DETAILED_DEBUG) System.out.println("RULE SUCCESSFULLY LIFTED TO: " + pr);
                 return pr;
             }

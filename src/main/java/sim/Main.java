@@ -4,6 +4,7 @@ import fftlib.*;
 import fftlib.game.FFTSolver;
 
 
+import static misc.Config.AUTOGEN_TEAM;
 import static misc.Globals.*;
 
 public class Main {

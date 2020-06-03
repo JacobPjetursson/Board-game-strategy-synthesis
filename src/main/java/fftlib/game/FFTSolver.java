@@ -2,6 +2,7 @@ package fftlib.game;
 
 import fftlib.FFTManager;
 import fftlib.FFTSolution;
+import misc.Config;
 
 import java.util.HashMap;
 
@@ -54,6 +55,9 @@ public class FFTSolver{
         System.out.println("Winner is " + winnerStr);
         solved = true;
         FFTSolution.setSolution(lookupTable);
+        // Set autogen_team to winner unless it's a draw
+        if (winner == PLAYER1 || winner == PLAYER2)
+            Config.AUTOGEN_TEAM = winner;
         return lookupTable;
     }
 
