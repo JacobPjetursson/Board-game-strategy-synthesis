@@ -4,9 +4,7 @@ import fftlib.FFTManager;
 import fftlib.game.FFTNode;
 import fftlib.game.FFTSolver;
 import fftlib.game.LiteralSet;
-import fftlib.logic.Action;
-import fftlib.logic.Literal;
-import fftlib.logic.Rule;
+import fftlib.logic.*;
 import tictactoe.FFT.GameSpecifics;
 import tictactoe.game.Move;
 import tictactoe.game.Node;
@@ -19,6 +17,9 @@ public class Demo {
         GameSpecifics gs = new GameSpecifics();
         FFTManager.initialize(gs);
         FFTSolver.solveGame(new Node());
+
+
+
 
         /*
         TreeMap<Long, Node> codes = new TreeMap<>();

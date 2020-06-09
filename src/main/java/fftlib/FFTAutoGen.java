@@ -4,8 +4,8 @@ import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 import fftlib.game.LiteralSet;
 import fftlib.game.NodeMapping;
+import fftlib.logic.FFT;
 import fftlib.logic.*;
-import misc.Config;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +18,6 @@ public class FFTAutoGen {
     private static HashMap<FFTNode, FFTNode> reachableStates;
     // Subset of reachable states where strategy does not output a move, and player has the turn
     // This is the set of states that a new rule can potentially influence
-    // Bitcode -> FFTNode
     private static Map<FFTNode, FFTNode> reachableRelevantStates;
 
     private static FFT fft;
@@ -81,7 +80,7 @@ public class FFTAutoGen {
         if (DETAILED_DEBUG) System.out.println("Rules before minimizing");
         if (DETAILED_DEBUG) System.out.println(fft);
 
-        int i = fft.minimize(AUTOGEN_TEAM, Config.MINIMIZE_PRECONDITIONS);
+        int i = fft.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
 
         System.out.println("Final amount of rules after " + i +
@@ -151,19 +150,27 @@ public class FFTAutoGen {
     private static void simplifyRule(Rule r) {
         if (DETAILED_DEBUG) System.out.println("SIMPLIFYING RULE: " + r);
         // make copy to avoid concurrentModificationException
-        LiteralSet rulePreconditions = new LiteralSet(r.getPreconditions());
-        for (Literal l : rulePreconditions) {
-            if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO REMOVE: " + l.getName());
-            r.removePrecondition(l);
+        int prevSize;
+        int i = 1;
+        do {
+            LiteralSet rulePreconditions = new LiteralSet(r.getPreconditions());
+            if (DETAILED_DEBUG && SIMPLIFY_ITERATIVELY)
+                System.out.println("SIMPLIFICATION ITERATION: " + i++);
+            prevSize = rulePreconditions.size();
+            for (Literal l : rulePreconditions) {
+                if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO REMOVE: " + l.getName());
+                r.removePrecondition(l);
 
-            if (!verifyRule(r, false)) {
-                if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.getName());
-                r.addPrecondition(l);
-            } else {
-                if (DETAILED_DEBUG) System.out.println("REMOVING PRECONDITION: " + l.getName());
+                if (!verifyRule(r, false)) {
+                    if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.getName());
+                    r.addPrecondition(l);
+                } else {
+                    if (DETAILED_DEBUG) System.out.println("REMOVING PRECONDITION: " + l.getName());
+                }
+                if (DETAILED_DEBUG) System.out.println("RULE IS NOW: " + r);
             }
-            if (DETAILED_DEBUG) System.out.println("RULE IS NOW: " + r);
-        }
+        } while (SIMPLIFY_ITERATIVELY && prevSize != r.getPreconditions().size() &&
+                r.getPreconditions().size() != 0);
     }
 
     private static boolean verifyRule(Rule r, boolean safe) {
@@ -173,10 +180,6 @@ public class FFTAutoGen {
 
         //long coveredStates = r.getNumberOfCoveredStates();
         long coveredStates = 0;
-        if (DETAILED_DEBUG) {
-            //System.out.println("Upper bound for no. of covered states: " + coveredStates);
-            System.out.println("Size of reachable relevant states: " + reachableRelevantStates.size());
-        }
 
         if (USE_APPLYSET_OPT && coveredStates < reachableRelevantStates.size()) {
             fillFromCoveredStates(r, appliedMap);
@@ -350,7 +353,6 @@ public class FFTAutoGen {
         return false;
     }
 
-
     private static void findReachableStates() {
         int team = AUTOGEN_TEAM;
         FFTNode initialNode = FFTManager.initialFFTNode;
@@ -454,5 +456,64 @@ public class FFTAutoGen {
             return 0;
         }
     }
+
+    /*
+    // assumes that the FFT is strongly optimal
+    private static int minimize() {
+        int ruleSize, precSize;
+        int i = 0;
+        do {
+            ruleSize = fft.getAmountOfRules();
+            precSize = fft.getAmountOfPreconditions();
+            if (DETAILED_DEBUG)
+                System.out.println("Minimizing, iteration no. " + i++);
+            minimizeRules();
+            if (!MINIMIZE_RULE_BY_RULE && MINIMIZE_PRECONDITIONS) {
+                if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
+                minimizePreconditions();
+            }
+        } while (ruleSize != fft.getAmountOfRules() || precSize != fft.getAmountOfPreconditions());
+
+        return i;
+    }
+
+    private static void minimizeRules() {
+        for (RuleGroup rg : fft.ruleGroups) {
+            if (rg.locked) // don't minimize if rulegroup is locked
+                continue;
+            ListIterator<Rule> itr = rg.rules.listIterator();
+            while(itr.hasNext()) {
+                Rule r = itr.next();
+                itr.remove();
+                if (false) {
+                    // TODO - check if we're good without this rule
+                }
+                else {
+                    itr.add(r);
+                    if (MINIMIZE_RULE_BY_RULE)
+                        minimizePreconditions(r);
+                }
+            }
+        }
+    }
+
+    private static void minimizePreconditions() {
+        for (RuleGroup rg : fft.ruleGroups) {
+            if (rg.locked) continue; // don't minimize if rg is locked
+            for(Rule r : rg.rules) {
+                minimizePreconditions(r);
+            }
+        }
+    }
+
+    private static void minimizePreconditions(Rule r) {
+        LiteralSet rulePreconditions = new LiteralSet(r.getPreconditions());
+        for (Literal l : rulePreconditions) {
+            r.removePrecondition(l);
+            if (false) // check if we're good without this precondition
+                r.addPrecondition(l);
+        }
+    }
+     */
 }
 

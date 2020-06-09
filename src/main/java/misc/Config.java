@@ -30,8 +30,10 @@ public class Config {
     public static int BENCHMARK_NUMBER;
     public static boolean USE_APPLYSET_OPT;
     public static boolean USE_RULE_ORDERING;
+    public static boolean SIMPLIFY_ITERATIVELY;
     public static boolean USE_LIFTING;
     public static boolean LIFT_BEFORE_SIMPLIFY;
+    public static boolean LIFT_WHEN_MINIMIZING;
 
     // KULIBRAT PROPERTIES
     public static int BWIDTH;
@@ -113,6 +115,7 @@ public class Config {
         USE_RULE_ORDERING = Boolean.parseBoolean(global.getProperty("use_rule_ordering"));
         USE_LIFTING = Boolean.parseBoolean(global.getProperty("use_lifting"));
         LIFT_BEFORE_SIMPLIFY = Boolean.parseBoolean(global.getProperty("lift_before_simplify"));
+        LIFT_WHEN_MINIMIZING = Boolean.parseBoolean(global.getProperty("lift_when_minimizing"));
         GREEDY_AUTOGEN = Boolean.parseBoolean(global.getProperty("greedy_autogen"));
         RANDOM_SEED = Boolean.parseBoolean(global.getProperty("random_seed"));
         SEED = Integer.parseInt(global.getProperty("seed"));
@@ -120,6 +123,7 @@ public class Config {
         ENABLE_GGP_PARSER = Boolean.parseBoolean(global.getProperty("enable_ggp_parser"));
         MINIMIZE_PRECONDITIONS = Boolean.parseBoolean(global.getProperty("minimize_preconditions"));
         MINIMIZE_RULE_BY_RULE = Boolean.parseBoolean(global.getProperty("minimize_rule_by_rule"));
+        SIMPLIFY_ITERATIVELY = Boolean.parseBoolean(global.getProperty("simplify_iteratively"));
         SYMMETRY_DETECTION = Boolean.parseBoolean(global.getProperty("symmetry_detection"));
         SHOW_RULE_GROUPS = Boolean.parseBoolean(global.getProperty("show_rule_groups"));
         // DEBUG AND TEST
@@ -179,7 +183,9 @@ public class Config {
         System.out.printf("%-30.40s %-30.40s\n", "Use rule ordering:", USE_RULE_ORDERING);
         System.out.printf("%-30.40s %-30.40s\n", "Use lifting:", USE_LIFTING);
         System.out.printf("%-30.40s %-30.40s\n", "Lift before simplify:", LIFT_BEFORE_SIMPLIFY);
+        System.out.printf("%-30.40s %-30.40s\n", "Lift when minimizing:", LIFT_WHEN_MINIMIZING);
         System.out.printf("%-30.40s %-30.40s\n", "Greedy Autogeneration:", GREEDY_AUTOGEN);
+        System.out.printf("%-30.40s %-30.40s\n", "Simplify iteratively:", SIMPLIFY_ITERATIVELY);
         System.out.printf("%-30.40s %-30.40s\n", "Minimize rule by rule:", MINIMIZE_RULE_BY_RULE);
         System.out.printf("%-30.40s %-30.40s\n", "Use applySet optimization:", USE_APPLYSET_OPT);
 

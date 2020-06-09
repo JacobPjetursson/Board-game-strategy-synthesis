@@ -127,37 +127,21 @@ public class FFT {
             return -1;
         }
 
-        int ruleSize = getAmountOfRules();
-        int precSize = getAmountOfPreconditions();
-
+        int ruleSize, precSize;
         int i = 0;
-        if (DETAILED_DEBUG)
-            System.out.println("Minimizing, iteration no. " + i);
-        minimizeRules(team);
-        if (!MINIMIZE_RULE_BY_RULE && minimize_precons) {
-            if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
-            minimizePreconditions(team);
-        }
+        do {
+            ruleSize = getAmountOfRules();
+            precSize = getAmountOfPreconditions();
 
-        int minRuleSize = getAmountOfRules();
-        int minPrecSize = getAmountOfPreconditions();
-
-        while (ruleSize != minRuleSize || precSize != minPrecSize) {
-            i++;
             if (DETAILED_DEBUG)
-                System.out.println("Minimizing, iteration no. " + i);
+                System.out.println("Minimizing, iteration no. " + i++);
             minimizeRules(team);
-            ruleSize = minRuleSize;
-            precSize = minPrecSize;
-
             if (!MINIMIZE_RULE_BY_RULE && minimize_precons) {
                 if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
                 minimizePreconditions(team);
             }
+        } while(ruleSize != getAmountOfRules() || precSize != getAmountOfPreconditions());
 
-            minRuleSize = getAmountOfRules();
-            minPrecSize = getAmountOfPreconditions();
-        }
         return i;
     }
 
@@ -207,16 +191,53 @@ public class FFT {
                     r.addPrecondition(s);
             }
         } else {
-            ArrayList<Literal> literals = new ArrayList<>();
-            for (Literal l : r.getPreconditions())
-                literals.add(l.clone());
+            LiteralSet precons = new LiteralSet(r.getPreconditions());
 
-            for (Literal l : literals) {
+            for (Literal l : precons) {
                 r.removePrecondition(l);
                 if (!verify(team, true))
                     r.addPrecondition(l);
             }
+            if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule)) {
+                liftRule(r, team);
+            }
         }
+    }
+
+    private void liftRule(Rule r, int team) {
+        if (DETAILED_DEBUG) System.out.println("Attempting to lift rule: " + r);
+        for (int prop : r.getSortedProps()) {
+            PredRule pr = r.liftAll(prop);
+            replaceRule(r, pr);
+            if (verify(team, true)) {
+                if (DETAILED_DEBUG) System.out.println("Successfully lifted rule to: " + pr);
+                return;
+            } else {
+                replaceRule(pr, r);
+            }
+        }
+    }
+
+    private void replaceRule(Rule oldRule, Rule newRule) {
+        int rgIdx = -1;
+        int rIdx = -1;
+        for (int i = 0; i < ruleGroups.size(); i++) {
+            RuleGroup rg = ruleGroups.get(i);
+            for (int j = 0; j < rg.rules.size(); j++) {
+                Rule r = rg.rules.get(j);
+                if (oldRule == r) {
+                    rgIdx = i;
+                    rIdx = j;
+                }
+
+            }
+        }
+        if (rgIdx == -1) {
+            if (DETAILED_DEBUG) System.out.println("Error: Failed to find oldRule when replacing");
+            return;
+        }
+        ruleGroups.get(rgIdx).rules.set(rIdx, newRule);
+
     }
 
     public boolean verify(int team, boolean complete) {
