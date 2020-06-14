@@ -29,6 +29,9 @@ public class Rule {
     public Set<GdlSentence> sentences;
     private Move move;
 
+    // index in FFT
+    private int ruleIndex;
+
     // parsing constructor
     public Rule(String preconStr, String actionStr) {
         if (ENABLE_GGP_PARSER) {
@@ -40,14 +43,14 @@ public class Rule {
             this.preconditions = getPreconditions(preconStr);
         }
         removeActionPrecons();
-        this.symmetryRules = getSymmetryRules();
+        if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
     }
 
     public Rule(LiteralSet precons, Action action) {
         this.action = action;
         this.preconditions = precons;
         removeActionPrecons();
-        this.symmetryRules = getSymmetryRules();
+        if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
     }
 
     // GDL Constructor
@@ -70,14 +73,29 @@ public class Rule {
     public Rule(Rule duplicate) {
         this.action = new Action(duplicate.action);
         this.preconditions = new LiteralSet(duplicate.preconditions);
-        this.symmetryRules = new HashSet<>(duplicate.symmetryRules);
+        if (SYMMETRY_DETECTION) this.symmetryRules = new HashSet<>(duplicate.symmetryRules);
+    }
 
+    public void setRuleIndex(int index) {
+        ruleIndex = index;
+    }
+
+    public int getRuleIndex() {
+        return ruleIndex;
+    }
+
+    public long getBitString() {
+        return getAllPreconditions().getBitString();
+    }
+
+    public long getNegativeBitString() {
+        return getAllPreconditions().getNegativeBitString();
     }
 
     public void addPrecondition(Literal l) {
         if (!action.getPreconditions().contains(l)) // do not include precondition from action
             preconditions.add(l);
-        this.symmetryRules = getSymmetryRules();
+        if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
     }
 
     public void addPrecondition(GdlSentence s) {
@@ -87,7 +105,7 @@ public class Rule {
 
     public void removePrecondition(Literal l) {
         this.preconditions.remove(l);
-        this.symmetryRules = getSymmetryRules();
+        if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
     }
 
     public void removePrecondition(GdlSentence s) {
@@ -116,13 +134,13 @@ public class Rule {
         else
             this.action = a;
         removeActionPrecons();
-        this.symmetryRules = getSymmetryRules();
+        if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
     }
 
     // Gdl
     public void setMove(Move m) {
         this.move = m;
-        this.symmetryRules = getSymmetryRules();
+        if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
     }
 
     public void setPreconditions(LiteralSet precons) {
@@ -130,7 +148,7 @@ public class Rule {
             this.preconditions = new LiteralSet();
         else
             this.preconditions = precons;
-        this.symmetryRules = getSymmetryRules();
+        if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
     }
 
     // Gdl

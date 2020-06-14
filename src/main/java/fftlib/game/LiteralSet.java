@@ -8,7 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 
 public class LiteralSet extends HashSet<Literal> {
-    long bitString;
+    long bitString; // bitstring for all positive literals
+    long negativeBitString; // bitstring for all negative literals
 
     public LiteralSet(LiteralSet literals) {
         super(literals);
@@ -35,8 +36,12 @@ public class LiteralSet extends HashSet<Literal> {
     @Override
     public boolean add(Literal l) {
         boolean added = super.add(l);
-        if (added && !l.negated)
-            bitString |= (1 << l.id);
+        if (added) {
+            if (l.negated)
+                negativeBitString |= (1 << l.id);
+            else
+                bitString |= (1 << l.id);
+        }
         return added;
     }
 
@@ -46,8 +51,12 @@ public class LiteralSet extends HashSet<Literal> {
 
     public boolean remove(Literal l) {
         boolean removed = super.remove(l);
-        if (removed && !l.negated)
-            bitString &= ~(1 << l.id);
+        if (removed) {
+            if (l.negated)
+                negativeBitString &= ~(1 << l.id);
+            else
+                bitString &= ~(1 << l.id);
+        }
         return removed;
     }
 
@@ -81,15 +90,20 @@ public class LiteralSet extends HashSet<Literal> {
         return bitString;
     }
 
-    public void initializeBitString() {
-        bitString = 0;
-        for (Literal l : this) {
-            if (l.negated)
-                continue;
-            bitString |= (1 << l.id);
-        }
+    public long getNegativeBitString() {
+        return negativeBitString;
     }
 
+    public void initializeBitString() {
+        bitString = 0;
+        negativeBitString = 0;
+        for (Literal l : this) {
+            if (l.negated)
+                negativeBitString |= (1 << l.id);
+            else
+                bitString |= (1 << l.id);
+        }
+    }
 
 
 

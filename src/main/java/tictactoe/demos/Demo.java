@@ -18,10 +18,7 @@ public class Demo {
         FFTManager.initialize(gs);
         FFTSolver.solveGame(new Node());
 
-
-
-
-        /*
+/*
         TreeMap<Long, Node> codes = new TreeMap<>();
         Node n = new Node();
         codes.put(n.convert().getBitString(), n);
@@ -54,7 +51,9 @@ public class Demo {
             System.out.println("Literal: " + entry.getValue() + " , with key: " + (1 << entry.getKey()));
         }
 
-         */
+ */
+
+
 
         // Make strategy with meta rules
         //ArrayList<FFT> ffts = FFTManager.load("FFTs/tictactoe_meta_fft.txt");

@@ -25,7 +25,9 @@ import static misc.Globals.*;
 
 public class FFT {
     public String name;
+    // used for a visual representation and for locking (preventing) a group of rules of being minimized
     public ArrayList<RuleGroup> ruleGroups;
+
     public FFTNodeAndMove failingPoint = null;
 
     // For concurrency purposes
@@ -109,6 +111,7 @@ public class FFT {
         return sb.toString();
     }
 
+    // todo - optimize this to find the correct rule faster
     public HashSet<FFTMove> apply(FFTNode node) {
         HashSet<FFTMove> moves = new HashSet<>();
         for (RuleGroup rg : ruleGroups) {
@@ -152,6 +155,7 @@ public class FFT {
             if (rg.locked) // don't minimize if rulegroup is locked
                 continue;
             ListIterator<Rule> itr = rg.rules.listIterator();
+            // todo - make copy of list and add/remove using the addRule() removeRule() functions instead
             while(itr.hasNext()) {
                 Rule r = itr.next();
                 itr.remove();
