@@ -83,7 +83,7 @@ public class FFTAutoGen {
 
         int i;
         if (USE_BITSTRING_SORT_OPT)
-            i = minimizeOpt();
+            i = fft.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
         else
             i = fft.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
