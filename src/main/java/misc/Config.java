@@ -33,8 +33,10 @@ public class Config {
     public static boolean USE_RULE_ORDERING;
     public static boolean SIMPLIFY_ITERATIVELY;
     public static boolean USE_LIFTING;
+    public static boolean MINIMIZE;
     public static boolean LIFT_BEFORE_SIMPLIFY;
     public static boolean LIFT_WHEN_MINIMIZING;
+    public static boolean SAVE_FFT;
 
     // KULIBRAT PROPERTIES
     public static int BWIDTH;
@@ -114,6 +116,7 @@ public class Config {
         }
 
         USE_RULE_ORDERING = Boolean.parseBoolean(global.getProperty("use_rule_ordering"));
+        MINIMIZE = Boolean.parseBoolean(global.getProperty("minimize"));
         USE_LIFTING = Boolean.parseBoolean(global.getProperty("use_lifting"));
         LIFT_BEFORE_SIMPLIFY = Boolean.parseBoolean(global.getProperty("lift_before_simplify"));
         LIFT_WHEN_MINIMIZING = Boolean.parseBoolean(global.getProperty("lift_when_minimizing"));
@@ -133,6 +136,7 @@ public class Config {
         BENCHMARK_NUMBER = Integer.parseInt(global.getProperty("no_of_benchmarks"));
         USE_DEBUG_FILE = Boolean.parseBoolean(global.getProperty("use_debug_file"));
         DEBUG_FILENAME = global.getProperty("debug_filename");
+        SAVE_FFT = Boolean.parseBoolean(global.getProperty("save_fft"));
         SINGLE_THREAD = Boolean.parseBoolean(global.getProperty("single_thread"));
         USE_APPLYSET_OPT = Boolean.parseBoolean(global.getProperty("use_applyset_opt"));
         USE_BITSTRING_SORT_OPT = Boolean.parseBoolean(global.getProperty("use_bitstring_sorting_opt"));
@@ -176,6 +180,11 @@ public class Config {
             LIFT_WHEN_MINIMIZING = false;
             LIFT_BEFORE_SIMPLIFY = false;
         }
+
+        if (!MINIMIZE) {
+            MINIMIZE_PRECONDITIONS = false;
+            MINIMIZE_RULE_BY_RULE = false;
+        }
     }
 
     private static void printSettings() {
@@ -206,6 +215,7 @@ public class Config {
         System.out.printf("%-30.40s %-30.40s\n", "Random seed:", RANDOM_SEED);
         System.out.printf("%-30.40s %-30.40s\n", "Seed value:",SEED);
         System.out.printf("%-30.40s %-30.40s\n", "Detailed debug messages:", DETAILED_DEBUG);
+        System.out.printf("%-30.40s %-30.40s\n", "Save fft to disk:", SAVE_FFT);
         System.out.printf("%-30.40s %-30.40s\n", "Using debug file:", USE_DEBUG_FILE);
         System.out.printf("%-30.40s %-30.40s\n", "Benchmark mode:", BENCHMARK_MODE);
         System.out.printf("%-30.40s %-30.40s\n", "Single thread:", SINGLE_THREAD);

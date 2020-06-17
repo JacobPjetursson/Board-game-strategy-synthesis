@@ -115,7 +115,7 @@ public class Controller {
                 Database.connectAndVerify();
             }
         } else if (aiRed instanceof PerfectPlayer || aiBlack instanceof PerfectPlayer) {
-            FFTSolver.solveGame(node);
+            FFTSolver.solveGame();
         }
 
         // Autogenerate

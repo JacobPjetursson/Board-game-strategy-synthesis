@@ -9,7 +9,7 @@ public class Main {
         Node n = new Node();
         GameSpecifics specs = new GameSpecifics();
         FFTManager.initialize(specs);
-        FFTSolver.solveGame(n);
+        FFTSolver.solveGame();
 
         FFTManager.autogenFFT();
     }

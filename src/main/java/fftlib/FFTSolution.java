@@ -19,6 +19,10 @@ public class FFTSolution{
         solution = lookupTable;
     }
 
+    public static HashMap<? extends FFTNode, NodeMapping> getSolution() {
+        return solution;
+    }
+
     public static ArrayList<? extends FFTMove> optimalMoves(FFTNode node) {
         ArrayList<FFTMove> optimalMoves = new ArrayList<>();
         NodeMapping mapping = solution.get(node);

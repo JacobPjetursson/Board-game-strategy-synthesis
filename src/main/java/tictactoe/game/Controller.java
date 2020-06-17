@@ -70,7 +70,7 @@ public class Controller {
 
         gameSpecifics = new GameSpecifics(this);
         FFTManager.initialize(gameSpecifics);
-        FFTSolver.solveGame(node);
+        FFTSolver.solveGame();
         // Autogenerate
         if (ENABLE_AUTOGEN)
             FFTManager.autogenFFT();

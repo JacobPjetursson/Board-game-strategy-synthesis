@@ -17,7 +17,7 @@ public class FFTSolver{
     private static HashMap<FFTNode, NodeMapping> lookupTable;
 
     // Runs an iterative deepening minimax as the exhaustive brute-force for the lookupDB. The data is saved in the transpo table
-    public static HashMap<? extends FFTNode, NodeMapping> solveGame(FFTNode initialNode) {
+    public static HashMap<? extends FFTNode, NodeMapping> solveGame() {
         if (solved) {
             System.out.println("Game already solved once, returning immediately");
             return lookupTable;
@@ -28,6 +28,7 @@ public class FFTSolver{
 
         int doneCounter = 0;
         long timeStart = System.currentTimeMillis();
+        FFTNode initialNode = FFTManager.initialFFTNode;
         while (!done) {
             CURR_MAX_DEPTH += 1;
             int prevSize = lookupTable.size();

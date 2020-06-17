@@ -16,7 +16,7 @@ public class Demo {
     public static void main(String[] args) {
         GameSpecifics gs = new GameSpecifics();
         FFTManager.initialize(gs);
-        FFTSolver.solveGame(new Node());
+        FFTSolver.solveGame();
 
 /*
         TreeMap<Long, Node> codes = new TreeMap<>();

@@ -22,7 +22,7 @@ public class Main extends Application {
         else {
             GameSpecifics specs = new GameSpecifics();
             FFTManager.initialize(specs);
-            FFTSolver.solveGame(new Node());
+            FFTSolver.solveGame();
             FFTManager.autogenFFT();
         }
     }

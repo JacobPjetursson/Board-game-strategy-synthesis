@@ -81,11 +81,13 @@ public class FFTAutoGen {
         if (DETAILED_DEBUG) System.out.println("Rules before minimizing");
         if (DETAILED_DEBUG) System.out.println(fft);
 
-        int i;
-        if (USE_BITSTRING_SORT_OPT)
-            i = fft.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
-        else
-            i = fft.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
+        int i = -1;
+        if (MINIMIZE) {
+            if (USE_BITSTRING_SORT_OPT)
+                i = fft.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
+            else
+                i = fft.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
+        }
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
 
         System.out.println("Final amount of rules after " + i +
@@ -94,6 +96,8 @@ public class FFTAutoGen {
                 " minimize iterations: " + fft.getAmountOfPreconditions());
         System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
         System.out.println("Final rules: \n" + fft);
+        if (SAVE_FFT)
+            FFTManager.save();
     }
 
     private static void setup(boolean existingFFT) {

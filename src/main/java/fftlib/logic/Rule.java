@@ -11,7 +11,6 @@ import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 import static misc.Config.ENABLE_GGP_PARSER;
@@ -21,7 +20,10 @@ import static misc.Config.SYMMETRY_DETECTION;
 public class Rule {
     private static final ArrayList<String> separators = new ArrayList<>(
             Arrays.asList("and", "And", "AND", "&", "∧"));
+    // preconditions are the preconditions visible to the human
     protected LiteralSet preconditions;
+    // allPreconditions are all the preconditions, including those from the action
+    protected LiteralSet allPreconditions;
     protected Action action;
     private HashSet<SymmetryRule> symmetryRules;
 
@@ -39,8 +41,9 @@ public class Rule {
             this.action = r.action;
             this.preconditions = r.preconditions;
         } else {
-            this.action = getAction(actionStr);
-            this.preconditions = getPreconditions(preconStr);
+            this.action = setAction(actionStr);
+            this.preconditions = setPreconditions(preconStr);
+            setAllPreconditions();
         }
         removeActionPrecons();
         if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
@@ -49,6 +52,7 @@ public class Rule {
     public Rule(LiteralSet precons, Action action) {
         this.action = action;
         this.preconditions = precons;
+        setAllPreconditions();
         removeActionPrecons();
         if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
     }
@@ -62,6 +66,7 @@ public class Rule {
     // Empty constructor to allow rule buildup
     public Rule() {
         this.preconditions = new LiteralSet();
+        this.allPreconditions = new LiteralSet();
         this.action = new Action();
     }
 
@@ -73,6 +78,7 @@ public class Rule {
     public Rule(Rule duplicate) {
         this.action = new Action(duplicate.action);
         this.preconditions = new LiteralSet(duplicate.preconditions);
+        setAllPreconditions();
         if (SYMMETRY_DETECTION) this.symmetryRules = new HashSet<>(duplicate.symmetryRules);
     }
 
@@ -95,6 +101,7 @@ public class Rule {
     public void addPrecondition(Literal l) {
         if (!action.getPreconditions().contains(l)) // do not include precondition from action
             preconditions.add(l);
+        allPreconditions.add(l);
         if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
     }
 
@@ -105,6 +112,8 @@ public class Rule {
 
     public void removePrecondition(Literal l) {
         this.preconditions.remove(l);
+        if (!action.getPreconditions().contains(l))
+            this.allPreconditions.remove(l);
         if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
     }
 
@@ -119,9 +128,12 @@ public class Rule {
     }
 
     public LiteralSet getAllPreconditions() {
-        LiteralSet precons = new LiteralSet(preconditions);
-        precons.addAll(action.getPreconditions());
-        return precons;
+        return allPreconditions;
+    }
+
+    public void setAllPreconditions() {
+        allPreconditions = new LiteralSet(preconditions);
+        allPreconditions.addAll(action.getPreconditions());
     }
 
     public Action getAction() {
@@ -222,7 +234,7 @@ public class Rule {
         return states;
     }
 
-    private static LiteralSet getPreconditions(String preconStr) {
+    private static LiteralSet setPreconditions(String preconStr) {
         LiteralSet literals = new LiteralSet();
         for (String precons : prepPreconditions(preconStr)) {
             literals.add(new Literal(precons));
@@ -283,7 +295,7 @@ public class Rule {
         }
     }
 
-    private static Action getAction(String actionStr) {
+    private static Action setAction(String actionStr) {
         return new Action(prepAction(actionStr));
     }
 
