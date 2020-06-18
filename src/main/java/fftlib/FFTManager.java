@@ -22,6 +22,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static misc.Config.SAVE_FFT;
+
 
 public class FFTManager {
     // Misc
@@ -203,6 +205,10 @@ public class FFTManager {
         FFT fft = FFTAutoGen.generateFFT(Config.AUTOGEN_TEAM);
         ffts.add(0, fft);
         currFFT = fft;
+        if (SAVE_FFT) {
+            System.out.println("Saving FFT");
+            save();
+        }
         return currFFT;
     }
 

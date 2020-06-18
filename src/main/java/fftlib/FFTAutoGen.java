@@ -96,8 +96,6 @@ public class FFTAutoGen {
                 " minimize iterations: " + fft.getAmountOfPreconditions());
         System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
         System.out.println("Final rules: \n" + fft);
-        if (SAVE_FFT)
-            FFTManager.save();
     }
 
     private static void setup(boolean existingFFT) {

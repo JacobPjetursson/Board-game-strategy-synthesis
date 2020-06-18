@@ -86,7 +86,7 @@ public class ApplyDemo {
         double timeSpent;
         ArrayList<FFTNode> classicStates = new ArrayList<>();
         // BENCHMARKS
-        int iterations = 100;
+        int iterations = 50;
         // benchmark of classic apply method
         timeStart = System.currentTimeMillis();
         for (int i = 0; i < iterations; i++) {
@@ -162,21 +162,9 @@ public class ApplyDemo {
         Literal neg = new Literal(atom, true);
         if (DEBUG)
             System.out.println("pos: " + pos);
-        int posEnd = rules.size();
-        int negStart = rules.size();
-        // find pos & neg intervals (todo - make binary search)
-        boolean posFound = false;
-        for (int i = 0; i < rules.size(); i++) {
-            LiteralSet precons = rules.get(i).getAllPreconditions();
-            if (!precons.contains(pos) && !posFound) {
-                posEnd = i;
-                posFound = true;
-            }
-            if (precons.contains(neg)) {
-                negStart = i;
-                break;
-            }
-        }
+        int posEnd = findInterval(rules, pos, true);
+        int negStart = findInterval(rules, neg, false);
+
         List<Rule> middleList = null, sideList = null;
         if (posEnd != rules.size() && negStart != 0) // middle list exists
             middleList = rules.subList(posEnd, negStart);
@@ -206,8 +194,32 @@ public class ApplyDemo {
         return appliedRules;
     }
 
-    public static class LiteralSetComparator implements Comparator<Rule> {
+    // look for first index where value (rule) does not contain 'l'
+    // It is always a worst-case search, as we need to verify that the prev rule in fact has the lit
+    // if 'start' is true, then we search for the first idx where 'l' is not in rules
+    // if 'start' is false, then we search for the first idx where 'l' is in rules
+    private static int findInterval(List<Rule> rules,
+                                     Literal l, boolean start) {
+        int low = 0;
+        int high = rules.size() - 1;
+        int foundIdx = rules.size();
 
+        while (low <= high) {
+            int mid = (low + high) >>> 1;
+            LiteralSet precons = rules.get(mid).getAllPreconditions();
+            if ((start && precons.contains(l)) ||
+                    (!start && !precons.contains(l)))
+                low = mid + 1;
+            else {
+                foundIdx = mid;
+                high = mid - 1;
+            }
+        }
+        return foundIdx;
+    }
+
+
+    public static class LiteralSetComparator implements Comparator<Rule> {
         @Override
         public int compare(Rule o1, Rule o2) {
             LiteralSet set1 = o1.getAllPreconditions();
