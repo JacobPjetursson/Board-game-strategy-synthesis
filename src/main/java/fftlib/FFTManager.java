@@ -103,6 +103,9 @@ public class FFTManager {
 
         // Try loading ffts from file in working directory
         ffts = load(fftPath);
+        // initialize rule lists for all FFT's
+        for (FFT f : ffts)
+            f.initializeRuleList();
         if (!ffts.isEmpty())
             currFFT = ffts.get(fft_index);
     }
@@ -141,13 +144,10 @@ public class FFTManager {
         try {
             if (!fftFile.createNewFile()) {
                 lines = Files.readAllLines(Paths.get(filePath));
-                int fftIndex = -1;
-                int rgIndex = -1;
+
                 for (String line : lines) {
                     if (line.startsWith("{")) {
                         ffts.add(new FFT(line.substring(1, line.length() - 1)));
-                        fftIndex++;
-                        rgIndex = -1;
                     }
                     // Rulegroup name
                     else if (line.startsWith("[")) {
@@ -155,13 +155,12 @@ public class FFTManager {
                         RuleGroup rg = new RuleGroup(line.substring(1, length));
                         if (line.endsWith("*"))
                             rg.locked = true;
-                        ffts.get(fftIndex).addRuleGroup(rg);
-                        rgIndex++;
+                        ffts.get(ffts.size()-1).addRuleGroup(rg);
                     } else {
                         String[] rule = line.split("->");
                         String clauseStr = rule[0].trim();
                         String actionStr = rule[1].trim();
-                        ffts.get(fftIndex).append(new Rule(clauseStr, actionStr));
+                        ffts.get(ffts.size()-1).append(new Rule(clauseStr, actionStr));
                     }
                 }
 

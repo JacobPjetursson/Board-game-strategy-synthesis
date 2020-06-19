@@ -22,13 +22,9 @@ import static misc.Config.MINIMIZE_PRECONDITIONS;
 
 public class Demo {
 
-    private static ArrayList<Integer> sortedAtoms;
-
     public static void main(String[] args) {
         GameSpecifics gs = new GameSpecifics();
         FFTManager.initialize(gs);
-
-        sortedAtoms = FFTManager.sortedGameAtoms;
 
         // build set of testNodes (SIM)
         ArrayList<FFTNode> testNodes = new ArrayList<>();
@@ -53,13 +49,12 @@ public class Demo {
         FFTSolver.solveGame();
         //FFTManager.autogenFFT();
         System.out.println("fft size: " + FFTManager.currFFT.size());
-        System.out.println("fft rulelist size: " + FFTManager.currFFT.getRuleList().size());
+        System.out.println("ruleList size: " + FFTManager.currFFT.getRuleList().size());
 
         long timeStart;
         double timeSpent;
         HashMap<FFTNode, FFTMove> classicStates = new HashMap<>();
         HashMap<FFTNode, FFTMove> newStates = new HashMap<>();
-
 
         // BENCHMARKS
         int iterations = 1;
