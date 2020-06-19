@@ -24,9 +24,10 @@ public class RuleList extends ArrayList<Rule> {
 
     public Rule findRule(LiteralSet lSet) {
         List<Rule> appliedRules = filterByAtom(0, lSet, this);
-        if (appliedRules.isEmpty())
+        if (appliedRules.isEmpty()) {
             return null;
-        int minIdx = size();
+        }
+        int minIdx = Integer.MAX_VALUE;
         Rule firstRule = null;
         for (Rule r : appliedRules) {
             if (r.getRuleIndex() < minIdx) {
@@ -92,21 +93,37 @@ public class RuleList extends ArrayList<Rule> {
 
     // maintains ordering
     public void sortedAdd(Rule r) {
-        int index = Collections.binarySearch(this, r, rc);
+        /*
+        int index = Collections.binarySearch(this, r, new RuleComparator());
         if (index < 0) {
             index = -index - 1;
         }
         add(index, r);
+
+         */
+        add(r);
+        sort(new RuleComparator());
     }
 
     // n + log(n) instead of (n + n)
     public boolean sortedRemove(Rule r) {
-        int index = Collections.binarySearch(this, r, rc);
+        /*
+        System.out.println("removing rule: " + r);
+        int index = Collections.binarySearch(this, r, new RuleComparator());
+        System.out.println("index: " + index);
         if (index < 0) {
             return false; // no element
         }
+        System.out.println("rule at index: " + get(index));
         remove(index);
         return true;
+
+         */
+        return remove(r);
+    }
+
+    public void sort() {
+        sort(new RuleComparator());
     }
 
     private static class RuleComparator implements Comparator<Rule> {
@@ -116,14 +133,18 @@ public class RuleList extends ArrayList<Rule> {
             LiteralSet set2 = o2.getAllPreconditions();
             for (int atm : sortedAtoms) {
                 Literal l = new Literal(atm);
-                if (set1.contains(l) && !set2.contains(l))
+                boolean s1Contains = set1.contains(l);
+                boolean s2Contains = set2.contains(l);
+                if (s1Contains && !s2Contains)
                     return -1;
-                if (set2.contains(l) && !set1.contains(l))
+                if (s2Contains && !s1Contains)
                     return 1;
                 l.setNegated(true);
-                if (set1.contains(l) && !set2.contains(l))
+                s1Contains = set1.contains(l);
+                s2Contains = set2.contains(l);
+                if (s1Contains && !s2Contains)
                     return 1;
-                if (set2.contains(l) && !set1.contains(l))
+                if (s2Contains && !s1Contains)
                     return -1;
             }
             return 0;

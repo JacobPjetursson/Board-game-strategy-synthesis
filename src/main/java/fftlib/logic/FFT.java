@@ -28,7 +28,9 @@ public class FFT {
     // used for a visual representation and for locking (preventing) a group of rules of being minimized
     public ArrayList<RuleGroup> ruleGroups;
     // used for the efficient computation of looking up rules that apply
+    // rulelist is only initialized after autogeneration, to avoid a bunch of unnecessary sorts
     private RuleList ruleList;
+
 
     public FFTNodeAndMove failingPoint = null;
 
@@ -41,7 +43,6 @@ public class FFT {
     public FFT(String name) {
         this.name = name;
         ruleGroups = new ArrayList<>();
-        ruleList = new RuleList();
     }
 
     public FFT(FFT duplicate) {
@@ -54,8 +55,17 @@ public class FFT {
         this.ruleList = (RuleList) duplicate.ruleList.clone();
     }
 
+    public void initializeRuleList() {
+        ruleList = new RuleList();
+        ruleList.addAll(getRules());
+        ruleList.sort();
+    }
+
     public int size() {
-        return ruleList.size();
+        int size = 0;
+        for (RuleGroup rg : ruleGroups)
+            size += rg.rules.size();
+        return size;
     }
 
     public ArrayList<Rule> getRules() {
@@ -73,13 +83,13 @@ public class FFT {
         ruleGroups.add(ruleGroup);
     }
 
-    public void add(Rule r) {
-        r.setRuleIndex(ruleList.size());
+    public void append(Rule r) {
+        r.setRuleIndex(size());
         // add to last rulegroup
         ruleGroups.get(ruleGroups.size()-1).rules.add(r);
-        // add to sorted list of rules
-        ruleList.sortedAdd(r);
-
+        // add to sorted list of rules if initialized
+        if (ruleList != null)
+            ruleList.sortedAdd(r);
     }
 
     public void remove(Rule r) {
@@ -87,6 +97,26 @@ public class FFT {
             rg.rules.remove(r);
         }
         ruleList.sortedRemove(r);
+    }
+
+    public void removePrecondition(Rule r, Literal l) {
+        if (ruleList == null) {
+            r.removePrecondition(l);
+        } else {
+            ruleList.sortedRemove(r);
+            r.removePrecondition(l);
+            ruleList.sortedAdd(r);
+        }
+    }
+
+    public void addPrecondition(Rule r, Literal l) {
+        if (ruleList == null) {
+            r.addPrecondition(l);
+        } else {
+            ruleList.sortedRemove(r);
+            r.addPrecondition(l);
+            ruleList.sortedAdd(r);
+        }
     }
 
     public boolean isValid(int team) {
@@ -135,7 +165,9 @@ public class FFT {
     // optimized way of finding the correct move using the sorted ruleList
     public HashSet<FFTMove> apply_optim(FFTNode node) {
         HashSet<FFTMove> moves = new HashSet<>();
-        moves.add(ruleList.apply(node));
+        FFTMove m = ruleList.apply(node);
+        if (m != null)
+            moves.add(m);
         return moves;
     }
 
@@ -152,7 +184,7 @@ public class FFT {
     }
 
     public HashSet<FFTMove> apply(FFTNode node) {
-        if (!SYMMETRY_DETECTION && USE_APPLY_OPT)
+        if (!SYMMETRY_DETECTION && USE_APPLY_OPT && ruleList != null)
             return apply_optim(node);
         return apply_slow(node);
     }
@@ -191,12 +223,16 @@ public class FFT {
                 Rule r = itr.next();
                 itr.remove();
                 ruleList.sortedRemove(r);
+
                 if (verify(team, true)) {
                     redundantRules.add(r);
+                    if (DETAILED_DEBUG)
+                        System.out.println("Remaining amount of rules: " + ruleList.size());
                 }
                 else {
                     itr.add(r);
                     ruleList.sortedAdd(r);
+
                     if (MINIMIZE_RULE_BY_RULE)
                         minimizePreconditions(r, team);
 
@@ -231,9 +267,9 @@ public class FFT {
             LiteralSet precons = new LiteralSet(r.getPreconditions());
 
             for (Literal l : precons) {
-                r.removePrecondition(l);
+                removePrecondition(r, l);
                 if (!verify(team, true))
-                    r.addPrecondition(l);
+                    addPrecondition(r, l);
             }
             if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule)) {
                 liftRule(r, team);

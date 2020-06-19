@@ -174,10 +174,11 @@ public class Config {
         GGP_GAME = ggp.getProperty("ggp_game");
 
         // Tweaking configurations (certain configs can't overlap)
-        if (USE_BITSTRING_SORT_OPT) {
-            USE_LIFTING = false;
-            SYMMETRY_DETECTION = false;
+        if (SYMMETRY_DETECTION || USE_LIFTING) {
+            USE_BITSTRING_SORT_OPT = false;
+            USE_APPLY_OPT = false;
         }
+
         if (!USE_LIFTING) {
             LIFT_WHEN_MINIMIZING = false;
             LIFT_BEFORE_SIMPLIFY = false;
@@ -199,28 +200,38 @@ public class Config {
                                 (RULE_ORDERING == RULE_ORDERING_TERMINAL_FIRST) ? "Close to terminal first" :
                                         "Close to terminal last";
 
-        System.out.printf("%-30.40s %-30.40s\n", "Autogen perspective:", perspectiveStr);
-        System.out.printf("%-30.40s %-30.40s\n", "Symmetry detection:", SYMMETRY_DETECTION);
-        System.out.printf("%-30.40s %-30.40s\n", "Minimize preconditions:", MINIMIZE_PRECONDITIONS);
-        System.out.printf("%-30.40s %-30.40s\n", "Rule ordering:", ruleOrderingStr);
-        System.out.printf("%-30.40s %-30.40s\n", "Use rule ordering:", USE_RULE_ORDERING);
-        System.out.printf("%-30.40s %-30.40s\n", "Use lifting:", USE_LIFTING);
-        System.out.printf("%-30.40s %-30.40s\n", "Lift before simplify:", LIFT_BEFORE_SIMPLIFY);
-        System.out.printf("%-30.40s %-30.40s\n", "Lift when minimizing:", LIFT_WHEN_MINIMIZING);
-        System.out.printf("%-30.40s %-30.40s\n", "Greedy Autogeneration:", GREEDY_AUTOGEN);
-        System.out.printf("%-30.40s %-30.40s\n", "Simplify iteratively:", SIMPLIFY_ITERATIVELY);
-        System.out.printf("%-30.40s %-30.40s\n", "Minimize rule by rule:", MINIMIZE_RULE_BY_RULE);
-        System.out.printf("%-30.40s %-30.40s\n", "Use covered states optimization:", USE_COVERED_STATES_OPT);
-        System.out.printf("%-30.40s %-30.40s\n", "Use bitstring sorting optimization:", USE_BITSTRING_SORT_OPT);
-        System.out.printf("%-30.40s %-30.40s\n", "Use apply optimization:", USE_APPLY_OPT);
+        System.out.printf("%-40.50s %-40.50s\n", "Autogen perspective:", perspectiveStr);
+        System.out.printf("%-40.50s %-40.50s\n", "Symmetry detection:", SYMMETRY_DETECTION);
+        System.out.printf("%-40.50s %-40.50s\n", "Single thread:", SINGLE_THREAD);
+        System.out.printf("%-40.50s %-40.50s\n", "Greedy Autogeneration:", GREEDY_AUTOGEN);
+        System.out.printf("%-40.50s %-40.50s\n", "Simplify iteratively:", SIMPLIFY_ITERATIVELY);
+        System.out.printf("%-40.50s %-40.50s\n", "Minimize:", MINIMIZE);
+        if (MINIMIZE) {
+            System.out.printf("%-40.50s %-40.50s\n", "Minimize rule by rule:", MINIMIZE_RULE_BY_RULE);
+            System.out.printf("%-40.50s %-40.50s\n", "Minimize preconditions:", MINIMIZE_PRECONDITIONS);
+        }
+        System.out.printf("%-40.50s %-40.50s\n", "Use rule ordering:", USE_RULE_ORDERING);
+        if (USE_RULE_ORDERING) {
+            System.out.printf("%-40.50s %-40.50s\n", "Rule ordering:", ruleOrderingStr);
+        }
+        System.out.printf("%-40.50s %-40.50s\n", "Use lifting:", USE_LIFTING);
+        if (USE_LIFTING) {
+            System.out.printf("%-40.50s %-40.50s\n", "Lift before simplify:", LIFT_BEFORE_SIMPLIFY);
+            System.out.printf("%-40.50s %-40.50s\n", "Lift when minimizing:", LIFT_WHEN_MINIMIZING);
 
-        System.out.printf("%-30.40s %-30.40s\n", "Random seed:", RANDOM_SEED);
-        System.out.printf("%-30.40s %-30.40s\n", "Seed value:",SEED);
-        System.out.printf("%-30.40s %-30.40s\n", "Detailed debug messages:", DETAILED_DEBUG);
-        System.out.printf("%-30.40s %-30.40s\n", "Save fft to disk:", SAVE_FFT);
-        System.out.printf("%-30.40s %-30.40s\n", "Using debug file:", USE_DEBUG_FILE);
-        System.out.printf("%-30.40s %-30.40s\n", "Benchmark mode:", BENCHMARK_MODE);
-        System.out.printf("%-30.40s %-30.40s\n", "Single thread:", SINGLE_THREAD);
+        }
+        System.out.printf("%-40.50s %-40.50s\n", "Use covered states optimization:", USE_COVERED_STATES_OPT);
+        if (!SYMMETRY_DETECTION && !USE_LIFTING) {
+            System.out.printf("%-40.50s %-40.50s\n", "Use bitstring sorting optimization:", USE_BITSTRING_SORT_OPT);
+            System.out.printf("%-40.50s %-40.50s\n", "Use apply optimization:", USE_APPLY_OPT);
+        }
+
+        System.out.printf("%-40.50s %-40.50s\n", "Detailed debug messages:", DETAILED_DEBUG);
+        System.out.printf("%-40.50s %-40.50s\n", "Using debug file:", USE_DEBUG_FILE);
+        System.out.printf("%-40.50s %-40.50s\n", "Random seed:", RANDOM_SEED);
+        System.out.printf("%-40.50s %-40.50s\n", "Seed value:",SEED);
+        System.out.printf("%-40.50s %-40.50s\n", "Save fft to disk:", SAVE_FFT);
+        System.out.printf("%-40.50s %-40.50s\n", "Benchmark mode:", BENCHMARK_MODE);
     }
 
     private static void setupDebugFile() {

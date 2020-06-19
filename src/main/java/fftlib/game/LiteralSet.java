@@ -6,6 +6,7 @@ import fftlib.logic.Literal;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 public class LiteralSet extends HashSet<Literal> {
     long bitString; // bitstring for all positive literals
@@ -106,5 +107,12 @@ public class LiteralSet extends HashSet<Literal> {
     }
 
 
-
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LiteralSet literals = (LiteralSet) o;
+        return bitString == literals.bitString &&
+                negativeBitString == literals.negativeBitString;
+    }
 }

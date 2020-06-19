@@ -2,13 +2,9 @@ package tictactoe.demos;
 
 import fftlib.FFTManager;
 import fftlib.game.FFTSolver;
-import fftlib.logic.Action;
+import fftlib.logic.FFT;
 import fftlib.logic.Rule;
-import fftlib.logic.RuleList;
 import tictactoe.FFT.GameSpecifics;
-import tictactoe.game.Node;
-
-import java.util.ArrayList;
 
 public class Demo {
 
@@ -16,6 +12,41 @@ public class Demo {
         GameSpecifics gs = new GameSpecifics();
         FFTManager.initialize(gs);
         FFTSolver.solveGame();
+        FFTManager.autogenFFT();
+        FFT fft = FFTManager.currFFT;
+/*
+        USE_APPLY_OPT = false;
+        System.out.println("Old verify: " + fft.verify(AUTOGEN_TEAM, true));
+        USE_APPLY_OPT = true;
+        System.out.println("New verify: " + fft.verify(AUTOGEN_TEAM, true));
+
+ */
+
+        System.out.println("rules size: " + fft.ruleGroups.get(0).rules.size());
+        System.out.println("ruleList size: " + fft.getRuleList().size());
+        Rule r = fft.ruleGroups.get(0).rules.get(5);
+        System.out.println("Removing rule: " + r);
+        fft.remove(r);
+        System.out.println("rules size: " + fft.ruleGroups.get(0).rules.size());
+        System.out.println("ruleList size: " + fft.getRuleList().size());
+        System.out.println("Adding back rule");
+        fft.ruleGroups.get(0).rules.add(5, r);
+        fft.getRuleList().sortedAdd(r);
+        for (Rule ru : fft.ruleGroups.get(0).rules) {
+            if (ru.getRuleIndex() == 5)
+                System.out.println("CMON MAN");
+        }
+        for (Rule ru : fft.getRuleList())
+            if (ru.getRuleIndex() == 5)
+                System.out.println("ARGHHH");
+
+/*
+        USE_APPLY_OPT = false;
+        System.out.println("Old verify: " + fft.verify(AUTOGEN_TEAM, true));
+        USE_APPLY_OPT = true;
+        System.out.println("New verify: " + fft.verify(AUTOGEN_TEAM, true));
+
+        /*
 
         Node test1 = new Node();
         Node test2 = new Node(new int[][] {{0, 0, 0}, {0, 0, 0}, {0, 0, 1}}, 2);
@@ -72,6 +103,8 @@ public class Demo {
             System.out.println(ruleList.get(i));
             System.out.println();
         }
+
+         */
 /*
         TreeMap<Long, Node> codes = new TreeMap<>();
         Node n = new Node();

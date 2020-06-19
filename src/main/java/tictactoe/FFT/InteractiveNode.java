@@ -1,5 +1,6 @@
 package tictactoe.FFT;
 
+import fftlib.FFTManager;
 import fftlib.logic.Action;
 import fftlib.logic.Literal;
 import fftlib.auxiliary.Position;
@@ -60,9 +61,9 @@ public class InteractiveNode implements interactiveFFTNode {
         for (int i = 1; i < 4; i++) {
             Position pos = new Position(bt.getRow(), bt.getCol(), i);
             Literal l = new Literal(Atoms.posToId.get(pos), false);
-            rule.removePrecondition(l);
+            FFTManager.currFFT.removePrecondition(rule, l);
             l.setNegated(true);
-            rule.removePrecondition(l);
+            FFTManager.currFFT.removePrecondition(rule, l);
         }
         if (actionTile != null) {
             actionTile.removeHighlight();

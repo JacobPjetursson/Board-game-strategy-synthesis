@@ -11,6 +11,7 @@ public class SymmetryRule extends Rule { // Simpler rule class for rules in symm
     public SymmetryRule(LiteralSet precons, Action action) {
         this.preconditions = precons;
         this.action = action;
+        setAllPreconditions();
     }
 
     @Override

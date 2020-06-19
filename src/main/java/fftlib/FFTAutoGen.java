@@ -124,6 +124,9 @@ public class FFTAutoGen {
             System.out.println();
             size = USE_BITSTRING_SORT_OPT ? applicableStatesOpt.size() : applicableStates.size();
         }
+        // initialize rule list
+        if (USE_APPLY_OPT)
+            fft.initializeRuleList();
     }
 
     private static Rule addRule(FFTNode n) {
@@ -150,7 +153,7 @@ public class FFTAutoGen {
                 simplifyRule(pr); // TODO - benchmark
             r = pr;
         }
-        fft.add(r);
+        fft.append(r);
         verifyRule(r, true); // safe run where we know we have the final rule
 
         /*
@@ -182,11 +185,11 @@ public class FFTAutoGen {
             prevSize = literalSet.size();
             for (Literal l : literalSet.values()) {
                 if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO REMOVE: " + l.getName());
-                r.removePrecondition(l);
+                fft.removePrecondition(r, l);
 
                 if (!verifyRule(r, false)) {
                     if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.getName());
-                    r.addPrecondition(l);
+                    fft.addPrecondition(r, l);
                 } else {
                     if (DETAILED_DEBUG) System.out.println("REMOVING PRECONDITION: " + l.getName());
                 }
@@ -273,16 +276,13 @@ public class FFTAutoGen {
 
     private static void fillByIterating_Opt(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
         long code = r.getAllPreconditions().getBitString();
-        if (!SINGLE_THREAD) {
-            applicableStatesOpt.values().parallelStream().forEach(node ->
-                    insert(node, r, appliedMap));
-        } else {
-            for (Map.Entry<Long, FFTNode> entry : applicableStatesOpt.entrySet()) {
-                if (entry.getKey() < code)
-                    break;
-                insert(entry.getValue(), r, appliedMap);
-            }
+        // TODO - multithread
+        for (Map.Entry<Long, FFTNode> entry : applicableStatesOpt.entrySet()) {
+            if (entry.getKey() < code)
+                break;
+            insert(entry.getValue(), r, appliedMap);
         }
+
     }
 
     private static void insert(FFTNode n, Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {

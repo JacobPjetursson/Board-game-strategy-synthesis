@@ -32,7 +32,7 @@ public class Rule {
     private Move move;
 
     // index in FFT
-    private int ruleIndex;
+    private int ruleIndex = -1;
 
     // parsing constructor
     public Rule(String preconStr, String actionStr) {
@@ -98,7 +98,7 @@ public class Rule {
         return getAllPreconditions().getNegativeBitString();
     }
 
-    public void addPrecondition(Literal l) {
+    protected void addPrecondition(Literal l) {
         if (!action.getPreconditions().contains(l)) // do not include precondition from action
             preconditions.add(l);
         allPreconditions.add(l);
@@ -110,7 +110,7 @@ public class Rule {
         //this.transformedSentences = getTransformedSentences();
     }
 
-    public void removePrecondition(Literal l) {
+    protected void removePrecondition(Literal l) {
         this.preconditions.remove(l);
         if (!action.getPreconditions().contains(l))
             this.allPreconditions.remove(l);
@@ -358,7 +358,7 @@ public class Rule {
 
     private FFTMove match(Rule rule, LiteralSet stLiterals) {
         boolean match = true;
-        for (Literal l : rule.preconditions) {
+        for (Literal l : rule.allPreconditions) {
             match = matchLiteral(l, stLiterals);
             if (!match)
                 break;
@@ -380,7 +380,7 @@ public class Rule {
     
     public Move apply(MachineState ms) throws MoveDefinitionException {
         Set<GdlSentence> stSentences = ms.getContents();
-        // TODO - transformations of sentences
+        // TODO - symmetry
             boolean match = true;
             for (GdlSentence s : sentences) {
                 match = matchSentence(s, stSentences);

@@ -161,7 +161,7 @@ public class FFTManager {
                         String[] rule = line.split("->");
                         String clauseStr = rule[0].trim();
                         String actionStr = rule[1].trim();
-                        ffts.get(fftIndex).add(new Rule(clauseStr, actionStr));
+                        ffts.get(fftIndex).append(new Rule(clauseStr, actionStr));
                     }
                 }
 
