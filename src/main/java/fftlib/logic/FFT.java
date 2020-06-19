@@ -27,6 +27,8 @@ public class FFT {
     public String name;
     // used for a visual representation and for locking (preventing) a group of rules of being minimized
     public ArrayList<RuleGroup> ruleGroups;
+    // used for the efficient computation of looking up rules that apply
+    private RuleList ruleList;
 
     public FFTNodeAndMove failingPoint = null;
 
@@ -39,6 +41,7 @@ public class FFT {
     public FFT(String name) {
         this.name = name;
         ruleGroups = new ArrayList<>();
+        ruleList = new RuleList();
     }
 
     public FFT(FFT duplicate) {
@@ -48,13 +51,11 @@ public class FFT {
             ruleGroups.add(new RuleGroup(rg));
         }
         this.failingPoint = duplicate.failingPoint;
+        this.ruleList = (RuleList) duplicate.ruleList.clone();
     }
 
     public int size() {
-        int size = 0;
-        for (RuleGroup rg : ruleGroups)
-            size += rg.rules.size();
-        return size;
+        return ruleList.size();
     }
 
     public ArrayList<Rule> getRules() {
@@ -64,8 +65,28 @@ public class FFT {
         return rules;
     }
 
+    public RuleList getRuleList() {
+        return ruleList;
+    }
+
     public void addRuleGroup(RuleGroup ruleGroup) {
         ruleGroups.add(ruleGroup);
+    }
+
+    public void add(Rule r) {
+        r.setRuleIndex(ruleList.size());
+        // add to last rulegroup
+        ruleGroups.get(ruleGroups.size()-1).rules.add(r);
+        // add to sorted list of rules
+        ruleList.sortedAdd(r);
+
+    }
+
+    public void remove(Rule r) {
+        for (RuleGroup rg : ruleGroups) {
+            rg.rules.remove(r);
+        }
+        ruleList.sortedRemove(r);
     }
 
     public boolean isValid(int team) {
@@ -111,8 +132,14 @@ public class FFT {
         return sb.toString();
     }
 
-    // todo - optimize this to find the correct rule faster
-    public HashSet<FFTMove> apply(FFTNode node) {
+    // optimized way of finding the correct move using the sorted ruleList
+    public HashSet<FFTMove> apply_optim(FFTNode node) {
+        HashSet<FFTMove> moves = new HashSet<>();
+        moves.add(ruleList.apply(node));
+        return moves;
+    }
+
+    public HashSet<FFTMove> apply_slow(FFTNode node) {
         HashSet<FFTMove> moves = new HashSet<>();
         for (RuleGroup rg : ruleGroups) {
             for (Rule r : rg.rules) {
@@ -122,6 +149,12 @@ public class FFT {
             }
         }
         return moves;
+    }
+
+    public HashSet<FFTMove> apply(FFTNode node) {
+        if (!SYMMETRY_DETECTION && USE_APPLY_OPT)
+            return apply_optim(node);
+        return apply_slow(node);
     }
 
     public int minimize(int team, boolean minimize_precons) { // Returns amount of iterations
@@ -136,8 +169,7 @@ public class FFT {
             ruleSize = getAmountOfRules();
             precSize = getAmountOfPreconditions();
 
-            if (DETAILED_DEBUG)
-                System.out.println("Minimizing, iteration no. " + i++);
+            System.out.println("Minimizing, iteration no. " + i++);
             minimizeRules(team);
             if (!MINIMIZE_RULE_BY_RULE && minimize_precons) {
                 if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
@@ -155,15 +187,16 @@ public class FFT {
             if (rg.locked) // don't minimize if rulegroup is locked
                 continue;
             ListIterator<Rule> itr = rg.rules.listIterator();
-            // todo - make copy of list and add/remove using the addRule() removeRule() functions instead
             while(itr.hasNext()) {
                 Rule r = itr.next();
                 itr.remove();
+                ruleList.sortedRemove(r);
                 if (verify(team, true)) {
                     redundantRules.add(r);
                 }
                 else {
                     itr.add(r);
+                    ruleList.sortedAdd(r);
                     if (MINIMIZE_RULE_BY_RULE)
                         minimizePreconditions(r, team);
 

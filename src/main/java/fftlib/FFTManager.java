@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -50,6 +51,7 @@ public class FFTManager {
     public static Function<FFTNode, LiteralSet> nodeToLiterals;
     // Logic representation
     public static Supplier<ArrayList<Integer>> getGameAtoms;
+    public static ArrayList<Integer> sortedGameAtoms;
     public static Function<String, Integer> getAtomId;
     public static Function<Integer, String> getAtomName;
     public static Function<Position, Integer> getIdFromPos;
@@ -93,6 +95,8 @@ public class FFTManager {
         getPosFromId = gameSpecifics::idToPos;
         getIdFromPos = gameSpecifics::posToId;
         getActionPreconditions = gameSpecifics::getActionPreconditions;
+        sortedGameAtoms = getGameAtoms.get();
+        sortedGameAtoms.sort(Collections.reverseOrder());
         getNumberOfCoveredStates = gameSpecifics::getNumberOfCoveredStates;
         getCoveredStates = gameSpecifics::getCoveredStates;
 
@@ -157,7 +161,7 @@ public class FFTManager {
                         String[] rule = line.split("->");
                         String clauseStr = rule[0].trim();
                         String actionStr = rule[1].trim();
-                        ffts.get(fftIndex).ruleGroups.get(rgIndex).addRule(new Rule(clauseStr, actionStr));
+                        ffts.get(fftIndex).add(new Rule(clauseStr, actionStr));
                     }
                 }
 

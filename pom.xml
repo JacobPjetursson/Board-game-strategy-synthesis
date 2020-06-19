@@ -145,6 +145,12 @@
                 <version>1.6.0</version>
                 <executions>
                     <execution>
+                        <id>demo</id>
+                        <configuration>
+                            <mainClass>misc.demos.Demo</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>tictactoe.main.Main</mainClass>

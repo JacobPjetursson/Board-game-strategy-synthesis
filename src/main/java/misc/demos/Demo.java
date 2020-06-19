@@ -1,18 +1,26 @@
-package tictactoe.demos;
+package misc.demos;
 
 import fftlib.FFTManager;
 import fftlib.FFTSolution;
-import fftlib.game.*;
-import fftlib.logic.*;
+import fftlib.game.FFTMove;
+import fftlib.game.FFTNode;
+import fftlib.game.FFTSolver;
+import fftlib.logic.Rule;
 import misc.Config;
 import sim.GameSpecifics;
 import sim.Line;
 import sim.Move;
 import sim.Node;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
-public class ApplyDemo {
+import static misc.Config.AUTOGEN_TEAM;
+import static misc.Config.MINIMIZE_PRECONDITIONS;
+
+public class Demo {
 
     private static ArrayList<Integer> sortedAtoms;
 
@@ -23,7 +31,6 @@ public class ApplyDemo {
         sortedAtoms = FFTManager.sortedGameAtoms;
 
         // build set of testNodes (SIM)
-
         ArrayList<FFTNode> testNodes = new ArrayList<>();
         Node test1 = new Node();
         testNodes.add(test1);
@@ -42,7 +49,8 @@ public class ApplyDemo {
         Node test8 = test7.getNextNode(new Move(1, new Line(2, 3)));
         testNodes.add(test8);
 
-        //FFTSolver.solveGame();
+        System.out.println("Solving game");
+        FFTSolver.solveGame();
         //FFTManager.autogenFFT();
         System.out.println("fft size: " + FFTManager.currFFT.size());
         System.out.println("fft rulelist size: " + FFTManager.currFFT.getRuleList().size());
@@ -50,6 +58,9 @@ public class ApplyDemo {
         long timeStart;
         double timeSpent;
         HashMap<FFTNode, FFTMove> classicStates = new HashMap<>();
+        HashMap<FFTNode, FFTMove> newStates = new HashMap<>();
+
+
         // BENCHMARKS
         int iterations = 1;
         // benchmark of classic apply method
@@ -57,7 +68,7 @@ public class ApplyDemo {
         timeStart = System.currentTimeMillis();
         for (int i = 0; i < iterations; i++) {
             for (FFTNode n : testNodes) {
-            //for (FFTNode n : FFTSolution.getSolution().keySet()) {
+                //for (FFTNode n : FFTSolution.getSolution().keySet()) {
                 HashSet<FFTMove> moves = FFTManager.currFFT.apply(n);
                 if (!moves.isEmpty()) {
                     classicStates.put(n, moves.iterator().next());
@@ -71,7 +82,6 @@ public class ApplyDemo {
         // benchmark of new apply method
         Config.USE_APPLY_OPT = true;
         timeStart = System.currentTimeMillis();
-        HashMap<FFTNode, FFTMove> newStates = new HashMap<>();
         for (int i = 0; i < iterations; i++) {
             //for (FFTNode n : FFTSolution.getSolution().keySet()) {
             for (FFTNode n : testNodes) {
@@ -105,5 +115,10 @@ public class ApplyDemo {
                 break;
             }
         }
+
+        // MINIMIZE WITH NEW OPTIMIZATION
+        Config.USE_APPLY_OPT = true;
+        System.out.println("Minimizing");
+        FFTManager.currFFT.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
     }
 }

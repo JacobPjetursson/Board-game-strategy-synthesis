@@ -22,7 +22,6 @@ public class FFTAutoGen {
     private static Map<FFTNode, FFTNode> applicableStates;
 
     private static FFT fft;
-    private static RuleGroup rg;
 
     // used for checking whether lifting a rule applies to more states
     private static int groundedAppliedMapSize;
@@ -101,8 +100,7 @@ public class FFTAutoGen {
     private static void setup(boolean existingFFT) {
         if (!existingFFT) {
             fft = new FFT("Synthesis");
-            rg = new RuleGroup("Synthesis");
-            fft.addRuleGroup(rg);
+            fft.addRuleGroup(new RuleGroup("Synthesis"));
         }
 
         // Set reachable parents for all states
@@ -118,7 +116,7 @@ public class FFTAutoGen {
         long size = USE_BITSTRING_SORT_OPT ? applicableStatesOpt.size() : applicableStates.size();
         while (size != 0) {
             System.out.println("Remaining applicable states: " + size +
-                    ". Current amount of rules: " + rg.rules.size());
+                    ". Current amount of rules: " + fft.size());
             FFTNode node = USE_BITSTRING_SORT_OPT ? applicableStatesOpt.firstEntry().getValue() :
                     applicableStates.values().iterator().next();
             Rule r = addRule(node);
@@ -152,7 +150,7 @@ public class FFTAutoGen {
                 simplifyRule(pr); // TODO - benchmark
             r = pr;
         }
-        rg.rules.add(r);
+        fft.add(r);
         verifyRule(r, true); // safe run where we know we have the final rule
 
         /*

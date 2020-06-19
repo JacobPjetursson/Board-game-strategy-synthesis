@@ -28,8 +28,9 @@ public class Config {
     public static String DEBUG_FILENAME;
     public static boolean BENCHMARK_MODE;
     public static int BENCHMARK_NUMBER;
-    public static boolean USE_APPLYSET_OPT;
+    public static boolean USE_COVERED_STATES_OPT;
     public static boolean USE_BITSTRING_SORT_OPT;
+    public static boolean USE_APPLY_OPT;
     public static boolean USE_RULE_ORDERING;
     public static boolean SIMPLIFY_ITERATIVELY;
     public static boolean USE_LIFTING;
@@ -138,8 +139,9 @@ public class Config {
         DEBUG_FILENAME = global.getProperty("debug_filename");
         SAVE_FFT = Boolean.parseBoolean(global.getProperty("save_fft"));
         SINGLE_THREAD = Boolean.parseBoolean(global.getProperty("single_thread"));
-        USE_APPLYSET_OPT = Boolean.parseBoolean(global.getProperty("use_applyset_opt"));
+        USE_COVERED_STATES_OPT = Boolean.parseBoolean(global.getProperty("use_covered_states_opt"));
         USE_BITSTRING_SORT_OPT = Boolean.parseBoolean(global.getProperty("use_bitstring_sorting_opt"));
+        USE_APPLY_OPT = Boolean.parseBoolean(global.getProperty("use_apply_opt"));
 
         // KULIBRAT
         BWIDTH = Integer.parseInt(kulibrat.getProperty("boardWidth"));
@@ -208,9 +210,9 @@ public class Config {
         System.out.printf("%-30.40s %-30.40s\n", "Greedy Autogeneration:", GREEDY_AUTOGEN);
         System.out.printf("%-30.40s %-30.40s\n", "Simplify iteratively:", SIMPLIFY_ITERATIVELY);
         System.out.printf("%-30.40s %-30.40s\n", "Minimize rule by rule:", MINIMIZE_RULE_BY_RULE);
-        System.out.printf("%-30.40s %-30.40s\n", "Use applySet optimization:", USE_APPLYSET_OPT);
+        System.out.printf("%-30.40s %-30.40s\n", "Use covered states optimization:", USE_COVERED_STATES_OPT);
         System.out.printf("%-30.40s %-30.40s\n", "Use bitstring sorting optimization:", USE_BITSTRING_SORT_OPT);
-
+        System.out.printf("%-30.40s %-30.40s\n", "Use apply optimization:", USE_APPLY_OPT);
 
         System.out.printf("%-30.40s %-30.40s\n", "Random seed:", RANDOM_SEED);
         System.out.printf("%-30.40s %-30.40s\n", "Seed value:",SEED);
