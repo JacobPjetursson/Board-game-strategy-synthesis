@@ -415,15 +415,16 @@ public class Rule {
         if (this == rule)
             return true;
         if (SYMMETRY_DETECTION)
-            return this.symmetryRules.equals(rule.symmetryRules);
-        return this.preconditions.equals(rule.preconditions) && this.action.equals(rule.action);
+            return this.symmetryRules.equals(rule.symmetryRules) && ruleIndex == rule.ruleIndex;
+        return this.preconditions.equals(rule.preconditions) &&
+                this.action.equals(rule.action) && ruleIndex == rule.ruleIndex;
     }
 
     @Override
     public int hashCode() {
         if (SYMMETRY_DETECTION)
-            return 31 * Objects.hashCode(symmetryRules);
-        return 31 * Objects.hash(preconditions, action);
+            return 31 * Objects.hash(symmetryRules, ruleIndex);
+        return 31 * Objects.hash(preconditions, action, ruleIndex);
     }
 
 }

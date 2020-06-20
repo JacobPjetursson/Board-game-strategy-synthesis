@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static misc.Config.SAVE_FFT;
+import static misc.Config.USE_APPLY_OPT;
 
 
 public class FFTManager {
@@ -104,8 +105,9 @@ public class FFTManager {
         // Try loading ffts from file in working directory
         ffts = load(fftPath);
         // initialize rule lists for all FFT's
-        for (FFT f : ffts)
-            f.initializeRuleList();
+        if (USE_APPLY_OPT)
+            for (FFT f : ffts)
+                f.initializeRuleList();
         if (!ffts.isEmpty())
             currFFT = ffts.get(fft_index);
     }

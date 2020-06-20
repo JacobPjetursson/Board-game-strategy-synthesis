@@ -93,44 +93,31 @@ public class RuleList extends ArrayList<Rule> {
 
     // maintains ordering
     public void sortedAdd(Rule r) {
-        /*
-        int index = Collections.binarySearch(this, r, new RuleComparator());
-        if (index < 0) {
-            index = -index - 1;
-        }
-        add(index, r);
 
-         */
-        add(r);
-        sort(new RuleComparator());
+        int index = Collections.binarySearch(this, r, rc);
+        if (index < 0)
+            index = -index - 1;
+        add(index, r);
     }
 
     // n + log(n) instead of (n + n)
     public boolean sortedRemove(Rule r) {
-        /*
-        System.out.println("removing rule: " + r);
-        int index = Collections.binarySearch(this, r, new RuleComparator());
-        System.out.println("index: " + index);
-        if (index < 0) {
+        int index = Collections.binarySearch(this, r, rc);
+        if (index < 0)
             return false; // no element
-        }
-        System.out.println("rule at index: " + get(index));
         remove(index);
         return true;
-
-         */
-        return remove(r);
     }
 
     public void sort() {
-        sort(new RuleComparator());
+        sort(rc);
     }
 
     private static class RuleComparator implements Comparator<Rule> {
         @Override
-        public int compare(Rule o1, Rule o2) {
-            LiteralSet set1 = o1.getAllPreconditions();
-            LiteralSet set2 = o2.getAllPreconditions();
+        public int compare(Rule r1, Rule r2) {
+            LiteralSet set1 = r1.getAllPreconditions();
+            LiteralSet set2 = r2.getAllPreconditions();
             for (int atm : sortedAtoms) {
                 Literal l = new Literal(atm);
                 boolean s1Contains = set1.contains(l);
@@ -146,8 +133,11 @@ public class RuleList extends ArrayList<Rule> {
                     return 1;
                 if (s2Contains && !s1Contains)
                     return -1;
+
             }
-            return 0;
+            // differentiate between rules with different ruleIndex
+            // (since this is possible in the FFT)
+            return r1.getRuleIndex() - r2.getRuleIndex();
         }
     }
 }

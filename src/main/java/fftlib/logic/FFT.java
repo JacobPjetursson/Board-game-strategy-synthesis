@@ -100,9 +100,9 @@ public class FFT {
     }
 
     public void removePrecondition(Rule r, Literal l) {
-        if (ruleList == null) {
+        if (ruleList == null)
             r.removePrecondition(l);
-        } else {
+        else {
             ruleList.sortedRemove(r);
             r.removePrecondition(l);
             ruleList.sortedAdd(r);
@@ -110,9 +110,9 @@ public class FFT {
     }
 
     public void addPrecondition(Rule r, Literal l) {
-        if (ruleList == null) {
+        if (ruleList == null)
             r.addPrecondition(l);
-        } else {
+        else {
             ruleList.sortedRemove(r);
             r.addPrecondition(l);
             ruleList.sortedAdd(r);
@@ -220,22 +220,24 @@ public class FFT {
                 continue;
             ListIterator<Rule> itr = rg.rules.listIterator();
             while(itr.hasNext()) {
+                if (DETAILED_DEBUG) {
+                    System.out.println("Remaining amount of rules: " + getAmountOfRules());
+                }
                 Rule r = itr.next();
                 itr.remove();
-                ruleList.sortedRemove(r);
+                if (ruleList != null)
+                    ruleList.sortedRemove(r);
 
                 if (verify(team, true)) {
                     redundantRules.add(r);
-                    if (DETAILED_DEBUG)
-                        System.out.println("Remaining amount of rules: " + ruleList.size());
                 }
                 else {
                     itr.add(r);
-                    ruleList.sortedAdd(r);
+                    if (ruleList != null)
+                        ruleList.sortedAdd(r);
 
                     if (MINIMIZE_RULE_BY_RULE)
                         minimizePreconditions(r, team);
-
                 }
             }
         }
@@ -268,8 +270,9 @@ public class FFT {
 
             for (Literal l : precons) {
                 removePrecondition(r, l);
-                if (!verify(team, true))
+                if (!verify(team, true)) {
                     addPrecondition(r, l);
+                }
             }
             if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule)) {
                 liftRule(r, team);
