@@ -39,9 +39,9 @@ public class LiteralSet extends HashSet<Literal> {
         boolean added = super.add(l);
         if (added) {
             if (l.negated)
-                negativeBitString |= (1 << l.id);
+                negativeBitString |= (1L << l.id);
             else
-                bitString |= (1 << l.id);
+                bitString |= (1L << l.id);
         }
         return added;
     }
@@ -54,9 +54,9 @@ public class LiteralSet extends HashSet<Literal> {
         boolean removed = super.remove(l);
         if (removed) {
             if (l.negated)
-                negativeBitString &= ~(1 << l.id);
+                negativeBitString &= ~(1L << l.id);
             else
-                bitString &= ~(1 << l.id);
+                bitString &= ~(1L << l.id);
         }
         return removed;
     }
@@ -100,19 +100,22 @@ public class LiteralSet extends HashSet<Literal> {
         negativeBitString = 0;
         for (Literal l : this) {
             if (l.negated)
-                negativeBitString |= (1 << l.id);
+                negativeBitString |= (1L << l.id);
             else
-                bitString |= (1 << l.id);
+                bitString |= (1L << l.id);
         }
     }
 
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        LiteralSet literals = (LiteralSet) o;
-        return bitString == literals.bitString &&
-                negativeBitString == literals.negativeBitString;
+    public boolean equals(LiteralSet lSet) {
+        if (this == lSet) return true;
+        return bitString == lSet.bitString &&
+                negativeBitString == lSet.negativeBitString;
+    }
+
+    public boolean contains(Literal literal) {
+        if (literal.negated)
+            return (negativeBitString & (1L << literal.id)) != 0;
+        return (bitString & (1L << literal.id)) != 0;
     }
 }
