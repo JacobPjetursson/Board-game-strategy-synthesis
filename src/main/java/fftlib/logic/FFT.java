@@ -52,7 +52,7 @@ public class FFT {
             ruleGroups.add(new RuleGroup(rg));
         }
         this.failingPoint = duplicate.failingPoint;
-        this.ruleList = (RuleList) duplicate.ruleList.clone();
+        this.ruleList = new RuleList(duplicate.ruleList);
     }
 
     public void initializeRuleList() {
@@ -200,19 +200,18 @@ public class FFT {
         do {
             ruleSize = getAmountOfRules();
             precSize = getAmountOfPreconditions();
-
-            System.out.println("Minimizing, iteration no. " + i++);
-            minimizeRules(team);
+            i++;
+            System.out.println("Minimizing, iteration no. " + i);
+            minimizeRules(team, minimize_precons);
             if (!MINIMIZE_RULE_BY_RULE && minimize_precons) {
                 if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
                 minimizePreconditions(team);
             }
         } while(ruleSize != getAmountOfRules() || precSize != getAmountOfPreconditions());
-
         return i;
     }
 
-    private ArrayList<Rule> minimizeRules(int team) {
+    private ArrayList<Rule> minimizeRules(int team, boolean minimize_precons) {
         ArrayList<Rule> redundantRules = new ArrayList<>();
 
         for (RuleGroup rg : ruleGroups) {
@@ -236,7 +235,7 @@ public class FFT {
                     if (ruleList != null)
                         ruleList.sortedAdd(r);
 
-                    if (MINIMIZE_RULE_BY_RULE)
+                    if (MINIMIZE_RULE_BY_RULE && minimize_precons)
                         minimizePreconditions(r, team);
                 }
             }
@@ -270,13 +269,11 @@ public class FFT {
 
             for (Literal l : precons) {
                 removePrecondition(r, l);
-                if (!verify(team, true)) {
+                if (!verify(team, true))
                     addPrecondition(r, l);
-                }
             }
-            if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule)) {
+            if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule))
                 liftRule(r, team);
-            }
         }
     }
 

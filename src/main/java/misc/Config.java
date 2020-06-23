@@ -31,6 +31,7 @@ public class Config {
     public static boolean USE_COVERED_STATES_OPT;
     public static boolean USE_BITSTRING_SORT_OPT;
     public static boolean USE_APPLY_OPT;
+    public static boolean USE_MINIMIZE_OPT;
     public static boolean USE_RULE_ORDERING;
     public static boolean SIMPLIFY_ITERATIVELY;
     public static boolean USE_LIFTING;
@@ -142,6 +143,7 @@ public class Config {
         USE_COVERED_STATES_OPT = Boolean.parseBoolean(global.getProperty("use_covered_states_opt"));
         USE_BITSTRING_SORT_OPT = Boolean.parseBoolean(global.getProperty("use_bitstring_sorting_opt"));
         USE_APPLY_OPT = Boolean.parseBoolean(global.getProperty("use_apply_opt"));
+        USE_MINIMIZE_OPT = Boolean.parseBoolean(global.getProperty("use_minimize_opt"));
 
         // KULIBRAT
         BWIDTH = Integer.parseInt(kulibrat.getProperty("boardWidth"));
@@ -209,6 +211,7 @@ public class Config {
         if (MINIMIZE) {
             System.out.printf("%-40.50s %-40.50s\n", "Minimize rule by rule:", MINIMIZE_RULE_BY_RULE);
             System.out.printf("%-40.50s %-40.50s\n", "Minimize preconditions:", MINIMIZE_PRECONDITIONS);
+            System.out.printf("%-40.50s %-40.50s\n", "Use minimize optimization:", USE_MINIMIZE_OPT);
         }
         System.out.printf("%-40.50s %-40.50s\n", "Use rule ordering:", USE_RULE_ORDERING);
         if (USE_RULE_ORDERING) {

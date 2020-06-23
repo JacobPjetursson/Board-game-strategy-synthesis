@@ -1,10 +1,14 @@
 package tictactoe.demos;
 
+import fftlib.FFTAutoGen;
 import fftlib.FFTManager;
+import fftlib.game.FFTNode;
 import fftlib.game.FFTSolver;
 import fftlib.logic.FFT;
 import fftlib.logic.Rule;
 import tictactoe.FFT.GameSpecifics;
+
+import java.util.HashMap;
 
 public class Demo {
 
@@ -12,16 +16,26 @@ public class Demo {
         GameSpecifics gs = new GameSpecifics();
         FFTManager.initialize(gs);
         FFTSolver.solveGame();
+
+        FFT loadedFFT = FFTManager.currFFT;
+        FFTManager.autogenFFT(loadedFFT);
+        HashMap<FFTNode, FFTNode> loadedReach = new HashMap<>(FFTAutoGen.getReachableStates());
+        System.out.println("Loaded fft applied size: " + loadedReach.size());
+
         FFTManager.autogenFFT();
         FFT fft = FFTManager.currFFT;
+        HashMap<FFTNode, FFTNode> newReach = new HashMap<>(FFTAutoGen.getReachableStates());
+        System.out.println("New fft applied size: " + newReach.size());
+
+        System.out.println("Comparing applied states");
+        for (FFTNode n : loadedReach.keySet()) {
+            if (!newReach.containsKey(n)) {
+                System.out.println("Node discrepancy!");
+                System.out.println("Node: " + n + " , not in new applied states");
+            }
+        }
+
 /*
-        USE_APPLY_OPT = false;
-        System.out.println("Old verify: " + fft.verify(AUTOGEN_TEAM, true));
-        USE_APPLY_OPT = true;
-        System.out.println("New verify: " + fft.verify(AUTOGEN_TEAM, true));
-
- */
-
         System.out.println("rules size: " + fft.ruleGroups.get(0).rules.size());
         System.out.println("ruleList size: " + fft.getRuleList().size());
         Rule r = fft.ruleGroups.get(0).rules.get(5);
@@ -39,14 +53,6 @@ public class Demo {
         for (Rule ru : fft.getRuleList())
             if (ru.getRuleIndex() == 5)
                 System.out.println("ARGHHH");
-
-/*
-        USE_APPLY_OPT = false;
-        System.out.println("Old verify: " + fft.verify(AUTOGEN_TEAM, true));
-        USE_APPLY_OPT = true;
-        System.out.println("New verify: " + fft.verify(AUTOGEN_TEAM, true));
-
-        /*
 
         Node test1 = new Node();
         Node test2 = new Node(new int[][] {{0, 0, 0}, {0, 0, 0}, {0, 0, 1}}, 2);
@@ -104,8 +110,6 @@ public class Demo {
             System.out.println();
         }
 
-         */
-/*
         TreeMap<Long, Node> codes = new TreeMap<>();
         Node n = new Node();
         codes.put(n.convert().getBitString(), n);

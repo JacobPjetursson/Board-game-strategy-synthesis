@@ -15,6 +15,17 @@ public class RuleList extends ArrayList<Rule> {
     private static final RuleComparator rc = new RuleComparator();
     private static final ArrayList<Integer> sortedAtoms = FFTManager.sortedGameAtoms;
 
+    RuleList() {
+        super();
+    }
+
+    RuleList(RuleList duplicate) {
+        super();
+        for (Rule r : duplicate) {
+            add(new Rule(r));
+        }
+    }
+
     public FFTMove apply(FFTNode n) {
         Rule r = findRule(n.convert().getAll());
         if (r == null)

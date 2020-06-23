@@ -1,25 +1,26 @@
 package fftlib;
 
+import fftlib.auxiliary.NodeMap;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 import fftlib.game.LiteralSet;
-import fftlib.game.NodeMapping;
-import fftlib.logic.FFT;
 import fftlib.logic.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static misc.Config.*;
-import static misc.Globals.*;
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class FFTAutoGen {
     // States that are reachable when playing with a partial or total strategy
     private static HashMap<FFTNode, FFTNode> reachableStates;
     // Subset of reachable states where strategy does not output a move, and player has the turn
-    // This is the set of states that a new rule can potentially influence
-    private static TreeMap<Long, FFTNode> applicableStatesOpt;
-    private static Map<FFTNode, FFTNode> applicableStates;
+    // This is the set of states that a new rule can potentially influence (subset of reachable)
+    private static NodeMap applicableStates;
+    // This is the set of states that the rules currently apply to (subset of reachable)
+    private static HashMap<FFTNode, FFTNode> appliedStates;
 
     private static FFT fft;
 
@@ -77,17 +78,48 @@ public class FFTAutoGen {
         makeRules();
         System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
+
+        /*
+        System.out.println("Set sizes before minimize:");
+        System.out.println("reachable: " + reachableStates.size());
+        System.out.println("applicable: " + applicableStates.size());
+        System.out.println("applied: " + appliedStates.size());
+
+         */
+
         if (DETAILED_DEBUG) System.out.println("Rules before minimizing");
         if (DETAILED_DEBUG) System.out.println(fft);
 
         int i = -1;
+        //FFT copy = new FFT(fft);
         if (MINIMIZE) {
-            if (USE_BITSTRING_SORT_OPT)
-                i = fft.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
+            if (USE_MINIMIZE_OPT)
+                i = minimizeOpt();
             else
                 i = fft.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
+
         }
         double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
+
+        /*
+        System.out.println("RULES WITH OLD MINIMIZE:");
+        System.out.println(copy);
+        System.out.println("RULES WITH NEW MINIMIZE:");
+        System.out.println(fft);
+        System.out.println("COMPARING FFT's AFTER MINIMIZING");
+        for (int x = 0; x < copy.getRules().size(); x++) {
+            Rule r = copy.getRules().get(x);
+            if (!fft.getRules().get(x).equals(r)) {
+                System.out.println("Rule discrepancy!");
+                System.out.println("Rule with old minimization: " + r);
+                System.out.println("Rule with new minimization: " + fft.getRules().get(x));
+                System.exit(1);
+            }
+        }
+
+         */
+
+
 
         System.out.println("Final amount of rules after " + i +
                 " minimize iterations: " + fft.getAmountOfRules());
@@ -95,6 +127,14 @@ public class FFTAutoGen {
                 " minimize iterations: " + fft.getAmountOfPreconditions());
         System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
         System.out.println("Final rules: \n" + fft);
+
+        /*
+        System.out.println("Set sizes after minimize:");
+        System.out.println("reachable: " + reachableStates.size());
+        System.out.println("applicable: " + applicableStates.size());
+        System.out.println("applied: " + appliedStates.size());
+
+         */
     }
 
     private static void setup(boolean existingFFT) {
@@ -108,21 +148,38 @@ public class FFTAutoGen {
 
         System.out.println("Solution size: " + FFTSolution.size());
         System.out.println("Number of reachable states: " + reachableStates.size());
-        int size = USE_BITSTRING_SORT_OPT ? applicableStatesOpt.size() : applicableStates.size();
-        System.out.println("Number of applicable states: " + size);
+        System.out.println("Number of applicable states: " + applicableStates.size());
     }
 
     private static void makeRules() {
-        long size = USE_BITSTRING_SORT_OPT ? applicableStatesOpt.size() : applicableStates.size();
-        while (size != 0) {
-            System.out.println("Remaining applicable states: " + size +
+        HashSet<FFTNode> skippedNodes = new HashSet<>();
+        while (applicableStates.size() > 0) {
+            System.out.println("Remaining applicable states: " + applicableStates.size() +
                     ". Current amount of rules: " + fft.size());
-            FFTNode node = USE_BITSTRING_SORT_OPT ? applicableStatesOpt.firstEntry().getValue() :
-                    applicableStates.values().iterator().next();
+            Iterator<FFTNode> it = applicableStates.values().iterator();
+            FFTNode node = it.next();
+
+            boolean onlySkips = false;
+            while (skippedNodes.contains(node)) {
+                if (!it.hasNext()) {
+                    onlySkips = true;
+                    break;
+                }
+                node = it.next();
+            }
+            if (onlySkips)
+                break;
+
+            if (FFTSolution.optimalMoves(node).size() == node.getLegalMoves().size()) {
+                // don't need a rule for this state
+                System.out.println("Skipping rule");
+                skippedNodes.add(node);
+                continue;
+            }
+
             Rule r = addRule(node);
             if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
             System.out.println();
-            size = USE_BITSTRING_SORT_OPT ? applicableStatesOpt.size() : applicableStates.size();
         }
         // initialize rule list
         if (USE_APPLY_OPT)
@@ -144,50 +201,55 @@ public class FFTAutoGen {
         if (!USE_BITSTRING_SORT_OPT && USE_LIFTING && LIFT_BEFORE_SIMPLIFY)
             r = liftRule(r);
 
-        simplifyRule(r);
+        simplifyRule(r, true);
 
         if (!USE_BITSTRING_SORT_OPT && USE_LIFTING && !LIFT_BEFORE_SIMPLIFY) {
             Rule pr = liftRule(r);
             // simplify again?
             if (pr != r)
-                simplifyRule(pr); // TODO - benchmark
+                simplifyRule(pr, true); // TODO - benchmark
             r = pr;
         }
         fft.append(r);
-        verifyRule(r, true); // safe run where we know we have the final rule
+        if (SYMMETRY_DETECTION || USE_LIFTING) // symmetry and use_lifting can introduce new moves for an applied state, so we do a safe run at last
+            verifyRule(r, true,true); // safe run where we know we have the final rule
 
-        /*
+/*
         if (!fft.verify(AUTOGEN_TEAM, false)) {
             System.out.println("ERROR: Old verification failed where new did not");
             System.out.println("Failing point: " + fft.failingPoint);
             System.exit(1);
         }
 
-         */
+ */
 
         return r;
     }
 
-    private static void simplifyRule(Rule r) {
+    // if simplifying last rule, simplifying can not effect other rules, so it's simpler
+    private static void simplifyRule(Rule r, boolean lastRule) {
         if (DETAILED_DEBUG) System.out.println("SIMPLIFYING RULE: " + r);
         // make copy to avoid concurrentModificationException
         int prevSize;
         int i = 1;
         do {
-            // sort the literals so we start with literal with lowest ID
-            TreeMap<Integer, Literal> literalSet = new TreeMap<>();
-            for (Literal l : r.getPreconditions()) {
-                literalSet.put(l.id, l);
+            Collection<Literal> precons;
+            if (USE_BITSTRING_SORT_OPT && lastRule) { // outcomment lastRule if you want to compare to original minimization
+                // sort the literals so we start with literal with lowest ID
+                TreeMap<Integer, Literal> literalSet = new TreeMap<>();
+                for (Literal l : r.getPreconditions())
+                    literalSet.put(l.id, l);
+                precons = literalSet.values();
+            } else {
+                precons = new LiteralSet(r.getPreconditions());
             }
-            //LiteralSet rulePreconditions = new LiteralSet(r.getPreconditions());
             if (DETAILED_DEBUG && SIMPLIFY_ITERATIVELY)
                 System.out.println("SIMPLIFICATION ITERATION: " + i++);
-            prevSize = literalSet.size();
-            for (Literal l : literalSet.values()) {
+            prevSize = precons.size();
+            for (Literal l : precons) {
                 if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO REMOVE: " + l.getName());
                 fft.removePrecondition(r, l);
-
-                if (!verifyRule(r, false)) {
+                if (!verifyRule(r, lastRule, false)) {
                     if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.getName());
                     fft.addPrecondition(r, l);
                 } else {
@@ -199,39 +261,6 @@ public class FFTAutoGen {
                 r.getPreconditions().size() != 0);
     }
 
-    private static boolean verifyRule(Rule r, boolean safe) {
-        if (safe && DETAILED_DEBUG)
-            System.out.println("DOING SAFE RUN");
-        ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap = new ConcurrentHashMap<>();
-
-        //long coveredStates = r.getNumberOfCoveredStates();
-        //if (USE_APPLYSET_OPT && coveredStates < reachableRelevantStates.size()) {
-        //    fillFromCoveredStates(r, appliedMap);
-        //}
-        if (USE_BITSTRING_SORT_OPT)
-            fillByIterating_Opt(r, appliedMap);
-        else
-            fillByIterating(r, appliedMap);
-
-        if (DETAILED_DEBUG)
-            System.out.println("appliedMap size: " + appliedMap.size());
-
-        for (Map.Entry<FFTNode, HashSet<FFTMove>> entry : appliedMap.entrySet()) {
-            FFTNode n = entry.getKey();
-            HashSet<FFTMove> moves = entry.getValue();
-            if (!updateSets(n, moves, appliedMap, safe)) {
-                return false;
-            }
-        }
-
-        if (r instanceof PredRule)
-            liftedAppliedMapSize = appliedMap.size();
-        else
-            groundedAppliedMapSize = appliedMap.size();
-
-        return true;
-    }
-
     private static Rule liftRule(Rule r) {
         if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO LIFT RULE");
         // attempt to lift propositional variables one at a time, sorted by the most occurring variable 1st
@@ -239,7 +268,7 @@ public class FFTAutoGen {
             PredRule pr = r.liftAll(prop);
             if (DETAILED_DEBUG) System.out.println("VERIFYING LIFTED RULE: " + pr);
             // we do not want to lift if the lifted rule does not apply to more states
-            if (verifyRule(pr, false) && groundedAppliedMapSize != liftedAppliedMapSize) {
+            if (verifyRule(pr, true,false) && groundedAppliedMapSize != liftedAppliedMapSize) {
                 if (DETAILED_DEBUG) System.out.println("RULE SUCCESSFULLY LIFTED TO: " + pr);
                 return pr;
             }
@@ -248,110 +277,267 @@ public class FFTAutoGen {
         return r;
     }
 
-    private static void fillFromCoveredStates(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
-        HashSet<LiteralSet> states = r.getCoveredStates();
-        if (DETAILED_DEBUG) System.out.println("Exact no. of covered states: " + states.size());
-        if (!SINGLE_THREAD) {
-            states.parallelStream().forEach(set -> {
-                FFTNode n = applicableStates.get(set.getBitString());
-                insert(n, r, appliedMap);
-            });
+    private static void fillByIterating(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap, boolean lastRule) {
+        if (!lastRule) {
+            if (!SINGLE_THREAD) {
+                appliedStates.values().parallelStream().forEach(node ->
+                        insert(node, r, appliedMap, false));
+            } else {
+                for (FFTNode n : appliedStates.values())
+                    insert(n, r, appliedMap, false);
+            }
         }
-        for (LiteralSet state : states) {
-            FFTNode n = applicableStates.get(state.getBitString());
-            insert(n, r, appliedMap);
+        if (USE_BITSTRING_SORT_OPT) {
+            long code = r.getBitString();
+            // TODO - multithread
+            for (Map.Entry<Long, FFTNode> entry : applicableStates.getCodeMap().entrySet()) {
+                if (entry.getKey() < code)
+                    break;
+                insert(entry.getValue(), r, appliedMap, lastRule);
+            }
         }
-    }
-
-    private static void fillByIterating(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
-        if (!SINGLE_THREAD) {
+        else if (!SINGLE_THREAD) {
             applicableStates.values().parallelStream().forEach(node ->
-                    insert(node, r, appliedMap));
+                    insert(node, r, appliedMap, lastRule));
         } else {
             for (FFTNode n : applicableStates.values()) {
-                insert(n, r, appliedMap);
+                insert(n, r, appliedMap, lastRule);
             }
         }
     }
 
-    private static void fillByIterating_Opt(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
-        long code = r.getAllPreconditions().getBitString();
-        // TODO - multithread
-        for (Map.Entry<Long, FFTNode> entry : applicableStatesOpt.entrySet()) {
-            if (entry.getKey() < code)
-                break;
-            insert(entry.getValue(), r, appliedMap);
-        }
-
-    }
-
-    private static void insert(FFTNode n, Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
+    private static void insert(FFTNode n, Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap, boolean lastRule) {
         if (n == null)
             return;
-        HashSet<FFTMove> moves = r.apply(n);
-        if (!moves.isEmpty())
-            appliedMap.put(n, moves);
+        HashSet<FFTMove> ruleMoves = r.apply(n);
+        if (!ruleMoves.isEmpty()) {
+            if (!lastRule) {
+                // no guarantee all states in appliedSet will apply to this rule
+                // might be that they apply to a previous rule, or no rule at all (if removing)
+                ruleMoves = fft.apply(n);
+            }
+            appliedMap.put(n, ruleMoves);
+        }
     }
 
-    // Either remove states from applySet in addition to reachableSet, or check whether state is still reachable
-    private static boolean updateSets(FFTNode n, HashSet<FFTMove> chosenMoves, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap,
-                                      boolean safe) {
-        if (safe) {
-            if (USE_BITSTRING_SORT_OPT) applicableStatesOpt.remove(n.convert().getBitString());
-            else applicableStates.remove(n);
+    private static boolean verifyRule(Rule r, boolean lastRule, boolean safe) {
+        //System.out.println("Verifying rule");
+        if (safe && DETAILED_DEBUG && (SYMMETRY_DETECTION || USE_LIFTING))
+            System.out.println("DOING SAFE RUN");
+        ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap = new ConcurrentHashMap<>();
+
+        fillByIterating(r, appliedMap, lastRule);
+
+        if (DETAILED_DEBUG)
+            System.out.println("appliedMap size: " + appliedMap.size());
+
+        //System.out.println("appliedMap:");
+        for (Map.Entry<FFTNode, HashSet<FFTMove>> entry : appliedMap.entrySet()) {
+            FFTNode n = entry.getKey();
+            HashSet<FFTMove> moves = entry.getValue();
+            //System.out.println(n + " , moves: " + moves);
+            //System.out.println("Checking if node is valid");
+            if (!updateSets(n, moves, appliedMap, lastRule, safe)) {
+                //System.out.println("Node is invalid!");
+                return false;
+            }
+            //System.out.println("Node is valid!");
         }
+        if (r instanceof PredRule)
+            liftedAppliedMapSize = appliedMap.size();
+        else
+            groundedAppliedMapSize = appliedMap.size();
+
+        // If g(s) = f(s), which is the case with no symmetry and lifting,
+        // we can here do another updateSets() for all applied states
+        if (!SYMMETRY_DETECTION && !USE_LIFTING)
+            for (Map.Entry<FFTNode, HashSet<FFTMove>> entry : appliedMap.entrySet()) {
+                //System.out.println("Doing safe updateSets for node: " + entry.getKey());
+                //System.out.println("moves: " + entry.getValue());
+                updateSets(entry.getKey(), entry.getValue(), appliedMap, lastRule, true);
+            }
+        return true;
+    }
+
+    private static boolean updateSets(FFTNode n, HashSet<FFTMove> chosenMoves,
+                                          ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap,
+                                      boolean lastRule, boolean safe) {
+        boolean reachable = true;
         // s might've been set unreachable by another state in appliedSet
         if (!n.isReachable()) {
             return true;
         }
         ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(n);
+        //System.out.println("Optimal moves: " + optimalMoves);
+        //System.out.println("reachable parents: " + n.getReachableParents());
         if (optimalMoves.isEmpty()) // terminal state
             return true;
+
+        // if chosenMoves empty, require all moves to be optimal (if state isReachable())
+        if (chosenMoves.isEmpty() && optimalMoves.size() != n.getLegalMoves().size()) {
+            if (isReachable(n, appliedMap)) {
+                //System.out.println("Chosen moves empty and not all moves optimal");
+                return false;
+            }
+            else {
+                //System.out.println("This node is not reachable");
+                reachable = false;
+            }
+        }
+
+        // if chosenMoves is non-empty, require them to be optimal
         for (FFTMove chosenMove : chosenMoves) {
             if (!optimalMoves.contains(chosenMove)) {
-                if (isReachable(n, appliedMap))
+                if (isReachable(n, appliedMap)) {
+                    //System.out.println("Move: " + chosenMove + " , is not optimal");
                     return false;
+                }
                 else {
-                    chosenMoves.clear();
+                    //System.out.println("This node is not reachable");
+                    reachable = false;
                     break;
                 }
             }
         }
-        if (!safe) // only update sets in a safe run
+        // add back transitions (if not last rule)
+        if (!lastRule && reachable) {
+            //System.out.println("Checking if adding back transitions is verified");
+            if (chosenMoves.isEmpty()) {
+                if (safe)
+                    applicableStates.put(n);
+                //System.out.println("Chosen moves empty, checking if we can add back all transitions");
+                for (FFTMove m : optimalMoves) {
+                    if (!addToSets(n, m, safe)) {
+                        //System.out.println("Failed to add the transition from node: " + n + ", with move: " + m);
+                        return false;
+                    }
+                }
+            } else {
+                //System.out.println("Chosen moves non-empty, checking if we can add back chosen moves");
+                for (FFTMove m : chosenMoves)
+                    if (!addToSets(n, m, safe)) {
+                        //System.out.println("Failed to add the transition from node: " + n + ", with move: " + m);
+                        return false;
+                    }
+            }
+        }
+        if (!safe)
+            return true;
+        //System.out.println("Removing transitions");
+        if (!reachable) {
+            for (FFTMove m : optimalMoves) // remove all
+                removeFromSets(n, m);
+        } else if (!chosenMoves.isEmpty()) { // remove all but to chosenMoves
+            for (FFTMove m : optimalMoves)
+                if (!chosenMoves.contains(m))
+                    removeFromSets(n, m);
+        }
+
+        // Adjusting sets
+        if (reachable) {
+            // when deleting a rule, chosenMoves might be empty and state is no longer applied
+            if (chosenMoves.isEmpty()) {
+                //System.out.println("removing node " + n + " , from appliedStates");
+                appliedStates.remove(n);
+                applicableStates.put(n);
+            } else {
+                // simplifying an intermediate rule might affect both an applied state and applicable state
+                if (!appliedStates.containsKey(n)) {
+                    //System.out.println("Adding node: " + n + " , to appliedStates");
+                    appliedStates.put(n, n);
+                }
+                applicableStates.remove(n);
+            }
+        }
+
+        return true;
+    }
+
+    private static void removeFromSets(FFTNode n, FFTMove m) {
+        FFTNode existingChild = reachableStates.get(n.getNextNode(m));
+        // existingChild can be null if we re-visit a state where we already deleted it from
+        // i.e. we deleted all but chosen move from this state, so it's still reachable, but children isn't
+        // getReachableParents may not contain 'n', e.g. if we simplify an intermediate rule
+        if (existingChild == null)
+            return;
+        existingChild.removeReachableParent(n);
+        if (existingChild.isReachable())
+            return;
+        //System.out.println("removing child: " + existingChild);
+        reachableStates.remove(existingChild);
+        applicableStates.remove(existingChild);
+        appliedStates.remove(existingChild);
+        for (FFTMove move : existingChild.getLegalMoves()) {
+            removeFromSets(existingChild, move);
+        }
+    }
+
+    private static boolean addToSets(FFTNode n, FFTMove m, boolean safe) {
+        FFTNode existingChild = reachableStates.get(n.getNextNode(m));
+        //System.out.println("adding transition from node: " + n + " , with move: " + m);
+        //System.out.println("existing child exists: " + (existingChild != null));
+        if (existingChild != null) {
+            if (safe) existingChild.addReachableParent(n);
+            return true;
+        }
+        FFTNode child = n.getNextNode(m);
+
+        if (safe) {
+            //System.out.println("inserting child: " + child + " , in reachable states");
+            reachableStates.put(child, child);
+            reachableStates.get(child).addReachableParent(n);
+        }
+
+        if (child.isTerminal())
             return true;
 
-        for (FFTMove m : optimalMoves) { // remove pointer to all children except chosen moves
-            if (chosenMoves.contains(m)) { // chosen move
-                continue;
+        ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(child);
+        //System.out.println("Optimal moves for child: " + child + " : " + optimalMoves);
+        if (child.getTurn() != AUTOGEN_TEAM) {
+            for (FFTMove move : child.getLegalMoves())
+                if (!addToSets(child, move, safe))
+                    return false;
+            return true;
+        }
+
+        // find new move (if any)
+        HashSet<FFTMove> newMoves = fft.apply(child);
+        //System.out.println("newMoves: " + newMoves);
+        if (newMoves.isEmpty()) {
+            if (safe) {
+                // this state is now applicable
+                applicableStates.put(child);
             }
-            FFTNode existingChild = reachableStates.get(n.getNextNode(m));
-            // existingChild can be null if we re-visit a state where we already deleted it from
-            // i.e. we deleted all but chosen move from this state, so it's still reachable, but children isn't
-            if (existingChild == null)
-                continue;
-            existingChild.removeReachableParent(n);
-            if (!existingChild.isReachable())
-                removeFromSets(existingChild);
+            // check that every move is legal
+            if (optimalMoves.size() != child.getLegalMoves().size()) {
+                //System.out.println("Chosen moves empty and not every move is legal");
+                return false;
+            }
+            // we already assume it is valid, meaning optimalMoves = legalMoves
+            for (FFTMove move : optimalMoves)
+                if (!addToSets(child, move, safe)) {
+                    //System.out.println("newMoves empty, failed to add all transitions");
+                    return false;
+                }
+        } else {
+            if (safe) {
+                // this state is now applied
+                appliedStates.put(child, child);
+            }
+            for (FFTMove move : newMoves) {
+                if (!optimalMoves.contains(move) || !addToSets(child, move, safe)) {
+                    //System.out.println("Chosen move was not optimal, or failed to add transition");
+                    return false;
+                }
+            }
         }
         return true;
     }
 
-    private static void removeFromSets(FFTNode parent) {
-        reachableStates.remove(parent);
-        if (USE_BITSTRING_SORT_OPT) applicableStatesOpt.remove(parent.convert().getBitString());
-        else applicableStates.remove(parent);
-        for (FFTNode child : parent.getChildren()) {
-            FFTNode existingChild = reachableStates.get(child);
-            if (existingChild == null)
-                continue;
-            existingChild.removeReachableParent(parent);
-            if (!existingChild.isReachable())
-                removeFromSets(existingChild);
-        }
-    }
-
     // walk upwards through reachable parents until either initial state is found
-    private static boolean isReachable(FFTNode node, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
+    private static boolean isReachable(FFTNode node,
+                                       ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
+        //System.out.println("Checking if node" + node + " , is reachable");
         LinkedList<FFTNode> frontier = new LinkedList<>();
         HashSet<FFTNode> closedSet = new HashSet<>();
         frontier.add(node);
@@ -364,17 +550,21 @@ public class FFTAutoGen {
             }
             for (FFTNode parent : n.getReachableParents()) {
                 FFTNode existingParent = reachableStates.get(parent);
+                //System.out.println("Parent: " + parent + " , exists: " + (existingParent != null));
                 if (existingParent == null || closedSet.contains(parent))
                     continue;
                 HashSet<FFTMove> chosenMoves = appliedMap.get(parent);
-                // not in appliedMap, add parent
-                if (chosenMoves == null) {
+                //System.out.println("chosenMoves: " + chosenMoves);
+                // not in appliedMap or all moves optimal, add parent
+                if (chosenMoves == null || chosenMoves.isEmpty()) {
+                    //System.out.println("No chosen moves, adding parent: " + parent + " , to frontier");
                     closedSet.add(parent);
                     frontier.add(existingParent);
                 } else{
                     // chooses correct move
                     for (FFTMove chosenMove : chosenMoves) {
                         if (parent.getNextNode(chosenMove).equals(n)) {
+                            //System.out.println("Correct move, adding parent: " + parent + " , to frontier");
                             closedSet.add(parent);
                             frontier.add(existingParent);
                             break;
@@ -387,42 +577,101 @@ public class FFTAutoGen {
         return false;
     }
 
+    // assumes that the FFT is strongly optimal
+    private static int minimizeOpt() {
+        int ruleSize, precSize;
+        int i = 0;
+        do {
+            ruleSize = fft.getAmountOfRules();
+            precSize = fft.getAmountOfPreconditions();
+            i++;
+            System.out.println("Minimizing, iteration no. " + i);
+            minimizeRules();
+            if (!MINIMIZE_RULE_BY_RULE && MINIMIZE_PRECONDITIONS) {
+                if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
+                minimizePreconditions();
+            }
+        } while (ruleSize != fft.getAmountOfRules() || precSize != fft.getAmountOfPreconditions());
+        return i;
+    }
+
+    private static void minimizeRules() {
+        for (RuleGroup rg : fft.ruleGroups) {
+            if (rg.locked) // don't minimize if rulegroup is locked
+                continue;
+            ListIterator<Rule> itr = rg.rules.listIterator();
+            while(itr.hasNext()) {
+                Rule r = itr.next();
+                //System.out.println("Attempting to remove rule: " + r);
+                itr.remove();
+                if (fft.getRuleList() != null)
+                    fft.getRuleList().sortedRemove(r);
+                if (!verifyRule(r, false, false)) {
+                    //System.out.println("failed to remove: " + r);
+                    //System.out.println();
+                    itr.add(r);
+                    if (fft.getRuleList() != null)
+                        fft.getRuleList().sortedAdd(r);
+                    if (MINIMIZE_RULE_BY_RULE && MINIMIZE_PRECONDITIONS) {
+                        //System.out.println("Attempting to simplify rule: " + r);
+                        simplifyRule(r, false);
+                        //System.out.println();
+                    }
+                } else {
+                    //System.out.println();
+                    //System.out.println("Successfully removed rule: " + r);
+                }
+                //System.out.println("Doing safe run");
+                if (SYMMETRY_DETECTION || USE_LIFTING)
+                    verifyRule(r, false,true);
+
+                /*
+                if (!fft.verify(AUTOGEN_TEAM, true)) {
+                    System.out.println("Failed to verify the FFT!");
+                    System.out.println("failing point: " + fft.failingPoint);
+                    System.out.println("Exiting");
+                    System.exit(1);
+                }
+                System.out.println();
+
+                 */
+
+
+            }
+        }
+    }
+
+    private static void minimizePreconditions() {
+        for (RuleGroup rg : fft.ruleGroups) {
+            if (rg.locked) continue; // don't minimize if rg is locked
+            for(Rule r : rg.rules) {
+                //System.out.println("Simplifying rule");
+                simplifyRule(r, false);
+                if (SYMMETRY_DETECTION || USE_LIFTING)
+                    verifyRule(r, false,true);
+            }
+        }
+    }
+
     private static void findReachableStates() {
         int team = AUTOGEN_TEAM;
         FFTNode initialNode = FFTManager.initialFFTNode;
-        int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
         LinkedList<FFTNode> frontier;
         frontier = new LinkedList<>();
         frontier.add(initialNode);
         reachableStates = new HashMap<>();
-        if (USE_BITSTRING_SORT_OPT)
-            applicableStatesOpt = new TreeMap<>(Comparator.reverseOrder());
-        else {
-            if (USE_RULE_ORDERING)
-                applicableStates = new TreeMap<>(new NodeComparator());
-            else
-                applicableStates = new HashMap<>();
+        appliedStates = new HashMap<>();
+        applicableStates = new NodeMap();
 
-        }
         reachableStates.put(initialNode, initialNode);
-        if (team == PLAYER1) {
-            if (USE_BITSTRING_SORT_OPT) applicableStatesOpt.put(
-                    initialNode.convert().getBitString(), initialNode);
-            else
-            applicableStates.put(initialNode, initialNode);
-        }
+        if (team == PLAYER1 && fft.apply(initialNode).isEmpty())
+            applicableStates.put(initialNode);
 
         while (!frontier.isEmpty()) {
             FFTNode node = frontier.pop();
-            // game over
-            if (node.isTerminal()) {
-                if (node.getWinner() == opponent) {
-                    // Should not hit this given initial check
-                    System.err.println("No chance of winning vs. perfect player");
-                    System.exit(1);
-                }
+
+            if (node.isTerminal())
                 continue;
-            }
 
             // Not our turn
             if (team != node.getTurn()) {
@@ -432,13 +681,13 @@ public class FFTAutoGen {
             }
             HashSet<FFTMove> chosenMoves = fft.apply(node);
             if (!chosenMoves.isEmpty()) {
+                appliedStates.put(node, node);
                 for (FFTMove m : chosenMoves)
                     addNode(frontier, node, node.getNextNode(m));
             } else {
                 ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(node);
-                if (USE_BITSTRING_SORT_OPT) applicableStatesOpt.put(node.convert().getBitString(), node);
-                else applicableStates.put(node, node);
-                // Our turn, add all states from optimal moves, or those that an existing FFT applies to
+                applicableStates.put(node);
+                // add all states from optimal moves
                 for (FFTMove m : optimalMoves)
                     addNode(frontier, node, node.getNextNode(m));
             }
@@ -453,204 +702,31 @@ public class FFTAutoGen {
         reachableStates.get(child).addReachableParent(parent);
     }
 
-    // Allows us to sort the nodes based on custom values, such as which node is closed to a terminal node
-    public static class NodeComparator implements Comparator<FFTNode> {
-        @Override
-        public int compare(FFTNode n1, FFTNode n2) {
-            if (RULE_ORDERING == RULE_ORDERING_TERMINAL_LAST ||
-                    RULE_ORDERING == RULE_ORDERING_TERMINAL_FIRST) {
-                NodeMapping nm1 = FFTSolution.queryNode(n1);
-                NodeMapping nm2 = FFTSolution.queryNode(n2);
-                if (nm1 == null) {
-                    if (nm2 == null)
-                        return compareBitString(n1, n2);
-                    return -1;
-                } else if (nm2 == null) {
-                    return 1;
-                }
-                int n1_score = Math.abs(nm1.getScore());
-                int n2_score = Math.abs(nm2.getScore());
-
-                if (RULE_ORDERING == RULE_ORDERING_TERMINAL_FIRST) {
-                    if (n1_score > n2_score)
-                        return -1;
-                    else if (n2_score > n1_score)
-                        return 1;
-                    else {
-                        return compareBitString(n1, n2);
-                    }
-                }
-            }
-            int n1_precons_amount = n1.convert().size();
-            int n2_precons_amount = n2.convert().size();
-            if (RULE_ORDERING == RULE_ORDERING_FEWEST_PRECONS_FIRST) {
-                if (n1_precons_amount > n2_precons_amount)
-                    return n1.hashCode() - n2.hashCode();
-                return n2.hashCode() - n1.hashCode();
-            }
-            return 0;
-        }
-
-        private int compareBitString(FFTNode n1, FFTNode n2) {
-            long bitStringDiff = n1.convert().getBitString() - n2.convert().getBitString();
-            if (bitStringDiff > 0)
-                return 1;
-            else if (bitStringDiff < 0)
-                return -1;
-            return 0;
-        }
-    }
-
-    // Rule 'r' has been removed, so we verify if FFT is still optimal without 'r'
-    private static boolean verifyRuleRemoval(Rule r) {
-        ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap = new ConcurrentHashMap<>();
-        fillByIterating_Min(r, appliedMap);
-
-        if (DETAILED_DEBUG)
-            System.out.println("appliedMap size: " + appliedMap.size());
-
-        for (Map.Entry<FFTNode, HashSet<FFTMove>> entry : appliedMap.entrySet()) {
-            FFTNode n = entry.getKey();
-            HashSet<FFTMove> moves = entry.getValue();
-            if (!updateSets_Min(n, moves, appliedMap)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    // iterates through reachable states (since we're looking for the states we already apply to)
-    private static void fillByIterating_Min(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
+    // Currently not used, but kept here if we ever need to benchmark
+    private static void fillFromCoveredStates(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
+        HashSet<LiteralSet> states = r.getCoveredStates();
+        if (DETAILED_DEBUG) System.out.println("Exact no. of covered states: " + states.size());
         if (!SINGLE_THREAD) {
-            reachableStates.values().parallelStream().forEach(node ->
-                    insert_Min(node, r, appliedMap));
-        } else {
-            for (FFTNode n : reachableStates.values()) {
-                insert_Min(n, r, appliedMap);
-            }
+            states.parallelStream().forEach(set -> {
+                FFTNode n = applicableStates.get(set.getBitString());
+                insert(n, r, appliedMap, false);
+            });
+        }
+        for (LiteralSet state : states) {
+            FFTNode n = applicableStates.get(state.getBitString());
+            insert(n, r, appliedMap, false);
         }
     }
 
-    private static void insert_Min(FFTNode n, Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
-        if (n == null)
-            return;
-        HashSet<FFTMove> oldMoves = r.apply(n);
-        if (!oldMoves.isEmpty()) {
-            // find new moves todo
-            HashSet<FFTMove> newMoves = new HashSet<>();
-            appliedMap.put(n, newMoves);
-        }
+    public static HashMap<FFTNode, FFTNode> getReachableStates() {
+        return reachableStates;
     }
 
-    // TODO
-    private static boolean updateSets_Min(FFTNode n, HashSet<FFTMove> chosenMoves,
-                                          ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
-        // chosenMoves empty, add back to applicableSet
-        if (chosenMoves.isEmpty()) {
-            applicableStatesOpt.put(n.convert().getBitString(), n);
-        }
-        // s might've been set unreachable by another state in appliedSet
-        if (!n.isReachable()) {
-            return true;
-        }
-        ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(n);
-        if (optimalMoves.isEmpty()) // terminal state
-            return true;
-        for (FFTMove chosenMove : chosenMoves) {
-            if (!optimalMoves.contains(chosenMove)) {
-                if (isReachable(n, appliedMap))
-                    return false;
-                else {
-                    chosenMoves.clear();
-                    break;
-                }
-            }
-        }
-
-        // add back pointers to all children recursively
-        if (chosenMoves.isEmpty()) {
-
-        } else { // same procedure as previously
-
-        }
-
-        for (FFTMove m : optimalMoves) { // remove pointer to all children except chosen moves
-            if (chosenMoves.contains(m)) { // chosen move, add pointer
-                continue;
-            }
-            FFTNode existingChild = reachableStates.get(n.getNextNode(m));
-            // existingChild can be null if we re-visit a state where we already deleted it from
-            // i.e. we deleted all but chosen move from this state, so it's still reachable, but children isn't
-            if (existingChild == null)
-                continue;
-            existingChild.removeReachableParent(n);
-            if (!existingChild.isReachable())
-                removeFromSets(existingChild);
-        }
-        return true;
+    public static HashMap<FFTNode, FFTNode> getAppliedStates() {
+        return appliedStates;
     }
 
-    // todo
-    private static void addToSets(FFTNode parent) {
-        reachableStates.remove(parent);
-        if (USE_BITSTRING_SORT_OPT) applicableStatesOpt.remove(parent.convert().getBitString());
-        else applicableStates.remove(parent);
-        for (FFTNode child : parent.getChildren()) {
-            FFTNode existingChild = reachableStates.get(child);
-            if (existingChild == null)
-                continue;
-            existingChild.removeReachableParent(parent);
-            if (!existingChild.isReachable())
-                removeFromSets(existingChild);
-        }
-    }
 
-    // assumes that the FFT is strongly optimal
-    private static int minimizeOpt() {
-        int ruleSize, precSize;
-        int i = 0;
-        do {
-            ruleSize = fft.getAmountOfRules();
-            precSize = fft.getAmountOfPreconditions();
-            if (DETAILED_DEBUG)
-                System.out.println("Minimizing, iteration no. " + i++);
-            minimizeRules();
-            if (!MINIMIZE_RULE_BY_RULE && MINIMIZE_PRECONDITIONS) {
-                if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
-                minimizePreconditions();
-            }
-        } while (ruleSize != fft.getAmountOfRules() || precSize != fft.getAmountOfPreconditions());
 
-        return i;
-    }
-
-    private static void minimizeRules() {
-        for (RuleGroup rg : fft.ruleGroups) {
-            if (rg.locked) // don't minimize if rulegroup is locked
-                continue;
-            ListIterator<Rule> itr = rg.rules.listIterator();
-            while(itr.hasNext()) {
-                Rule r = itr.next();
-                itr.remove();
-                // todo - this bad boy is tough work
-                if (!verifyRuleRemoval(r)) {
-                    itr.add(r);
-                    if (MINIMIZE_RULE_BY_RULE)
-                        minimizePreconditions();
-                }
-            }
-        }
-    }
-
-    private static void minimizePreconditions() {
-        for (RuleGroup rg : fft.ruleGroups) {
-            if (rg.locked) continue; // don't minimize if rg is locked
-            for(Rule r : rg.rules) {
-                // we can simplify intermediate rules optimally if symmetry is disabled
-                simplifyRule(r);
-            }
-        }
-    }
 }
 

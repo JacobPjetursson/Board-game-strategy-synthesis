@@ -78,6 +78,7 @@ public class Rule {
     public Rule(Rule duplicate) {
         this.action = new Action(duplicate.action);
         this.preconditions = new LiteralSet(duplicate.preconditions);
+        this.ruleIndex = duplicate.ruleIndex;
         setAllPreconditions();
         if (SYMMETRY_DETECTION) this.symmetryRules = new HashSet<>(duplicate.symmetryRules);
     }
@@ -301,14 +302,19 @@ public class Rule {
 
     public String toString() {
         if (sentences != null || move != null) { // ggp
-            return "IF: " + sentences + " THEN: " + move;
+            String str = "IF: " + sentences + " THEN: " + move;
+            if (ruleIndex != -1)
+                str += " , index: " + ruleIndex;
+            return str;
         }
 
         if (ENABLE_GGP_PARSER) {
             // TODO
         }
-
-        return "IF [" + getPreconString() + "] THEN [" + getActionString() + "]";
+        String str = "IF [" + getPreconString() + "] THEN [" + getActionString() + "]";
+        if (ruleIndex != -1)
+            str += " , index: " + ruleIndex;
+        return str;
     }
 
     public String getPreconString() {
@@ -332,6 +338,9 @@ public class Rule {
     public HashSet<FFTMove> apply(FFTNode node) {
         LiteralSet stLiterals = node.convert();
         HashSet<FFTMove> moves = new HashSet<>();
+        // make quick test by bitstring comparisons
+        if (getBitString() > stLiterals.getBitString())
+            return moves;
 
         FFTMove m = match(this, stLiterals);
         if (m != null)

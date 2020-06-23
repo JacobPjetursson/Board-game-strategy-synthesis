@@ -1,5 +1,6 @@
 package misc.demos;
 
+import fftlib.FFTAutoGen;
 import fftlib.FFTManager;
 import fftlib.FFTSolution;
 import fftlib.game.FFTMove;
@@ -33,6 +34,6 @@ public class Demo {
 
         // MINIMIZE TEST
         System.out.println("Minimizing");
-        FFTManager.currFFT.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
+        //FFTManager.currFFT.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
     }
 }
