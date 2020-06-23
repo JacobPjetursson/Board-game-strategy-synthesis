@@ -478,15 +478,15 @@ public class FFTAutoGen {
             return true;
         }
         FFTNode child = n.getNextNode(m);
+        if (child.isTerminal())
+            return true;
 
         if (safe) {
             //System.out.println("inserting child: " + child + " , in reachable states");
             reachableStates.put(child, child);
-            reachableStates.get(child).addReachableParent(n);
+            child.addReachableParent(n);
         }
 
-        if (child.isTerminal())
-            return true;
 
         ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(child);
         //System.out.println("Optimal moves for child: " + child + " : " + optimalMoves);
@@ -669,9 +669,6 @@ public class FFTAutoGen {
         while (!frontier.isEmpty()) {
             FFTNode node = frontier.pop();
 
-            if (node.isTerminal())
-                continue;
-
             // Not our turn
             if (team != node.getTurn()) {
                 for (FFTNode child : node.getChildren())
@@ -694,6 +691,8 @@ public class FFTAutoGen {
     }
 
     private static void addNode(LinkedList<FFTNode> frontier, FFTNode parent, FFTNode child) {
+        if (child.isTerminal())
+            return;
         if (!reachableStates.containsKey(child)) {
             reachableStates.put(child, child);
             frontier.add(child);
