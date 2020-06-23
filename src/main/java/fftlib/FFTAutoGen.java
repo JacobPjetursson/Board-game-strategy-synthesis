@@ -328,9 +328,6 @@ public class FFTAutoGen {
 
         fillByIterating(r, appliedMap, lastRule);
 
-        if (DETAILED_DEBUG)
-            System.out.println("appliedMap size: " + appliedMap.size());
-
         //System.out.println("appliedMap:");
         for (Map.Entry<FFTNode, HashSet<FFTMove>> entry : appliedMap.entrySet()) {
             FFTNode n = entry.getKey();
@@ -601,6 +598,8 @@ public class FFTAutoGen {
                 continue;
             ListIterator<Rule> itr = rg.rules.listIterator();
             while(itr.hasNext()) {
+                if (DETAILED_DEBUG)
+                    System.out.println("Remaining amount of rules: " + fft.size());
                 Rule r = itr.next();
                 //System.out.println("Attempting to remove rule: " + r);
                 itr.remove();
