@@ -57,7 +57,8 @@ public class FFT {
 
     public void initializeRuleList() {
         ruleList = new RuleList();
-        ruleList.addAll(getRules());
+        for (Rule r : getRules())
+            ruleList.add(r); // can't be replaced by addAll since add() has been overridden
         ruleList.sort();
     }
 
@@ -164,11 +165,7 @@ public class FFT {
 
     // optimized way of finding the correct move using the sorted ruleList
     public HashSet<FFTMove> apply_optim(FFTNode node) {
-        HashSet<FFTMove> moves = new HashSet<>();
-        FFTMove m = ruleList.apply(node);
-        if (m != null)
-            moves.add(m);
-        return moves;
+        return ruleList.apply(node);
     }
 
     public HashSet<FFTMove> apply_slow(FFTNode node) {
@@ -184,7 +181,7 @@ public class FFT {
     }
 
     public HashSet<FFTMove> apply(FFTNode node) {
-        if (!SYMMETRY_DETECTION && USE_APPLY_OPT && ruleList != null)
+        if (USE_APPLY_OPT && ruleList != null)
             return apply_optim(node);
         return apply_slow(node);
     }
@@ -281,6 +278,8 @@ public class FFT {
         if (DETAILED_DEBUG) System.out.println("Attempting to lift rule: " + r);
         for (int prop : r.getSortedProps()) {
             PredRule pr = r.liftAll(prop);
+            if (pr == null) // inconsistent
+                continue;
             replaceRule(r, pr);
             if (verify(team, true)) {
                 if (DETAILED_DEBUG) System.out.println("Successfully lifted rule to: " + pr);
@@ -291,7 +290,7 @@ public class FFT {
         }
     }
 
-    private void replaceRule(Rule oldRule, Rule newRule) {
+    public void replaceRule(Rule oldRule, Rule newRule) {
         int rgIdx = -1;
         int rIdx = -1;
         for (int i = 0; i < ruleGroups.size(); i++) {
@@ -311,6 +310,10 @@ public class FFT {
         }
         ruleGroups.get(rgIdx).rules.set(rIdx, newRule);
 
+        if (ruleList != null) {
+            ruleList.sortedRemove(oldRule);
+            ruleList.sortedAdd(newRule);
+        }
     }
 
     public boolean verify(int team, boolean complete) {

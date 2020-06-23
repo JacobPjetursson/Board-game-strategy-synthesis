@@ -191,6 +191,7 @@ public class FFTAutoGen {
         FFTMove bestMove = FFTSolution.queryNode(n).move;
 
         Rule r = new Rule(minSet, bestMove.convert()); // rule from state-move pair
+        fft.append(r);
 
         // DEBUG
         if (DETAILED_DEBUG) {
@@ -198,19 +199,19 @@ public class FFTAutoGen {
             System.out.println("NODE SCORE: " + FFTSolution.queryNode(n).score);
             System.out.println("ORIGINAL RULE: " + r);
         }
-        if (!USE_BITSTRING_SORT_OPT && USE_LIFTING && LIFT_BEFORE_SIMPLIFY)
-            r = liftRule(r);
+        if (USE_LIFTING && LIFT_BEFORE_SIMPLIFY)
+            r = liftRule(r, true);
 
         simplifyRule(r, true);
 
-        if (!USE_BITSTRING_SORT_OPT && USE_LIFTING && !LIFT_BEFORE_SIMPLIFY) {
-            Rule pr = liftRule(r);
+        if (USE_LIFTING && !LIFT_BEFORE_SIMPLIFY) {
+            Rule pr = liftRule(r, true);
             // simplify again?
             if (pr != r)
                 simplifyRule(pr, true); // TODO - benchmark
             r = pr;
         }
-        fft.append(r);
+        //fft.append(r);
         if (SYMMETRY_DETECTION || USE_LIFTING) // symmetry and use_lifting can introduce new moves for an applied state, so we do a safe run at last
             verifyRule(r, true,true); // safe run where we know we have the final rule
 
@@ -261,16 +262,21 @@ public class FFTAutoGen {
                 r.getPreconditions().size() != 0);
     }
 
-    private static Rule liftRule(Rule r) {
+    private static Rule liftRule(Rule r, boolean lastRule) {
         if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO LIFT RULE");
         // attempt to lift propositional variables one at a time, sorted by the most occurring variable 1st
         for (int prop : r.getSortedProps()) {
             PredRule pr = r.liftAll(prop);
+            if (pr == null) // inconsistent
+                continue;
+            fft.replaceRule(r, pr);
             if (DETAILED_DEBUG) System.out.println("VERIFYING LIFTED RULE: " + pr);
             // we do not want to lift if the lifted rule does not apply to more states
-            if (verifyRule(pr, true,false) && groundedAppliedMapSize != liftedAppliedMapSize) {
+            if (verifyRule(pr, lastRule,false) && groundedAppliedMapSize != liftedAppliedMapSize) {
                 if (DETAILED_DEBUG) System.out.println("RULE SUCCESSFULLY LIFTED TO: " + pr);
                 return pr;
+            } else {
+                fft.replaceRule(pr, r);
             }
         }
         if (DETAILED_DEBUG) System.out.println("FAILED TO LIFT RULE");
@@ -280,14 +286,14 @@ public class FFTAutoGen {
     private static void fillByIterating(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap, boolean lastRule) {
         if (!lastRule) {
             if (!SINGLE_THREAD) {
-                reachableStates.values().parallelStream().forEach(node ->
+                appliedStates.values().parallelStream().forEach(node ->
                         insert(node, r, appliedMap, false));
             } else {
-                for (FFTNode n : reachableStates.values())
+                for (FFTNode n : appliedStates.values())
                     insert(n, r, appliedMap, false);
             }
         }
-        else if (USE_BITSTRING_SORT_OPT) {
+        if (USE_BITSTRING_SORT_OPT) {
             long code = r.getBitString();
             // TODO - multithread
             for (Map.Entry<Long, FFTNode> entry : applicableStates.getCodeMap().entrySet()) {
@@ -615,6 +621,8 @@ public class FFTAutoGen {
                         //System.out.println("Attempting to simplify rule: " + r);
                         simplifyRule(r, false);
                         //System.out.println();
+                        if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule))
+                            liftRule(r, false);
                     }
                 } else {
                     //System.out.println();

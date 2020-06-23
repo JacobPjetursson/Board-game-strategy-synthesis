@@ -178,7 +178,6 @@ public class Config {
         // Tweaking configurations (certain configs can't overlap)
         if (SYMMETRY_DETECTION || USE_LIFTING) {
             USE_BITSTRING_SORT_OPT = false;
-            USE_APPLY_OPT = false;
         }
 
         if (!USE_LIFTING) {

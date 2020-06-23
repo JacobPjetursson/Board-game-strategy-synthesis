@@ -32,7 +32,7 @@ public class Rule {
     private Move move;
 
     // index in FFT
-    private int ruleIndex = -1;
+    protected int ruleIndex = -1;
 
     // parsing constructor
     public Rule(String preconStr, String actionStr) {
@@ -46,7 +46,7 @@ public class Rule {
             setAllPreconditions();
         }
         removeActionPrecons();
-        if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
+        if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
     }
 
     public Rule(LiteralSet precons, Action action) {
@@ -54,7 +54,7 @@ public class Rule {
         this.preconditions = precons;
         setAllPreconditions();
         removeActionPrecons();
-        if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
+        if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
     }
 
     // GDL Constructor
@@ -85,6 +85,9 @@ public class Rule {
 
     public void setRuleIndex(int index) {
         ruleIndex = index;
+        if (SYMMETRY_DETECTION)
+            for (Rule ru : symmetryRules)
+                ru.setRuleIndex(index);
     }
 
     public int getRuleIndex() {
@@ -103,7 +106,7 @@ public class Rule {
         if (!action.getPreconditions().contains(l)) // do not include precondition from action
             preconditions.add(l);
         allPreconditions.add(l);
-        if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
+        if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
     }
 
     public void addPrecondition(GdlSentence s) {
@@ -115,7 +118,7 @@ public class Rule {
         this.preconditions.remove(l);
         if (!action.getPreconditions().contains(l))
             this.allPreconditions.remove(l);
-        if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
+        if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
     }
 
     public void removePrecondition(GdlSentence s) {
@@ -147,13 +150,13 @@ public class Rule {
         else
             this.action = a;
         removeActionPrecons();
-        if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
+        if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
     }
 
     // Gdl
     public void setMove(Move m) {
         this.move = m;
-        if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
+        if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
     }
 
     public void setPreconditions(LiteralSet precons) {
@@ -161,7 +164,7 @@ public class Rule {
             this.preconditions = new LiteralSet();
         else
             this.preconditions = precons;
-        if (SYMMETRY_DETECTION) this.symmetryRules = getSymmetryRules();
+        if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
     }
 
     // Gdl
@@ -245,6 +248,7 @@ public class Rule {
 
     // Lifts a single propositional symbol to a predicate symbol
     // Takes as arg the index to lift
+    // returns null if the lifting is illegal (it creates inconsistencies)
     public PredRule liftAll(int prop) {
         LiteralSet newPrecs = new LiteralSet();
         for (Literal l : preconditions) {
@@ -257,7 +261,11 @@ public class Rule {
         for (Literal l : action.rems)
             remSet.add(l.liftAll(prop));
         Action a = new Action(addSet, remSet);
-        return new PredRule(newPrecs, a);
+        PredRule pr = new PredRule(newPrecs, a);
+        if (pr.isInConsistent())
+            return null;
+        pr.setRuleIndex(this.ruleIndex);
+        return pr;
     }
 
     // returns sorted list based on most reoccurring index (which we will prioritize when lifting)
@@ -331,15 +339,22 @@ public class Rule {
         return action.getFormattedString();
     }
 
+    private HashSet<SymmetryRule> initializeSymmetryRules() {
+        HashSet<SymmetryRule> symRules = FFTManager.getSymmetryRules.apply(this);
+        for (Rule r : symRules)
+            r.setRuleIndex(this.ruleIndex);
+        return symRules;
+    }
+
     public HashSet<SymmetryRule> getSymmetryRules() {
-        return FFTManager.getSymmetryRules.apply(this);
+        return symmetryRules;
     }
 
     public HashSet<FFTMove> apply(FFTNode node) {
         LiteralSet stLiterals = node.convert();
         HashSet<FFTMove> moves = new HashSet<>();
         // make quick test by bitstring comparisons
-        if (getBitString() > stLiterals.getBitString())
+        if (!SYMMETRY_DETECTION && getBitString() > stLiterals.getBitString())
             return moves;
 
         FFTMove m = match(this, stLiterals);

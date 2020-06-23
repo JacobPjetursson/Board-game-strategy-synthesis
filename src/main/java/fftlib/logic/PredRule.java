@@ -9,40 +9,45 @@ import java.util.HashSet;
 
 // TODO - make common super class for Rule and PredRule
 public class PredRule extends Rule{
-    public HashSet<Rule> groundedRules;
+    private HashSet<Rule> groundedRules;
+    private boolean inconsistent;
 
     public PredRule(LiteralSet preconditions, Action action) {
         this.preconditions = preconditions;
         this.action = action;
-        groundedRules = getGroundedRules();
+        groundedRules = initializeGroundedRules();
     }
 
     public void addPrecondition(Literal l) {
-        if (action == null)
-            System.out.println("wuut?");
-        if (l == null)
-            System.out.println("literal null?");
-        if (!action.getPreconditions().contains(l)) // do not include precondition from action
+        if (l instanceof PredLiteral || !action.getPreconditions().contains(l))
             preconditions.add(l);
-        groundedRules = getGroundedRules();
+        groundedRules = initializeGroundedRules();
     }
 
     public void removePrecondition(Literal l) {
         this.preconditions.remove(l);
-        groundedRules = getGroundedRules();
+        groundedRules = initializeGroundedRules();
     }
 
     public HashSet<Rule> getGroundedRules() {
+        return groundedRules;
+    }
+
+    public boolean isInConsistent() {
+        return inconsistent;
+    }
+
+    private HashSet<Rule> initializeGroundedRules() {
         HashSet<Rule> rules = new HashSet<>();
         for (int prop : FFTManager.legalIndices) {
-            boolean illegalGrounding = false;
+            boolean legalGrounding = true;
             LiteralSet litset = new LiteralSet();
             for (Literal l : preconditions) {
                 if (l instanceof PredLiteral) {
                     PredLiteral pl = (PredLiteral) l;
                     Literal groundedLit = pl.groundAll(prop);
                     if (groundedLit == null) {
-                        illegalGrounding = true;
+                        legalGrounding = false;
                         break;
                     }
                     litset.add(groundedLit);
@@ -57,7 +62,7 @@ public class PredRule extends Rule{
                     PredLiteral pr = (PredLiteral) add;
                     Literal groundedLit = pr.groundAll(prop);
                     if (groundedLit == null) {
-                        illegalGrounding = true;
+                        legalGrounding = false;
                         break;
                     }
                     addSet.add(groundedLit);
@@ -70,7 +75,7 @@ public class PredRule extends Rule{
                     PredLiteral pr = (PredLiteral) rem;
                     Literal groundedLit = pr.groundAll(prop);
                     if (groundedLit == null) {
-                        illegalGrounding = true;
+                        legalGrounding = false;
                         break;
                     }
                     remSet.add(groundedLit);
@@ -78,11 +83,30 @@ public class PredRule extends Rule{
                     remSet.add(rem.clone());
                 }
             }
+            // check for inconsistencies
             Action a = new Action(addSet, remSet);
-            if (!illegalGrounding)
+            if (!a.isLegal(litset)) {
+                inconsistent = true;
+            }
+            for (Literal l : litset) {
+                Literal negLit = new Literal(l);
+                if (litset.contains(negLit)) {
+                    inconsistent = true;
+                    break;
+                }
+            }
+            if (inconsistent)
+                return null;
+            if (legalGrounding)
                 rules.add(new Rule(litset, a));
         }
         return rules;
+    }
+
+    public void setRuleIndex(int index) {
+        this.ruleIndex = index;
+        for (Rule gr : groundedRules)
+            gr.setRuleIndex(index);
     }
 
 

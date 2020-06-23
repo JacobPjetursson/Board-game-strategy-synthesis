@@ -30,4 +30,8 @@ public class SymmetryRule extends Rule { // Simpler rule class for rules in symm
         return this.preconditions.equals(rule.preconditions) && this.action.equals(rule.action);
     }
 
+    public void setRuleIndex(int index) {
+        this.ruleIndex = index;
+    }
+
 }
