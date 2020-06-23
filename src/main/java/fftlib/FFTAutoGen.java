@@ -280,14 +280,14 @@ public class FFTAutoGen {
     private static void fillByIterating(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap, boolean lastRule) {
         if (!lastRule) {
             if (!SINGLE_THREAD) {
-                appliedStates.values().parallelStream().forEach(node ->
+                reachableStates.values().parallelStream().forEach(node ->
                         insert(node, r, appliedMap, false));
             } else {
-                for (FFTNode n : appliedStates.values())
+                for (FFTNode n : reachableStates.values())
                     insert(n, r, appliedMap, false);
             }
         }
-        if (USE_BITSTRING_SORT_OPT) {
+        else if (USE_BITSTRING_SORT_OPT) {
             long code = r.getBitString();
             // TODO - multithread
             for (Map.Entry<Long, FFTNode> entry : applicableStates.getCodeMap().entrySet()) {
