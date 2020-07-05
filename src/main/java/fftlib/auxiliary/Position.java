@@ -34,7 +34,7 @@ public class Position {
             colMap.put(i, rLong);
         }
 
-        for (int i = 0; i < 3; i++) { // occ
+        for (int i = -2; i < 3; i++) { // occ
             long rLong = (long) (r.nextDouble() * range);
             occMap.put(i, rLong);
         }

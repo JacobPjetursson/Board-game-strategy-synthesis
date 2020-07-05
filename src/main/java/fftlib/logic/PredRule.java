@@ -3,7 +3,6 @@ package fftlib.logic;
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
-import fftlib.game.LiteralSet;
 
 import java.util.HashSet;
 

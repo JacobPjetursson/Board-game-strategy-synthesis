@@ -1,8 +1,7 @@
 package mens_morris;
 
 import fftlib.auxiliary.Position;
-import fftlib.game.LiteralSet;
-import fftlib.logic.Action;
+import fftlib.logic.LiteralSet;
 import fftlib.logic.Literal;
 import misc.Config;
 

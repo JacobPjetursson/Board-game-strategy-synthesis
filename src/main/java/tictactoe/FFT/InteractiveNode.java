@@ -6,15 +6,12 @@ import fftlib.logic.Literal;
 import fftlib.auxiliary.Position;
 import fftlib.logic.Rule;
 import fftlib.game.FFTNode;
-import fftlib.game.LiteralSet;
 import fftlib.gui.interactiveFFTNode;
 import tictactoe.game.Controller;
 import tictactoe.game.Move;
 import tictactoe.game.Node;
 import tictactoe.gui.board.BoardTile;
 import tictactoe.gui.board.PlayBox.InteractivePlayBox;
-
-import java.util.ArrayList;
 
 import static misc.Globals.*;
 import static tictactoe.gui.board.BoardTile.blueStr;
@@ -59,10 +56,9 @@ public class InteractiveNode implements interactiveFFTNode {
 
     public void setActionFromTile(BoardTile bt) {
         for (int i = 1; i < 4; i++) {
+            // todo
             Position pos = new Position(bt.getRow(), bt.getCol(), i);
-            Literal l = new Literal(Atoms.posToId.get(pos), false);
-            FFTManager.currFFT.removePrecondition(rule, l);
-            l.setNegated(true);
+            Literal l = new Literal(Atoms.posToId.get(pos));
             FFTManager.currFFT.removePrecondition(rule, l);
         }
         if (actionTile != null) {

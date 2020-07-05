@@ -2,10 +2,9 @@ package fftlib.logic;
 
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
-import fftlib.game.LiteralSet;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Objects;
 
 
 public class Action {
@@ -75,15 +74,8 @@ public class Action {
 
     public boolean isLegal(LiteralSet stateLiterals)  {
         for (Literal l : getPreconditions()) {
-            if (l.negated) {
-                Literal lit = new Literal(l.id);
-                boolean legal = !stateLiterals.contains(lit);
-                if (!legal)
-                    return false;
-            }
-            else if (!stateLiterals.contains(l)) {
+            if (!stateLiterals.contains(l))
                 return false;
-            }
         }
         return true;
     }
@@ -118,11 +110,11 @@ public class Action {
 
     @Override
     public int hashCode() {
-        return (int) getCode();
+        return getCode().intValue();
     }
 
-    private long getCode() {
-        return this.adds.getBitString() + this.rems.getBitString();
+    private BigInteger getCode() {
+        return this.adds.getBitString().add(this.rems.getBitString());
     }
 
     public String toString() {

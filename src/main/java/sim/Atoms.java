@@ -3,7 +3,7 @@ package sim;
 import fftlib.logic.Action;
 import fftlib.logic.Literal;
 import fftlib.auxiliary.Position;
-import fftlib.game.LiteralSet;
+import fftlib.logic.LiteralSet;
 import misc.Config;
 
 import java.util.*;

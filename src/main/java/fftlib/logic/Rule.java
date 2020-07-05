@@ -4,13 +4,13 @@ import fftlib.FFTManager;
 import fftlib.GGPAutogen.GGPManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
-import fftlib.game.LiteralSet;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 
+import java.math.BigInteger;
 import java.util.*;
 
 import static misc.Config.ENABLE_GGP_PARSER;
@@ -94,12 +94,8 @@ public class Rule {
         return ruleIndex;
     }
 
-    public long getBitString() {
+    public BigInteger getBitString() {
         return getAllPreconditions().getBitString();
-    }
-
-    public long getNegativeBitString() {
-        return getAllPreconditions().getNegativeBitString();
     }
 
     protected void addPrecondition(Literal l) {
@@ -354,7 +350,7 @@ public class Rule {
         LiteralSet stLiterals = node.convert();
         HashSet<FFTMove> moves = new HashSet<>();
         // make quick test by bitstring comparisons
-        if (!SYMMETRY_DETECTION && getBitString() > stLiterals.getBitString())
+        if (!SYMMETRY_DETECTION && getBitString().compareTo(stLiterals.getBitString()) > 0)
             return moves;
 
         FFTMove m = match(this, stLiterals);
@@ -382,7 +378,7 @@ public class Rule {
 
     private FFTMove match(Rule rule, LiteralSet stLiterals) {
         boolean match = true;
-        for (Literal l : rule.allPreconditions) {
+        for (Literal l : rule.preconditions) {
             match = matchLiteral(l, stLiterals);
             if (!match)
                 break;
@@ -395,10 +391,6 @@ public class Rule {
     }
 
     private boolean matchLiteral(Literal lit, LiteralSet stLiterals) {
-        if (lit.negated) {
-            Literal l = new Literal(lit.id);
-            return !stLiterals.contains(l);
-        }
         return stLiterals.contains(lit);
     }
     

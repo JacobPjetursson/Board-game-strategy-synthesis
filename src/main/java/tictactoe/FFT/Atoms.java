@@ -1,13 +1,15 @@
 package tictactoe.FFT;
 
-import fftlib.FFTManager;
 import fftlib.logic.Action;
 import fftlib.logic.Literal;
 import fftlib.auxiliary.Position;
-import fftlib.game.LiteralSet;
+import fftlib.logic.LiteralSet;
 import misc.Config;
 
 import java.util.*;
+
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
 
 public class Atoms {
 
@@ -17,6 +19,14 @@ public class Atoms {
     public static HashMap<Integer, Position> idToPos;
     public static HashMap<Position, Integer> posToId;
     public static HashMap<Action, LiteralSet> actionToPrecons;
+
+    public static void addToSets(int id, String name, int row, int col, int occ) {
+        gameAtoms.add(id);
+        stringToId.put(name, id);
+        idToString.put(id, name);
+        idToPos.put(id, new Position(row, col, occ));
+        posToId.put(new Position(row, col, occ), id);
+    }
 
     static {
         stringToId = new HashMap<>();
@@ -31,7 +41,7 @@ public class Atoms {
         if (!Config.RANDOM_SEED)
             random.setSeed(Config.SEED);
         LinkedList<Integer> ids = new LinkedList<>();
-        for (int i = 1; i <= 18; i++)
+        for (int i = 1; i <= 36; i++)
             ids.add(i);
         Collections.shuffle(ids, random);
 
@@ -41,19 +51,19 @@ public class Atoms {
             for (int j = 0; j < 3; j++) {
                 id = ids.pop();
                 s = String.format("P1(%s, %s)", i, j);
-                gameAtoms.add(id);
-                stringToId.put(s, id);
-                idToString.put(id, s);
-                idToPos.put(id, new Position(i, j, 1));
-                posToId.put(new Position(i, j, 1), id);
+                addToSets(id, s, i, j, PLAYER1);
+
+                id = ids.pop();
+                s = String.format("!P1(%s, %s)", i, j);
+                addToSets(id, s, i, j, -PLAYER1);
 
                 id = ids.pop();
                 s = String.format("P2(%s, %s)", i, j);
-                gameAtoms.add(id);
-                stringToId.put(s, id);
-                idToString.put(id, s);
-                idToPos.put(id, new Position(i, j, 2));
-                posToId.put(new Position(i, j, 2), id);
+                addToSets(id, s, i, j, PLAYER2);
+
+                id = ids.pop();
+                s = String.format("!P2(%s, %s)", i, j);
+                addToSets(id, s, i, j, -PLAYER2);
 
                 LiteralSet actionPrecons = new LiteralSet();
                 actionPrecons.add(new Literal(String.format("!P1(%s, %s)", i, j)));

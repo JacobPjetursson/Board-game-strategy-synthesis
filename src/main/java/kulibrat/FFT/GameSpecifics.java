@@ -1,15 +1,11 @@
 package kulibrat.FFT;
 
-import fftlib.logic.Action;
+import fftlib.logic.*;
 import fftlib.auxiliary.Position;
-import fftlib.logic.Literal;
-import fftlib.logic.Rule;
-import fftlib.logic.SymmetryRule;
 import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
 import kulibrat.game.Controller;
-import kulibrat.game.Logic;
 import kulibrat.game.Node;
 import misc.Config;
 

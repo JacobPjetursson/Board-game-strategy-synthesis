@@ -5,6 +5,7 @@ import fftlib.game.FFTNode;
 import fftlib.game.NodeMapping;
 import misc.Config;
 
+import java.math.BigInteger;
 import java.util.*;
 
 import static misc.Config.RULE_ORDERING;
@@ -17,7 +18,7 @@ import static misc.Globals.*;
  */
 public class NodeMap {
     // TODO - super non-important, but would be nice to have this class represented as a single map somehow
-    private TreeMap<Long, FFTNode> codeMap;
+    private TreeMap<BigInteger, FFTNode> codeMap;
     private Map<FFTNode, FFTNode> map;
 
     public NodeMap() {
@@ -50,7 +51,7 @@ public class NodeMap {
         return map.values();
     }
 
-    public FFTNode get(long key) {
+    public FFTNode get(BigInteger key) {
         return codeMap.get(key);
     }
 
@@ -64,7 +65,7 @@ public class NodeMap {
         return map.size();
     }
 
-    public TreeMap<Long, FFTNode> getCodeMap() {
+    public TreeMap<BigInteger, FFTNode> getCodeMap() {
         return codeMap;
     }
 
@@ -112,7 +113,7 @@ public class NodeMap {
         }
 
         private int compareBitString(FFTNode n1, FFTNode n2) {
-            long bitStringDiff = n1.convert().getBitString() - n2.convert().getBitString();
+            int bitStringDiff = n1.convert().getBitString().compareTo(n2.convert().getBitString());
             if (bitStringDiff > 0)
                 return 1;
             else if (bitStringDiff < 0)

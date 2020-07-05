@@ -6,7 +6,7 @@ import fftlib.auxiliary.Transform;
 import fftlib.game.FFTGameSpecifics;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
-import fftlib.game.LiteralSet;
+import fftlib.logic.LiteralSet;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
 import fftlib.logic.Action;
@@ -71,7 +71,7 @@ public class GameSpecifics implements FFTGameSpecifics {
             return new Action(addSet, remSet);
         }
     }
-
+    // todo
     @Override
     public LiteralSet nodeToLiterals(FFTNode n) {
         Node node = (Node) n;
@@ -91,7 +91,7 @@ public class GameSpecifics implements FFTGameSpecifics {
                     continue;
                 Position pos = new Position(i, j, occ);
                 int id = Atoms.posToId.get(pos);
-                literals.add(new Literal(id, false));
+                literals.add(new Literal(id));
             }
         }
         return literals;
@@ -266,12 +266,12 @@ public class GameSpecifics implements FFTGameSpecifics {
                 // make set of all relevant literals from this cell
                 for (occ = PLAYER1; occ <= PLAYER2; occ++) {
                     pos = new Position(row, col, occ);
-                    l = new Literal(posToId(pos), false);
+                    l = new Literal(posToId(pos));
                     if (precons.contains(l)) {
                         setExists = true;
                         break;
                     }
-                    negLit = new Literal(posToId(pos), true);
+                    negLit = new Literal(posToId(pos));
                     if (!precons.contains(negLit)) {
                         litSet.add(l);
                     }
@@ -331,12 +331,12 @@ public class GameSpecifics implements FFTGameSpecifics {
                 // make set of all relevant literals from this cell
                 for (occ = PLAYER1; occ <= PLAYER2; occ++) {
                     pos = new Position(row, col, occ);
-                    l = new Literal(posToId(pos), false);
+                    l = new Literal(posToId(pos));
                     if (precons.contains(l)) {
                         combinations = 1;
                         break;
                     }
-                    lneg = new Literal(posToId(pos), true);
+                    lneg = new Literal(posToId(pos));
                     if (precons.contains(lneg))
                         combinations--;
                 }

@@ -3,15 +3,15 @@ package fftlib;
 import fftlib.auxiliary.NodeMap;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
-import fftlib.game.LiteralSet;
+import fftlib.logic.LiteralSet;
 import fftlib.logic.*;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static misc.Config.*;
 import static misc.Globals.PLAYER1;
-import static misc.Globals.PLAYER2;
 
 public class FFTAutoGen {
     // States that are reachable when playing with a partial or total strategy
@@ -191,10 +191,10 @@ public class FFTAutoGen {
     }
 
     private static Rule addRule(FFTNode n) {
-        LiteralSet minSet = new LiteralSet(n.convert().getAll());
+        LiteralSet stSet = new LiteralSet(n.convert());
         FFTMove bestMove = FFTSolution.queryNode(n).move;
 
-        Rule r = new Rule(minSet, bestMove.convert()); // rule from state-move pair
+        Rule r = new Rule(stSet, bestMove.convert()); // rule from state-move pair
         fft.append(r);
 
         // DEBUG
@@ -243,10 +243,7 @@ public class FFTAutoGen {
                 // sort the literals so we start with literal with lowest ID
                 TreeMap<Integer, Literal> literalSet = new TreeMap<>();
                 for (Literal l : r.getPreconditions()) {
-                    if (l.negated)
-                        literalSet.put(-l.id, l);
-                    else
-                        literalSet.put(l.id, l);
+                    literalSet.put(l.id, l);
                 }
                 precons = literalSet.values();
             } else {
@@ -256,7 +253,6 @@ public class FFTAutoGen {
                 System.out.println("SIMPLIFICATION ITERATION: " + i++);
             prevSize = precons.size();
             for (Literal l : precons) {
-                System.out.println("literal: " + l);
                 if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO REMOVE: " + l.getName());
                 fft.removePrecondition(r, l);
                 if (!verifyRule(r, lastRule, false)) {
@@ -303,10 +299,10 @@ public class FFTAutoGen {
             }
         }
         if (USE_BITSTRING_SORT_OPT) {
-            long code = r.getAllPreconditions().getBitString();
+            BigInteger code = r.getAllPreconditions().getBitString();
             // TODO - multithread
-            for (Map.Entry<Long, FFTNode> entry : applicableStates.getCodeMap().entrySet()) {
-                if (entry.getKey() < code)
+            for (Map.Entry<BigInteger, FFTNode> entry : applicableStates.getCodeMap().entrySet()) {
+                if (entry.getKey().compareTo(code) < 0)
                     break;
                 insert(entry.getValue(), r, appliedMap, lastRule);
             }

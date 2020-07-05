@@ -4,9 +4,11 @@ import fftlib.FFTAutoGen;
 import fftlib.FFTManager;
 import fftlib.game.FFTNode;
 import fftlib.game.FFTSolver;
+import fftlib.logic.Action;
 import fftlib.logic.FFT;
 import fftlib.logic.Rule;
 import tictactoe.FFT.GameSpecifics;
+import tictactoe.game.Node;
 
 import java.util.HashMap;
 
@@ -16,7 +18,7 @@ public class Demo {
         GameSpecifics gs = new GameSpecifics();
         FFTManager.initialize(gs);
         FFTSolver.solveGame();
-
+/*
         FFT loadedFFT = FFTManager.currFFT;
         FFTManager.autogenFFT(loadedFFT);
         HashMap<FFTNode, FFTNode> loadedReach = new HashMap<>(FFTAutoGen.getReachableStates());
@@ -35,6 +37,8 @@ public class Demo {
             }
         }
 
+
+ */
 /*
         System.out.println("rules size: " + fft.ruleGroups.get(0).rules.size());
         System.out.println("ruleList size: " + fft.getRuleList().size());
@@ -53,18 +57,31 @@ public class Demo {
         for (Rule ru : fft.getRuleList())
             if (ru.getRuleIndex() == 5)
                 System.out.println("ARGHHH");
-
+                */
+        for (int atom : FFTManager.sortedGameAtoms)
+            System.out.println(FFTManager.getAtomName.apply(atom));
         Node test1 = new Node();
-        Node test2 = new Node(new int[][] {{0, 0, 0}, {0, 0, 0}, {0, 0, 1}}, 2);
+        Node test2 = new Node(new int[][] {{0, 2, 0}, {0, 0, 0}, {0, 0, 0}}, 1);
         Node test3 = new Node(new int[][] {{0, 0, 0}, {0, 0, 0}, {0, 2, 1}}, 1);
         Node test4 = new Node(new int[][] {{1, 0, 0}, {0, 0, 0}, {0, 2, 1}}, 2);
         Node test5 = new Node(new int[][] {{1, 0, 2}, {0, 0, 0}, {0, 2, 1}}, 1);
+        System.out.println(test1.convert().getBitString());
+        System.out.println(test1.convert());
+        System.out.println(test2.convert().getBitString());
+        System.out.println(test2.convert());
+        System.out.println(test3.convert().getBitString());
+        System.out.println(test3.convert());
+        System.out.println(test4.convert().getBitString());
+        System.out.println(test4.convert());
+        System.out.println(test5.convert().getBitString());
+        System.out.println(test5.convert());
+        /*
 
-        Rule r1 = new Rule(test1.convert().getAll(), new Action("P1(0, 0)"));
-        Rule r2 = new Rule(test2.convert().getAll(), new Action("P1(0, 1)"));
-        Rule r3 = new Rule(test3.convert().getAll(), new Action("P1(0, 2)"));
-        Rule r4 = new Rule(test4.convert().getAll(), new Action("P1(1, 0)"));
-        Rule r5 = new Rule(test5.convert().getAll(), new Action("P1(1, 1)"));
+        Rule r1 = new Rule(test1.convert(), new Action("P1(0, 0)"));
+        Rule r2 = new Rule(test2.convert(), new Action("P1(0, 1)"));
+        Rule r3 = new Rule(test3.convert(), new Action("P1(0, 2)"));
+        Rule r4 = new Rule(test4.convert(), new Action("P1(1, 0)"));
+        Rule r5 = new Rule(test5.convert(), new Action("P1(1, 1)"));
         Rule r6 = new Rule("P1(1, 2) AND !P2(2, 0) AND !P2(0, 1)", "+P1(1, 1)");
         Rule r7 = new Rule("!P1(1, 2) AND P2(2, 0) AND P2(0, 1)", "+P1(1, 1)");
         Rule r8 = new Rule("!P2(0, 1)", "+P1(1, 1)");

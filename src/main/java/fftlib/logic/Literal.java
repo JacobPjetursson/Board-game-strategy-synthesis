@@ -6,10 +6,9 @@ import java.util.ArrayList;
 
 public class Literal {
     public int id;
-    public boolean negated;
 
     // used for cartesian product to allow the option of not picking any literal
-    public static Literal NULL = new Literal(0, false);
+    public static Literal NULL = new Literal(0);
 
     public Literal() {
 
@@ -17,19 +16,22 @@ public class Literal {
 
     public Literal(int id) {
         this.id = id;
-        this.negated = false;
     }
 
-    public Literal(int id, boolean neg) {
-        this.id = id;
-        this.negated = neg;
+    public boolean isNegated() {
+        return getName().startsWith("!");
+    }
+
+    public void setNegated(boolean negated) {
+        String name = getName();
+        if (negated && !name.startsWith("!")) {
+            this.id = FFTManager.getAtomId.apply("!" + name);
+        } else if (name.startsWith("!")){
+            this. id = FFTManager.getAtomId.apply(name.substring(1));
+        }
     }
 
     public Literal(String name) {
-        if (name.startsWith("!")) {
-            this.negated = true;
-            name = name.substring(1);
-        }
         try {
             this.id = FFTManager.getAtomId.apply(name);
         } catch (Exception e) {
@@ -41,11 +43,6 @@ public class Literal {
 
     public Literal(Literal duplicate) {
         this.id = duplicate.id;
-        this.negated = duplicate.negated;
-    }
-
-    public void setNegated(boolean negated) {
-        this.negated = negated;
     }
 
     @Override
@@ -61,19 +58,16 @@ public class Literal {
         if (this == literal)
             return true;
 
-        return this.id == literal.id && this.negated == literal.negated;
+        return this.id == literal.id;
     }
 
     @Override
     public int hashCode() {
-        if (negated)
-            return -id;
         return id;
     }
 
     public String getName() {
-        String negPfx = negated ? "!" : "";
-        return negPfx + FFTManager.getAtomName.apply(id);
+        return FFTManager.getAtomName.apply(id);
     }
 
     @Override
@@ -113,11 +107,9 @@ public class Literal {
         String[] comps = getName().split("\\(");
         String newBody = "(" + comps[1].replace(oldIdxStr, newIdxStr);
         String newName = comps[0] + newBody;
-        if (newName.startsWith("!"))
-            newName = newName.substring(1);
         try {
             int id = FFTManager.getAtomId.apply(newName);
-            return new Literal(id, negated);
+            return new Literal(id);
         } catch (Exception ignored) {
             // return this literal if id does not exist
         }

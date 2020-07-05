@@ -1,10 +1,7 @@
 package sim;
 
 import com.google.common.collect.Sets;
-import fftlib.logic.Action;
-import fftlib.logic.Literal;
-import fftlib.logic.Rule;
-import fftlib.logic.SymmetryRule;
+import fftlib.logic.*;
 import fftlib.auxiliary.Position;
 import fftlib.auxiliary.Transform;
 import fftlib.game.*;
@@ -160,12 +157,12 @@ public class GameSpecifics implements FFTGameSpecifics {
                 // make set of all relevant literals from this cell
                 for (occ = PLAYER1; occ <= PLAYER2; occ++) {
                     pos = new Position(n1, n2, occ);
-                    Literal l = new Literal(posToId(pos), false);
+                    Literal l = new Literal(posToId(pos));
                     if (precons.contains(l)) {
                         setExists = true;
                         break;
                     }
-                    Literal negLit = new Literal(posToId(pos), true);
+                    Literal negLit = new Literal(posToId(pos));
                     if (!precons.contains(negLit)) {
                         litSet.add(l);
                     }
@@ -204,12 +201,12 @@ public class GameSpecifics implements FFTGameSpecifics {
                 // make set of all relevant literals from this cell
                 for (occ = PLAYER1; occ <= PLAYER2; occ++) {
                     pos = new Position(n1, n2, occ);
-                    Literal l = new Literal(posToId(pos), false);
+                    Literal l = new Literal(posToId(pos));
                     if (precons.contains(l)) {
                         combinations = 1;
                         break;
                     }
-                    Literal negLit = new Literal(posToId(pos), true);
+                    Literal negLit = new Literal(posToId(pos));
                     if (precons.contains(negLit))
                         combinations--;
                 }

@@ -6,10 +6,7 @@ import fftlib.auxiliary.Transform;
 import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
-import fftlib.logic.Action;
-import fftlib.logic.Literal;
-import fftlib.logic.Rule;
-import fftlib.logic.SymmetryRule;
+import fftlib.logic.*;
 import misc.Config;
 import tictactoe.game.Controller;
 import tictactoe.game.Move;
@@ -62,13 +59,26 @@ public class GameSpecifics implements FFTGameSpecifics {
     public LiteralSet nodeToLiterals(FFTNode n) {
         Node node = (Node) n;
         LiteralSet literals = new LiteralSet();
+        Position pos;
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 int occ = node.getBoard()[i][j];
-                if (occ == 0)
-                    continue;
-                Position pos = new Position(i, j, occ);
-                literals.add(new Literal(Atoms.posToId.get(pos), false));
+                if (occ == 0) {
+                    pos = new Position(i, j, -PLAYER1);
+                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    pos = new Position(i, j, -PLAYER2);
+                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                } else if (occ == 1) {
+                    pos = new Position(i, j, -PLAYER2);
+                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    pos = new Position(i, j, PLAYER1);
+                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                } else {
+                    pos = new Position(i, j, -PLAYER1);
+                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    pos = new Position(i, j, PLAYER2);
+                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                }
             }
         }
         return new LiteralSet(literals);
@@ -179,12 +189,12 @@ public class GameSpecifics implements FFTGameSpecifics {
                 // make set of all relevant literals from this cell
                 for (occ = PLAYER1; occ <= PLAYER2; occ++) {
                     pos = new Position(row, col, occ);
-                    Literal l = new Literal(posToId(pos), false);
+                    Literal l = new Literal(posToId(pos));
                     if (precons.contains(l)) {
                         setExists = true;
                         break;
                     }
-                    Literal negLit = new Literal(posToId(pos), true);
+                    Literal negLit = new Literal(posToId(pos));
                     if (!precons.contains(negLit)) {
                         litSet.add(l);
                     }
@@ -223,12 +233,12 @@ public class GameSpecifics implements FFTGameSpecifics {
                 // make set of all relevant literals from this cell
                 for (occ = PLAYER1; occ <= PLAYER2; occ++) {
                     pos = new Position(row, col, occ);
-                    Literal l = new Literal(posToId(pos), false);
+                    Literal l = new Literal(posToId(pos));
                     if (precons.contains(l)) {
                         combinations = 1;
                         break;
                     }
-                    Literal negLit = new Literal(posToId(pos), true);
+                    Literal negLit = new Literal(posToId(pos));
                     if (precons.contains(negLit))
                         combinations--;
                 }

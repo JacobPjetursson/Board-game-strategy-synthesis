@@ -1,7 +1,7 @@
 package sim;
 
 import fftlib.*;
-import fftlib.game.LiteralSet;
+import fftlib.logic.LiteralSet;
 import fftlib.logic.Action;
 import fftlib.logic.Literal;
 import fftlib.logic.Rule;

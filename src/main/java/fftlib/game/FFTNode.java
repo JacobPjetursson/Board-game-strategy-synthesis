@@ -1,6 +1,7 @@
 package fftlib.game;
 
 import fftlib.FFTManager;
+import fftlib.logic.LiteralSet;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,6 +10,9 @@ public abstract class FFTNode {
     public int turn;
     public boolean reachable = true;
     public HashSet<FFTNode> reachableParents;
+
+    // cached literalSet
+    public LiteralSet converted;
 
     public int getTurn() {
         return turn;
@@ -37,7 +41,9 @@ public abstract class FFTNode {
     }
 
     public LiteralSet convert() {
-        return FFTManager.nodeToLiterals.apply(this);
+        if (converted == null)
+            converted = FFTManager.nodeToLiterals.apply(this);
+        return converted;
     }
 
     public abstract ArrayList<? extends FFTMove> getLegalMoves();

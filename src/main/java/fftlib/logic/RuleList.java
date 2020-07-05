@@ -3,7 +3,6 @@ package fftlib.logic;
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
-import fftlib.game.LiteralSet;
 import misc.Config;
 
 import java.util.*;
@@ -11,7 +10,18 @@ import java.util.*;
 public class RuleList extends ArrayList<Rule> {
 
     private static final RuleComparator rc = new RuleComparator();
-    private static final ArrayList<Integer> sortedAtoms = FFTManager.sortedGameAtoms;
+    private static ArrayList<Integer> sortedAtoms;
+    static {
+        sortedAtoms = new ArrayList<>(FFTManager.sortedGameAtoms);
+        // remove all negative atoms (since we dont use those in the ruleList)
+        ArrayList<Integer> removeList = new ArrayList<>();
+        for (int atom : sortedAtoms) {
+            String name = FFTManager.getAtomName.apply(atom);
+            if (name.startsWith("!"))
+                removeList.add(atom);
+        }
+        sortedAtoms.removeAll(removeList);
+    }
 
     RuleList() {
         super();
@@ -25,7 +35,7 @@ public class RuleList extends ArrayList<Rule> {
     }
 
     public HashSet<FFTMove> apply(FFTNode n) {
-        return findMoves(n.convert().getAll());
+        return findMoves(n.convert());
     }
 
     public HashSet<FFTMove> findMoves(LiteralSet lSet) {
@@ -60,9 +70,10 @@ public class RuleList extends ArrayList<Rule> {
 
         ArrayList<Rule> appliedRules = new ArrayList<>();
         int atom = sortedAtoms.get(atomIdx++);
-
+        // todo
         Literal pos = new Literal(atom);
-        Literal neg = new Literal(atom, true);
+        String negName = "!" + pos.getName();
+        Literal neg = new Literal(negName);
 
         int posEnd = findInterval(pos, true, rules);
         int negStart = findInterval(neg, false, rules);

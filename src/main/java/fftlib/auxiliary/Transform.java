@@ -1,8 +1,7 @@
 package fftlib.auxiliary;
 
 import fftlib.*;
-import fftlib.game.FFTNode;
-import fftlib.game.LiteralSet;
+import fftlib.logic.LiteralSet;
 import fftlib.logic.Action;
 import fftlib.logic.Literal;
 import fftlib.logic.Rule;
@@ -193,7 +192,7 @@ public class Transform {
         Position pos = getPosFromId.apply(l.id);
         if (pos == null)
             return null;
-        preconBoard[pos.row][pos.col] = l.negated ? -pos.occ : pos.occ;
+        preconBoard[pos.row][pos.col] = l.isNegated() ? -pos.occ : pos.occ;
         return preconBoard;
     }
 
@@ -202,12 +201,9 @@ public class Transform {
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 Position pos = new Position(i, j, board[i][j]);
-                if (pos.occ < 0) {
-                    pos.occ = Math.abs(pos.occ);
-                    return new Literal(getIdFromPos.apply(pos), true);
-                }
-                else if (pos.occ > 0)
-                    return new Literal(getIdFromPos.apply(pos), false);
+                if (pos.occ == 0)
+                    continue;
+                return new Literal(getIdFromPos.apply(pos));
             }
         }
         return null;
@@ -253,7 +249,7 @@ public class Transform {
                     n2 = temp;
                 }
                 newPos = new Position(n1, n2, pos.occ);
-                precons.add(new Literal(getIdFromPos.apply(newPos), lit.negated));
+                precons.add(new Literal(getIdFromPos.apply(newPos)));
             }
             transformations.add(new SymmetryRule(precons, action));
         }
