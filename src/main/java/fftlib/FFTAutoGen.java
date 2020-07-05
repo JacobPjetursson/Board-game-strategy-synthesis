@@ -78,6 +78,7 @@ public class FFTAutoGen {
         makeRules();
         System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
+        double autoGenTimeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
 
         /*
         System.out.println("Set sizes before minimize:");
@@ -92,6 +93,7 @@ public class FFTAutoGen {
 
         int i = -1;
         //FFT copy = new FFT(fft);
+        timeStart = System.currentTimeMillis();
         if (MINIMIZE) {
             if (USE_MINIMIZE_OPT)
                 i = minimizeOpt();
@@ -99,7 +101,7 @@ public class FFTAutoGen {
                 i = fft.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
 
         }
-        double timeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
+        double timeSpentMinimize = (System.currentTimeMillis() - timeStart) / 1000.0;
 
         /*
         System.out.println("RULES WITH OLD MINIMIZE:");
@@ -125,7 +127,9 @@ public class FFTAutoGen {
                 " minimize iterations: " + fft.getAmountOfRules());
         System.out.println("Final amount of preconditions after " + i +
                 " minimize iterations: " + fft.getAmountOfPreconditions());
-        System.out.println("Time spent on Autogenerating: " + timeSpent + " seconds");
+        System.out.println("Time spent on Autogenerating: " + autoGenTimeSpent + " seconds");
+        System.out.println("Time spent on minimizing: " + timeSpentMinimize + " seconds");
+        System.out.println("Time spent in total: " + (timeSpentMinimize + autoGenTimeSpent) + " seconds");
         System.out.println("Final rules: \n" + fft);
 
         /*
@@ -238,8 +242,12 @@ public class FFTAutoGen {
             if (USE_BITSTRING_SORT_OPT && lastRule) { // outcomment lastRule if you want to compare to original minimization
                 // sort the literals so we start with literal with lowest ID
                 TreeMap<Integer, Literal> literalSet = new TreeMap<>();
-                for (Literal l : r.getPreconditions())
-                    literalSet.put(l.id, l);
+                for (Literal l : r.getPreconditions()) {
+                    if (l.negated)
+                        literalSet.put(-l.id, l);
+                    else
+                        literalSet.put(l.id, l);
+                }
                 precons = literalSet.values();
             } else {
                 precons = new LiteralSet(r.getPreconditions());
@@ -248,6 +256,7 @@ public class FFTAutoGen {
                 System.out.println("SIMPLIFICATION ITERATION: " + i++);
             prevSize = precons.size();
             for (Literal l : precons) {
+                System.out.println("literal: " + l);
                 if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO REMOVE: " + l.getName());
                 fft.removePrecondition(r, l);
                 if (!verifyRule(r, lastRule, false)) {
@@ -294,7 +303,7 @@ public class FFTAutoGen {
             }
         }
         if (USE_BITSTRING_SORT_OPT) {
-            long code = r.getBitString();
+            long code = r.getAllPreconditions().getBitString();
             // TODO - multithread
             for (Map.Entry<Long, FFTNode> entry : applicableStates.getCodeMap().entrySet()) {
                 if (entry.getKey() < code)

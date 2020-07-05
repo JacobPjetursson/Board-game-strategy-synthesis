@@ -36,7 +36,7 @@ public class ShowFFTPane extends VBox {
         lw = new ListView<>();
         lw.setPickOnBounds(false);
         lw.setPrefHeight(500);
-        lw.setPrefWidth(500);
+        lw.setPrefWidth(650);
 
 
         lw.setSelectionModel(new NoSelectionModel<>());
