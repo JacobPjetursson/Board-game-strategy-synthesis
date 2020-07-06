@@ -1,6 +1,6 @@
 package kulibrat.ai.Minimax;
 
-import fftlib.FFTSolution;
+import fftlib.game.FFTSolution;
 import fftlib.game.NodeMapping;
 import kulibrat.ai.AI;
 import kulibrat.game.Move;

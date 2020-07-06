@@ -1,6 +1,6 @@
 package tictactoe.ai;
 
-import fftlib.FFTSolution;
+import fftlib.game.FFTSolution;
 import fftlib.game.NodeMapping;
 import tictactoe.game.Move;
 import tictactoe.game.Node;

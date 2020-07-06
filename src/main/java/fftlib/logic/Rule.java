@@ -78,8 +78,8 @@ public class Rule {
     public Rule(Rule duplicate) {
         this.action = new Action(duplicate.action);
         this.preconditions = new LiteralSet(duplicate.preconditions);
+        this.allPreconditions = duplicate.allPreconditions;
         this.ruleIndex = duplicate.ruleIndex;
-        setAllPreconditions();
         if (SYMMETRY_DETECTION) this.symmetryRules = new HashSet<>(duplicate.symmetryRules);
     }
 

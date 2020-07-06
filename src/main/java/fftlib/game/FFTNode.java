@@ -12,7 +12,7 @@ public abstract class FFTNode {
     public HashSet<FFTNode> reachableParents;
 
     // cached literalSet
-    public LiteralSet converted;
+    private LiteralSet converted;
 
     public int getTurn() {
         return turn;

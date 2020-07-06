@@ -1,6 +1,6 @@
 package tictactoe.game;
 
-import fftlib.FFTSolution;
+import fftlib.game.FFTSolution;
 import fftlib.game.NodeMapping;
 import fftlib.logic.FFT;
 import fftlib.FFTManager;

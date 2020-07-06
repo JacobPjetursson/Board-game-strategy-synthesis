@@ -1,6 +1,6 @@
 package fftlib.auxiliary;
 
-import fftlib.FFTSolution;
+import fftlib.game.FFTSolution;
 import fftlib.game.FFTNode;
 import fftlib.game.NodeMapping;
 import misc.Config;

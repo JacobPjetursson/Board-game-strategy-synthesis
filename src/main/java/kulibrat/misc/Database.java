@@ -4,7 +4,7 @@
 package kulibrat.misc;
 
 import fftlib.game.FFTMove;
-import fftlib.FFTSolution;
+import fftlib.game.FFTSolution;
 import fftlib.game.FFTNode;
 import fftlib.game.NodeMapping;
 import kulibrat.ai.Minimax.LookupTableMinimax;

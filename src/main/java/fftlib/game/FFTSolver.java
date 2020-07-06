@@ -1,7 +1,6 @@
 package fftlib.game;
 
 import fftlib.FFTManager;
-import fftlib.FFTSolution;
 import misc.Config;
 
 import java.util.HashMap;

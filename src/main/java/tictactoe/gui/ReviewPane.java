@@ -1,8 +1,7 @@
 package tictactoe.gui;
 
 
-import fftlib.FFTSolution;
-import fftlib.game.FFTMove;
+import fftlib.game.FFTSolution;
 import fftlib.game.NodeMapping;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;

@@ -105,16 +105,16 @@ public class Action {
 
         Action action = (Action) obj;
         return this == action ||
-                (this.getCode() == action.getCode());
+                (this.adds.equals(action.adds) && this.rems.equals(action.rems));
     }
 
     @Override
+    // attempt to semi-uniquely hash two numbers
     public int hashCode() {
-        return getCode().intValue();
-    }
-
-    private BigInteger getCode() {
-        return this.adds.getBitString().add(this.rems.getBitString());
+        int hash = 23;
+        hash = hash * 31 + adds.getBitString().intValue();
+        hash = hash * 31 + rems.getBitString().intValue();
+        return hash;
     }
 
     public String toString() {

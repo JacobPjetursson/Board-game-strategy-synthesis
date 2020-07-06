@@ -1,7 +1,7 @@
 package fftlib.logic;
 
 import fftlib.FFTManager;
-import fftlib.FFTSolution;
+import fftlib.game.FFTSolution;
 import fftlib.GGPAutogen.Database;
 import fftlib.GGPAutogen.GGPManager;
 import fftlib.game.*;

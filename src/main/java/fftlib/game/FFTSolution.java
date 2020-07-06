@@ -1,9 +1,5 @@
-package fftlib;
+package fftlib.game;
 
-
-import fftlib.game.FFTMove;
-import fftlib.game.FFTNode;
-import fftlib.game.NodeMapping;
 
 import java.util.ArrayList;
 import java.util.HashMap;

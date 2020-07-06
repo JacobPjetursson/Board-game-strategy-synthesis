@@ -19,7 +19,7 @@ public class Node extends FFTNode {
     public Node() {
         board = new int[3][3];
         turn = PLAYER1;
-        zobrist_key = initHashCode();
+        initHashCode();
     }
 
     // Duplicate constructor
@@ -37,7 +37,7 @@ public class Node extends FFTNode {
     public Node(int[][] board, int turn) {
         this.board = board;
         this.turn = turn;
-        this.zobrist_key = initHashCode();
+        initHashCode();
     }
 
     // Non-root state
@@ -48,16 +48,15 @@ public class Node extends FFTNode {
         updateHashCode(parent);
     }
 
-    private long initHashCode() {
-        long hash = 0L;
+    public void initHashCode() {
+        zobrist_key = 0L;
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 int k = board[i][j]; // team occupying spot
-                hash = hash ^ Zobrist.board[i][j][k];
+                zobrist_key = zobrist_key ^ Zobrist.board[i][j][k];
             }
         }
-        hash = hash ^ Zobrist.turn[turn];
-        return hash;
+        zobrist_key = zobrist_key ^ Zobrist.turn[turn];
     }
 
     private void updateHashCode(Node parent) {
@@ -130,5 +129,9 @@ public class Node extends FFTNode {
     @Override
     public int hashCode() {
         return (int) zobrist_key;
+    }
+
+    public long getZobristKey() {
+        return zobrist_key;
     }
 }
