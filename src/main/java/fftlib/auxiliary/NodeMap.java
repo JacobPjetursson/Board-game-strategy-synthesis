@@ -1,15 +1,16 @@
 package fftlib.auxiliary;
 
+import fftlib.game.FFTMove;
 import fftlib.game.FFTSolution;
 import fftlib.game.FFTNode;
 import fftlib.game.NodeMapping;
-import misc.Config;
+import fftlib.logic.Rule;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-import static misc.Config.RULE_ORDERING;
-import static misc.Config.USE_BITSTRING_SORT_OPT;
+import static misc.Config.*;
 import static misc.Globals.*;
 
 /** This class offers a very dynamic setup that supports various structures all at once that shares common functions,
@@ -17,36 +18,50 @@ import static misc.Globals.*;
  * It helps compress a lot of the code in the FFTAutoGen class
  */
 public class NodeMap {
+    public static final int NO_SORT = 0;
+    public static final int BITSTRING_SORT = 1;
+    public static final int RULE_SORT = 2;
+
     // TODO - super non-important, but would be nice to have this class represented as a single map somehow
     private TreeMap<BigInteger, FFTNode> codeMap;
     private Map<FFTNode, FFTNode> map;
+    private final int sort;
+    private InvertedList nodeList;
 
-    public NodeMap() {
-        if (Config.USE_BITSTRING_SORT_OPT)
+    public NodeMap(int sort) {
+        this.sort = sort;
+        if (sort == BITSTRING_SORT)
             codeMap = new TreeMap<>(Comparator.reverseOrder());
-        else if (Config.USE_RULE_ORDERING) {
+        else if (sort == RULE_SORT) {
             map = new TreeMap<>(new NodeComparator());
         } else
             map = new HashMap<>();
+
+        if (USE_INVERTED_LIST_NODES_OPT)
+            nodeList = new InvertedList(true);
     }
 
 
     public void put(FFTNode n) {
-        if (USE_BITSTRING_SORT_OPT) {
+        if (USE_INVERTED_LIST_NODES_OPT)
+            nodeList.add(n);
+        if (sort == BITSTRING_SORT)
             codeMap.put(n.convert().getBitString(), n);
-        }
         else
             map.put(n, n);
+
     }
 
     public FFTNode remove(FFTNode n) {
-        if (USE_BITSTRING_SORT_OPT)
+        if (USE_INVERTED_LIST_NODES_OPT)
+            nodeList.remove(n);
+        if (sort == BITSTRING_SORT)
             return codeMap.remove(n.convert().getBitString());
         return map.remove(n);
     }
 
     public Collection<FFTNode> values() {
-        if (USE_BITSTRING_SORT_OPT)
+        if (sort == BITSTRING_SORT)
             return codeMap.values();
         return map.values();
     }
@@ -60,9 +75,16 @@ public class NodeMap {
     }
 
     public int size() {
-        if (USE_BITSTRING_SORT_OPT)
+        if (sort == BITSTRING_SORT)
             return codeMap.size();
         return map.size();
+    }
+
+    public boolean contains(FFTNode n) {
+        if (sort == BITSTRING_SORT)
+            return codeMap.containsKey(n.convert().getBitString());
+        return map.containsKey(n);
+
     }
 
     public TreeMap<BigInteger, FFTNode> getCodeMap() {
@@ -71,6 +93,35 @@ public class NodeMap {
 
     public Map<FFTNode, FFTNode> getMap() {
         return map;
+    }
+
+    public void findNodes(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
+        if (sort == BITSTRING_SORT) {
+            BigInteger code = r.getAllPreconditions().getBitString();
+            // TODO - multithread
+            for (Map.Entry<BigInteger, FFTNode> entry : codeMap.entrySet()) {
+                if (entry.getKey().compareTo(code) < 0)
+                    break;
+                insert(entry.getValue(), r, appliedMap);
+            }
+        }
+        else if (USE_INVERTED_LIST_NODES_OPT) {
+            nodeList.findNodes(r, appliedMap);
+        }
+        else if (!SINGLE_THREAD) {
+            values().parallelStream().forEach(node ->
+                    insert(node, r, appliedMap));
+        } else {
+            for (FFTNode n : values()) {
+                insert(n, r, appliedMap);
+            }
+        }
+    }
+
+    private static void insert(FFTNode n, Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> nodes) {
+        HashSet<FFTMove> moves = r.apply(n);
+        if (!moves.isEmpty())
+            nodes.put(n, moves);
     }
 
 

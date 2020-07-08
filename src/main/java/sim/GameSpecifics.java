@@ -46,12 +46,25 @@ public class GameSpecifics implements FFTGameSpecifics {
     public LiteralSet nodeToLiterals(FFTNode n) {
         Node node = (Node) n;
         LiteralSet literals = new LiteralSet();
+        Position pos;
         for (Line l : node.lines) {
             int occ = l.color;
-            if (occ == NO_COLOR)
-                continue;
-            Position pos = new Position(l.n1, l.n2, occ);
-            literals.add(new Literal(Atoms.posToId.get(pos)));
+            if (occ == NO_COLOR) {
+                pos = new Position(l.n1, l.n2, -PLAYER1);
+                literals.add(new Literal(Atoms.posToId.get(pos)));
+                pos = new Position(l.n1, l.n2, -PLAYER2);
+                literals.add(new Literal(Atoms.posToId.get(pos)));
+            } else if (occ == PLAYER1) {
+                pos = new Position(l.n1, l.n2, PLAYER1);
+                literals.add(new Literal(Atoms.posToId.get(pos)));
+                pos = new Position(l.n1, l.n2, -PLAYER2);
+                literals.add(new Literal(Atoms.posToId.get(pos)));
+            } else {
+                pos = new Position(l.n1, l.n2, -PLAYER1);
+                literals.add(new Literal(Atoms.posToId.get(pos)));
+                pos = new Position(l.n1, l.n2, PLAYER2);
+                literals.add(new Literal(Atoms.posToId.get(pos)));
+            }
         }
         return literals;
     }

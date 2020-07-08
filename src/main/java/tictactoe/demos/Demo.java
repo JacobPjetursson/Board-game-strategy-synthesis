@@ -1,16 +1,11 @@
 package tictactoe.demos;
 
-import fftlib.FFTAutoGen;
 import fftlib.FFTManager;
-import fftlib.game.FFTNode;
 import fftlib.game.FFTSolver;
-import fftlib.logic.Action;
-import fftlib.logic.FFT;
-import fftlib.logic.Rule;
+import fftlib.logic.*;
 import tictactoe.FFT.GameSpecifics;
+import tictactoe.game.Move;
 import tictactoe.game.Node;
-
-import java.util.HashMap;
 
 public class Demo {
 
@@ -18,11 +13,35 @@ public class Demo {
         GameSpecifics gs = new GameSpecifics();
         FFTManager.initialize(gs);
         FFTSolver.solveGame();
-/*
-        FFT loadedFFT = FFTManager.currFFT;
-        FFTManager.autogenFFT(loadedFFT);
-        HashMap<FFTNode, FFTNode> loadedReach = new HashMap<>(FFTAutoGen.getReachableStates());
-        System.out.println("Loaded fft applied size: " + loadedReach.size());
+        // make testrules
+        LiteralSet lSet = new LiteralSet();
+        Rule test1 = new Rule(lSet, new Action("P1(1, 1)"));
+
+        lSet = new LiteralSet();
+        lSet.add(new Literal("P1(0, 0)"));
+        Rule test2 = new Rule(lSet, new Action("P1(1, 1)"));
+
+        lSet = new LiteralSet();
+        lSet.add(new Literal("P1(0, 0)"));
+        lSet.add(new Literal("P2(2, 2)"));
+        Rule test3 = new Rule(lSet, new Action("P1(0, 2)"));
+
+        FFT fft = new FFT("Synthesis");
+        fft.addRuleGroup(new RuleGroup("Synthesis"));
+        fft.append(test1);
+        fft.append(test2);
+        fft.append(test3);
+
+        // make testNodes
+        Node testNode1 = new Node();
+        Node testNode2 = testNode1.getNextNode(new Move(0, 0, 1));
+        System.out.println("apply testnode1: " + testNode1);
+        System.out.println("testNode1 applies with move: " + fft.apply(testNode1));
+        System.out.println("apply testnode2: " + testNode2);
+        System.out.println("testNode2 applies with move: " + fft.apply(testNode2));
+
+
+        /*
 
         FFTManager.autogenFFT();
         FFT fft = FFTManager.currFFT;
@@ -37,7 +56,10 @@ public class Demo {
             }
         }
 
+         */
 
+
+/*
  */
 /*
         System.out.println("rules size: " + fft.ruleGroups.get(0).rules.size());
@@ -58,6 +80,7 @@ public class Demo {
             if (ru.getRuleIndex() == 5)
                 System.out.println("ARGHHH");
                 */
+        /*
         for (int atom : FFTManager.sortedGameAtoms)
             System.out.println(FFTManager.getAtomName.apply(atom));
         Node test1 = new Node();
@@ -75,6 +98,8 @@ public class Demo {
         System.out.println(test4.convert());
         System.out.println(test5.convert().getBitString());
         System.out.println(test5.convert());
+
+         */
         /*
 
         Rule r1 = new Rule(test1.convert(), new Action("P1(0, 0)"));

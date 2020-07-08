@@ -8,6 +8,9 @@ import misc.Config;
 
 import java.util.*;
 
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
+
 public class Atoms {
     public static HashMap<Integer, String> idToString;
     public static HashMap<String, Integer> stringToId;
@@ -15,6 +18,14 @@ public class Atoms {
     public static HashMap<Position, Integer> posToId;
     public static ArrayList<Integer> gameAtoms;
     public static HashMap<Action, LiteralSet> actionToPrecons;
+
+    public static void addToSets(int id, String name, int row, int col, int occ) {
+        gameAtoms.add(id);
+        stringToId.put(name, id);
+        idToString.put(id, name);
+        idToPos.put(id, new Position(row, col, occ));
+        posToId.put(new Position(row, col, occ), id);
+    }
 
     static {
         stringToId = new HashMap<>();
@@ -29,7 +40,7 @@ public class Atoms {
         if (!Config.RANDOM_SEED)
             random.setSeed(Config.SEED);
         LinkedList<Integer> ids = new LinkedList<>();
-        for (int i = 1; i <= 30; i++)
+        for (int i = 1; i <= 60; i++)
             ids.add(i);
         Collections.shuffle(ids, random);
 
@@ -39,19 +50,19 @@ public class Atoms {
             for (int j = i+1; j < 6; j++) {
                 id = ids.pop();
                 s = String.format("P1(%s, %s)", i, j);
-                gameAtoms.add(id);
-                stringToId.put(s, id);
-                idToPos.put(id, new Position(i, j, 1));
-                posToId.put(new Position(i, j, 1), id);
-                idToString.put(id, s);
+                addToSets(id, s, i, j, PLAYER1);
+
+                id = ids.pop();
+                s = String.format("!P1(%s, %s)", i, j);
+                addToSets(id, s, i, j, -PLAYER1);
 
                 id = ids.pop();
                 s = String.format("P2(%s, %s)", i, j);
-                gameAtoms.add(id);
-                stringToId.put(s, id);
-                idToPos.put(id, new Position(i, j, 2));
-                posToId.put(new Position(i, j, 2), id);
-                idToString.put(id, s);
+                addToSets(id, s, i, j, PLAYER2);
+
+                id = ids.pop();
+                s = String.format("!P2(%s, %s)", i, j);
+                addToSets(id, s, i, j, -PLAYER2);
 
 
                 LiteralSet actionPrecons = new LiteralSet();

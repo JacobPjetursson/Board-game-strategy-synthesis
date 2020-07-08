@@ -1,7 +1,5 @@
 package fftlib.logic;
 
-import fftlib.FFTManager;
-
 import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.List;

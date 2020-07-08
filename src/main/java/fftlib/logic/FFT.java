@@ -1,6 +1,7 @@
 package fftlib.logic;
 
 import fftlib.FFTManager;
+import fftlib.auxiliary.InvertedList;
 import fftlib.game.FFTSolution;
 import fftlib.GGPAutogen.Database;
 import fftlib.GGPAutogen.GGPManager;
@@ -30,6 +31,7 @@ public class FFT {
     // used for the efficient computation of looking up rules that apply
     // rulelist is only initialized after autogeneration, to avoid a bunch of unnecessary sorts
     private RuleList ruleList;
+    private final InvertedList invertedList = new InvertedList(false);
 
 
     public FFTNodeAndMove failingPoint = null;
@@ -89,34 +91,48 @@ public class FFT {
         // add to last rulegroup
         ruleGroups.get(ruleGroups.size()-1).rules.add(r);
         // add to sorted list of rules if initialized
-        if (ruleList != null)
+        if (USE_APPLY_OPT && ruleList != null)
             ruleList.sortedAdd(r);
+        else if (USE_INVERTED_LIST_RULES_OPT)
+            invertedList.add(r);
     }
 
     public void remove(Rule r) {
         for (RuleGroup rg : ruleGroups) {
             rg.rules.remove(r);
         }
-        ruleList.sortedRemove(r);
+        if (USE_APPLY_OPT && ruleList != null)
+            ruleList.sortedRemove(r);
+        else if (USE_INVERTED_LIST_RULES_OPT) {
+            invertedList.remove(r);
+        }
     }
 
     public void removePrecondition(Rule r, Literal l) {
-        if (ruleList == null)
-            r.removePrecondition(l);
-        else {
+        if (USE_APPLY_OPT && ruleList != null) {
             ruleList.sortedRemove(r);
             r.removePrecondition(l);
             ruleList.sortedAdd(r);
+        } else if (USE_INVERTED_LIST_RULES_OPT) {
+            invertedList.remove(r);
+            r.removePrecondition(l);
+            invertedList.add(r);
+        } else {
+            r.removePrecondition(l);
         }
     }
 
     public void addPrecondition(Rule r, Literal l) {
-        if (ruleList == null)
-            r.addPrecondition(l);
-        else {
+        if (ruleList != null && USE_APPLY_OPT) {
             ruleList.sortedRemove(r);
             r.addPrecondition(l);
             ruleList.sortedAdd(r);
+        } else if (USE_INVERTED_LIST_RULES_OPT) {
+            invertedList.remove(r);
+            r.addPrecondition(l);
+            invertedList.add(r);
+        } else {
+            r.addPrecondition(l);
         }
     }
 
@@ -163,18 +179,14 @@ public class FFT {
         return sb.toString();
     }
 
-    // optimized way of finding the correct move using the sorted ruleList
-    public HashSet<FFTMove> apply_optim(FFTNode node) {
-        return ruleList.apply(node);
-    }
-
     public HashSet<FFTMove> apply_slow(FFTNode node) {
         HashSet<FFTMove> moves = new HashSet<>();
         for (RuleGroup rg : ruleGroups) {
             for (Rule r : rg.rules) {
                 moves = r.apply(node);
-                if (!moves.isEmpty())
+                if (!moves.isEmpty()) {
                     return moves;
+                }
             }
         }
         return moves;
@@ -182,7 +194,9 @@ public class FFT {
 
     public HashSet<FFTMove> apply(FFTNode node) {
         if (USE_APPLY_OPT && ruleList != null)
-            return apply_optim(node);
+            return ruleList.apply(node);
+        if (USE_INVERTED_LIST_RULES_OPT)
+            return invertedList.apply(node);
         return apply_slow(node);
     }
 
@@ -221,16 +235,20 @@ public class FFT {
                 }
                 Rule r = itr.next();
                 itr.remove();
-                if (ruleList != null)
+                if (USE_APPLY_OPT && ruleList != null)
                     ruleList.sortedRemove(r);
+                else if (USE_INVERTED_LIST_RULES_OPT)
+                    invertedList.remove(r);
 
                 if (verify(team, true)) {
                     redundantRules.add(r);
                 }
                 else {
                     itr.add(r);
-                    if (ruleList != null)
+                    if (USE_APPLY_OPT && ruleList != null)
                         ruleList.sortedAdd(r);
+                    else if (USE_INVERTED_LIST_RULES_OPT)
+                        invertedList.add(r);
 
                     if (MINIMIZE_RULE_BY_RULE && minimize_precons)
                         minimizePreconditions(r, team);
@@ -263,7 +281,6 @@ public class FFT {
             }
         } else {
             LiteralSet precons = new LiteralSet(r.getPreconditions());
-
             for (Literal l : precons) {
                 removePrecondition(r, l);
                 if (!verify(team, true))

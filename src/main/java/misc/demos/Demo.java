@@ -1,22 +1,11 @@
 package misc.demos;
 
 import fftlib.FFTManager;
-import fftlib.auxiliary.InvertedList;
-import fftlib.game.FFTNode;
 import fftlib.game.FFTSolver;
-import fftlib.logic.Action;
-import fftlib.logic.Literal;
-import fftlib.logic.LiteralSet;
-import fftlib.logic.Rule;
-import tictactoe.FFT.GameSpecifics;
-import tictactoe.game.Node;
+import sim.GameSpecifics;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import static misc.Globals.PLAYER2;
+import static misc.Config.AUTOGEN_TEAM;
+import static misc.Config.MINIMIZE_PRECONDITIONS;
 
 public class Demo {
 
@@ -26,16 +15,15 @@ public class Demo {
 
         System.out.println("Solving game");
         FFTSolver.solveGame();
-        //FFTManager.autogenFFT();
-        //System.out.println("fft size: " + FFTManager.currFFT.size());
+        FFTManager.loadFFTs();
+        System.out.println("fft size: " + FFTManager.currFFT.size());
 
         // MINIMIZE TEST
-        //System.out.println("Minimizing");
-        //FFTManager.currFFT.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
+        System.out.println("Minimizing");
+        FFTManager.currFFT.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
 
-        // INVERTED LIST
-        InvertedList invertedList = new InvertedList(true);
 
+/*
         // testnodes
         ArrayList<FFTNode> testNodes = new ArrayList<>();
         Node test1 = new Node();
@@ -72,6 +60,8 @@ public class Demo {
             Node n = (Node) node;
             System.out.println(n.getZobristKey());
         }
+
+ */
 /*
         // testRule
         LiteralSet lSet = new LiteralSet();

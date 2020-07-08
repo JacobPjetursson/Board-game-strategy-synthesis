@@ -62,7 +62,7 @@ public class InteractiveNode implements interactiveFFTNode {
     }
 
     public void setAction(Action a) {
-        this.rule.setAction(a);
+        this.rule.parseAction(a);
         if (a == null)
             this.move = null;
         else
@@ -73,7 +73,7 @@ public class InteractiveNode implements interactiveFFTNode {
 
     public void removeAction() {
         pb.removeArrows();
-        rule.setAction(null);
+        rule.parseAction(null);
         this.move = null;
     }
 
@@ -173,7 +173,7 @@ public class InteractiveNode implements interactiveFFTNode {
 
     public void setArrowEndpoint(int row, int col) {
         move = new Move(selected.getRow(), selected.getCol(), row, col, perspective);
-        rule.setAction(move.convert());
+        rule.parseAction(move.convert());
 
         pb.removeArrows();
         highlightMoves(move.oldRow, move.oldCol, perspective,false);

@@ -440,7 +440,10 @@ public class Rule {
     public int hashCode() {
         if (SYMMETRY_DETECTION)
             return 31 * Objects.hash(symmetryRules, ruleIndex);
-        return 31 * Objects.hash(preconditions, action, ruleIndex);
+        int hash = 23;
+        hash = hash * 31 + getBitString().intValue();
+        hash = hash * 31 + action.hashCode();
+        return hash;
     }
 
 }

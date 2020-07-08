@@ -103,13 +103,7 @@ public class FFTManager {
 
 
         // Try loading ffts from file in working directory
-        ffts = load(fftPath);
-        // initialize rule lists for all FFT's
-        if (USE_APPLY_OPT)
-            for (FFT f : ffts)
-                f.initializeRuleList();
-        if (!ffts.isEmpty())
-            currFFT = ffts.get(fft_index);
+        //loadFFTs(fftPath);
     }
 
     public static void save() {
@@ -138,14 +132,14 @@ public class FFTManager {
 
     }
 
-    public static ArrayList<FFT> load(String filePath) {
+    public static void loadFFTs() {
         List<String> lines;
         // Create new file if not exists
-        File fftFile = new File(filePath);
-        ArrayList<FFT> ffts = new ArrayList<>();
+        File fftFile = new File(fftPath);
+        ffts = new ArrayList<>();
         try {
             if (!fftFile.createNewFile()) {
-                lines = Files.readAllLines(Paths.get(filePath));
+                lines = Files.readAllLines(Paths.get(fftPath));
 
                 for (String line : lines) {
                     if (line.startsWith("{")) {
@@ -170,7 +164,12 @@ public class FFTManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return ffts;
+        // initialize rule lists for all FFT's
+        if (USE_APPLY_OPT)
+            for (FFT f : ffts)
+                f.initializeRuleList();
+        if (!ffts.isEmpty())
+            currFFT = ffts.get(fft_index);
     }
 
     public static void setCurrFFT(int index) {
