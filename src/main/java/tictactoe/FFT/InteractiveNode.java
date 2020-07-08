@@ -67,13 +67,13 @@ public class InteractiveNode implements interactiveFFTNode {
         }
         actionTile = bt;
         this.move = new Move(bt.getRow(), bt.getCol(), perspective);
-        this.rule.parseAction(move.convert());
+        this.rule.setAction(move.convert());
         pb.addHighlight(actionTile.getRow(), actionTile.getCol(), perspective, blueStr);
     }
 
     public void removeAction() {
         actionTile.removeHighlight();
-        rule.parseAction(null);
+        rule.setAction(null);
         move = null;
         actionTile = null;
     }
@@ -85,7 +85,7 @@ public class InteractiveNode implements interactiveFFTNode {
 
     @Override
     public void setAction(Action a) {
-        this.rule.parseAction(a);
+        this.rule.setAction(a);
         if (a == null)
             this.move = new Move();
         else
@@ -96,7 +96,7 @@ public class InteractiveNode implements interactiveFFTNode {
     }
     private Rule getRuleFromState(Node n) {
         Rule r = new Rule();
-        r.parsePreconditions(n.convert());
+        r.setPreconditions(n.convert());
         return r;
     }
     @Override
