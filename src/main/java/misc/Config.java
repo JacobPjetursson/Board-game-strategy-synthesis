@@ -22,6 +22,7 @@ public class Config {
     public static boolean MINIMIZE_PRECONDITIONS;
     public static boolean SYMMETRY_DETECTION;
     public static boolean MINIMIZE_RULE_BY_RULE;
+    public static boolean REMOVE_DEAD_RULES;
     public static boolean SINGLE_THREAD;
     public static boolean SHOW_RULE_GROUPS;
     public static boolean USE_DEBUG_FILE;
@@ -130,6 +131,7 @@ public class Config {
         ENABLE_GGP_PARSER = Boolean.parseBoolean(global.getProperty("enable_ggp_parser"));
         MINIMIZE_PRECONDITIONS = Boolean.parseBoolean(global.getProperty("minimize_preconditions"));
         MINIMIZE_RULE_BY_RULE = Boolean.parseBoolean(global.getProperty("minimize_rule_by_rule"));
+        REMOVE_DEAD_RULES = Boolean.parseBoolean(global.getProperty("remove_dead_rules"));
         SIMPLIFY_ITERATIVELY = Boolean.parseBoolean(global.getProperty("simplify_iteratively"));
         SYMMETRY_DETECTION = Boolean.parseBoolean(global.getProperty("symmetry_detection"));
         SHOW_RULE_GROUPS = Boolean.parseBoolean(global.getProperty("show_rule_groups"));
@@ -217,7 +219,9 @@ public class Config {
         if (MINIMIZE) {
             System.out.printf("%-40.50s %-40.50s\n", "Minimize rule by rule:", MINIMIZE_RULE_BY_RULE);
             System.out.printf("%-40.50s %-40.50s\n", "Minimize preconditions:", MINIMIZE_PRECONDITIONS);
+            System.out.printf("%-40.50s %-40.50s\n", "Remove dead rules:", REMOVE_DEAD_RULES);
             System.out.printf("%-40.50s %-40.50s\n", "Use minimize optimization:", USE_MINIMIZE_OPT);
+
         }
         System.out.printf("%-40.50s %-40.50s\n", "Use rule ordering:", USE_RULE_ORDERING);
         if (USE_RULE_ORDERING) {

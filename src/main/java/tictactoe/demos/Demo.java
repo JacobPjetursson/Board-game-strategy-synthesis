@@ -19,18 +19,27 @@ public class Demo {
 
         lSet = new LiteralSet();
         lSet.add(new Literal("P1(0, 0)"));
-        Rule test2 = new Rule(lSet, new Action("P1(1, 1)"));
+        Rule dead1 = new Rule(lSet, new Action("P1(1, 1)"));
 
         lSet = new LiteralSet();
         lSet.add(new Literal("P1(0, 0)"));
         lSet.add(new Literal("P2(2, 2)"));
-        Rule test3 = new Rule(lSet, new Action("P1(0, 2)"));
+        Rule dead2 = new Rule(lSet, new Action("P1(1, 1)"));
+
+        lSet = new LiteralSet();
+        Rule notdead = new Rule(lSet, new Action("P1(1, 2)"));
 
         FFT fft = new FFT("Synthesis");
         fft.addRuleGroup(new RuleGroup("Synthesis"));
         fft.append(test1);
-        fft.append(test2);
-        fft.append(test3);
+        fft.append(dead1);
+        fft.append(dead2);
+        fft.append(notdead);
+
+        System.out.println(fft);
+        fft.initializeRuleList();
+        fft.removeDeadRules(test1);
+        System.out.println(fft);
 
         // make testNodes
         Node testNode1 = new Node();

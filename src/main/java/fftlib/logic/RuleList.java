@@ -39,7 +39,7 @@ public class RuleList extends ArrayList<Rule> {
     }
 
     public HashSet<FFTMove> findMoves(LiteralSet lSet) {
-        List<Rule> appliedRules = filterByAtom(0, lSet, this);
+        List<Rule> appliedRules = findRules(lSet);
 
         if (appliedRules.isEmpty())
             return new HashSet<>();
@@ -62,6 +62,10 @@ public class RuleList extends ArrayList<Rule> {
                 moves.add(r.action.convert());
 
         return moves;
+    }
+
+    public List<Rule> findRules(LiteralSet lSet) {
+        return filterByAtom(0, lSet, this);
     }
 
     private List<Rule> filterByAtom(int atomIdx, LiteralSet lSet, List<Rule> rules) {

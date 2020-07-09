@@ -346,24 +346,21 @@ public class Rule {
         return symmetryRules;
     }
 
-    public HashSet<FFTMove> apply(FFTNode node) {
-        LiteralSet stLiterals = node.convert();
+    public HashSet<FFTMove> apply(LiteralSet lSet) {
         HashSet<FFTMove> moves = new HashSet<>();
         // make quick test by bitstring comparisons
-        if (!SYMMETRY_DETECTION && getBitString().compareTo(stLiterals.getBitString()) > 0)
+        if (!SYMMETRY_DETECTION && getBitString().compareTo(lSet.getBitString()) > 0)
             return moves;
 
-        FFTMove m = match(this, stLiterals);
+        FFTMove m = match(this, lSet);
         if (m != null)
             moves.add(m);
         if (/*m != null || */!SYMMETRY_DETECTION) {
             return moves;
         }
 
-
-
         for (Rule rule : symmetryRules) {
-            m = match(rule, stLiterals);
+            m = match(rule, lSet);
             // returns the first symmetry with a legal move
             // We want to ensure that rule is optimal in all symmetric states, but since all these will be explored
             // by the algorithm, we are good. This is the case since we always start with checking the default state
@@ -374,6 +371,10 @@ public class Rule {
             }
         }
         return moves;
+    }
+
+    public HashSet<FFTMove> apply(FFTNode node) {
+        return apply(node.convert());
     }
 
     private FFTMove match(Rule rule, LiteralSet stLiterals) {
@@ -431,15 +432,15 @@ public class Rule {
         if (this == rule)
             return true;
         if (SYMMETRY_DETECTION)
-            return this.symmetryRules.equals(rule.symmetryRules) && ruleIndex == rule.ruleIndex;
+            return this.symmetryRules.equals(rule.symmetryRules);
         return this.preconditions.equals(rule.preconditions) &&
-                this.action.equals(rule.action) && ruleIndex == rule.ruleIndex;
+                this.action.equals(rule.action);
     }
 
     @Override
     public int hashCode() {
         if (SYMMETRY_DETECTION)
-            return 31 * Objects.hash(symmetryRules, ruleIndex);
+            return 31 * Objects.hash(symmetryRules);
         int hash = 23;
         hash = hash * 31 + getBitString().intValue();
         hash = hash * 31 + action.hashCode();

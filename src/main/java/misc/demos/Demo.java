@@ -21,8 +21,6 @@ public class Demo {
         // MINIMIZE TEST
         System.out.println("Minimizing");
         FFTManager.currFFT.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
-
-
 /*
         // testnodes
         ArrayList<FFTNode> testNodes = new ArrayList<>();

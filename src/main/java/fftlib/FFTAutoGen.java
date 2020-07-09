@@ -263,6 +263,12 @@ public class FFTAutoGen {
                     fft.addPrecondition(r, l);
                 } else {
                     if (DETAILED_DEBUG) System.out.println("REMOVING PRECONDITION: " + l.getName());
+                    if (!lastRule) {
+                        // we successfully removed precondition from intermediate rule,
+                        // so following rules may now be dead
+                        if (REMOVE_DEAD_RULES) fft.removeDeadRules(r);
+                    }
+
                 }
                 if (DETAILED_DEBUG) System.out.println("RULE IS NOW: " + r);
             }
@@ -581,21 +587,24 @@ public class FFTAutoGen {
         for (RuleGroup rg : fft.ruleGroups) {
             if (rg.locked) // don't minimize if rulegroup is locked
                 continue;
-            ListIterator<Rule> itr = rg.rules.listIterator();
-            while(itr.hasNext()) {
+            ArrayList<Rule> rulesCopy = new ArrayList<>(rg.rules);
+            int removed = 0;
+            for (int i = 0; i < rulesCopy.size(); i++) {
                 if (DETAILED_DEBUG)
                     System.out.println("Remaining amount of rules: " + fft.size());
-                Rule r = itr.next();
+                Rule r = rulesCopy.get(i);
+                if (!rg.rules.get(i - removed).equals(r)) {// some later rules deleted
+                    removed++;
+                    continue;
+                }
                 //System.out.println("Attempting to remove rule: " + r);
-                itr.remove();
-                if (fft.getRuleList() != null)
-                    fft.getRuleList().sortedRemove(r);
+                fft.removeRule(r, i - removed);
+                removed++;
                 if (!verifyRule(r, false, false)) {
                     //System.out.println("failed to remove: " + r);
                     //System.out.println();
-                    itr.add(r);
-                    if (fft.getRuleList() != null)
-                        fft.getRuleList().sortedAdd(r);
+                    removed--;
+                    fft.addRule(r, i - removed);
                     if (MINIMIZE_RULE_BY_RULE && MINIMIZE_PRECONDITIONS) {
                         //System.out.println("Attempting to simplify rule: " + r);
                         simplifyRule(r, false);
@@ -603,9 +612,6 @@ public class FFTAutoGen {
                         if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule))
                             liftRule(r, false);
                     }
-                } else {
-                    //System.out.println();
-                    //System.out.println("Successfully removed rule: " + r);
                 }
                 //System.out.println("Doing safe run");
                 if (SYMMETRY_DETECTION || USE_LIFTING)

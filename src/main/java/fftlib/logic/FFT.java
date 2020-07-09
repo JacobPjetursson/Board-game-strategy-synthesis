@@ -97,17 +97,6 @@ public class FFT {
             invertedList.add(r);
     }
 
-    public void remove(Rule r) {
-        for (RuleGroup rg : ruleGroups) {
-            rg.rules.remove(r);
-        }
-        if (USE_APPLY_OPT && ruleList != null)
-            ruleList.sortedRemove(r);
-        else if (USE_INVERTED_LIST_RULES_OPT) {
-            invertedList.remove(r);
-        }
-    }
-
     public void removePrecondition(Rule r, Literal l) {
         if (USE_APPLY_OPT && ruleList != null) {
             ruleList.sortedRemove(r);
@@ -134,6 +123,30 @@ public class FFT {
         } else {
             r.addPrecondition(l);
         }
+    }
+
+    public void removeRule(Rule r) {
+        for (RuleGroup rg : ruleGroups)
+            removeRule(r, rg.rules.indexOf(r));
+    }
+    // faster since we don't have to search for rule
+    public void removeRule(Rule r, int index) {
+        for (RuleGroup rg : ruleGroups)
+            rg.rules.remove(index);
+
+        if (USE_APPLY_OPT && ruleList != null)
+            ruleList.sortedRemove(r);
+        else if (USE_INVERTED_LIST_RULES_OPT)
+            invertedList.remove(r);
+    }
+
+    public void addRule(Rule r, int index) {
+        ruleGroups.get(ruleGroups.size()-1).rules.add(index, r);
+
+        if (USE_APPLY_OPT && ruleList != null)
+            ruleList.sortedAdd(r);
+        else if (USE_INVERTED_LIST_RULES_OPT)
+            invertedList.add(r);
     }
 
     public boolean isValid(int team) {
@@ -200,6 +213,26 @@ public class FFT {
         return apply_slow(node);
     }
 
+    // for all rules r' with a higher index than r.index, check if r is subset of r'
+    // if yes, then r' is dead. Maybe we can use containsAll
+    // Alternative: We can use r.apply(r') to determine the same thing.
+    // Perhaps we can even use the invertedList/ruleList stuff
+    public void removeDeadRules(Rule rule) {
+        for (RuleGroup rg : ruleGroups) {
+            ArrayList<Rule> rulesCopy = new ArrayList<>(rg.rules);
+            int removed = 0;
+            for (int i = 0; i < rulesCopy.size(); i++) {
+                Rule r = rulesCopy.get(i);
+                if (r.getRuleIndex() > rule.getRuleIndex() && !rule.apply(r.getAllPreconditions()).isEmpty()) {
+                    removeRule(r, i - removed);
+                    removed++;
+                }
+            }
+        }
+
+
+    }
+
     public int minimize(int team, boolean minimize_precons) { // Returns amount of iterations
         if (!verify(team, true)) {
             System.out.println("FFT is not a winning strategy, so it can not be minimized");
@@ -228,27 +261,26 @@ public class FFT {
         for (RuleGroup rg : ruleGroups) {
             if (rg.locked) // don't minimize if rulegroup is locked
                 continue;
-            ListIterator<Rule> itr = rg.rules.listIterator();
-            while(itr.hasNext()) {
+            ArrayList<Rule> rulesCopy = new ArrayList<>(rg.rules);
+            int removed = 0;
+            for (int i = 0; i < rulesCopy.size(); i++) {
                 if (DETAILED_DEBUG) {
                     System.out.println("Remaining amount of rules: " + getAmountOfRules());
                 }
-                Rule r = itr.next();
-                itr.remove();
-                if (USE_APPLY_OPT && ruleList != null)
-                    ruleList.sortedRemove(r);
-                else if (USE_INVERTED_LIST_RULES_OPT)
-                    invertedList.remove(r);
+                Rule r = rulesCopy.get(i);
+                if (!rg.rules.get(i - removed).equals(r)) {// some later rules deleted
+                    removed++;
+                    continue;
+                }
+                removeRule(r, i - removed);
+                removed++;
 
                 if (verify(team, true)) {
                     redundantRules.add(r);
                 }
                 else {
-                    itr.add(r);
-                    if (USE_APPLY_OPT && ruleList != null)
-                        ruleList.sortedAdd(r);
-                    else if (USE_INVERTED_LIST_RULES_OPT)
-                        invertedList.add(r);
+                    removed--;
+                    addRule(r, i - removed);
 
                     if (MINIMIZE_RULE_BY_RULE && minimize_precons)
                         minimizePreconditions(r, team);
@@ -285,6 +317,9 @@ public class FFT {
                 removePrecondition(r, l);
                 if (!verify(team, true))
                     addPrecondition(r, l);
+                else if (REMOVE_DEAD_RULES) {
+                    removeDeadRules(r);
+                }
             }
             if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule))
                 liftRule(r, team);
