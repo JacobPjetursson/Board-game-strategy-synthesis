@@ -129,6 +129,7 @@ public class FFT {
         for (RuleGroup rg : ruleGroups)
             removeRule(r, rg.rules.indexOf(r));
     }
+
     // faster since we don't have to search for rule
     public void removeRule(Rule r, int index) {
         for (RuleGroup rg : ruleGroups)

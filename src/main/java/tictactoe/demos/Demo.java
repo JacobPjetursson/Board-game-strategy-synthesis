@@ -24,7 +24,23 @@ public class Demo {
         lSet = new LiteralSet();
         lSet.add(new Literal("P1(0, 0)"));
         lSet.add(new Literal("P2(2, 2)"));
+        lSet.add(new Literal("!P1(2, 2)"));
+        lSet.add(new Literal("!P2(0, 0)"));
+        lSet.add(new Literal("!P1(1, 1)"));
+        lSet.add(new Literal("P2(0, 2)"));
+        lSet.add(new Literal("P1(0, 1)"));
+        lSet.add(new Literal("P2(0, 2)"));
+        lSet.add(new Literal("!P1(0, 2)"));
+        lSet.add(new Literal("!P2(0, 1)"));
+        lSet.add(new Literal("!P1(1, 2)"));
+        lSet.add(new Literal("P2(1, 2)"));
         Rule dead2 = new Rule(lSet, new Action("P1(1, 1)"));
+        LiteralSet testSet = new LiteralSet(dead2.getPreconditions());
+        System.out.println(testSet);
+        LiteralSet testSet1 = new LiteralSet(dead2.getPreconditions());
+        System.out.println(testSet1);
+        System.out.println(dead2.getPreconditions());
+
 
         lSet = new LiteralSet();
         Rule notdead = new Rule(lSet, new Action("P1(1, 2)"));

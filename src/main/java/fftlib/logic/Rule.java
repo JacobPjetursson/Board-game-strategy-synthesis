@@ -424,6 +424,10 @@ public class Rule {
         return stSentences.contains(s);
     }
 
+    public static Rule createRule(FFTNode n, FFTMove m) {
+        return new Rule(new LiteralSet(n.convert()), new Action(m.convert()));
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Rule)) return false;

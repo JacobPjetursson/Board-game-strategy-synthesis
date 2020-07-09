@@ -78,7 +78,11 @@ public class FFTAutoGen {
 
         setup(existingFFT);
         System.out.println("Making rules");
-        makeRules();
+        if (NAIVE_RULE_GENERATION)
+            makeNaiveRules();
+        else
+            makeRules();
+
         System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
         double autoGenTimeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
@@ -194,6 +198,29 @@ public class FFTAutoGen {
             fft.initializeRuleList();
     }
 
+    private static void makeNaiveRules() {
+
+        HashSet<FFTNode> applied = new HashSet<>();
+        for (FFTNode node : applicableStates.values()) {
+
+            if (FFTSolution.optimalMoves(node).size() == node.getLegalMoves().size())
+                // don't need a rule for this state
+                continue;
+
+            FFTMove move = FFTSolution.queryNode(node).move;
+            Rule r = Rule.createRule(node, move);
+            fft.append(r);
+            applied.add(node);
+        }
+        // initialize rule list
+        if (USE_APPLY_OPT)
+            fft.initializeRuleList();
+
+        // move all appliedStates from applicable to applied
+        applicableStates.removeAll(applied);
+        appliedStates.putAll(applied);
+    }
+
     private static Rule addRule(FFTNode n) {
         LiteralSet stSet = new LiteralSet(n.convert());
         FFTMove bestMove = FFTSolution.queryNode(n).move;
@@ -297,6 +324,7 @@ public class FFTAutoGen {
 
     private static void fillAppliedMap(
             Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap, boolean lastRule) {
+
         if (!lastRule)
             appliedStates.findNodes(r, appliedMap);
 
@@ -617,7 +645,7 @@ public class FFTAutoGen {
                 if (SYMMETRY_DETECTION || USE_LIFTING)
                     verifyRule(r, false,true);
 
-                /*
+/*
                 if (!fft.verify(AUTOGEN_TEAM, true)) {
                     System.out.println("Failed to verify the FFT!");
                     System.out.println("failing point: " + fft.failingPoint);
@@ -625,10 +653,7 @@ public class FFTAutoGen {
                     System.exit(1);
                 }
                 System.out.println();
-
-                 */
-
-
+ */
             }
         }
     }

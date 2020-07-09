@@ -124,6 +124,16 @@ public class NodeMap {
             nodes.put(n, moves);
     }
 
+    public void removeAll(Collection<FFTNode> nodes) {
+        for (FFTNode n : nodes)
+            remove(n);
+    }
+
+    public void putAll(Collection<FFTNode> nodes) {
+        for (FFTNode n : nodes)
+            put(n);
+    }
+
 
     // Allows us to sort the nodes based on custom values, such as which node is closed to a terminal node
     public static class NodeComparator implements Comparator<FFTNode> {

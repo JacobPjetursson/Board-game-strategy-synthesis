@@ -2,7 +2,9 @@ package misc.demos;
 
 import fftlib.FFTManager;
 import fftlib.game.FFTSolver;
-import sim.GameSpecifics;
+import fftlib.logic.*;
+import tictactoe.FFT.GameSpecifics;
+
 
 import static misc.Config.AUTOGEN_TEAM;
 import static misc.Config.MINIMIZE_PRECONDITIONS;
@@ -15,12 +17,13 @@ public class Demo {
 
         System.out.println("Solving game");
         FFTSolver.solveGame();
-        FFTManager.loadFFTs();
-        System.out.println("fft size: " + FFTManager.currFFT.size());
+        //FFTManager.loadFFTs();
+        //System.out.println("fft size: " + FFTManager.currFFT.size());
 
         // MINIMIZE TEST
-        System.out.println("Minimizing");
-        FFTManager.autogenFFT(FFTManager.currFFT);
+        //System.out.println("Minimizing");
+        //FFTManager.autogenFFT(FFTManager.currFFT);
+
 /*
         // testnodes
         ArrayList<FFTNode> testNodes = new ArrayList<>();

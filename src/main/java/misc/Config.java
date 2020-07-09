@@ -21,6 +21,7 @@ public class Config {
     public static int RULE_ORDERING;
     public static boolean MINIMIZE_PRECONDITIONS;
     public static boolean SYMMETRY_DETECTION;
+    public static boolean NAIVE_RULE_GENERATION;
     public static boolean MINIMIZE_RULE_BY_RULE;
     public static boolean REMOVE_DEAD_RULES;
     public static boolean SINGLE_THREAD;
@@ -134,6 +135,7 @@ public class Config {
         REMOVE_DEAD_RULES = Boolean.parseBoolean(global.getProperty("remove_dead_rules"));
         SIMPLIFY_ITERATIVELY = Boolean.parseBoolean(global.getProperty("simplify_iteratively"));
         SYMMETRY_DETECTION = Boolean.parseBoolean(global.getProperty("symmetry_detection"));
+        NAIVE_RULE_GENERATION = Boolean.parseBoolean(global.getProperty("naive_generation"));
         SHOW_RULE_GROUPS = Boolean.parseBoolean(global.getProperty("show_rule_groups"));
         // DEBUG AND TEST
         DETAILED_DEBUG = Boolean.parseBoolean(global.getProperty("detailedDebug"));
@@ -198,6 +200,8 @@ public class Config {
             MINIMIZE_PRECONDITIONS = false;
             MINIMIZE_RULE_BY_RULE = false;
         }
+
+        // todo - disable/enable some stuff based on whether we have naive rule generation or not
     }
 
     private static void printSettings() {
@@ -212,6 +216,7 @@ public class Config {
 
         System.out.printf("%-40.50s %-40.50s\n", "Autogen perspective:", perspectiveStr);
         System.out.printf("%-40.50s %-40.50s\n", "Symmetry detection:", SYMMETRY_DETECTION);
+        System.out.printf("%-40.50s %-40.50s\n", "Naive rule generation:", NAIVE_RULE_GENERATION);
         System.out.printf("%-40.50s %-40.50s\n", "Single thread:", SINGLE_THREAD);
         System.out.printf("%-40.50s %-40.50s\n", "Greedy Autogeneration:", GREEDY_AUTOGEN);
         System.out.printf("%-40.50s %-40.50s\n", "Simplify iteratively:", SIMPLIFY_ITERATIVELY);
