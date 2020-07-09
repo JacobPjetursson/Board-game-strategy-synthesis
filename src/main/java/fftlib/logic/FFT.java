@@ -224,6 +224,8 @@ public class FFT {
             for (int i = 0; i < rulesCopy.size(); i++) {
                 Rule r = rulesCopy.get(i);
                 if (r.getRuleIndex() > rule.getRuleIndex() && !rule.apply(r.getAllPreconditions()).isEmpty()) {
+                    if (DETAILED_DEBUG)
+                        System.out.println("Removing dead rule at index " + r.getRuleIndex() + ": " + r);
                     removeRule(r, i - removed);
                     removed++;
                 }
@@ -264,9 +266,10 @@ public class FFT {
             ArrayList<Rule> rulesCopy = new ArrayList<>(rg.rules);
             int removed = 0;
             for (int i = 0; i < rulesCopy.size(); i++) {
-                if (DETAILED_DEBUG) {
+                if ((i - removed) >= rg.rules.size()) // remaining rules are removed
+                    break;
+                if (DETAILED_DEBUG)
                     System.out.println("Remaining amount of rules: " + getAmountOfRules());
-                }
                 Rule r = rulesCopy.get(i);
                 if (!rg.rules.get(i - removed).equals(r)) {// some later rules deleted
                     removed++;

@@ -590,6 +590,8 @@ public class FFTAutoGen {
             ArrayList<Rule> rulesCopy = new ArrayList<>(rg.rules);
             int removed = 0;
             for (int i = 0; i < rulesCopy.size(); i++) {
+                if ((i - removed) >= rg.rules.size()) // remaining rules are removed
+                    break;
                 if (DETAILED_DEBUG)
                     System.out.println("Remaining amount of rules: " + fft.size());
                 Rule r = rulesCopy.get(i);
