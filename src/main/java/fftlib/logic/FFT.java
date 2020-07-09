@@ -316,14 +316,17 @@ public class FFT {
             }
         } else {
             LiteralSet precons = new LiteralSet(r.getPreconditions());
+            boolean simplified = false;
             for (Literal l : precons) {
                 removePrecondition(r, l);
                 if (!verify(team, true))
                     addPrecondition(r, l);
-                else if (REMOVE_DEAD_RULES) {
-                    removeDeadRules(r);
-                }
+                else
+                    simplified = true;
             }
+            if (simplified && REMOVE_DEAD_RULES)
+                removeDeadRules(r);
+
             if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule))
                 liftRule(r, team);
         }

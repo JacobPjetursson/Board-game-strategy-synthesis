@@ -255,6 +255,7 @@ public class FFTAutoGen {
             if (DETAILED_DEBUG && SIMPLIFY_ITERATIVELY)
                 System.out.println("SIMPLIFICATION ITERATION: " + i++);
             prevSize = precons.size();
+            boolean simplified = false;
             for (Literal l : precons) {
                 if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO REMOVE: " + l.getName());
                 fft.removePrecondition(r, l);
@@ -262,16 +263,13 @@ public class FFTAutoGen {
                     if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.getName());
                     fft.addPrecondition(r, l);
                 } else {
+                    simplified = true;
                     if (DETAILED_DEBUG) System.out.println("REMOVING PRECONDITION: " + l.getName());
-                    if (!lastRule) {
-                        // we successfully removed precondition from intermediate rule,
-                        // so following rules may now be dead
-                        if (REMOVE_DEAD_RULES) fft.removeDeadRules(r);
-                    }
-
                 }
                 if (DETAILED_DEBUG) System.out.println("RULE IS NOW: " + r);
             }
+            if (!lastRule && simplified && REMOVE_DEAD_RULES)
+                fft.removeDeadRules(r);
         } while (SIMPLIFY_ITERATIVELY && prevSize != r.getPreconditions().size() &&
                 r.getPreconditions().size() != 0);
     }

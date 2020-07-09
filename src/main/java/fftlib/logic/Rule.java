@@ -432,9 +432,9 @@ public class Rule {
         if (this == rule)
             return true;
         if (SYMMETRY_DETECTION)
-            return this.symmetryRules.equals(rule.symmetryRules);
+            return this.symmetryRules.equals(rule.symmetryRules) && this.getRuleIndex() == rule.getRuleIndex();
         return this.preconditions.equals(rule.preconditions) &&
-                this.action.equals(rule.action);
+                this.action.equals(rule.action) && this.getRuleIndex() == rule.getRuleIndex();
     }
 
     @Override
@@ -444,6 +444,7 @@ public class Rule {
         int hash = 23;
         hash = hash * 31 + getBitString().intValue();
         hash = hash * 31 + action.hashCode();
+        hash = hash * 31 + ruleIndex;
         return hash;
     }
 
