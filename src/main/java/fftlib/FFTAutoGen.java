@@ -1,15 +1,11 @@
 package fftlib;
 
-import fftlib.auxiliary.InvertedList;
 import fftlib.auxiliary.NodeMap;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 import fftlib.game.FFTSolution;
-import fftlib.logic.LiteralSet;
 import fftlib.logic.*;
-import misc.Config;
 
-import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -98,6 +94,7 @@ public class FFTAutoGen {
         if (DETAILED_DEBUG) System.out.println("Rules before minimizing");
         if (DETAILED_DEBUG) System.out.println(fft);
 
+
         int i = -1;
         //FFT copy = new FFT(fft);
         timeStart = System.currentTimeMillis();
@@ -155,12 +152,15 @@ public class FFTAutoGen {
         }
 
         // Set reachable parents for all states
-        findReachableStates();
+        if (!NAIVE_RULE_GENERATION)
+            findReachableStates();
 
         System.out.println("Solution size: " + FFTSolution.size());
-        System.out.println("Number of reachable states: " + reachableStates.size());
-        System.out.println("Number of applicable states: " + applicableStates.size());
-        System.out.println("Number of applied states: " + appliedStates.size());
+        if (!NAIVE_RULE_GENERATION) {
+            System.out.println("Number of reachable states: " + reachableStates.size());
+            System.out.println("Number of applicable states: " + applicableStates.size());
+            System.out.println("Number of applied states: " + appliedStates.size());
+        }
     }
 
     private static void makeRules() {
@@ -199,26 +199,39 @@ public class FFTAutoGen {
     }
 
     private static void makeNaiveRules() {
+        // make search through state space playing with the minimax strategy, adding a rule for each move chosen,
+        // even the moves where all moves are optimal
+        int team = AUTOGEN_TEAM;
+        FFTNode initialNode = FFTManager.initialFFTNode;
+        LinkedList<FFTNode> frontier;
+        frontier = new LinkedList<>();
+        frontier.add(initialNode);
 
-        HashSet<FFTNode> applied = new HashSet<>();
-        for (FFTNode node : applicableStates.values()) {
+        reachableStates = new HashMap<>();
+        appliedStates = new NodeMap(NodeMap.NO_SORT);
+        applicableStates = new NodeMap(NodeMap.NO_SORT);
+        reachableStates.put(initialNode, initialNode);
+        while (!frontier.isEmpty()) {
+            FFTNode node = frontier.pop();
 
-            if (FFTSolution.optimalMoves(node).size() == node.getLegalMoves().size())
-                // don't need a rule for this state
+            // Not our turn
+            if (team != node.getTurn()) {
+                for (FFTNode child : node.getChildren())
+                    addNode(frontier, node, child);
                 continue;
-
-            FFTMove move = FFTSolution.queryNode(node).move;
-            Rule r = Rule.createRule(node, move);
-            fft.append(r);
-            applied.add(node);
+            }
+            FFTMove chosenMove = FFTSolution.queryNode(node).move;
+            appliedStates.put(node);
+            fft.append(Rule.createRule(node, chosenMove));
+            addNode(frontier, node, node.getNextNode(chosenMove));
         }
+
         // initialize rule list
         if (USE_APPLY_OPT)
             fft.initializeRuleList();
 
-        // move all appliedStates from applicable to applied
-        applicableStates.removeAll(applied);
-        appliedStates.putAll(applied);
+        System.out.println("Number of reachable states: " + reachableStates.size());
+        System.out.println("Number of applied states: " + appliedStates.size());
     }
 
     private static Rule addRule(FFTNode n) {
