@@ -220,9 +220,15 @@ public class FFTAutoGen {
                     addNode(frontier, node, child);
                 continue;
             }
-            FFTMove chosenMove = FFTSolution.queryNode(node).move;
             appliedStates.put(node);
-            fft.append(Rule.createRule(node, chosenMove));
+            FFTMove chosenMove = FFTSolution.queryNode(node).move;
+            if (SYMMETRY_DETECTION && !fft.apply(node).isEmpty()) {// if symmetry is enabled, another rule might apply here
+                if (DETAILED_DEBUG)
+                    System.out.println("Rules added so far: " + fft.size());
+            }
+            else {
+                fft.append(Rule.createRule(node, chosenMove));
+            }
             addNode(frontier, node, node.getNextNode(chosenMove));
         }
 
@@ -344,7 +350,12 @@ public class FFTAutoGen {
         applicableStates.findNodes(r, appliedMap);
 
         if (!lastRule) { // replace value of all keys
-            appliedMap.replaceAll((k, v) -> fft.apply(k));
+            if (!SINGLE_THREAD) {
+                appliedMap.keySet().parallelStream().forEach(key ->
+                        appliedMap.put(key, fft.apply(key)));
+            } else {
+                appliedMap.replaceAll((k, v) -> fft.apply(k));
+            }
         }
 
     }
