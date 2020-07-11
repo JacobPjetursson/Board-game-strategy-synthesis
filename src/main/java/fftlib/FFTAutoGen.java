@@ -222,12 +222,9 @@ public class FFTAutoGen {
             }
             appliedStates.put(node);
             FFTMove chosenMove = FFTSolution.queryNode(node).move;
-            if (SYMMETRY_DETECTION && !fft.apply(node).isEmpty()) {// if symmetry is enabled, another rule might apply here
-                if (DETAILED_DEBUG)
-                    System.out.println("Rules added so far: " + fft.size());
-            }
-            else {
+            if (!SYMMETRY_DETECTION || fft.apply(node).isEmpty()) { // if symmetry is enabled, another rule might apply here
                 fft.append(Rule.createRule(node, chosenMove));
+                if (SYMMETRY_DETECTION) System.out.println("Rules added so far: " + fft.size());
             }
             addNode(frontier, node, node.getNextNode(chosenMove));
         }
@@ -352,7 +349,8 @@ public class FFTAutoGen {
         if (!lastRule) { // replace value of all keys
             if (!SINGLE_THREAD) {
                 appliedMap.keySet().parallelStream().forEach(key ->
-                        appliedMap.put(key, fft.apply(key)));
+                        appliedMap.replace(key, fft.apply(key)));
+
             } else {
                 appliedMap.replaceAll((k, v) -> fft.apply(k));
             }
@@ -642,7 +640,8 @@ public class FFTAutoGen {
             for (int i = 0; i < rulesCopy.size(); i++) {
                 if ((i - removed) >= rg.rules.size()) // remaining rules are removed
                     break;
-                if (DETAILED_DEBUG)
+
+                if (DETAILED_DEBUG || NAIVE_RULE_GENERATION)
                     System.out.println("Remaining amount of rules: " + fft.size());
                 Rule r = rulesCopy.get(i);
                 if (!rg.rules.get(i - removed).equals(r)) {// some later rules deleted
