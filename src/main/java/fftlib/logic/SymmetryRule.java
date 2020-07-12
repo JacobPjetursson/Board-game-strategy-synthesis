@@ -10,6 +10,12 @@ public class SymmetryRule extends Rule { // Simpler rule class for rules in symm
         setAllPreconditions();
     }
 
+    public SymmetryRule(SymmetryRule duplicate) {
+        this.preconditions = new LiteralSet(duplicate.preconditions);
+        this.action = new Action(duplicate.action);
+        setAllPreconditions();
+    }
+
     @Override
     public int hashCode() {
         return 31 * Objects.hash(preconditions, action);

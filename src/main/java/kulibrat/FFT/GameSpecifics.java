@@ -141,14 +141,4 @@ public class GameSpecifics implements FFTGameSpecifics {
     public ArrayList<Integer> legalIndices() {
         return null;
     }
-
-    @Override
-    public HashSet<LiteralSet> getCoveredStates(Rule rule) {
-        return null;
-    }
-
-    @Override
-    public long getNumberOfCoveredStates(Rule rule) {
-        return 0;
-    }
 }

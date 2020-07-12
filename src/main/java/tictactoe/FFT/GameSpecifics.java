@@ -174,7 +174,7 @@ public class GameSpecifics implements FFTGameSpecifics {
         return indices;
     }
 
-    @Override
+    /*
     public HashSet<LiteralSet> getCoveredStates(Rule rule) {
         HashSet<LiteralSet> states = new HashSet<>();
         List<Set<Literal>> subsets = new ArrayList<>();
@@ -247,4 +247,6 @@ public class GameSpecifics implements FFTGameSpecifics {
         }
         return coveredStates;
     }
+
+     */
 }

@@ -54,7 +54,8 @@ public class FFT {
             ruleGroups.add(new RuleGroup(rg));
         }
         this.failingPoint = duplicate.failingPoint;
-        this.ruleList = new RuleList(duplicate.ruleList);
+        if (ruleList != null)
+            this.ruleList = new RuleList(duplicate.ruleList);
     }
 
     public void initializeRuleList() {
@@ -269,7 +270,7 @@ public class FFT {
             for (int i = 0; i < rulesCopy.size(); i++) {
                 if ((i - removed) >= rg.rules.size()) // remaining rules are removed
                     break;
-                if (DETAILED_DEBUG)
+                if (DETAILED_DEBUG || NAIVE_RULE_GENERATION)
                     System.out.println("Remaining amount of rules: " + getAmountOfRules());
                 Rule r = rulesCopy.get(i);
                 if (!rg.rules.get(i - removed).equals(r)) {// some later rules deleted

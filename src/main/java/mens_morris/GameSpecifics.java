@@ -76,22 +76,37 @@ public class GameSpecifics implements FFTGameSpecifics {
     public LiteralSet nodeToLiterals(FFTNode n) {
         Node node = (Node) n;
         LiteralSet literals = new LiteralSet();
-        if (node.getTurn() == PLAYER1)
-            literals.add(new Literal("p1Turn"));
-        if (node.phase2)
-            literals.add(new Literal("phase2"));
-        if (!THREE_MENS && node.canRemove)
-            literals.add(new Literal("canRemove"));
+        String pfx = node.getTurn() == PLAYER1 ? "" : "!";
+
+        literals.add(new Literal(pfx + "p1Turn"));
+        pfx = node.phase2 ? "" : "!";
+        literals.add(new Literal(pfx + "phase2"));
+        if (!THREE_MENS) {
+            pfx =  node.canRemove ? "" : "!";
+            literals.add(new Literal(pfx + "canRemove"));
+        }
+        Position pos;
         for (int i = 0; i < node.board.length; i++) {
             for (int j = 0; j < node.board[i].length; j++) {
                 if (!Node.validPos(i, j))
                     continue;
                 int occ = node.board[i][j];
-                if (occ == 0)
-                    continue;
-                Position pos = new Position(i, j, occ);
-                int id = Atoms.posToId.get(pos);
-                literals.add(new Literal(id));
+                if (occ == 0) {
+                    pos = new Position(i, j, -PLAYER1);
+                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    pos = new Position(i, j, -PLAYER2);
+                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                } else if (occ == PLAYER1) {
+                    pos = new Position(i, j, PLAYER1);
+                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    pos = new Position(i, j, -PLAYER2);
+                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                } else {
+                    pos = new Position(i, j, -PLAYER1);
+                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    pos = new Position(i, j, PLAYER2);
+                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                }
             }
         }
         return literals;
@@ -139,7 +154,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public int getAtomId(String name) {
-        return Atoms.stringToId.getOrDefault(name, 0);
+        return Atoms.stringToId.get(name);
     }
 
     @Override
@@ -216,133 +231,5 @@ public class GameSpecifics implements FFTGameSpecifics {
     @Override
     public ArrayList<Integer> legalIndices() {
         return null;
-    }
-
-    @Override
-    public HashSet<LiteralSet> getCoveredStates(Rule rule) {
-        HashSet<LiteralSet> coveredStates = new HashSet<>();
-        List<Set<Literal>> subsets = new ArrayList<>();
-        LiteralSet precons = rule.getAllPreconditions();
-        int row, col, occ;
-        Position pos;
-        Literal l, negLit;
-        LiteralSet litSet;
-
-        // find sets of preconditions that can not co-exist
-
-        // canRemove
-        if (!THREE_MENS) {
-            l = new Literal("canRemove");
-            negLit = new Literal("!canRemove");
-            if (!precons.contains(l) && !precons.contains(negLit)) {
-                litSet = new LiteralSet(Literal.NULL);
-                litSet.add(new Literal("canRemove"));
-                subsets.add(litSet);
-            }
-        }
-        // turn
-        l = new Literal("p1Turn");
-        negLit = new Literal("!p1Turn");
-        if (!precons.contains(l) && !precons.contains(negLit)) {
-            litSet = new LiteralSet(Literal.NULL);
-            litSet.add(new Literal("p1Turn"));
-        }
-
-        // phase 2
-        l = new Literal("phase2");
-        negLit = new Literal("!phase2");
-        if (!precons.contains(l) && !precons.contains(negLit)) {
-            litSet = new LiteralSet(Literal.NULL);
-            litSet.add(new Literal("phase2"));
-            subsets.add(litSet);
-        }
-
-        for (row = 0; row < Node.BOARD_SIZE; row++) {
-            for (col = 0; col < Node.BOARD_SIZE; col++) {
-                if (!Node.validPos(row, col))
-                    continue;
-                boolean setExists = false;
-                litSet = new LiteralSet();
-                // make set of all relevant literals from this cell
-                for (occ = PLAYER1; occ <= PLAYER2; occ++) {
-                    pos = new Position(row, col, occ);
-                    l = new Literal(posToId(pos));
-                    if (precons.contains(l)) {
-                        setExists = true;
-                        break;
-                    }
-                    negLit = new Literal(posToId(pos));
-                    if (!precons.contains(negLit)) {
-                        litSet.add(l);
-                    }
-                }
-                if (!setExists) {
-                    litSet.add(Literal.NULL);
-                    subsets.add(litSet);
-                }
-            }
-        }
-        // Find the cartesian product of those sets (combination of sets where
-        // we only pick one from each set)
-        Set<List<Literal>> cartesianSet = Sets.cartesianProduct(subsets);
-        // Add each if not null literal
-        for (List<Literal> literals : cartesianSet) {
-            LiteralSet newSet = new LiteralSet(precons);
-            for (Literal lit : literals) {
-                if (!lit.equals(Literal.NULL))
-                    newSet.add(lit);
-            }
-            coveredStates.add(newSet);
-        }
-        return coveredStates;
-    }
-
-    @Override
-    public long getNumberOfCoveredStates(Rule rule) {
-        LiteralSet precons = rule.getAllPreconditions();
-        long coveredStates = 1;
-        int row, col, occ;
-        Literal l, lneg;
-        Position pos;
-
-        // phase 2
-        l = new Literal("phase2");
-        lneg = new Literal("!phase2");
-        if (!precons.contains(l) && !precons.contains(lneg))
-            coveredStates *= 2;
-        // turn
-        l = new Literal("p1Turn");
-        lneg = new Literal("!p1Turn");
-        if (!precons.contains(l) && !precons.contains(lneg))
-            coveredStates *= 2;
-        if (!THREE_MENS) {
-            // canRemove
-            l = new Literal("canRemove");
-            lneg = new Literal("!canRemove");
-            if (!precons.contains(l) && !precons.contains(lneg))
-                coveredStates *= 2;
-        }
-
-        for (row = 0; row < Node.BOARD_SIZE; row++) {
-            for (col = 0; col < Node.BOARD_SIZE; col++) {
-                if (!Node.validPos(row, col))
-                    continue;
-                int combinations = 3;
-                // make set of all relevant literals from this cell
-                for (occ = PLAYER1; occ <= PLAYER2; occ++) {
-                    pos = new Position(row, col, occ);
-                    l = new Literal(posToId(pos));
-                    if (precons.contains(l)) {
-                        combinations = 1;
-                        break;
-                    }
-                    lneg = new Literal(posToId(pos));
-                    if (precons.contains(lneg))
-                        combinations--;
-                }
-                coveredStates *= combinations;
-            }
-        }
-        return coveredStates;
     }
 }

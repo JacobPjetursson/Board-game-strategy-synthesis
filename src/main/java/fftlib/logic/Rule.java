@@ -78,9 +78,14 @@ public class Rule {
     public Rule(Rule duplicate) {
         this.action = new Action(duplicate.action);
         this.preconditions = new LiteralSet(duplicate.preconditions);
-        this.allPreconditions = duplicate.allPreconditions;
+        this.allPreconditions = new LiteralSet(duplicate.allPreconditions);
         this.ruleIndex = duplicate.ruleIndex;
-        if (SYMMETRY_DETECTION) this.symmetryRules = new HashSet<>(duplicate.symmetryRules);
+        if (SYMMETRY_DETECTION) {
+            this.symmetryRules = new HashSet<>();
+            for (SymmetryRule symRule : duplicate.symmetryRules) {
+                this.symmetryRules.add(new SymmetryRule(symRule));
+            }
+        }
     }
 
     public void setRuleIndex(int index) {
@@ -208,30 +213,6 @@ public class Rule {
     private void removeActionPrecons() {
         for (Literal l : action.getPreconditions())
             preconditions.remove(l);
-    }
-
-    // This is an upper bound due to how symmetry works (may lead to duplicate states
-    // that are hard to detect)
-    public long getNumberOfCoveredStates() {
-        int number = 0;
-        if (!SYMMETRY_DETECTION)
-            return FFTManager.getNumberOfCoveredStates.apply(this);
-
-        for (Rule r : symmetryRules) {
-            number += FFTManager.getNumberOfCoveredStates.apply(r);
-        }
-        return number;
-    }
-
-    public HashSet<LiteralSet> getCoveredStates() {
-        if (!SYMMETRY_DETECTION)
-            return FFTManager.getCoveredStates.apply(this);
-
-        HashSet<LiteralSet> states = new HashSet<>();
-        for (Rule r : symmetryRules) {
-            states.addAll(FFTManager.getCoveredStates.apply(r));
-        }
-        return states;
     }
 
     private static LiteralSet setPreconditions(String preconStr) {

@@ -12,6 +12,12 @@ public class FFTNodeAndMove {
         this.random = random;
     }
 
+    public FFTNodeAndMove(FFTNode node, FFTMove move) {
+        this.node = node;
+        this.move = move;
+        this.random = false;
+    }
+
     public FFTMove getMove() {
         return move;
     }

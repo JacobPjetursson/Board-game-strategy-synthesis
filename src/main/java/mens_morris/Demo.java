@@ -29,8 +29,6 @@ public class Demo {
         System.out.println("Action preconditions:");
         System.out.println(testAction.getPreconditions());
         System.out.println(testRule.getSymmetryRules());
-        System.out.println(testRule.getNumberOfCoveredStates());
-        System.out.println(testRule.getCoveredStates());
     }
 
     static void playGame() {

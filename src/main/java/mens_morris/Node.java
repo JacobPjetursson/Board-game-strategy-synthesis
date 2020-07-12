@@ -186,7 +186,6 @@ public class Node extends FFTNode {
 
     public String toString() {
         String phaseStr = (phase2) ? "2" : "1";
-        return "TURN: " + turn + ", PHASE: " + phaseStr + "\n" +
-                Arrays.deepToString(board);
+        return Arrays.deepToString(board) + " , TURN: " + turn + ", PHASE: " + phaseStr;
     }
 }

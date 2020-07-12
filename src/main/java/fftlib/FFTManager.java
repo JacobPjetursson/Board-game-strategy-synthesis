@@ -58,8 +58,6 @@ public class FFTManager {
     public static Function<Position, Integer> getIdFromPos;
     public static Function<Integer, Position> getPosFromId;
     public static Function<Action, LiteralSet> getActionPreconditions;
-    public static Function<Rule, Long> getNumberOfCoveredStates;
-    public static Function<Rule, HashSet<LiteralSet>> getCoveredStates;
 
     public static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     public static final String blueBtnStyle = "-fx-border-color: #000000; -fx-background-color: #4444ff;";
@@ -98,8 +96,6 @@ public class FFTManager {
         getActionPreconditions = gameSpecifics::getActionPreconditions;
         sortedGameAtoms = getGameAtoms.get();
         sortedGameAtoms.sort(Collections.reverseOrder());
-        getNumberOfCoveredStates = gameSpecifics::getNumberOfCoveredStates;
-        getCoveredStates = gameSpecifics::getCoveredStates;
 
 
         // Try loading ffts from file in working directory
