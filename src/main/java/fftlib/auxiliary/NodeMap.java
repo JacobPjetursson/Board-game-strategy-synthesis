@@ -100,25 +100,23 @@ public class NodeMap {
     public void findNodes(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
         if (sort == BITSTRING_SORT) {
             BigInteger code = r.getAllPreconditions().getBitString();
-            LinkedList<Future<?>> tasks = new LinkedList<>();
+            Collection<InsertTask> tasks = new LinkedList<>();
             // TODO - multithread
             for (Map.Entry<BigInteger, FFTNode> entry : codeMap.entrySet()) {
                 if (entry.getKey().compareTo(code) < 0)
                     break;
                 if (!SINGLE_THREAD) {
                     InsertTask t = new InsertTask(entry.getValue(), r, appliedMap);
-                    tasks.add(threadPool.submit(t));
+                    tasks.add(t);
                 } else {
                     insert(entry.getValue(), r, appliedMap);
                 }
             }
             // join
-            for (Future<?> f : tasks) {
-                try {
-                    f.get();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            try {
+                threadPool.invokeAll(tasks);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
 
         }
@@ -201,7 +199,7 @@ public class NodeMap {
     }
 
     // used for parallelising the bitstring sort opt
-    class InsertTask implements Runnable {
+    class InsertTask implements Callable<Boolean> {
         FFTNode n;
         Rule r;
         ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap;
@@ -212,10 +210,13 @@ public class NodeMap {
             this.appliedMap = appliedMap;
         }
 
-        public void run() {
-            insert(n, r, appliedMap);
-        }
 
+
+        @Override
+        public Boolean call() {
+            insert(n, r, appliedMap);
+            return true;
+        }
     }
 
 }
