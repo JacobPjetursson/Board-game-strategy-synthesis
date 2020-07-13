@@ -22,8 +22,6 @@ public class NodeMap {
     public static final int BITSTRING_SORT = 1;
     public static final int RULE_SORT = 2;
 
-    private ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-
     // TODO - super non-important, but would be nice to have this class represented as a single map somehow
     private TreeMap<BigInteger, FFTNode> codeMap;
     private Map<FFTNode, FFTNode> map;
@@ -100,25 +98,13 @@ public class NodeMap {
     public void findNodes(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
         if (sort == BITSTRING_SORT) {
             BigInteger code = r.getAllPreconditions().getBitString();
-            Collection<InsertTask> tasks = new LinkedList<>();
-            // TODO - multithread
+            // multithreading has bad performance
             for (Map.Entry<BigInteger, FFTNode> entry : codeMap.entrySet()) {
                 if (entry.getKey().compareTo(code) < 0)
                     break;
-                if (!SINGLE_THREAD) {
-                    InsertTask t = new InsertTask(entry.getValue(), r, appliedMap);
-                    tasks.add(t);
-                } else {
-                    insert(entry.getValue(), r, appliedMap);
-                }
-            }
-            // join
-            try {
-                threadPool.invokeAll(tasks);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+                insert(entry.getValue(), r, appliedMap);
 
+            }
         }
         else if (USE_INVERTED_LIST_NODES_OPT) {
             nodeList.findNodes(r, appliedMap);
@@ -197,26 +183,4 @@ public class NodeMap {
             return 0;
         }
     }
-
-    // used for parallelising the bitstring sort opt
-    class InsertTask implements Callable<Boolean> {
-        FFTNode n;
-        Rule r;
-        ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap;
-
-        public InsertTask(FFTNode n, Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
-            this.n = n;
-            this.r = r;
-            this.appliedMap = appliedMap;
-        }
-
-
-
-        @Override
-        public Boolean call() {
-            insert(n, r, appliedMap);
-            return true;
-        }
-    }
-
 }
