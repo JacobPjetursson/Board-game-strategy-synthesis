@@ -8,7 +8,7 @@ import fftlib.logic.Rule;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 import static misc.Config.*;
 import static misc.Globals.*;
@@ -21,6 +21,8 @@ public class NodeMap {
     public static final int NO_SORT = 0;
     public static final int BITSTRING_SORT = 1;
     public static final int RULE_SORT = 2;
+
+    private ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
     // TODO - super non-important, but would be nice to have this class represented as a single map somehow
     private TreeMap<BigInteger, FFTNode> codeMap;
@@ -98,12 +100,27 @@ public class NodeMap {
     public void findNodes(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
         if (sort == BITSTRING_SORT) {
             BigInteger code = r.getAllPreconditions().getBitString();
+            LinkedList<Future<?>> tasks = new LinkedList<>();
             // TODO - multithread
             for (Map.Entry<BigInteger, FFTNode> entry : codeMap.entrySet()) {
                 if (entry.getKey().compareTo(code) < 0)
                     break;
-                insert(entry.getValue(), r, appliedMap);
+                if (!SINGLE_THREAD) {
+                    InsertTask t = new InsertTask(entry.getValue(), r, appliedMap);
+                    tasks.add(threadPool.submit(t));
+                } else {
+                    insert(entry.getValue(), r, appliedMap);
+                }
             }
+            // join
+            for (Future<?> f : tasks) {
+                try {
+                    f.get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
         else if (USE_INVERTED_LIST_NODES_OPT) {
             nodeList.findNodes(r, appliedMap);
@@ -118,7 +135,7 @@ public class NodeMap {
         }
     }
 
-    private static void insert(FFTNode n, Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> nodes) {
+    private void insert(FFTNode n, Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> nodes) {
         HashSet<FFTMove> moves = r.apply(n);
         if (!moves.isEmpty())
             nodes.put(n, moves);
@@ -183,5 +200,22 @@ public class NodeMap {
         }
     }
 
+    // used for parallelising the bitstring sort opt
+    class InsertTask implements Runnable {
+        FFTNode n;
+        Rule r;
+        ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap;
+
+        public InsertTask(FFTNode n, Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
+            this.n = n;
+            this.r = r;
+            this.appliedMap = appliedMap;
+        }
+
+        public void run() {
+            insert(n, r, appliedMap);
+        }
+
+    }
 
 }
