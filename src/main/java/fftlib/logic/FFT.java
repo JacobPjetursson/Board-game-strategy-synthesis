@@ -326,7 +326,7 @@ public class FFT {
                 else
                     simplified = true;
             }
-            if (simplified && REMOVE_DEAD_RULES)
+            if (simplified)
                 removeDeadRules(r);
 
             if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule))

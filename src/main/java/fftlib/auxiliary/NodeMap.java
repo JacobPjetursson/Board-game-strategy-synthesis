@@ -95,34 +95,41 @@ public class NodeMap {
         return map;
     }
 
-    public void findNodes(Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
+    public void findNodes(Rule r, Map<FFTNode, Set<FFTMove>> appliedMap) {
+        findNodes(r, appliedMap, false);
+    }
+
+    public void findNodes(Rule r, Map<FFTNode, Set<FFTMove>> appliedMap, boolean safe) {
         if (sort == BITSTRING_SORT) {
             BigInteger code = r.getAllPreconditions().getBitString();
             // multithreading has bad performance
             for (Map.Entry<BigInteger, FFTNode> entry : codeMap.entrySet()) {
                 if (entry.getKey().compareTo(code) < 0)
                     break;
-                insert(entry.getValue(), r, appliedMap);
+                insert(entry.getValue(), r, appliedMap, safe);
 
             }
         }
         else if (USE_INVERTED_LIST_NODES_OPT) {
-            nodeList.findNodes(r, appliedMap);
+            nodeList.findNodes(r, appliedMap, safe);
         }
         else if (!SINGLE_THREAD) {
             values().parallelStream().forEach(node ->
-                    insert(node, r, appliedMap));
+                    insert(node, r, appliedMap, safe));
         } else {
             for (FFTNode n : values()) {
-                insert(n, r, appliedMap);
+                insert(n, r, appliedMap, safe);
             }
         }
     }
 
-    private void insert(FFTNode n, Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> nodes) {
+    private void insert(FFTNode n, Rule r, Map<FFTNode, Set<FFTMove>> nodes, boolean safe) {
         HashSet<FFTMove> moves = r.apply(n);
-        if (!moves.isEmpty())
+        if (!moves.isEmpty()) {
             nodes.put(n, moves);
+            if (safe)
+                n.setAppliedRule(r);
+        }
     }
 
     public void removeAll(Collection<FFTNode> nodes) {

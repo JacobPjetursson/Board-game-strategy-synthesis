@@ -15,7 +15,7 @@ import static misc.Globals.PLAYER1;
 
 public class FFTAutoGen {
     // States that are reachable when playing with a partial or total strategy
-    private static HashMap<FFTNode, FFTNode> reachableStates;
+    private static Map<FFTNode, FFTNode> reachableStates;
     // Subset of reachable states where strategy does not output a move, and player has the turn
     // This is the set of states that a new rule can potentially influence (subset of reachable)
     private static NodeMap applicableStates;
@@ -165,13 +165,14 @@ public class FFTAutoGen {
     }
 
     private static void makeRules() {
-        HashSet<FFTNode> skippedNodes = new HashSet<>();
+        Set<FFTNode> skippedNodes = new HashSet<>();
         while (applicableStates.size() > 0) {
             System.out.println("Remaining applicable states: " + applicableStates.size() +
                     ". Current amount of rules: " + fft.size());
             Iterator<FFTNode> it = applicableStates.values().iterator();
             FFTNode node = it.next();
 
+            /*  //Skipping rules probably bad
             boolean onlySkips = false;
             while (skippedNodes.contains(node)) {
                 if (!it.hasNext()) {
@@ -189,6 +190,7 @@ public class FFTAutoGen {
                 skippedNodes.add(node);
                 continue;
             }
+            */
 
             Rule r = addRule(node);
             if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
@@ -227,7 +229,7 @@ public class FFTAutoGen {
             // if symmetry, only add rule if node is not covered
             // expand on all chosen moves, since symmetric rule can have several chosen moves
             if (SYMMETRY_DETECTION) {
-                HashSet<FFTMove> appliedMoves = fft.apply(node);
+                Set<FFTMove> appliedMoves = fft.apply(node);
                 if (appliedMoves.isEmpty()) {
                     Rule r = Rule.createRule(node, chosenMove);
                     //System.out.println("adding rule: " + r);
@@ -325,7 +327,7 @@ public class FFTAutoGen {
                 }
                 if (DETAILED_DEBUG) System.out.println("RULE IS NOW: " + r);
             }
-            if (!lastRule && simplified && REMOVE_DEAD_RULES)
+            if (!lastRule && simplified)
                 fft.removeDeadRules(r);
         } while (SIMPLIFY_ITERATIVELY && prevSize != r.getPreconditions().size() &&
                 r.getPreconditions().size() != 0);
@@ -353,12 +355,12 @@ public class FFTAutoGen {
     }
 
     private static void fillAppliedMap(
-            Rule r, ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap, boolean lastRule) {
+            Rule r, Map<FFTNode, Set<FFTMove>> appliedMap, boolean lastRule, boolean safe) {
 
         if (!lastRule)
-            appliedStates.findNodes(r, appliedMap);
+            appliedStates.findNodes(r, appliedMap, safe);
 
-        applicableStates.findNodes(r, appliedMap);
+        applicableStates.findNodes(r, appliedMap, safe);
 
         if (!lastRule) { // replace value of all keys
             if (!SINGLE_THREAD) {
@@ -376,14 +378,14 @@ public class FFTAutoGen {
         //System.out.println("Verifying rule");
         if (safe && DETAILED_DEBUG && (SYMMETRY_DETECTION || USE_LIFTING))
             System.out.println("DOING SAFE RUN");
-        ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap = new ConcurrentHashMap<>();
+        Map<FFTNode, Set<FFTMove>> appliedMap = new ConcurrentHashMap<>();
 
-        fillAppliedMap(r, appliedMap, lastRule);
+        fillAppliedMap(r, appliedMap, lastRule, safe);
 
         //System.out.println("appliedMap:");
-        for (Map.Entry<FFTNode, HashSet<FFTMove>> entry : appliedMap.entrySet()) {
+        for (Map.Entry<FFTNode, Set<FFTMove>> entry : appliedMap.entrySet()) {
             FFTNode n = entry.getKey();
-            HashSet<FFTMove> moves = entry.getValue();
+            Set<FFTMove> moves = entry.getValue();
             //System.out.println(n + " , moves: " + moves);
             //System.out.println("Checking if node is valid");
             if (!updateSets(n, moves, appliedMap, lastRule, safe)) {
@@ -400,7 +402,7 @@ public class FFTAutoGen {
         // If g(s) = f(s), which is the case with no symmetry and lifting,
         // we can here do another updateSets() for all applied states
         if (!SYMMETRY_DETECTION && !USE_LIFTING)
-            for (Map.Entry<FFTNode, HashSet<FFTMove>> entry : appliedMap.entrySet()) {
+            for (Map.Entry<FFTNode, Set<FFTMove>> entry : appliedMap.entrySet()) {
                 //System.out.println("Doing safe updateSets for node: " + entry.getKey());
                 //System.out.println("moves: " + entry.getValue());
                 updateSets(entry.getKey(), entry.getValue(), appliedMap, lastRule, true);
@@ -408,8 +410,8 @@ public class FFTAutoGen {
         return true;
     }
 
-    private static boolean updateSets(FFTNode n, HashSet<FFTMove> chosenMoves,
-                                          ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap,
+    private static boolean updateSets(FFTNode n, Set<FFTMove> chosenMoves,
+                                          Map<FFTNode, Set<FFTMove>> appliedMap,
                                       boolean lastRule, boolean safe) {
         boolean reachable = true;
         // s might've been set unreachable by another state in appliedSet
@@ -518,18 +520,23 @@ public class FFTAutoGen {
         existingChild.removeReachableParent(n);
         if (existingChild.isReachable())
             return;
-        //System.out.println("removing child: " + existingChild);
-        reachableStates.remove(existingChild);
-        applicableStates.remove(existingChild);
-        appliedStates.remove(existingChild);
+        remove(existingChild);
         for (FFTMove move : existingChild.getLegalMoves()) {
             removeFromSets(existingChild, move);
         }
     }
 
+    private static void remove(FFTNode n) {
+        //System.out.println("removing child: " + existingChild);
+        reachableStates.remove(n);
+        applicableStates.remove(n);
+        appliedStates.remove(n);
+
+    }
+
     private static boolean addToSets(FFTNode node, FFTMove move, boolean safe) {
         LinkedList<FFTNodeAndMove> frontier = new LinkedList<>();
-        HashSet<FFTNode> closedSet = new HashSet<>(); // prevent looping when not safe
+        Set<FFTNode> closedSet = new HashSet<>(); // prevent looping when not safe
         frontier.add(new FFTNodeAndMove(node, move));
         while (!frontier.isEmpty()) {
             FFTNodeAndMove nm = frontier.pop();
@@ -566,7 +573,7 @@ public class FFTAutoGen {
             ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(child);
             //System.out.println("Optimal moves for child: " + child + " : " + optimalMoves);
             // find new move (if any)
-            HashSet<FFTMove> newMoves = fft.apply(child);
+            Set<FFTMove> newMoves = fft.apply(child);
             //System.out.println("newMoves: " + newMoves);
             if (newMoves.isEmpty()) {
                 if (safe) {
@@ -601,10 +608,10 @@ public class FFTAutoGen {
 
     // walk upwards through reachable parents until initial state is found
     private static boolean isReachable(FFTNode node,
-                                       ConcurrentHashMap<FFTNode, HashSet<FFTMove>> appliedMap) {
+                                       Map<FFTNode, Set<FFTMove>> appliedMap) {
         //System.out.println("Checking if node" + node + " , is reachable");
         LinkedList<FFTNode> frontier = new LinkedList<>();
-        HashSet<FFTNode> closedSet = new HashSet<>();
+        Set<FFTNode> closedSet = new HashSet<>();
         frontier.add(node);
         closedSet.add(node);
 
@@ -618,7 +625,7 @@ public class FFTAutoGen {
                 //System.out.println("Parent: " + parent + " , exists: " + (existingParent != null));
                 if (existingParent == null || closedSet.contains(parent))
                     continue;
-                HashSet<FFTMove> chosenMoves = appliedMap.get(parent);
+                Set<FFTMove> chosenMoves = appliedMap.get(parent);
                 //System.out.println("chosenMoves: " + chosenMoves);
                 // not in appliedMap or all moves optimal, add parent
                 if (chosenMoves == null || chosenMoves.isEmpty()) {
@@ -752,7 +759,7 @@ public class FFTAutoGen {
                     addNode(frontier, node, child);
                 continue;
             }
-            HashSet<FFTMove> chosenMoves = fft.apply(node);
+            Set<FFTMove> chosenMoves = fft.apply(node);
             if (!chosenMoves.isEmpty()) {
                 appliedStates.put(node);
                 for (FFTMove m : chosenMoves)
@@ -777,7 +784,7 @@ public class FFTAutoGen {
         reachableStates.get(child).addReachableParent(parent);
     }
 
-    public static HashMap<FFTNode, FFTNode> getReachableStates() {
+    public static Map<FFTNode, FFTNode> getReachableStates() {
         return reachableStates;
     }
 

@@ -2,6 +2,7 @@ package fftlib.game;
 
 import fftlib.FFTManager;
 import fftlib.logic.LiteralSet;
+import fftlib.logic.Rule;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,6 +14,8 @@ public abstract class FFTNode {
 
     // cached literalSet
     private LiteralSet converted;
+
+    private Rule appliedRule; // the current rule that applies to this state
 
     public int getTurn() {
         return turn;
@@ -30,6 +33,14 @@ public abstract class FFTNode {
         reachableParents.remove(parent);
         if (reachableParents.isEmpty())
             reachable = false;
+    }
+
+    public Rule getAppliedRule() {
+        return appliedRule;
+    }
+
+    public void setAppliedRule(Rule r) {
+        appliedRule = r;
     }
 
     public HashSet<FFTNode> getReachableParents() {
