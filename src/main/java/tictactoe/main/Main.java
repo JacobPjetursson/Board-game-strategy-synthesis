@@ -7,16 +7,15 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import misc.Globals;
 import tictactoe.FFT.GameSpecifics;
-import tictactoe.game.Node;
 import tictactoe.gui.menu.MenuPane;
 
-import static misc.Config.TIC_TAC_TOE_SHOW_GUI;
+import static misc.Config.SHOW_GUI;
 
 public class Main extends Application {
 
     public static void main(String[] args) {
         Globals.CURRENT_GAME = Globals.TICTACTOE;
-        if (TIC_TAC_TOE_SHOW_GUI)
+        if (SHOW_GUI)
             launch(args);
         else {
             GameSpecifics specs = new GameSpecifics();

@@ -115,7 +115,7 @@ public class FFTManager {
                         fft_file.append("*");
                     fft_file.append("\n");
                     for (Rule r : rg.rules) {
-                        fft_file.append(r.getPreconString()).append(" -> ").append(r.getActionString()).append("\n");
+                        fft_file.append(r.getPreconditions()).append(" -> ").append(r.getPreconditions()).append("\n");
                     }
                 }
             }

@@ -6,18 +6,16 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import kulibrat.FFT.GameSpecifics;
-import kulibrat.game.Node;
 import kulibrat.gui.menu.MenuPane;
 import misc.Globals;
 
-
-import static misc.Config.KULIBRAT_SHOW_GUI;
+import static misc.Config.SHOW_GUI;
 
 public class Main extends Application {
 
     public static void main(String[] args) {
         Globals.CURRENT_GAME = Globals.KULIBRAT;
-        if (KULIBRAT_SHOW_GUI)
+        if (SHOW_GUI)
             launch(args);
         else {
             GameSpecifics specs = new GameSpecifics();

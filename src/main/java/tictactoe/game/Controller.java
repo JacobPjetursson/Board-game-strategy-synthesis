@@ -71,6 +71,7 @@ public class Controller {
         gameSpecifics = new GameSpecifics(this);
         FFTManager.initialize(gameSpecifics);
         FFTSolver.solveGame();
+        FFTManager.loadFFTs();
         // Autogenerate
         if (ENABLE_AUTOGEN)
             FFTManager.autogenFFT();

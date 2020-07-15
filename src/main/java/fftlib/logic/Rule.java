@@ -13,8 +13,7 @@ import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import java.math.BigInteger;
 import java.util.*;
 
-import static misc.Config.ENABLE_GGP_PARSER;
-import static misc.Config.SYMMETRY_DETECTION;
+import static misc.Config.*;
 
 
 public class Rule {
@@ -296,24 +295,10 @@ public class Rule {
         if (ENABLE_GGP_PARSER) {
             // TODO
         }
-        String str = "IF [" + getPreconString() + "] THEN [" + getActionString() + "]";
-        if (ruleIndex != -1)
+        String str = "IF [" + preconditions + "] THEN [" + action + "]";
+        if (!SHOW_GUI && ruleIndex != -1)
             str += " , index: " + ruleIndex;
         return str;
-    }
-
-    public String getPreconString() {
-        StringBuilder pStr = new StringBuilder();
-        for (Literal l : preconditions) {
-            if (pStr.length() > 0)
-                pStr.append(" ∧ ");
-            pStr.append(l.getName());
-        }
-        return pStr.toString();
-    }
-
-    public String getActionString() {
-        return action.getFormattedString();
     }
 
     private HashSet<SymmetryRule> initializeSymmetryRules() {

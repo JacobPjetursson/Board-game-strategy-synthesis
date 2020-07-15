@@ -89,12 +89,12 @@ public class Action {
         for (Literal literal : adds) {
             if (actionMsg.length() > 0)
                 actionMsg.append(" ∧ ");
-            actionMsg.append("+").append(literal.getName());
+            actionMsg.append("+").append(literal);
         }
         for (Literal literal : rems) {
             if (actionMsg.length() > 0)
                 actionMsg.append(" ∧ ");
-            actionMsg.append("-").append(literal.getName());
+            actionMsg.append("-").append(literal);
         }
         return actionMsg.toString();
     }

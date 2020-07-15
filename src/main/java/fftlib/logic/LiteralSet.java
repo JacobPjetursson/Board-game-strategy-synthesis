@@ -86,4 +86,14 @@ public class LiteralSet extends HashSet<Literal> {
     public boolean contains(Literal literal) {
         return (bitString.testBit(literal.id));
     }
+
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        for (Literal l : this) {
+            if (str.length() > 0)
+                str.append(" ∧ ");
+            str.append(l);
+        }
+        return str.toString();
+    }
 }

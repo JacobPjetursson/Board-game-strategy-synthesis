@@ -18,6 +18,7 @@ public class Config {
     public static int SEED;
     public static boolean ENABLE_GGP;
     public static boolean ENABLE_GGP_PARSER;
+    public static boolean SHOW_GUI;
     public static int RULE_ORDERING;
     public static boolean MINIMIZE_PRECONDITIONS;
     public static boolean SYMMETRY_DETECTION;
@@ -47,12 +48,10 @@ public class Config {
     public static int BWIDTH;
     public static int BHEIGHT;
     public static boolean USE_DB;
-    public static boolean KULIBRAT_SHOW_GUI;
     public static String DB_PATH;
 
     // TIC TAC TOE PROPERTIES
     public static int TIC_TAC_TOE_RULES;
-    public static boolean TIC_TAC_TOE_SHOW_GUI;
 
     // SIM
     public static boolean SIM_SIMPLE_RULES;
@@ -130,6 +129,7 @@ public class Config {
         SEED = Integer.parseInt(global.getProperty("seed"));
         ENABLE_GGP = Boolean.parseBoolean(global.getProperty("enable_ggp"));
         ENABLE_GGP_PARSER = Boolean.parseBoolean(global.getProperty("enable_ggp_parser"));
+        SHOW_GUI = Boolean.parseBoolean(global.getProperty("show_gui"));
         MINIMIZE_PRECONDITIONS = Boolean.parseBoolean(global.getProperty("minimize_preconditions"));
         MINIMIZE_RULE_BY_RULE = Boolean.parseBoolean(global.getProperty("minimize_rule_by_rule"));
         REMOVE_DEAD_RULES = Boolean.parseBoolean(global.getProperty("remove_dead_rules"));
@@ -155,7 +155,6 @@ public class Config {
         BWIDTH = Integer.parseInt(kulibrat.getProperty("boardWidth"));
         BHEIGHT = Integer.parseInt(kulibrat.getProperty("boardHeight"));
         USE_DB = Boolean.parseBoolean(kulibrat.getProperty("use_db"));
-        KULIBRAT_SHOW_GUI = Boolean.parseBoolean(kulibrat.getProperty("show_gui"));
         DB_PATH = kulibrat.getProperty("db_path");
 
         // TIC TAC TOE
@@ -170,7 +169,6 @@ public class Config {
             default:
                 TIC_TAC_TOE_RULES = TIC_TAC_TOE_NORMAL_RULES;
         }
-        TIC_TAC_TOE_SHOW_GUI = Boolean.parseBoolean(tictactoe.getProperty("show_gui"));
 
         // SIM
         SIM_SIMPLE_RULES = Boolean.parseBoolean(sim.getProperty("simple_rules"));
