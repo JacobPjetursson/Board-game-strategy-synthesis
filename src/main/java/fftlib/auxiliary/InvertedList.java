@@ -3,8 +3,9 @@ package fftlib.auxiliary;
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
-import fftlib.logic.Literal;
-import fftlib.logic.LiteralSet;
+import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.LiteralSet;
+import fftlib.logic.literal.PropLiteral;
 import fftlib.logic.rule.Rule;
 import fftlib.logic.rule.PropRule;
 import misc.Config;
@@ -42,8 +43,8 @@ public class InvertedList {
     public void add(PropRule rule) {
         for (int atom : FFTManager.getGameAtoms.get()) {
             LiteralSet precons = rule.getAllPreconditions();
-            Literal pos = new Literal(atom);
-            Literal neg = new Literal(atom);
+            Literal pos = new PropLiteral(atom);
+            Literal neg = new PropLiteral(atom);
             neg.setNegated(true);
             // add if contains pos or does not contain neg
             if (precons.contains(pos) || !precons.contains(neg))

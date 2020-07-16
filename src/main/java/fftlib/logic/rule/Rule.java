@@ -4,8 +4,9 @@ import fftlib.GGPAutogen.GGPManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 import fftlib.logic.Action;
-import fftlib.logic.Literal;
-import fftlib.logic.LiteralSet;
+import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.LiteralSet;
+import fftlib.logic.literal.PropLiteral;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
@@ -21,6 +22,8 @@ import static misc.Config.ENABLE_GGP_PARSER;
 import static misc.Config.SHOW_GUI;
 
 public abstract class Rule {
+
+
     protected static final ArrayList<String> separators = new ArrayList<>(
             Arrays.asList("and", "And", "AND", "&", "∧"));
     // preconditions are the preconditions visible to the human
@@ -97,7 +100,7 @@ public abstract class Rule {
     static LiteralSet parsePreconditions(String preconStr) {
         LiteralSet literals = new LiteralSet();
         for (String precons : prepPreconditions(preconStr)) {
-            literals.add(new Literal(precons));
+            literals.add(new PropLiteral(precons));
         }
         return literals;
     }

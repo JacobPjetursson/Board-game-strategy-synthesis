@@ -1,37 +1,14 @@
-package fftlib.logic;
+package fftlib.logic.literal;
 
 import fftlib.FFTManager;
 
-import java.util.ArrayList;
+public class PropLiteral extends Literal {
 
-public class Literal {
-    public int id;
-
-    // used for cartesian product to allow the option of not picking any literal
-    public static Literal NULL = new Literal(0);
-
-    public Literal() {
-
-    }
-
-    public Literal(int id) {
+    public PropLiteral(int id) {
         this.id = id;
     }
 
-    public boolean isNegated() {
-        return getName().startsWith("!");
-    }
-
-    public void setNegated(boolean negated) {
-        String name = getName();
-        if (negated && !name.startsWith("!")) {
-            this.id = FFTManager.getAtomId.apply("!" + name);
-        } else if (name.startsWith("!")){
-            this. id = FFTManager.getAtomId.apply(name.substring(1));
-        }
-    }
-
-    public Literal(String name) {
+    public PropLiteral(String name) {
         try {
             this.id = FFTManager.getAtomId.apply(name);
         } catch (Exception e) {
@@ -41,20 +18,30 @@ public class Literal {
         }
     }
 
-    public Literal(Literal duplicate) {
+    public PropLiteral(PropLiteral duplicate) {
         this.id = duplicate.id;
     }
 
     @Override
     public Literal clone() {
-        return new Literal(this);
+        return new PropLiteral(this);
+    }
+
+    @Override
+    public void setNegated(boolean negated) {
+        String name = getName();
+        if (negated && !name.startsWith("!")) {
+            this.id = FFTManager.getAtomId.apply("!" + name);
+        } else if (name.startsWith("!")){
+            this.id = FFTManager.getAtomId.apply(name.substring(1));
+        }
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof Literal)) return false;
+        if (!(obj instanceof PropLiteral)) return false;
 
-        Literal literal = (Literal) obj;
+        PropLiteral literal = (PropLiteral) obj;
         if (this == literal)
             return true;
 
@@ -68,27 +55,6 @@ public class Literal {
 
     public String getName() {
         return FFTManager.getAtomName.apply(id);
-    }
-
-    @Override
-    public String toString() {
-        return getName();
-    }
-
-    public String getBody() {
-        String name = getName();
-        return name.substring(name.lastIndexOf("("));
-    }
-
-    // TODO - should scale to values > 9
-    public ArrayList<Integer> getIndices() {
-        ArrayList<Integer> indices = new ArrayList<>();
-        String body = getBody();
-        for (char c : body.toCharArray()) {
-            if (Character.isDigit(c))
-                indices.add(Character.getNumericValue(c));
-        }
-        return indices;
     }
 
     public Literal liftAll(int prop) {
@@ -109,11 +75,10 @@ public class Literal {
         String newName = comps[0] + newBody;
         try {
             int id = FFTManager.getAtomId.apply(newName);
-            return new Literal(id);
+            return new PropLiteral(id);
         } catch (Exception ignored) {
             // return this literal if id does not exist
         }
-        return new Literal(this);
+        return new PropLiteral(this);
     }
-
 }

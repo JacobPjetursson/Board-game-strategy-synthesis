@@ -2,8 +2,9 @@ package tictactoe.FFT;
 
 import fftlib.FFTManager;
 import fftlib.logic.Action;
-import fftlib.logic.Literal;
+import fftlib.logic.literal.Literal;
 import fftlib.auxiliary.Position;
+import fftlib.logic.literal.PropLiteral;
 import fftlib.logic.rule.Rule;
 import fftlib.logic.rule.PropRule;
 import fftlib.game.FFTNode;
@@ -59,7 +60,7 @@ public class InteractiveNode implements interactiveFFTNode {
         for (int i = 1; i < 4; i++) {
             // todo
             Position pos = new Position(bt.getRow(), bt.getCol(), i);
-            Literal l = new Literal(Atoms.posToId.get(pos));
+            Literal l = new PropLiteral(Atoms.posToId.get(pos));
             FFTManager.currFFT.removePrecondition(rule, l);
         }
         if (actionTile != null) {

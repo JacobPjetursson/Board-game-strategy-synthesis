@@ -1,7 +1,7 @@
 package fftlib.game;
 
 import fftlib.FFTManager;
-import fftlib.logic.LiteralSet;
+import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.rule.Rule;
 import fftlib.logic.rule.SymmetryRule;
 
@@ -43,7 +43,7 @@ public abstract class FFTNode {
     public void setAppliedRule(Rule r) {
         if (r instanceof SymmetryRule) {
             SymmetryRule symRule = (SymmetryRule) r;
-            //r = symRule.
+            r = symRule.getParent();
         }
         appliedRule = r;
     }

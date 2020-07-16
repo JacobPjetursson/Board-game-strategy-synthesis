@@ -2,7 +2,8 @@ package mens_morris;
 
 import fftlib.FFTManager;
 import fftlib.logic.Action;
-import fftlib.logic.Literal;
+import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.PropLiteral;
 import fftlib.logic.rule.PropRule;
 
 import java.util.Scanner;
@@ -21,8 +22,8 @@ public class Demo {
         System.out.println(node.convert());
         System.out.println(node.convert().getBitString());
         Action testAction = new Action();
-        testAction.adds.add(new Literal("P1(1, 0)"));
-        testAction.rems.add(new Literal("P1(0, 0)"));
+        testAction.adds.add(new PropLiteral("P1(1, 0)"));
+        testAction.rems.add(new PropLiteral("P1(0, 0)"));
         PropRule testRule = new PropRule(node.convert(), testAction);
         System.out.println("All preconditions:");
         System.out.println(testRule.getAllPreconditions());

@@ -3,9 +3,9 @@ package fftlib.logic.rule;
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 import fftlib.logic.Action;
-import fftlib.logic.Literal;
-import fftlib.logic.LiteralSet;
-import fftlib.logic.PredLiteral;
+import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.LiteralSet;
+import fftlib.logic.literal.PredLiteral;
 
 import java.util.HashSet;
 
@@ -23,7 +23,7 @@ public class PredRule extends Rule {
     public PredRule(PredRule duplicate) {
         this.preconditions = new LiteralSet();
         for (Literal l : duplicate.preconditions)
-            this.preconditions.add(new Literal(l));
+            this.preconditions.add(l.clone());
         this.action = new Action(duplicate.action);
 
         initializeGroundedRules();
@@ -100,7 +100,8 @@ public class PredRule extends Rule {
                 inconsistent = true;
             }
             for (Literal l : litset) {
-                Literal negLit = new Literal(l);
+                Literal negLit = l.clone();
+                negLit.setNegated(true);
                 if (litset.contains(negLit)) {
                     inconsistent = true;
                     break;

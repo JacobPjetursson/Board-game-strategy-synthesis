@@ -1,8 +1,9 @@
 package mens_morris;
 
 import fftlib.auxiliary.Position;
-import fftlib.logic.LiteralSet;
-import fftlib.logic.Literal;
+import fftlib.logic.literal.LiteralSet;
+import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.PropLiteral;
 import misc.Config;
 
 import java.util.*;
@@ -104,21 +105,21 @@ public class Atoms {
 
                 // Make sure new position is empty
                 LiteralSet addPrecons = new LiteralSet();
-                addPrecons.add(new Literal(String.format("!P1(%s, %s)", i, j)));
-                addPrecons.add(new Literal(String.format("!P2(%s, %s)", i, j)));
+                addPrecons.add(new PropLiteral(String.format("!P1(%s, %s)", i, j)));
+                addPrecons.add(new PropLiteral(String.format("!P2(%s, %s)", i, j)));
 
-                Literal addP1 = new Literal(String.format("P1(%s, %s)", i, j));
-                Literal addP2 = new Literal(String.format("P2(%s, %s)", i, j));
+                Literal addP1 = new PropLiteral(String.format("P1(%s, %s)", i, j));
+                Literal addP2 = new PropLiteral(String.format("P2(%s, %s)", i, j));
                 addToPrecons.put(addP1, addPrecons);
                 addToPrecons.put(addP2, addPrecons);
 
                 LiteralSet remPrecons = new LiteralSet();
-                Literal rem = new Literal(String.format("P1(%s, %s)", i, j));
+                Literal rem = new PropLiteral(String.format("P1(%s, %s)", i, j));
                 remPrecons.add(rem);
                 remToPrecons.put(rem, remPrecons);
 
                 remPrecons = new LiteralSet();
-                rem = new Literal(String.format("P2(%s, %s)", i, j));
+                rem = new PropLiteral(String.format("P2(%s, %s)", i, j));
                 remPrecons.add(rem);
                 remToPrecons.put(rem, remPrecons);
             }

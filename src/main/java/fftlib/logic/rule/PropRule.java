@@ -4,6 +4,9 @@ import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 import fftlib.logic.*;
+import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.LiteralSet;
+import fftlib.logic.literal.PropLiteral;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.Move;
 
@@ -136,14 +139,19 @@ public class PropRule extends Rule {
     public PredRule liftAll(int prop) {
         LiteralSet newPrecs = new LiteralSet();
         for (Literal l : preconditions) {
-            newPrecs.add(l.liftAll(prop));
+            PropLiteral pLit = (PropLiteral) l;
+            newPrecs.add(pLit.liftAll(prop));
         }
         LiteralSet addSet = new LiteralSet();
         LiteralSet remSet = new LiteralSet();
-        for (Literal l : action.adds)
-            addSet.add(l.liftAll(prop));
-        for (Literal l : action.rems)
-            remSet.add(l.liftAll(prop));
+        for (Literal l : action.adds) {
+            PropLiteral pLit = (PropLiteral) l;
+            addSet.add(pLit.liftAll(prop));
+        }
+        for (Literal l : action.rems) {
+            PropLiteral pLit = (PropLiteral) l;
+            remSet.add(pLit.liftAll(prop));
+        }
         Action a = new Action(addSet, remSet);
         PredRule pr = new PredRule(newPrecs, a);
         if (pr.isInConsistent())

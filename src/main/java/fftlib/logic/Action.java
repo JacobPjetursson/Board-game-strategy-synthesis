@@ -2,8 +2,10 @@ package fftlib.logic;
 
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
+import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.LiteralSet;
+import fftlib.logic.literal.PropLiteral;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 
 
@@ -19,13 +21,13 @@ public class Action {
     public Action(int id) {
         this.adds = new LiteralSet();
         this.rems = new LiteralSet();
-        this.adds.add(new Literal(id));
+        this.adds.add(new PropLiteral(id));
     }
 
     public Action(String name) {
         this.adds = new LiteralSet();
         this.rems = new LiteralSet();
-        this.adds.add(new Literal(FFTManager.getAtomId.apply(name)));
+        this.adds.add(new PropLiteral(FFTManager.getAtomId.apply(name)));
     }
 
     public Action(Action duplicate) {
@@ -40,11 +42,11 @@ public class Action {
         for (String lStr : literals) {
             if (lStr.startsWith("+")) {
                 lStr = lStr.substring(1);
-                Literal l = new Literal(lStr);
+                PropLiteral l = new PropLiteral(lStr);
                 adds.add(l);
             } else if (lStr.startsWith("-")) {
                 lStr = lStr.substring(1);
-                Literal l = new Literal(lStr);
+                PropLiteral l = new PropLiteral(lStr);
                 rems.add(l);
             } else {
                 System.err.println("Invalid action format! Literal should be prefixed with plus (+) or minus (-)");

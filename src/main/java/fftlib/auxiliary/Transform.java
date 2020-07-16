@@ -1,9 +1,10 @@
 package fftlib.auxiliary;
 
 import fftlib.*;
-import fftlib.logic.LiteralSet;
+import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.Action;
-import fftlib.logic.Literal;
+import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.PropLiteral;
 import fftlib.logic.rule.PropRule;
 import fftlib.logic.rule.SymmetryRule;
 
@@ -68,7 +69,7 @@ public class Transform {
         return symmetryBoards;
     }
 
-    public static HashSet<SymmetryRule> getSymmetryRules(int[] transformations, PropRule propRule) {
+    public static HashSet<SymmetryRule> getSymmetryRules(int[] transformations, PropRule rule) {
         boolean rotate = false;
         boolean refH = false;
         boolean refV = false;
@@ -82,12 +83,12 @@ public class Transform {
         }
         HashSet<SymmetryRule> symmetryRules = new HashSet<>();
         // add itself
-        symmetryRules.add(new SymmetryRule(propRule.getPreconditions(), propRule.getAction()));
+        symmetryRules.add(new SymmetryRule(rule.getPreconditions(), rule.getAction(), rule));
         int [][] lBoard;
         Literal transformed;
         for (ArrayList<Integer> trans : getAllTransformations(refH, refV, rotate)) {
             LiteralSet transformedSet = new LiteralSet();
-            for (Literal l : propRule.getPreconditions()) {
+            for (Literal l : rule.getPreconditions()) {
                 lBoard = literalToBoard(l);
                 if (lBoard == null) { // not a board literal
                     transformedSet.add(l);
@@ -98,7 +99,7 @@ public class Transform {
                 transformedSet.add(transformed);
             }
             Action action = new Action();
-            for (Literal l : propRule.getAction().adds) {
+            for (Literal l : rule.getAction().adds) {
                 lBoard = literalToBoard(l);
                 if (lBoard == null) { // not a board literal
                     transformedSet.add(l);
@@ -108,7 +109,7 @@ public class Transform {
                 transformed = boardToLiteral(lBoard);
                 action.adds.add(transformed);
             }
-            for (Literal l : propRule.getAction().rems) {
+            for (Literal l : rule.getAction().rems) {
                 lBoard = literalToBoard(l);
                 if (lBoard == null) { // not a board literal
                     transformedSet.add(l);
@@ -118,7 +119,7 @@ public class Transform {
                 transformed = boardToLiteral(lBoard);
                 action.rems.add(transformed);
             }
-            symmetryRules.add(new SymmetryRule(transformedSet, action));
+            symmetryRules.add(new SymmetryRule(transformedSet, action, rule));
         }
 
         return symmetryRules;
@@ -197,13 +198,13 @@ public class Transform {
     }
 
     // returns preconditions derived from transformed integer matrix and non-boardplacement literals
-    private static Literal boardToLiteral(int[][] board) {
+    private static PropLiteral boardToLiteral(int[][] board) {
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 Position pos = new Position(i, j, board[i][j]);
                 if (pos.occ == 0)
                     continue;
-                return new Literal(getIdFromPos.apply(pos));
+                return new PropLiteral(getIdFromPos.apply(pos));
             }
         }
         return null;
@@ -216,7 +217,7 @@ public class Transform {
         return copy;
     }
 
-    public static HashSet<SymmetryRule> findAutomorphisms(PropRule propRule) {
+    public static HashSet<SymmetryRule> findAutomorphisms(PropRule rule) {
         int [] vertices = new int[gameBoardHeight];
         for (int i = 0; i < gameBoardHeight; i++) {
             vertices[i] = i;
@@ -227,7 +228,7 @@ public class Transform {
         int n1, n2;
         for(int[] arr : permutations) {
             LiteralSet precons = new LiteralSet();
-            Literal literal = propRule.getAction().adds.iterator().next();
+            Literal literal = rule.getAction().adds.iterator().next();
             pos = getPosFromId.apply(literal.id);
             n1 = arr[pos.row];
             n2 = arr[pos.col];
@@ -239,7 +240,7 @@ public class Transform {
             newPos = new Position(n1, n2, pos.occ);
             Action action = new Action(getIdFromPos.apply(newPos));
 
-            for (Literal lit : propRule.getPreconditions()) {
+            for (Literal lit : rule.getPreconditions()) {
                 pos = getPosFromId.apply(lit.id);
                 n1 = arr[pos.row];
                 n2 = arr[pos.col];
@@ -249,9 +250,9 @@ public class Transform {
                     n2 = temp;
                 }
                 newPos = new Position(n1, n2, pos.occ);
-                precons.add(new Literal(getIdFromPos.apply(newPos)));
+                precons.add(new PropLiteral(getIdFromPos.apply(newPos)));
             }
-            transformations.add(new SymmetryRule(precons, action));
+            transformations.add(new SymmetryRule(precons, action, rule));
         }
         return transformations;
     }

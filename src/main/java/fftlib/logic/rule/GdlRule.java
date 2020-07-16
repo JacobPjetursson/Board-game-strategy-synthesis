@@ -2,8 +2,8 @@ package fftlib.logic.rule;
 
 import fftlib.game.FFTMove;
 import fftlib.logic.Action;
-import fftlib.logic.Literal;
-import fftlib.logic.LiteralSet;
+import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.LiteralSet;
 
 import java.util.HashSet;
 

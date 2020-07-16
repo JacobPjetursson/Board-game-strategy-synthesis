@@ -6,6 +6,9 @@ import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
 import fftlib.logic.*;
+import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.LiteralSet;
+import fftlib.logic.literal.PropLiteral;
 import fftlib.logic.rule.PropRule;
 import fftlib.logic.rule.SymmetryRule;
 import misc.Config;
@@ -64,19 +67,19 @@ public class GameSpecifics implements FFTGameSpecifics {
                 int occ = node.getBoard()[i][j];
                 if (occ == 0) {
                     pos = new Position(i, j, -PLAYER1);
-                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    literals.add(new PropLiteral(Atoms.posToId.get(pos)));
                     pos = new Position(i, j, -PLAYER2);
-                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    literals.add(new PropLiteral(Atoms.posToId.get(pos)));
                 } else if (occ == 1) {
                     pos = new Position(i, j, -PLAYER2);
-                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    literals.add(new PropLiteral(Atoms.posToId.get(pos)));
                     pos = new Position(i, j, PLAYER1);
-                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    literals.add(new PropLiteral(Atoms.posToId.get(pos)));
                 } else {
                     pos = new Position(i, j, -PLAYER1);
-                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    literals.add(new PropLiteral(Atoms.posToId.get(pos)));
                     pos = new Position(i, j, PLAYER2);
-                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    literals.add(new PropLiteral(Atoms.posToId.get(pos)));
                 }
             }
         }

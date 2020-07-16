@@ -1,4 +1,6 @@
-package fftlib.logic;
+package fftlib.logic.literal;
+
+import fftlib.logic.Action;
 
 import java.math.BigInteger;
 import java.util.HashSet;
@@ -26,7 +28,7 @@ public class LiteralSet extends HashSet<Literal> {
 
     public LiteralSet(int literalId) {
         super();
-        add(new Literal(literalId));
+        add(new PropLiteral(literalId));
     }
 
     @Override
@@ -39,7 +41,7 @@ public class LiteralSet extends HashSet<Literal> {
     }
 
     public boolean add(String literalName) {
-        return add(new Literal(literalName));
+        return add(new PropLiteral(literalName));
     }
 
     public boolean remove(Literal l) {

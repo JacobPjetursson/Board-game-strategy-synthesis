@@ -1,6 +1,5 @@
-package fftlib.logic;
+package fftlib.logic.rule;
 
-import fftlib.logic.rule.Rule;
 import misc.Config;
 
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public class RuleGroup {
         return sb.toString();
     }
 
-    int getAmountOfPreconditions() {
+    public int getAmountOfPreconditions() {
         int precons = 0;
         for (Rule r : rules) {
             precons += (Config.ENABLE_GGP) ? r.sentences.size() : r.getPreconditions().size();

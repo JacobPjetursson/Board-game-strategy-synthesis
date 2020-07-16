@@ -1,9 +1,10 @@
 package sim;
 
 import fftlib.*;
-import fftlib.logic.LiteralSet;
+import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.Action;
-import fftlib.logic.Literal;
+import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.PropLiteral;
 import fftlib.logic.rule.PropRule;
 
 import java.util.Scanner;
@@ -20,8 +21,8 @@ public class Demo {
             return;
         }
         LiteralSet precons = new LiteralSet();
-        precons.add(new Literal("!P1(2, 3)"));
-        precons.add(new Literal("!P2(2, 3)"));
+        precons.add(new PropLiteral("!P1(2, 3)"));
+        precons.add(new PropLiteral("!P2(2, 3)"));
         Action action = new Action("P2(0, 1)");
         PropRule rule = new PropRule(precons, action);
         System.out.println(rule.getSymmetryRules());

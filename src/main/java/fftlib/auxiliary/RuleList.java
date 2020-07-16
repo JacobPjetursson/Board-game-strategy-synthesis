@@ -3,8 +3,9 @@ package fftlib.auxiliary;
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
-import fftlib.logic.Literal;
-import fftlib.logic.LiteralSet;
+import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.LiteralSet;
+import fftlib.logic.literal.PropLiteral;
 import fftlib.logic.rule.Rule;
 import fftlib.logic.rule.PredRule;
 import fftlib.logic.rule.PropRule;
@@ -40,14 +41,15 @@ public class RuleList extends ArrayList<Rule> {
     }
 
     public HashSet<FFTMove> apply(FFTNode n, boolean safe) {
-        return findMoves(n.convert());
+        return findMoves(n, safe);
     }
 
     public HashSet<FFTMove> apply(FFTNode n) {
         return apply(n, false);
     }
 
-    public HashSet<FFTMove> findMoves(LiteralSet lSet) {
+    public HashSet<FFTMove> findMoves(FFTNode n, boolean safe) {
+        LiteralSet lSet = n.convert();
         List<Rule> appliedRules = findRules(lSet);
 
         if (appliedRules.isEmpty())
@@ -61,6 +63,8 @@ public class RuleList extends ArrayList<Rule> {
                 firstRule = r;
             }
         }
+        if (safe)
+            n.setAppliedRule(firstRule);
         HashSet<FFTMove> moves = new HashSet<>();
         moves.add(firstRule.getAction().convert()); // can't be null
         if (!Config.SYMMETRY_DETECTION && !Config.USE_LIFTING)
@@ -84,9 +88,9 @@ public class RuleList extends ArrayList<Rule> {
         ArrayList<Rule> appliedRules = new ArrayList<>();
         int atom = sortedAtoms.get(atomIdx++);
         // todo
-        Literal pos = new Literal(atom);
+        Literal pos = new PropLiteral(atom);
         String negName = "!" + pos.getName();
-        Literal neg = new Literal(negName);
+        Literal neg = new PropLiteral(negName);
 
         int posEnd = findInterval(pos, true, rules);
         int negStart = findInterval(neg, false, rules);
@@ -232,7 +236,7 @@ public class RuleList extends ArrayList<Rule> {
             LiteralSet set1 = r1.getAllPreconditions();
             LiteralSet set2 = r2.getAllPreconditions();
             for (int atm : sortedAtoms) {
-                Literal l = new Literal(atm);
+                Literal l = new PropLiteral(atm);
                 boolean s1Contains = set1.contains(l);
                 boolean s2Contains = set2.contains(l);
                 if (s1Contains && !s2Contains)

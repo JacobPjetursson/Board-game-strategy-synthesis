@@ -5,6 +5,7 @@ import fftlib.auxiliary.Position;
 import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
+import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.rule.PropRule;
 import fftlib.logic.rule.SymmetryRule;
 import kulibrat.game.Controller;

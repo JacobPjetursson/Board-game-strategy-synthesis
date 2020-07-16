@@ -2,7 +2,7 @@ package fftlib.GGPAutogen;
 
 import fftlib.logic.FFT;
 import fftlib.logic.rule.PropRule;
-import fftlib.logic.RuleGroup;
+import fftlib.logic.rule.RuleGroup;
 import misc.Config;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;

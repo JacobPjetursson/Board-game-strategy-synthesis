@@ -4,7 +4,7 @@ import fftlib.auxiliary.Position;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
 import fftlib.logic.Action;
-import fftlib.logic.LiteralSet;
+import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.rule.PropRule;
 import fftlib.logic.rule.SymmetryRule;
 

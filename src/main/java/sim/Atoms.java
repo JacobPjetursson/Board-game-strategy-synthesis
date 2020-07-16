@@ -1,9 +1,10 @@
 package sim;
 
 import fftlib.logic.Action;
-import fftlib.logic.Literal;
+import fftlib.logic.literal.Literal;
 import fftlib.auxiliary.Position;
-import fftlib.logic.LiteralSet;
+import fftlib.logic.literal.LiteralSet;
+import fftlib.logic.literal.PropLiteral;
 import misc.Config;
 
 import java.util.*;
@@ -66,8 +67,8 @@ public class Atoms {
 
 
                 LiteralSet actionPrecons = new LiteralSet();
-                actionPrecons.add(new Literal(String.format("!P1(%s, %s)", i, j)));
-                actionPrecons.add(new Literal(String.format("!P2(%s, %s)", i, j)));
+                actionPrecons.add(new PropLiteral(String.format("!P1(%s, %s)", i, j)));
+                actionPrecons.add(new PropLiteral(String.format("!P2(%s, %s)", i, j)));
 
                 Action p1 = new Action(String.format("P1(%s, %s)", i, j));
                 Action p2 = new Action(String.format("P2(%s, %s)", i, j));

@@ -5,11 +5,12 @@ import fftlib.auxiliary.Transform;
 import fftlib.game.FFTGameSpecifics;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
-import fftlib.logic.LiteralSet;
+import fftlib.logic.literal.LiteralSet;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
 import fftlib.logic.Action;
-import fftlib.logic.Literal;
+import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.PropLiteral;
 import fftlib.logic.rule.PropRule;
 import fftlib.logic.rule.SymmetryRule;
 import misc.Config;
@@ -56,15 +57,15 @@ public class GameSpecifics implements FFTGameSpecifics {
         } else if (move.newCol == POS_NONBOARD) { // canRemove
             Position pos = new Position(move.oldRow, move.oldCol, move.team);
             LiteralSet remSet = new LiteralSet();
-            remSet.add(new Literal(Atoms.posToId.get(pos)));
+            remSet.add(new PropLiteral(Atoms.posToId.get(pos)));
             return new Action(new LiteralSet(), remSet);
         } else { // move
             Position addPos = new Position(move.newRow, move.newCol, move.team);
             Position remPos = new Position(move.oldRow, move.oldCol, move.team);
             LiteralSet addSet = new LiteralSet();
             LiteralSet remSet = new LiteralSet();
-            addSet.add(new Literal(Atoms.posToId.get(addPos)));
-            remSet.add(new Literal(Atoms.posToId.get(remPos)));
+            addSet.add(new PropLiteral(Atoms.posToId.get(addPos)));
+            remSet.add(new PropLiteral(Atoms.posToId.get(remPos)));
             return new Action(addSet, remSet);
         }
     }
@@ -75,12 +76,12 @@ public class GameSpecifics implements FFTGameSpecifics {
         LiteralSet literals = new LiteralSet();
         String pfx = node.getTurn() == PLAYER1 ? "" : "!";
 
-        literals.add(new Literal(pfx + "p1Turn"));
+        literals.add(new PropLiteral(pfx + "p1Turn"));
         pfx = node.phase2 ? "" : "!";
-        literals.add(new Literal(pfx + "phase2"));
+        literals.add(new PropLiteral(pfx + "phase2"));
         if (!THREE_MENS) {
             pfx =  node.canRemove ? "" : "!";
-            literals.add(new Literal(pfx + "canRemove"));
+            literals.add(new PropLiteral(pfx + "canRemove"));
         }
         Position pos;
         for (int i = 0; i < node.board.length; i++) {
@@ -90,19 +91,19 @@ public class GameSpecifics implements FFTGameSpecifics {
                 int occ = node.board[i][j];
                 if (occ == 0) {
                     pos = new Position(i, j, -PLAYER1);
-                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    literals.add(new PropLiteral(Atoms.posToId.get(pos)));
                     pos = new Position(i, j, -PLAYER2);
-                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    literals.add(new PropLiteral(Atoms.posToId.get(pos)));
                 } else if (occ == PLAYER1) {
                     pos = new Position(i, j, PLAYER1);
-                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    literals.add(new PropLiteral(Atoms.posToId.get(pos)));
                     pos = new Position(i, j, -PLAYER2);
-                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    literals.add(new PropLiteral(Atoms.posToId.get(pos)));
                 } else {
                     pos = new Position(i, j, -PLAYER1);
-                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    literals.add(new PropLiteral(Atoms.posToId.get(pos)));
                     pos = new Position(i, j, PLAYER2);
-                    literals.add(new Literal(Atoms.posToId.get(pos)));
+                    literals.add(new PropLiteral(Atoms.posToId.get(pos)));
                 }
             }
         }
@@ -186,9 +187,9 @@ public class GameSpecifics implements FFTGameSpecifics {
         for (Literal add : action.adds) {
             precons.addAll(Atoms.addToPrecons.get(add));
             if (add.getName().startsWith("P1"))
-                precons.add(new Literal("p1Turn"));
+                precons.add(new PropLiteral("p1Turn"));
             else
-                precons.add(new Literal("!p1Turn"));
+                precons.add(new PropLiteral("!p1Turn"));
         }
 
         for (Literal rem : action.rems)
@@ -196,24 +197,24 @@ public class GameSpecifics implements FFTGameSpecifics {
 
 
         if (action.rems.isEmpty()) {// phase 1
-            precons.add(new Literal("!phase2"));
+            precons.add(new PropLiteral("!phase2"));
             if (!THREE_MENS)
-                precons.add(new Literal("!canRemove"));
+                precons.add(new PropLiteral("!canRemove"));
 
         }
         else if (action.adds.isEmpty()) { // canRemove
-            precons.add(new Literal("canRemove"));
+            precons.add(new PropLiteral("canRemove"));
             // turn
             Literal rem = action.rems.iterator().next();
             if (rem.getName().startsWith("P1"))
-                precons.add(new Literal("!p1Turn"));
+                precons.add(new PropLiteral("!p1Turn"));
             else
-                precons.add(new Literal("p1Turn"));
+                precons.add(new PropLiteral("p1Turn"));
 
         } else { // phase 2, can only move
             if (!THREE_MENS)
-                precons.add(new Literal("!canRemove"));
-            precons.add(new Literal("phase2"));
+                precons.add(new PropLiteral("!canRemove"));
+            precons.add(new PropLiteral("phase2"));
         }
         return precons;
     }
