@@ -1,7 +1,7 @@
 package fftlib.GGPAutogen;
 
 import fftlib.logic.FFT;
-import fftlib.logic.Rule;
+import fftlib.logic.rule.PropRule;
 import fftlib.logic.RuleGroup;
 import misc.Config;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
@@ -136,7 +136,7 @@ public class Runner {
 
             System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + rg.rules.size());
             MachineState state = states.iterator().next();
-            Rule r = addRule(state);
+            PropRule r = addRule(state);
             states.remove(state);
             if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
             System.out.println();
@@ -153,7 +153,7 @@ public class Runner {
         }
     }
 
-    private static Rule addRule(MachineState ms) {
+    private static PropRule addRule(MachineState ms) {
         Set<GdlSentence> sentences = ms.getContents();
         Set<GdlSentence> minSet = new HashSet<>();
         for (GdlSentence s : sentences) {
@@ -162,7 +162,7 @@ public class Runner {
         GGPMapping mapping = lookupTable.get(ms);
         Move bestMove = mapping.getMove();
 
-        Rule r = new Rule(minSet, bestMove);
+        PropRule r = new PropRule(minSet, bestMove);
         rg.rules.add(r);
 
         // DEBUG

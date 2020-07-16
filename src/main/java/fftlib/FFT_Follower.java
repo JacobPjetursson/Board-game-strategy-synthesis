@@ -2,7 +2,7 @@ package fftlib;
 
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
-import fftlib.logic.Rule;
+import fftlib.logic.rule.Rule;
 import fftlib.logic.RuleGroup;
 
 import java.util.HashSet;

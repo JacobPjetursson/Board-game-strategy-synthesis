@@ -2,7 +2,7 @@ package fftlib.gui;
 
 import fftlib.logic.FFT;
 import fftlib.FFTManager;
-import fftlib.logic.Rule;
+import fftlib.logic.rule.Rule;
 import fftlib.logic.RuleGroup;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;

@@ -1,6 +1,6 @@
 package kulibrat.gui.board.PlayBox;
 
-import fftlib.logic.Rule;
+import fftlib.logic.rule.Rule;
 import javafx.geometry.Pos;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;

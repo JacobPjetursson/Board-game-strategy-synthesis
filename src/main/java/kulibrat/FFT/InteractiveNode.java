@@ -1,7 +1,8 @@
 package kulibrat.FFT;
 
 import fftlib.logic.Action;
-import fftlib.logic.Rule;
+import fftlib.logic.rule.Rule;
+import fftlib.logic.rule.PropRule;
 import fftlib.game.FFTNode;
 import fftlib.gui.interactiveFFTNode;
 import javafx.scene.paint.Color;
@@ -28,7 +29,7 @@ public class InteractiveNode implements interactiveFFTNode {
     private int tilesize;
 
     InteractiveNode(Controller cont) {
-        this.rule = new Rule();
+        this.rule = new PropRule();
         this.cont = cont;
         this.tilesize = 52;
         curHighLights = new ArrayList<>();
@@ -47,7 +48,7 @@ public class InteractiveNode implements interactiveFFTNode {
 
     // Assume correct and unambigious format
     public javafx.scene.Node getInteractiveNode(Rule r) {
-        this.rule = new Rule(r);
+        this.rule = r.clone();
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
         if (r.getAction() != null)
             this.move = (Move) r.getAction().convert();
@@ -78,7 +79,7 @@ public class InteractiveNode implements interactiveFFTNode {
     }
 
     // This is called when the add rule button is pressed from game screen
-    private Rule getRuleFromState(Node n) { // TODO - requires Atoms class
+    private PropRule getRuleFromState(Node n) { // TODO - requires Atoms class
         /*
 
         Rule r = new Rule();
@@ -99,7 +100,7 @@ public class InteractiveNode implements interactiveFFTNode {
 
     public void clear() {
         deselect();
-        this.rule = new Rule();
+        this.rule = new PropRule();
         this.move = null;
         curHighLights.clear();
     }

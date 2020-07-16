@@ -1,14 +1,11 @@
-package fftlib.logic;
+package fftlib.logic.rule;
 
 import fftlib.FFTManager;
-import fftlib.GGPAutogen.GGPManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
+import fftlib.logic.*;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
-import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
-import org.ggp.base.util.statemachine.Role;
-import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -16,39 +13,26 @@ import java.util.*;
 import static misc.Config.*;
 
 
-public class Rule {
-    private static final ArrayList<String> separators = new ArrayList<>(
-            Arrays.asList("and", "And", "AND", "&", "∧"));
-    // preconditions are the preconditions visible to the human
-    protected LiteralSet preconditions;
-    // allPreconditions are all the preconditions, including those from the action
-    protected LiteralSet allPreconditions;
-    protected Action action;
+public class PropRule extends Rule {
+
     private HashSet<SymmetryRule> symmetryRules;
 
-    // General game playing
-    public Set<GdlSentence> sentences;
-    private Move move;
-
-    // index in FFT
-    protected int ruleIndex = -1;
-
     // parsing constructor
-    public Rule(String preconStr, String actionStr) {
+    public PropRule(String preconStr, String actionStr) {
         if (ENABLE_GGP_PARSER) {
-            Rule r = FFTManager.gdlToRule.apply(preconStr, actionStr);
+            PropRule r = FFTManager.gdlToRule.apply(preconStr, actionStr);
             this.action = r.action;
             this.preconditions = r.preconditions;
         } else {
-            this.action = setAction(actionStr);
-            this.preconditions = setPreconditions(preconStr);
+            this.action = parseAction(actionStr);
+            this.preconditions = parsePreconditions(preconStr);
             setAllPreconditions();
         }
         removeActionPrecons();
         if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
     }
 
-    public Rule(LiteralSet precons, Action action) {
+    public PropRule(LiteralSet precons, Action action) {
         this.action = action;
         this.preconditions = precons;
         setAllPreconditions();
@@ -57,24 +41,24 @@ public class Rule {
     }
 
     // GDL Constructor
-    public Rule(Set<GdlSentence> sentences, Move move) {
+    public PropRule(Set<GdlSentence> sentences, Move move) {
         this.sentences = sentences;
         this.move = move;
     }
 
     // Empty constructor to allow rule buildup
-    public Rule() {
+    public PropRule() {
         this.preconditions = new LiteralSet();
         this.allPreconditions = new LiteralSet();
         this.action = new Action();
     }
 
-    public Rule(Set<GdlSentence> sentences) {
+    public PropRule(Set<GdlSentence> sentences) {
         this.sentences = sentences;
     }
 
     // Duplicate constructor
-    public Rule(Rule duplicate) {
+    public PropRule(PropRule duplicate) {
         this.action = new Action(duplicate.action);
         this.preconditions = new LiteralSet(duplicate.preconditions);
         this.allPreconditions = new LiteralSet(duplicate.allPreconditions);
@@ -90,58 +74,31 @@ public class Rule {
     public void setRuleIndex(int index) {
         ruleIndex = index;
         if (SYMMETRY_DETECTION)
-            for (Rule ru : symmetryRules)
+            for (SymmetryRule ru : symmetryRules)
                 ru.setRuleIndex(index);
     }
 
-    public int getRuleIndex() {
-        return ruleIndex;
+    @Override
+    public Rule clone() {
+        return new PropRule(this);
     }
 
     public BigInteger getBitString() {
         return getAllPreconditions().getBitString();
     }
 
-    protected void addPrecondition(Literal l) {
+    public void addPrecondition(Literal l) {
         if (!action.getPreconditions().contains(l)) // do not include precondition from action
             preconditions.add(l);
         allPreconditions.add(l);
         if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
     }
 
-    public void addPrecondition(GdlSentence s) {
-        this.sentences.add(s);
-        //this.transformedSentences = getTransformedSentences();
-    }
-
-    protected void removePrecondition(Literal l) {
+    public void removePrecondition(Literal l) {
         this.preconditions.remove(l);
         if (!action.getPreconditions().contains(l))
             this.allPreconditions.remove(l);
         if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
-    }
-
-    public void removePrecondition(GdlSentence s) {
-        this.sentences.remove(s);
-        //this.transformedSentences = getTransformedSentences();
-
-    }
-
-    public LiteralSet getPreconditions() {
-        return preconditions;
-    }
-
-    public LiteralSet getAllPreconditions() {
-        return allPreconditions;
-    }
-
-    public void setAllPreconditions() {
-        allPreconditions = new LiteralSet(preconditions);
-        allPreconditions.addAll(action.getPreconditions());
-    }
-
-    public Action getAction() {
-        return action;
     }
 
     public void setAction(Action a) {
@@ -171,55 +128,6 @@ public class Rule {
     public void setSentences(Set<GdlSentence> sentences) {
         this.sentences = sentences;
         //this.transformedSentences = getTransformedSentences();
-    }
-
-    private static ArrayList<String> prepPreconditions(String preconStr) {
-        ArrayList<String> precons = new ArrayList<>();
-        StringBuilder regex = new StringBuilder();
-        regex.append(separators.get(0));
-        for (int i = 1; i < separators.size(); i++)
-            regex.append("|").append(separators.get(i));
-
-        String[] parts = preconStr.split(regex.toString());
-        for (String part : parts) {
-            if (part.length() < 2)
-                continue;
-            part = part.trim();
-            precons.add(part);
-        }
-        return precons;
-    }
-
-    private static ArrayList<String> prepAction(String actionStr) {
-        StringBuilder regex = new StringBuilder();
-        regex.append(separators.get(0));
-        for (int i = 1; i < separators.size(); i++)
-            regex.append("|").append(separators.get(i));
-
-        String[] parts = actionStr.split(regex.toString());
-        ArrayList<String> corrected_parts = new ArrayList<>();
-        for (String part : parts) {
-            if (part.length() < 2)
-                continue;
-            part = part.trim();
-            corrected_parts.add(part);
-
-        }
-
-        return corrected_parts;
-    }
-
-    private void removeActionPrecons() {
-        for (Literal l : action.getPreconditions())
-            preconditions.remove(l);
-    }
-
-    private static LiteralSet setPreconditions(String preconStr) {
-        LiteralSet literals = new LiteralSet();
-        for (String precons : prepPreconditions(preconStr)) {
-            literals.add(new Literal(precons));
-        }
-       return literals;
     }
 
     // Lifts a single propositional symbol to a predicate symbol
@@ -280,30 +188,9 @@ public class Rule {
         }
     }
 
-    private static Action setAction(String actionStr) {
-        return new Action(prepAction(actionStr));
-    }
-
-    public String toString() {
-        if (sentences != null || move != null) { // ggp
-            String str = "IF: " + sentences + " THEN: " + move;
-            if (ruleIndex != -1)
-                str += " , index: " + ruleIndex;
-            return str;
-        }
-
-        if (ENABLE_GGP_PARSER) {
-            // TODO
-        }
-        String str = "IF [" + preconditions + "] THEN [" + action + "]";
-        if (!SHOW_GUI && ruleIndex != -1)
-            str += " , index: " + ruleIndex;
-        return str;
-    }
-
     private HashSet<SymmetryRule> initializeSymmetryRules() {
         HashSet<SymmetryRule> symRules = FFTManager.getSymmetryRules.apply(this);
-        for (Rule r : symRules)
+        for (SymmetryRule r : symRules)
             r.setRuleIndex(this.ruleIndex);
         return symRules;
     }
@@ -325,16 +212,10 @@ public class Rule {
             return moves;
         }
 
-        for (Rule rule : symmetryRules) {
+        for (SymmetryRule rule : symmetryRules) {
             m = match(rule, lSet);
-            // returns the first symmetry with a legal move
-            // We want to ensure that rule is optimal in all symmetric states, but since all these will be explored
-            // by the algorithm, we are good. This is the case since we always start with checking the default state
-            // (no applied symmetries), meaning every symmetric states will inevitably be checked.
-            // Alternative is to check that all non-null moves here are legal, but that is significantly slower
-            if (m != null) {
+            if (m != null)
                 moves.add(m);
-            }
         }
         return moves;
     }
@@ -360,51 +241,18 @@ public class Rule {
     private boolean matchLiteral(Literal lit, LiteralSet stLiterals) {
         return stLiterals.contains(lit);
     }
-    
-    public Move apply(MachineState ms) throws MoveDefinitionException {
-        Set<GdlSentence> stSentences = ms.getContents();
-        // TODO - symmetry
-            boolean match = true;
-            for (GdlSentence s : sentences) {
-                match = matchSentence(s, stSentences);
-                if (!match)
-                    break;
-
-            }
-
-            if (match) {
-                // todo - transform move
-                //Move m = FFTManager.transformMove(move, transformations);
-                Role r = GGPManager.getRole(ms);
-                if (GGPManager.getLegalMoves(ms, r).contains(move)) {
-                    return move;
-                }
-            }
-
-        return null;
-    }
-
-    private boolean matchSentence(GdlSentence s, Set<GdlSentence> stSentences) {
-        if (false) // todo - negation
-            return false;
-        return stSentences.contains(s);
-    }
-
-    public static Rule createRule(FFTNode n, FFTMove m) {
-        return new Rule(new LiteralSet(n.convert()), new Action(m.convert()));
-    }
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof Rule)) return false;
+        if (!(obj instanceof PropRule)) return false;
 
-        Rule rule = (Rule) obj;
-        if (this == rule)
+        PropRule propRule = (PropRule) obj;
+        if (this == propRule)
             return true;
         if (SYMMETRY_DETECTION)
-            return this.symmetryRules.equals(rule.symmetryRules) && this.getRuleIndex() == rule.getRuleIndex();
-        return this.preconditions.equals(rule.preconditions) &&
-                this.action.equals(rule.action) && this.getRuleIndex() == rule.getRuleIndex();
+            return this.symmetryRules.equals(propRule.symmetryRules) && this.getRuleIndex() == propRule.getRuleIndex();
+        return this.preconditions.equals(propRule.preconditions) &&
+                this.action.equals(propRule.action) && this.getRuleIndex() == propRule.getRuleIndex();
     }
 
     @Override

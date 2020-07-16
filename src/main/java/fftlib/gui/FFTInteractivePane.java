@@ -2,7 +2,7 @@ package fftlib.gui;
 
 import fftlib.logic.FFT;
 import fftlib.FFTManager;
-import fftlib.logic.Rule;
+import fftlib.logic.rule.Rule;
 import fftlib.logic.RuleGroup;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
@@ -216,7 +216,7 @@ public class FFTInteractivePane extends BorderPane {
             ArrayList<RuleGroup> ruleGroups = FFTManager.currFFT.ruleGroups;
             if (ruleGroups.isEmpty())
                 ruleGroups.add(new RuleGroup(""));
-            Rule copy = new Rule(r);
+            Rule copy = r.clone();
             FFTManager.currFFT.ruleGroups.get(ruleGroups.size() - 1).addRule(copy);
             showRuleGroups();
         });

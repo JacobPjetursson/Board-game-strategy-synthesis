@@ -3,6 +3,7 @@ package tictactoe.demos;
 import fftlib.FFTManager;
 import fftlib.game.FFTSolver;
 import fftlib.logic.*;
+import fftlib.logic.rule.PropRule;
 import tictactoe.FFT.GameSpecifics;
 import tictactoe.game.Move;
 import tictactoe.game.Node;
@@ -15,11 +16,11 @@ public class Demo {
         FFTSolver.solveGame();
         // make testrules
         LiteralSet lSet = new LiteralSet();
-        Rule test1 = new Rule(lSet, new Action("P1(1, 1)"));
+        PropRule test1 = new PropRule(lSet, new Action("P1(1, 1)"));
 
         lSet = new LiteralSet();
         lSet.add(new Literal("P1(0, 0)"));
-        Rule dead1 = new Rule(lSet, new Action("P1(1, 1)"));
+        PropRule dead1 = new PropRule(lSet, new Action("P1(1, 1)"));
 
         lSet = new LiteralSet();
         lSet.add(new Literal("P1(0, 0)"));
@@ -34,7 +35,7 @@ public class Demo {
         lSet.add(new Literal("!P2(0, 1)"));
         lSet.add(new Literal("!P1(1, 2)"));
         lSet.add(new Literal("P2(1, 2)"));
-        Rule dead2 = new Rule(lSet, new Action("P1(1, 1)"));
+        PropRule dead2 = new PropRule(lSet, new Action("P1(1, 1)"));
         LiteralSet testSet = new LiteralSet(dead2.getPreconditions());
         System.out.println(testSet);
         LiteralSet testSet1 = new LiteralSet(dead2.getPreconditions());
@@ -43,7 +44,7 @@ public class Demo {
 
 
         lSet = new LiteralSet();
-        Rule notdead = new Rule(lSet, new Action("P1(1, 2)"));
+        PropRule notdead = new PropRule(lSet, new Action("P1(1, 2)"));
 
         FFT fft = new FFT("Synthesis");
         fft.addRuleGroup(new RuleGroup("Synthesis"));

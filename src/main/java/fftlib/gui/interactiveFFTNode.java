@@ -1,7 +1,7 @@
 package fftlib.gui;
 
 import fftlib.logic.Action;
-import fftlib.logic.Rule;
+import fftlib.logic.rule.Rule;
 import fftlib.game.FFTNode;
 import javafx.scene.Node;
 

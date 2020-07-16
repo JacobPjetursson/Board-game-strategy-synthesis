@@ -33,7 +33,7 @@ public class Action {
         this.rems = new LiteralSet(duplicate.rems);
     }
 
-    Action(ArrayList<String> literals) {
+    public Action(ArrayList<String> literals) {
         this.adds = new LiteralSet();
         this.rems = new LiteralSet();
 

@@ -4,7 +4,8 @@ import fftlib.FFTManager;
 import fftlib.logic.Action;
 import fftlib.logic.Literal;
 import fftlib.auxiliary.Position;
-import fftlib.logic.Rule;
+import fftlib.logic.rule.Rule;
+import fftlib.logic.rule.PropRule;
 import fftlib.game.FFTNode;
 import fftlib.gui.interactiveFFTNode;
 import tictactoe.game.Controller;
@@ -27,7 +28,7 @@ public class InteractiveNode implements interactiveFFTNode {
 
     InteractiveNode(Controller cont) {
         this.cont = cont;
-        this.rule = new Rule();
+        this.rule = new PropRule();
         this.tilesize = 60;
     }
     @Override
@@ -43,7 +44,7 @@ public class InteractiveNode implements interactiveFFTNode {
 
     @Override
     public javafx.scene.Node getInteractiveNode(Rule r) {
-        this.rule = new Rule(r);
+        this.rule = r.clone();
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
         this.move = (Move) r.getAction().convert();
         actionTile = pb.getBoard().getTiles()[move.row][move.col];
@@ -94,15 +95,15 @@ public class InteractiveNode implements interactiveFFTNode {
         actionTile.setAction(true);
         pb.update(rule);
     }
-    private Rule getRuleFromState(Node n) {
-        Rule r = new Rule();
+    private PropRule getRuleFromState(Node n) {
+        PropRule r = new PropRule();
         r.setPreconditions(n.convert());
         return r;
     }
     @Override
     public void clear() {
         this.actionTile = null;
-        this.rule = new Rule();
+        this.rule = new PropRule();
         this.move = null;
     }
 

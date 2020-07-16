@@ -3,7 +3,7 @@ package mens_morris;
 import fftlib.FFTManager;
 import fftlib.logic.Action;
 import fftlib.logic.Literal;
-import fftlib.logic.Rule;
+import fftlib.logic.rule.PropRule;
 
 import java.util.Scanner;
 
@@ -23,7 +23,7 @@ public class Demo {
         Action testAction = new Action();
         testAction.adds.add(new Literal("P1(1, 0)"));
         testAction.rems.add(new Literal("P1(0, 0)"));
-        Rule testRule = new Rule(node.convert(), testAction);
+        PropRule testRule = new PropRule(node.convert(), testAction);
         System.out.println("All preconditions:");
         System.out.println(testRule.getAllPreconditions());
         System.out.println("Action preconditions:");

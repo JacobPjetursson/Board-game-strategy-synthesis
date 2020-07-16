@@ -1,6 +1,5 @@
 package mens_morris;
 
-import com.google.common.collect.Sets;
 import fftlib.auxiliary.Position;
 import fftlib.auxiliary.Transform;
 import fftlib.game.FFTGameSpecifics;
@@ -11,14 +10,12 @@ import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
 import fftlib.logic.Action;
 import fftlib.logic.Literal;
-import fftlib.logic.Rule;
-import fftlib.logic.SymmetryRule;
+import fftlib.logic.rule.PropRule;
+import fftlib.logic.rule.SymmetryRule;
 import misc.Config;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import static fftlib.auxiliary.Transform.*;
 import static mens_morris.Logic.POS_NONBOARD;
@@ -113,7 +110,7 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public Rule gdlToRule(String precons, String action) {
+    public PropRule gdlToRule(String precons, String action) {
         return null;
     }
 
@@ -168,9 +165,9 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public HashSet<SymmetryRule> getSymmetryRules(Rule rule) {
+    public HashSet<SymmetryRule> getSymmetryRules(PropRule propRule) {
         int[] transformations = new int[] {TRANS_HREF, TRANS_VREF, TRANS_ROT};
-        return Transform.getSymmetryRules(transformations, rule);
+        return Transform.getSymmetryRules(transformations, propRule);
     }
 
     @Override

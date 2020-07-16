@@ -5,7 +5,13 @@ import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 import fftlib.game.FFTNodeAndMove;
 import fftlib.game.FFTSolution;
-import fftlib.logic.*;
+import fftlib.logic.FFT;
+import fftlib.logic.Literal;
+import fftlib.logic.LiteralSet;
+import fftlib.logic.RuleGroup;
+import fftlib.logic.rule.Rule;
+import fftlib.logic.rule.PredRule;
+import fftlib.logic.rule.PropRule;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -231,7 +237,7 @@ public class FFTAutoGen {
             if (SYMMETRY_DETECTION) {
                 Set<FFTMove> appliedMoves = fft.apply(node);
                 if (appliedMoves.isEmpty()) {
-                    Rule r = Rule.createRule(node, chosenMove);
+                    PropRule r = PropRule.createRule(node, chosenMove);
                     //System.out.println("adding rule: " + r);
                     fft.append(r);
                     appliedMoves = r.apply(node);
@@ -240,7 +246,7 @@ public class FFTAutoGen {
                 for (FFTMove move : appliedMoves)
                     addNode(frontier, node, node.getNextNode(move));
             } else {
-                fft.append(Rule.createRule(node, chosenMove));
+                fft.append(PropRule.createRule(node, chosenMove));
                 addNode(frontier, node, node.getNextNode(chosenMove));
             }
         }
@@ -257,7 +263,7 @@ public class FFTAutoGen {
         LiteralSet stSet = new LiteralSet(n.convert());
         FFTMove bestMove = FFTSolution.queryNode(n).move;
 
-        Rule r = new Rule(stSet, bestMove.convert()); // rule from state-move pair
+        Rule r = new PropRule(stSet, bestMove.convert()); // rule from state-move pair
         fft.append(r);
 
         // DEBUG
@@ -267,12 +273,12 @@ public class FFTAutoGen {
             System.out.println("ORIGINAL RULE: " + r);
         }
         if (USE_LIFTING && LIFT_BEFORE_SIMPLIFY)
-            r = liftRule(r, true);
+            r = liftRule((PropRule) r, true);
 
         simplifyRule(r, true);
 
         if (USE_LIFTING && !LIFT_BEFORE_SIMPLIFY) {
-            Rule pr = liftRule(r, true);
+            Rule pr = liftRule((PropRule)r, true);
             // simplify again?
             if (pr != r)
                 simplifyRule(pr, true); // TODO - benchmark
@@ -333,7 +339,7 @@ public class FFTAutoGen {
                 r.getPreconditions().size() != 0);
     }
 
-    private static Rule liftRule(Rule r, boolean lastRule) {
+    private static Rule liftRule(PropRule r, boolean lastRule) {
         if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO LIFT RULE");
         // attempt to lift propositional variables one at a time, sorted by the most occurring variable 1st
         for (int prop : r.getSortedProps()) {
@@ -365,10 +371,10 @@ public class FFTAutoGen {
         if (!lastRule) { // replace value of all keys
             if (!SINGLE_THREAD) {
                 appliedMap.keySet().parallelStream().forEach(key ->
-                        appliedMap.replace(key, fft.apply(key)));
+                        appliedMap.replace(key, fft.apply(key, safe)));
 
             } else {
-                appliedMap.replaceAll((k, v) -> fft.apply(k));
+                appliedMap.replaceAll((k, v) -> fft.apply(k, safe));
             }
         }
 
@@ -696,8 +702,10 @@ public class FFTAutoGen {
                         //System.out.println("Attempting to simplify rule: " + r);
                         simplifyRule(r, false);
                         //System.out.println();
-                        if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule))
-                            liftRule(r, false);
+                        if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule)) {
+                            PropRule propRule = (PropRule) r;
+                            liftRule(propRule, false);
+                        }
                     }
                 }
                 //System.out.println("Doing safe run");

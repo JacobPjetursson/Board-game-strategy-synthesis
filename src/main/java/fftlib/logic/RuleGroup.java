@@ -1,5 +1,6 @@
 package fftlib.logic;
 
+import fftlib.logic.rule.Rule;
 import misc.Config;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class RuleGroup {
     public RuleGroup(RuleGroup copy) {
         this.rules = new ArrayList<>();
         for (Rule r : copy.rules)
-            rules.add(new Rule(r));
+            rules.add(r.clone());
         this.name = copy.name;
         this.locked = copy.locked;
     }

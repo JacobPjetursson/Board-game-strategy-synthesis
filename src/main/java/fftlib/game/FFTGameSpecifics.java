@@ -5,8 +5,8 @@ import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
 import fftlib.logic.Action;
 import fftlib.logic.LiteralSet;
-import fftlib.logic.Rule;
-import fftlib.logic.SymmetryRule;
+import fftlib.logic.rule.PropRule;
+import fftlib.logic.rule.SymmetryRule;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,14 +17,14 @@ public interface FFTGameSpecifics {
 
     int[] getBoardDim(); // Domain specific
     FFTNode getInitialNode(); // Domain specific
-    HashSet<SymmetryRule> getSymmetryRules(Rule rule); // Domain specific
+    HashSet<SymmetryRule> getSymmetryRules(PropRule propRule); // Domain specific
     int getMaxStateLiterals(); // Domain specific
     ArrayList<Integer> legalIndices(); // Domain specific
 
     FFTMove actionToMove(Action a); // Interface
     Action moveToAction(FFTMove m); // Interface
     LiteralSet nodeToLiterals(FFTNode n); // Interface
-    Rule gdlToRule(String precons, String action); // Interface
+    PropRule gdlToRule(String precons, String action); // Interface
 
     String[] getPlayerNames(); // Visual
     FFTFailNode getFailNode(); // Visual

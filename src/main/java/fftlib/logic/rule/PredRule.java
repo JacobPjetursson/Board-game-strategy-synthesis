@@ -1,43 +1,55 @@
-package fftlib.logic;
+package fftlib.logic.rule;
 
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
-import fftlib.game.FFTNode;
+import fftlib.logic.Action;
+import fftlib.logic.Literal;
+import fftlib.logic.LiteralSet;
+import fftlib.logic.PredLiteral;
 
 import java.util.HashSet;
 
 // TODO - make common super class for Rule and PredRule
-public class PredRule extends Rule{
-    private HashSet<Rule> groundedRules;
+public class PredRule extends Rule {
+    private HashSet<PropRule> groundedPropRules;
     private boolean inconsistent;
 
     public PredRule(LiteralSet preconditions, Action action) {
         this.preconditions = preconditions;
         this.action = action;
-        groundedRules = initializeGroundedRules();
+        initializeGroundedRules();
+    }
+
+    public PredRule(PredRule duplicate) {
+        this.preconditions = new LiteralSet();
+        for (Literal l : duplicate.preconditions)
+            this.preconditions.add(new Literal(l));
+        this.action = new Action(duplicate.action);
+
+        initializeGroundedRules();
     }
 
     public void addPrecondition(Literal l) {
         if (l instanceof PredLiteral || !action.getPreconditions().contains(l))
             preconditions.add(l);
-        groundedRules = initializeGroundedRules();
+       initializeGroundedRules();
     }
 
     public void removePrecondition(Literal l) {
         this.preconditions.remove(l);
-        groundedRules = initializeGroundedRules();
+        initializeGroundedRules();
     }
 
-    public HashSet<Rule> getGroundedRules() {
-        return groundedRules;
+    public HashSet<PropRule> getGroundedPropRules() {
+        return groundedPropRules;
     }
 
     public boolean isInConsistent() {
         return inconsistent;
     }
 
-    private HashSet<Rule> initializeGroundedRules() {
-        HashSet<Rule> rules = new HashSet<>();
+    private void initializeGroundedRules() {
+        HashSet<PropRule> propRules = new HashSet<>();
         for (int prop : FFTManager.legalIndices) {
             boolean legalGrounding = true;
             LiteralSet litset = new LiteralSet();
@@ -95,17 +107,22 @@ public class PredRule extends Rule{
                 }
             }
             if (inconsistent)
-                return null;
+                return;
             if (legalGrounding)
-                rules.add(new Rule(litset, a));
+                propRules.add(new PropRule(litset, a));
         }
-        return rules;
+        groundedPropRules = propRules;
     }
 
     public void setRuleIndex(int index) {
         this.ruleIndex = index;
-        for (Rule gr : groundedRules)
+        for (PropRule gr : groundedPropRules)
             gr.setRuleIndex(index);
+    }
+
+    @Override
+    public Rule clone() {
+        return new PredRule(this);
     }
 
 
@@ -141,12 +158,17 @@ public class PredRule extends Rule{
     }
      */
 
-    public HashSet<FFTMove> apply(FFTNode node) {
+    public HashSet<FFTMove> apply(LiteralSet lSet) {
         HashSet<FFTMove> moves = new HashSet<>();
-        for (Rule r : groundedRules) {
-            moves.addAll(r.apply(node));
+        for (PropRule r : groundedPropRules) {
+            moves.addAll(r.apply(lSet));
         }
         return moves;
+    }
+
+    @Override
+    public void setAction(Action action) {
+
     }
 
 }

@@ -1,11 +1,17 @@
 package fftlib.logic;
 
 import fftlib.FFTManager;
-import fftlib.auxiliary.InvertedList;
-import fftlib.game.FFTSolution;
 import fftlib.GGPAutogen.Database;
 import fftlib.GGPAutogen.GGPManager;
-import fftlib.game.*;
+import fftlib.auxiliary.InvertedList;
+import fftlib.auxiliary.RuleList;
+import fftlib.game.FFTMove;
+import fftlib.game.FFTNode;
+import fftlib.game.FFTNodeAndMove;
+import fftlib.game.FFTSolution;
+import fftlib.logic.rule.Rule;
+import fftlib.logic.rule.PredRule;
+import fftlib.logic.rule.PropRule;
 import misc.Config;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
@@ -94,8 +100,11 @@ public class FFT {
         // add to sorted list of rules if initialized
         if (USE_APPLY_OPT && ruleList != null)
             ruleList.sortedAdd(r);
-        else if (USE_INVERTED_LIST_RULES_OPT)
-            invertedList.add(r);
+        else if (USE_INVERTED_LIST_RULES_OPT) {
+            // only works when no predicate rules and no symmetry
+            PropRule propRule = (PropRule) r;
+            invertedList.add(propRule);
+        }
     }
 
     public void removePrecondition(Rule r, Literal l) {
@@ -104,9 +113,11 @@ public class FFT {
             r.removePrecondition(l);
             ruleList.sortedAdd(r);
         } else if (USE_INVERTED_LIST_RULES_OPT) {
-            invertedList.remove(r);
-            r.removePrecondition(l);
-            invertedList.add(r);
+            // no predicate rules or symmetry
+            PropRule propRule = (PropRule) r;
+            invertedList.remove(propRule);
+            propRule.removePrecondition(l);
+            invertedList.add(propRule);
         } else {
             r.removePrecondition(l);
         }
@@ -118,15 +129,16 @@ public class FFT {
             r.addPrecondition(l);
             ruleList.sortedAdd(r);
         } else if (USE_INVERTED_LIST_RULES_OPT) {
-            invertedList.remove(r);
+            PropRule propRule = (PropRule) r;
+            invertedList.remove(propRule);
             r.addPrecondition(l);
-            invertedList.add(r);
+            invertedList.add(propRule);
         } else {
             r.addPrecondition(l);
         }
     }
 
-    public void removeRule(Rule r) {
+    public void removeRule(PropRule r) {
         for (RuleGroup rg : ruleGroups)
             removeRule(r, rg.rules.indexOf(r));
     }
@@ -138,8 +150,10 @@ public class FFT {
 
         if (USE_APPLY_OPT && ruleList != null)
             ruleList.sortedRemove(r);
-        else if (USE_INVERTED_LIST_RULES_OPT)
-            invertedList.remove(r);
+        else if (USE_INVERTED_LIST_RULES_OPT) {
+            PropRule propRule = (PropRule) r;
+            invertedList.remove(propRule);
+        }
     }
 
     public void addRule(Rule r, int index) {
@@ -147,8 +161,10 @@ public class FFT {
 
         if (USE_APPLY_OPT && ruleList != null)
             ruleList.sortedAdd(r);
-        else if (USE_INVERTED_LIST_RULES_OPT)
-            invertedList.add(r);
+        else if (USE_INVERTED_LIST_RULES_OPT) {
+            PropRule propRule = (PropRule) r;
+            invertedList.add(propRule);
+        }
     }
 
     public boolean isValid(int team) {
@@ -194,12 +210,14 @@ public class FFT {
         return sb.toString();
     }
 
-    public HashSet<FFTMove> apply_slow(FFTNode node) {
+    public HashSet<FFTMove> apply_slow(FFTNode node, boolean safe) {
         HashSet<FFTMove> moves = new HashSet<>();
         for (RuleGroup rg : ruleGroups) {
             for (Rule r : rg.rules) {
                 moves = r.apply(node);
                 if (!moves.isEmpty()) {
+                    if (safe)
+                        node.setAppliedRule(r);
                     return moves;
                 }
             }
@@ -207,12 +225,16 @@ public class FFT {
         return moves;
     }
 
-    public HashSet<FFTMove> apply(FFTNode node) {
+    public HashSet<FFTMove> apply(FFTNode node, boolean safe) {
         if (USE_APPLY_OPT && ruleList != null)
-            return ruleList.apply(node);
+            return ruleList.apply(node, safe);
         if (USE_INVERTED_LIST_RULES_OPT)
-            return invertedList.apply(node);
-        return apply_slow(node);
+            return invertedList.apply(node, safe);
+        return apply_slow(node, false);
+    }
+
+    public HashSet<FFTMove> apply(FFTNode node) {
+        return apply(node, false);
     }
 
     // for all rules r' with a higher index than r.index, check if r is subset of r'
@@ -329,12 +351,14 @@ public class FFT {
             if (simplified)
                 removeDeadRules(r);
 
-            if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule))
-                liftRule(r, team);
+            if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule)) {
+                PropRule propRule = (PropRule) r;
+                liftRule(propRule, team);
+            }
         }
     }
 
-    private void liftRule(Rule r, int team) {
+    private void liftRule(PropRule r, int team) {
         if (DETAILED_DEBUG) System.out.println("Attempting to lift rule: " + r);
         for (int prop : r.getSortedProps()) {
             PredRule pr = r.liftAll(prop);

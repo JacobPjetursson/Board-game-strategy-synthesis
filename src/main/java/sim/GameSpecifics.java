@@ -1,18 +1,17 @@
 package sim;
 
-import com.google.common.collect.Sets;
 import fftlib.logic.*;
 import fftlib.auxiliary.Position;
 import fftlib.auxiliary.Transform;
 import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
+import fftlib.logic.rule.PropRule;
+import fftlib.logic.rule.SymmetryRule;
 import misc.Config;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
@@ -70,7 +69,7 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public Rule gdlToRule(String precons, String action) {
+    public PropRule gdlToRule(String precons, String action) {
         return null;
     }
 
@@ -122,8 +121,8 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public HashSet<SymmetryRule> getSymmetryRules(Rule rule) {
-        return Transform.findAutomorphisms(rule);
+    public HashSet<SymmetryRule> getSymmetryRules(PropRule propRule) {
+        return Transform.findAutomorphisms(propRule);
     }
 
     @Override

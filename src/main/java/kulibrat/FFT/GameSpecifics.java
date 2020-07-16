@@ -5,6 +5,8 @@ import fftlib.auxiliary.Position;
 import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
+import fftlib.logic.rule.PropRule;
+import fftlib.logic.rule.SymmetryRule;
 import kulibrat.game.Controller;
 import kulibrat.game.Node;
 import misc.Config;
@@ -61,7 +63,7 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public Rule gdlToRule(String precons, String action) {
+    public PropRule gdlToRule(String precons, String action) {
         return null;
     }
 
@@ -113,7 +115,7 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public HashSet<SymmetryRule> getSymmetryRules(Rule rule) {
+    public HashSet<SymmetryRule> getSymmetryRules(PropRule propRule) {
         return null;
     }
 

@@ -2,7 +2,7 @@ package fftlib.gui;
 
 
 import fftlib.logic.FFT;
-import fftlib.logic.Rule;
+import fftlib.logic.rule.Rule;
 import fftlib.logic.RuleGroup;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;

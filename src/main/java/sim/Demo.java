@@ -4,7 +4,7 @@ import fftlib.*;
 import fftlib.logic.LiteralSet;
 import fftlib.logic.Action;
 import fftlib.logic.Literal;
-import fftlib.logic.Rule;
+import fftlib.logic.rule.PropRule;
 
 import java.util.Scanner;
 
@@ -23,7 +23,7 @@ public class Demo {
         precons.add(new Literal("!P1(2, 3)"));
         precons.add(new Literal("!P2(2, 3)"));
         Action action = new Action("P2(0, 1)");
-        Rule rule = new Rule(precons, action);
+        PropRule rule = new PropRule(precons, action);
         System.out.println(rule.getSymmetryRules());
         // Make strategy with meta rules
         //ArrayList<FFT> ffts = FFTManager.load("FFTs/simFFT.txt");

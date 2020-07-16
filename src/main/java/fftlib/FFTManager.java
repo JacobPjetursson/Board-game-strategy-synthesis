@@ -5,6 +5,9 @@ import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.interactiveFFTNode;
 import fftlib.logic.*;
+import fftlib.logic.rule.Rule;
+import fftlib.logic.rule.PropRule;
+import fftlib.logic.rule.SymmetryRule;
 import javafx.scene.Node;
 import javafx.scene.input.DataFormat;
 import misc.Config;
@@ -38,7 +41,7 @@ public class FFTManager {
     public static int gameBoardHeight;
     public static ArrayList<Integer> legalIndices;
     public static FFTNode initialFFTNode;
-    public static Function<Rule, HashSet<SymmetryRule>> getSymmetryRules;
+    public static Function<PropRule, HashSet<SymmetryRule>> getSymmetryRules;
     public static int maxStateLiterals;
     public static int winner; // set by solver
     // Visual tool
@@ -48,7 +51,7 @@ public class FFTManager {
     // Interface between domain specific and logic
     public static Function<Action, FFTMove> actionToMove;
     public static Function<FFTMove, Action> moveToAction;
-    public static BiFunction<String, String, Rule> gdlToRule;
+    public static BiFunction<String, String, PropRule> gdlToRule;
     public static Function<FFTNode, LiteralSet> nodeToLiterals;
     // Logic representation
     public static Supplier<ArrayList<Integer>> getGameAtoms;
@@ -152,7 +155,7 @@ public class FFTManager {
                         String[] rule = line.split("->");
                         String clauseStr = rule[0].trim();
                         String actionStr = rule[1].trim();
-                        ffts.get(ffts.size()-1).append(new Rule(clauseStr, actionStr));
+                        ffts.get(ffts.size()-1).append(new PropRule(clauseStr, actionStr));
                     }
                 }
 

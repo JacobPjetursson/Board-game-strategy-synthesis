@@ -1,8 +1,13 @@
-package fftlib.logic;
+package fftlib.auxiliary;
 
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
+import fftlib.logic.Literal;
+import fftlib.logic.LiteralSet;
+import fftlib.logic.rule.Rule;
+import fftlib.logic.rule.PredRule;
+import fftlib.logic.rule.PropRule;
 import misc.Config;
 
 import java.util.*;
@@ -23,19 +28,23 @@ public class RuleList extends ArrayList<Rule> {
         sortedAtoms.removeAll(removeList);
     }
 
-    RuleList() {
+    public RuleList() {
         super();
     }
 
-    RuleList(RuleList duplicate) {
+    public RuleList(RuleList duplicate) {
         super();
         for (Rule r : duplicate) {
-            add(new Rule(r));
+            add(r.clone());
         }
     }
 
-    public HashSet<FFTMove> apply(FFTNode n) {
+    public HashSet<FFTMove> apply(FFTNode n, boolean safe) {
         return findMoves(n.convert());
+    }
+
+    public HashSet<FFTMove> apply(FFTNode n) {
+        return apply(n, false);
     }
 
     public HashSet<FFTMove> findMoves(LiteralSet lSet) {
@@ -53,13 +62,13 @@ public class RuleList extends ArrayList<Rule> {
             }
         }
         HashSet<FFTMove> moves = new HashSet<>();
-        moves.add(firstRule.action.convert()); // can't be null
+        moves.add(firstRule.getAction().convert()); // can't be null
         if (!Config.SYMMETRY_DETECTION && !Config.USE_LIFTING)
             return moves;
 
         for (Rule r : appliedRules)
             if (r.getRuleIndex() == minIdx)
-                moves.add(r.action.convert());
+                moves.add(r.getAction().convert());
 
         return moves;
     }
@@ -122,81 +131,93 @@ public class RuleList extends ArrayList<Rule> {
         return foundIdx;
     }
 
-    public boolean add(Rule r) {
-        if (Config.USE_LIFTING && r instanceof PredRule) {
-            PredRule pr = (PredRule) r;
-            for (Rule ru : pr.getGroundedRules())
+    public boolean add(Rule rule) {
+        if (Config.USE_LIFTING && rule instanceof PredRule) {
+            PredRule pr = (PredRule) rule;
+            for (Rule ru : pr.getGroundedPropRules())
                 this.add(ru);
         }
-        else if (Config.SYMMETRY_DETECTION) {
-            for (Rule ru : r.getSymmetryRules())
-                super.add(ru);
-        } else {
-            super.add(r);
+        else {
+            PropRule r = (PropRule) rule;
+            if (Config.SYMMETRY_DETECTION) {
+                for (Rule ru : r.getSymmetryRules())
+                    super.add(ru);
+            } else {
+                super.add(r);
+            }
         }
         return true;
     }
 
-    public boolean remove(Rule r) {
-        if (Config.USE_LIFTING && r instanceof PredRule) {
-            PredRule pr = (PredRule) r;
-            for (Rule ru : pr.getGroundedRules())
+    public boolean remove(Rule rule) {
+        if (Config.USE_LIFTING && rule instanceof PredRule) {
+            PredRule pr = (PredRule) rule;
+            for (PropRule ru : pr.getGroundedPropRules())
                 this.remove(ru);
         }
-        else if (Config.SYMMETRY_DETECTION) {
-            for (Rule ru : r.getSymmetryRules())
-                super.remove(ru);
-        } else {
-            super.remove(r);
+        else {
+            PropRule r = (PropRule) rule;
+            if (Config.SYMMETRY_DETECTION) {
+                for (Rule ru : r.getSymmetryRules())
+                    super.remove(ru);
+            } else {
+                super.remove(r);
+            }
         }
         return true;
     }
 
     // maintains ordering
-    public void sortedAdd(Rule r) {
-        if (Config.USE_LIFTING && r instanceof PredRule) {
-            PredRule pr = (PredRule) r;
-            for (Rule ru : pr.getGroundedRules())
+    public void sortedAdd(Rule rule) {
+        if (Config.USE_LIFTING && rule instanceof PredRule) {
+            PredRule pr = (PredRule) rule;
+            for (PropRule ru : pr.getGroundedPropRules())
                 this.sortedAdd(ru);
         }
-        else if (Config.SYMMETRY_DETECTION) {
-            for (Rule ru : r.getSymmetryRules()) {
-                int index = Collections.binarySearch(this, ru, rc);
+        else {
+            PropRule r = (PropRule) rule;
+            if (Config.SYMMETRY_DETECTION) {
+                for (Rule ru : r.getSymmetryRules()) {
+                    int index = Collections.binarySearch(this, ru, rc);
+                    if (index < 0)
+                        index = -index - 1;
+                    add(index, ru);
+                }
+            } else {
+                int index = Collections.binarySearch(this, r, rc);
                 if (index < 0)
                     index = -index - 1;
-                add(index, ru);
+                add(index, r);
             }
-        } else {
-            int index = Collections.binarySearch(this, r, rc);
-            if (index < 0)
-                index = -index - 1;
-            add(index, r);
         }
     }
 
     // n + log(n) instead of (n + n)
-    public boolean sortedRemove(Rule r) {
-        if (Config.USE_LIFTING && r instanceof PredRule) {
-            PredRule pr = (PredRule) r;
-            for (Rule ru : pr.getGroundedRules())
+    public boolean sortedRemove(Rule rule) {
+        if (Config.USE_LIFTING && rule instanceof PredRule) {
+            PredRule pr = (PredRule) rule;
+            for (PropRule ru : pr.getGroundedPropRules())
                 this.sortedRemove(ru);
         }
-        else if (Config.SYMMETRY_DETECTION) {
-            boolean removed = true;
-            for (Rule ru : r.getSymmetryRules()) {
-                // return true if all rules removed
-                int index = Collections.binarySearch(this, ru, rc);
+        else {
+            PropRule r = (PropRule) rule;
+            if (Config.SYMMETRY_DETECTION) {
+                boolean removed = true;
+                for (Rule ru : r.getSymmetryRules()) {
+                    // return true if all rules removed
+                    int index = Collections.binarySearch(this, ru, rc);
+                    if (index < 0)
+                        removed = false; // no element
+                    else
+                        remove(index);
+                }
+                return removed;
+            } else {
+                int index = Collections.binarySearch(this, r, rc);
                 if (index < 0)
-                    removed = false; // no element
-                else
-                    remove(index);
+                    return false; // no element
+                remove(index);
             }
-            return removed;
-        } else {
-            int index = Collections.binarySearch(this, r, rc);
-            if (index < 0)
-                return false; // no element
-            remove(index);
         }
         return true;
     }

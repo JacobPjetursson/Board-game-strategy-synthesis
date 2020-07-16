@@ -1,5 +1,12 @@
-package fftlib.logic;
+package fftlib.logic.rule;
 
+import fftlib.game.FFTMove;
+import fftlib.game.FFTNode;
+import fftlib.logic.Action;
+import fftlib.logic.Literal;
+import fftlib.logic.LiteralSet;
+
+import java.util.HashSet;
 import java.util.Objects;
 
 public class SymmetryRule extends Rule { // Simpler rule class for rules in symmetry hashset
@@ -23,9 +30,9 @@ public class SymmetryRule extends Rule { // Simpler rule class for rules in symm
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof Rule)) return false;
+        if (!(obj instanceof SymmetryRule)) return false;
 
-        Rule rule = (Rule) obj;
+        SymmetryRule rule = (SymmetryRule) obj;
         if (this == rule)
             return true;
 
@@ -34,6 +41,36 @@ public class SymmetryRule extends Rule { // Simpler rule class for rules in symm
 
     public void setRuleIndex(int index) {
         this.ruleIndex = index;
+    }
+
+    @Override
+    public Rule clone() {
+        return new SymmetryRule(this);
+    }
+
+    @Override
+    public void removePrecondition(Literal l) {
+
+    }
+
+    @Override
+    public void addPrecondition(Literal l) {
+
+    }
+
+    @Override
+    public HashSet<FFTMove> apply(FFTNode n) {
+        return null;
+    }
+
+    @Override
+    public HashSet<FFTMove> apply(LiteralSet lSet) {
+        return null;
+    }
+
+    @Override
+    public void setAction(Action action) {
+
     }
 
 }

@@ -4,11 +4,10 @@ import fftlib.game.FFTMove;
 import fftlib.game.FFTSolution;
 import fftlib.game.FFTNode;
 import fftlib.game.NodeMapping;
-import fftlib.logic.Rule;
+import fftlib.logic.rule.Rule;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.*;
 
 import static misc.Config.*;
 import static misc.Globals.*;
