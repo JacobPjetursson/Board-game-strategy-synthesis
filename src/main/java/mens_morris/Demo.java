@@ -1,8 +1,7 @@
 package mens_morris;
 
 import fftlib.FFTManager;
-import fftlib.logic.Action;
-import fftlib.logic.literal.Literal;
+import fftlib.logic.rule.Action;
 import fftlib.logic.literal.PropLiteral;
 import fftlib.logic.rule.PropRule;
 

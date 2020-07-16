@@ -44,7 +44,7 @@ import static misc.Globals.*;
 public class FFTInteractivePane extends BorderPane {
     private int textFieldWidth = 150;
     private ListView<RulePane> lw;
-    private interactiveFFTNode interactiveFFTNode;
+    private InteractiveFFTNode interactiveFFTNode;
     private Label ruleLabel;
 
     private Button saveRuleBtn;

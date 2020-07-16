@@ -1,7 +1,6 @@
 package fftlib.logic.rule;
 
 import fftlib.game.FFTMove;
-import fftlib.logic.Action;
 import fftlib.logic.literal.Literal;
 import fftlib.logic.literal.LiteralSet;
 

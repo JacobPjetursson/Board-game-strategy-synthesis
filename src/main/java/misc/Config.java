@@ -22,6 +22,7 @@ public class Config {
     public static int RULE_ORDERING;
     public static boolean MINIMIZE_PRECONDITIONS;
     public static boolean SYMMETRY_DETECTION;
+    public static boolean SIMPLIFY_AFTER_DEL;
     public static boolean NAIVE_RULE_GENERATION;
     public static boolean MINIMIZE_RULE_BY_RULE;
     public static boolean SINGLE_THREAD;
@@ -36,7 +37,6 @@ public class Config {
     public static boolean USE_APPLY_OPT;
     public static boolean USE_MINIMIZE_OPT;
     public static boolean USE_RULE_ORDERING;
-    public static boolean SIMPLIFY_ITERATIVELY;
     public static boolean USE_LIFTING;
     public static boolean MINIMIZE;
     public static boolean LIFT_BEFORE_SIMPLIFY;
@@ -131,9 +131,8 @@ public class Config {
         SHOW_GUI = Boolean.parseBoolean(global.getProperty("show_gui"));
         MINIMIZE_PRECONDITIONS = Boolean.parseBoolean(global.getProperty("minimize_preconditions"));
         MINIMIZE_RULE_BY_RULE = Boolean.parseBoolean(global.getProperty("minimize_rule_by_rule"));
-
-        SIMPLIFY_ITERATIVELY = Boolean.parseBoolean(global.getProperty("simplify_iteratively"));
         SYMMETRY_DETECTION = Boolean.parseBoolean(global.getProperty("symmetry_detection"));
+        SIMPLIFY_AFTER_DEL = Boolean.parseBoolean(global.getProperty("simplify_rules_after_deleting_states"));
         NAIVE_RULE_GENERATION = Boolean.parseBoolean(global.getProperty("naive_generation"));
         SHOW_RULE_GROUPS = Boolean.parseBoolean(global.getProperty("show_rule_groups"));
         // DEBUG AND TEST
@@ -213,10 +212,10 @@ public class Config {
 
         System.out.printf("%-40.50s %-40.50s\n", "Autogen perspective:", perspectiveStr);
         System.out.printf("%-40.50s %-40.50s\n", "Symmetry detection:", SYMMETRY_DETECTION);
+        System.out.printf("%-40.50s %-40.50s\n", "Simplify after state deletion:", SIMPLIFY_AFTER_DEL);
         System.out.printf("%-40.50s %-40.50s\n", "Naive rule generation:", NAIVE_RULE_GENERATION);
         System.out.printf("%-40.50s %-40.50s\n", "Single thread:", SINGLE_THREAD);
         System.out.printf("%-40.50s %-40.50s\n", "Greedy Autogeneration:", GREEDY_AUTOGEN);
-        System.out.printf("%-40.50s %-40.50s\n", "Simplify iteratively:", SIMPLIFY_ITERATIVELY);
         System.out.printf("%-40.50s %-40.50s\n", "Minimize:", MINIMIZE);
         if (MINIMIZE) {
             System.out.printf("%-40.50s %-40.50s\n", "Minimize rule by rule:", MINIMIZE_RULE_BY_RULE);

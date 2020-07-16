@@ -1,14 +1,14 @@
 package sim;
 
-import fftlib.logic.*;
 import fftlib.auxiliary.Position;
 import fftlib.auxiliary.Transform;
 import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
-import fftlib.gui.interactiveFFTNode;
+import fftlib.gui.InteractiveFFTNode;
 import fftlib.logic.literal.Literal;
 import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.literal.PropLiteral;
+import fftlib.logic.rule.Action;
 import fftlib.logic.rule.PropRule;
 import fftlib.logic.rule.SymmetryRule;
 import misc.Config;
@@ -119,7 +119,7 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public interactiveFFTNode getInteractiveNode() {
+    public InteractiveFFTNode getInteractiveNode() {
         return null;
     }
 

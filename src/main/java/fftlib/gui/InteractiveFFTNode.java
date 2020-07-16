@@ -1,11 +1,11 @@
 package fftlib.gui;
 
-import fftlib.logic.Action;
+import fftlib.logic.rule.Action;
 import fftlib.logic.rule.Rule;
 import fftlib.game.FFTNode;
 import javafx.scene.Node;
 
-public interface interactiveFFTNode {
+public interface InteractiveFFTNode {
 
     Node getInteractiveNode(FFTNode fftNode);
 

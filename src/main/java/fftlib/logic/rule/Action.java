@@ -1,4 +1,4 @@
-package fftlib.logic;
+package fftlib.logic.rule;
 
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;

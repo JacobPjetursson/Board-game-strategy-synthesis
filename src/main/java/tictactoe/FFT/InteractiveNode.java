@@ -1,14 +1,14 @@
 package tictactoe.FFT;
 
 import fftlib.FFTManager;
-import fftlib.logic.Action;
+import fftlib.logic.rule.Action;
 import fftlib.logic.literal.Literal;
 import fftlib.auxiliary.Position;
 import fftlib.logic.literal.PropLiteral;
 import fftlib.logic.rule.Rule;
 import fftlib.logic.rule.PropRule;
 import fftlib.game.FFTNode;
-import fftlib.gui.interactiveFFTNode;
+import fftlib.gui.InteractiveFFTNode;
 import tictactoe.game.Controller;
 import tictactoe.game.Move;
 import tictactoe.game.Node;
@@ -18,7 +18,7 @@ import tictactoe.gui.board.PlayBox.InteractivePlayBox;
 import static misc.Globals.*;
 import static tictactoe.gui.board.BoardTile.blueStr;
 
-public class InteractiveNode implements interactiveFFTNode {
+public class InteractiveNode implements InteractiveFFTNode {
     private Controller cont;
     private InteractivePlayBox pb;
     private Rule rule;

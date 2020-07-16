@@ -2,8 +2,8 @@ package fftlib.game;
 
 import fftlib.auxiliary.Position;
 import fftlib.gui.FFTFailNode;
-import fftlib.gui.interactiveFFTNode;
-import fftlib.logic.Action;
+import fftlib.gui.InteractiveFFTNode;
+import fftlib.logic.rule.Action;
 import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.rule.PropRule;
 import fftlib.logic.rule.SymmetryRule;
@@ -28,7 +28,7 @@ public interface FFTGameSpecifics {
 
     String[] getPlayerNames(); // Visual
     FFTFailNode getFailNode(); // Visual
-    interactiveFFTNode getInteractiveNode(); // Visual
+    InteractiveFFTNode getInteractiveNode(); // Visual
 
     ArrayList<Integer> getGameAtoms(); // Logic
     String getAtomName(int atom); // Logic

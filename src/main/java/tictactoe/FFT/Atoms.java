@@ -1,7 +1,6 @@
 package tictactoe.FFT;
 
-import fftlib.logic.Action;
-import fftlib.logic.literal.Literal;
+import fftlib.logic.rule.Action;
 import fftlib.auxiliary.Position;
 import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.literal.PropLiteral;

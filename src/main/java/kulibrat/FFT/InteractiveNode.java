@@ -1,10 +1,10 @@
 package kulibrat.FFT;
 
-import fftlib.logic.Action;
+import fftlib.logic.rule.Action;
 import fftlib.logic.rule.Rule;
 import fftlib.logic.rule.PropRule;
 import fftlib.game.FFTNode;
-import fftlib.gui.interactiveFFTNode;
+import fftlib.gui.InteractiveFFTNode;
 import javafx.scene.paint.Color;
 import kulibrat.game.Controller;
 import kulibrat.game.Move;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import static misc.Globals.*;
 
 
-public class InteractiveNode implements interactiveFFTNode {
+public class InteractiveNode implements InteractiveFFTNode {
     private InteractivePlayBox pb;
     private BoardPiece selected;
     private ArrayList<Move> curHighLights;

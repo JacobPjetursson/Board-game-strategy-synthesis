@@ -3,13 +3,10 @@ package fftlib;
 import fftlib.auxiliary.Position;
 import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
-import fftlib.gui.interactiveFFTNode;
+import fftlib.gui.InteractiveFFTNode;
 import fftlib.logic.*;
 import fftlib.logic.literal.LiteralSet;
-import fftlib.logic.rule.Rule;
-import fftlib.logic.rule.PropRule;
-import fftlib.logic.rule.RuleGroup;
-import fftlib.logic.rule.SymmetryRule;
+import fftlib.logic.rule.*;
 import javafx.scene.Node;
 import javafx.scene.input.DataFormat;
 import misc.Config;
@@ -48,7 +45,7 @@ public class FFTManager {
     public static int winner; // set by solver
     // Visual tool
     private static FFTFailNode failNode;
-    public static interactiveFFTNode interactiveNode;
+    public static InteractiveFFTNode interactiveNode;
     public static String[] playerNames;
     // Interface between domain specific and logic
     public static Function<Action, FFTMove> actionToMove;

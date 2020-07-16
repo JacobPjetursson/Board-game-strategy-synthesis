@@ -1,6 +1,6 @@
 package kulibrat.game;
 
-import fftlib.logic.Action;
+import fftlib.logic.rule.Action;
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 

@@ -1,6 +1,6 @@
 package fftlib.logic.literal;
 
-import fftlib.logic.Action;
+import fftlib.logic.rule.Action;
 
 import java.math.BigInteger;
 import java.util.HashSet;

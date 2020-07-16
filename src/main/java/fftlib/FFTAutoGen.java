@@ -265,6 +265,11 @@ public class FFTAutoGen {
 
         Rule r = new PropRule(stSet, bestMove.convert()); // rule from state-move pair
         fft.append(r);
+        // set of rules affected by deleing states when minimizing
+        // if set to null then no rules will be added to set
+        Set<Rule> affectedRules = null;
+        if (SIMPLIFY_AFTER_DEL)
+            affectedRules = new HashSet<>();
 
         // DEBUG
         if (DETAILED_DEBUG) {
@@ -278,14 +283,10 @@ public class FFTAutoGen {
         simplifyRule(r, true);
 
         if (USE_LIFTING && !LIFT_BEFORE_SIMPLIFY) {
-            Rule pr = liftRule((PropRule)r, true);
-            // simplify again?
-            if (pr != r)
-                simplifyRule(pr, true); // TODO - benchmark
-            r = pr;
+            r = liftRule((PropRule)r, true);
         }
-        if (SYMMETRY_DETECTION || USE_LIFTING) // symmetry and use_lifting can introduce new moves for an applied state, so we do a safe run at last
-            verifyRule(r, true,true); // safe run where we know we have the final rule
+        // symmetry and use_lifting can introduce new moves for an applied state, so we do a safe run at last
+        safeRun(r, affectedRules,true); // safe run where we know we have the final rule
 
 /*
         if (!fft.verify(AUTOGEN_TEAM, false)) {
@@ -295,69 +296,72 @@ public class FFTAutoGen {
         }
 
  */
+        System.out.println("added rule: " + r);
+        if (SIMPLIFY_AFTER_DEL)
+            simplifyAffectedRules(affectedRules);
 
         return r;
+    }
+
+    private static void safeRun(Rule r, Set<Rule> affectedRules, boolean lastRule) {
+        verifyRule(r, affectedRules, lastRule, true);
+    }
+
+    private static void safeRun(Rule r, boolean lastRule) {
+        verifyRule(r, null, lastRule, true);
+    }
+
+    private static void simplifyAffectedRules(Set<Rule> affectedRules) {
+        System.out.println("No. of affected rules: " + affectedRules.size());
+        Set<Rule> simplified = new HashSet<>(); // keep track of rules already simplified in the recursion
+        for (Rule r : affectedRules) {
+            System.out.println("Simplifying: " + r);
+            if (simplified.contains(r)) {
+                System.out.println("Rule already simplified");
+                continue;
+            }
+            boolean lastRule = (fft.getLastRule() == r);
+            Set<Rule> newAffectedRules = new HashSet<>();
+            simplifyRule(r, lastRule);
+            safeRun(r, newAffectedRules, lastRule);
+            System.out.println("simplified to: " + r);
+            System.out.println("newAffectedRules size: " + newAffectedRules.size());
+            System.out.println("simplifying affected rules recursively");
+            simplifyAffectedRules(newAffectedRules);
+            simplified.addAll(newAffectedRules);
+        }
     }
 
     // if simplifying last rule, simplifying can not effect other rules, so it's simpler
     private static void simplifyRule(Rule r, boolean lastRule) {
         if (DETAILED_DEBUG) System.out.println("SIMPLIFYING RULE: " + r);
         // make copy to avoid concurrentModificationException
-        int prevSize;
-        int i = 1;
-        do {
-            Collection<Literal> precons;
-            if (USE_BITSTRING_SORT_OPT && lastRule) { // outcomment lastRule if you want to compare to original minimization
-                // sort the literals so we start with literal with lowest ID
-                TreeMap<Integer, Literal> literalSet = new TreeMap<>();
-                for (Literal l : r.getPreconditions()) {
-                    literalSet.put(l.id, l);
-                }
-                precons = literalSet.values();
-            } else {
-                precons = new LiteralSet(r.getPreconditions());
+        Collection<Literal> precons;
+        if (USE_BITSTRING_SORT_OPT && lastRule) { // outcomment lastRule if you want to compare to original minimization
+            // sort the literals so we start with literal with lowest ID
+            TreeMap<Integer, Literal> literalSet = new TreeMap<>();
+            for (Literal l : r.getPreconditions()) {
+                literalSet.put(l.id, l);
             }
-            if (DETAILED_DEBUG && SIMPLIFY_ITERATIVELY)
-                System.out.println("SIMPLIFICATION ITERATION: " + i++);
-            prevSize = precons.size();
-            boolean simplified = false;
-            for (Literal l : precons) {
-                if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO REMOVE: " + l.getName());
-                fft.removePrecondition(r, l);
-                if (!verifyRule(r, lastRule, false)) {
-                    if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.getName());
-                    fft.addPrecondition(r, l);
-                } else {
-                    simplified = true;
-                    if (DETAILED_DEBUG) System.out.println("REMOVING PRECONDITION: " + l.getName());
-                }
-                if (DETAILED_DEBUG) System.out.println("RULE IS NOW: " + r);
-            }
-            if (!lastRule && simplified)
-                fft.removeDeadRules(r);
-        } while (SIMPLIFY_ITERATIVELY && prevSize != r.getPreconditions().size() &&
-                r.getPreconditions().size() != 0);
-    }
-
-    private static Rule liftRule(PropRule r, boolean lastRule) {
-        if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO LIFT RULE");
-        // attempt to lift propositional variables one at a time, sorted by the most occurring variable 1st
-        for (int prop : r.getSortedProps()) {
-            PredRule pr = r.liftAll(prop);
-            if (pr == null) // inconsistent
-                continue;
-            fft.replaceRule(r, pr);
-            if (DETAILED_DEBUG) System.out.println("VERIFYING LIFTED RULE: " + pr);
-            // we do not want to lift if the lifted rule does not apply to more states
-            if (verifyRule(pr, lastRule,false) && groundedAppliedMapSize != liftedAppliedMapSize) {
-                if (DETAILED_DEBUG) System.out.println("RULE SUCCESSFULLY LIFTED TO: " + pr);
-                return pr;
-            } else {
-                fft.replaceRule(pr, r);
-            }
+            precons = literalSet.values();
+        } else {
+            precons = new LiteralSet(r.getPreconditions());
         }
-        if (DETAILED_DEBUG) System.out.println("FAILED TO LIFT RULE");
-        return r;
+        boolean simplified = false;
+        for (Literal l : precons) {
+            if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO REMOVE: " + l.getName());
+            fft.removePrecondition(r, l);
+            if (!verifyRule(r, lastRule)) {
+                if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.getName());
+                fft.addPrecondition(r, l);
+            } else {
+                simplified = true;
+                if (DETAILED_DEBUG) System.out.println("REMOVING PRECONDITION: " + l.getName());
+            }
+            if (DETAILED_DEBUG) System.out.println("RULE IS NOW: " + r);
+        }
+        if (!lastRule && simplified)
+            fft.removeDeadRules(r);
     }
 
     private static void fillAppliedMap(
@@ -380,9 +384,13 @@ public class FFTAutoGen {
 
     }
 
-    private static boolean verifyRule(Rule r, boolean lastRule, boolean safe) {
+    private static boolean verifyRule(Rule r, boolean lastRule) {
+        return verifyRule(r, null, lastRule, false);
+    }
+
+    private static boolean verifyRule(Rule r, Set<Rule> affectedRules, boolean lastRule, boolean safe) {
         //System.out.println("Verifying rule");
-        if (safe && DETAILED_DEBUG && (SYMMETRY_DETECTION || USE_LIFTING))
+        if (safe && DETAILED_DEBUG)
             System.out.println("DOING SAFE RUN");
         Map<FFTNode, Set<FFTMove>> appliedMap = new ConcurrentHashMap<>();
 
@@ -394,7 +402,7 @@ public class FFTAutoGen {
             Set<FFTMove> moves = entry.getValue();
             //System.out.println(n + " , moves: " + moves);
             //System.out.println("Checking if node is valid");
-            if (!updateSets(n, moves, appliedMap, lastRule, safe)) {
+            if (!updateSets(n, moves, appliedMap, affectedRules, lastRule, safe)) {
                 //System.out.println("Node is invalid!");
                 return false;
             }
@@ -405,19 +413,11 @@ public class FFTAutoGen {
         else
             groundedAppliedMapSize = appliedMap.size();
 
-        // If g(s) = f(s), which is the case with no symmetry and lifting,
-        // we can here do another updateSets() for all applied states
-        if (!SYMMETRY_DETECTION && !USE_LIFTING)
-            for (Map.Entry<FFTNode, Set<FFTMove>> entry : appliedMap.entrySet()) {
-                //System.out.println("Doing safe updateSets for node: " + entry.getKey());
-                //System.out.println("moves: " + entry.getValue());
-                updateSets(entry.getKey(), entry.getValue(), appliedMap, lastRule, true);
-            }
         return true;
     }
 
     private static boolean updateSets(FFTNode n, Set<FFTMove> chosenMoves,
-                                          Map<FFTNode, Set<FFTMove>> appliedMap,
+                                          Map<FFTNode, Set<FFTMove>> appliedMap, Set<Rule> affectedRules,
                                       boolean lastRule, boolean safe) {
         boolean reachable = true;
         // s might've been set unreachable by another state in appliedSet
@@ -487,11 +487,11 @@ public class FFTAutoGen {
         //System.out.println("Removing transitions");
         if (!reachable) {
             for (FFTMove m : optimalMoves) // remove all
-                removeFromSets(n, m);
+                removeFromSets(n, m, affectedRules);
         } else if (!chosenMoves.isEmpty()) { // remove all but to chosenMoves
             for (FFTMove m : optimalMoves)
                 if (!chosenMoves.contains(m))
-                    removeFromSets(n, m);
+                    removeFromSets(n, m, affectedRules);
         }
 
         // Adjusting sets
@@ -516,7 +516,7 @@ public class FFTAutoGen {
 
     // you might remove all children from a state and end up removing the state itself cause of recursion
     // should use a closedSet to prevent looping back, like we do with addToSets
-    private static void removeFromSets(FFTNode n, FFTMove m) {
+    private static void removeFromSets(FFTNode n, FFTMove m, Set<Rule> affectedRules) {
         FFTNode existingChild = reachableStates.get(n.getNextNode(m));
         // existingChild can be null if we re-visit a state where we already deleted it from
         // i.e. we deleted all but chosen move from this state, so it's still reachable, but children isn't
@@ -526,17 +526,22 @@ public class FFTAutoGen {
         existingChild.removeReachableParent(n);
         if (existingChild.isReachable())
             return;
-        remove(existingChild);
+        remove(existingChild, affectedRules);
         for (FFTMove move : existingChild.getLegalMoves()) {
-            removeFromSets(existingChild, move);
+            removeFromSets(existingChild, move, affectedRules);
         }
     }
 
-    private static void remove(FFTNode n) {
-        //System.out.println("removing child: " + existingChild);
+    private static void remove(FFTNode n, Set<Rule> affectedRules) {
         reachableStates.remove(n);
         applicableStates.remove(n);
         appliedStates.remove(n);
+        if (affectedRules != null) {// it's null when minimizing
+            Rule appliedRule = n.getAppliedRule();
+            if (appliedRule != null)
+                affectedRules.add(appliedRule);
+        }
+
 
     }
 
@@ -693,7 +698,7 @@ public class FFTAutoGen {
                 //System.out.println("Attempting to remove rule: " + r);
                 fft.removeRule(r, i - removed);
                 removed++;
-                if (!verifyRule(r, false, false)) {
+                if (!verifyRule(r, false)) {
                     //System.out.println("failed to remove: " + r);
                     //System.out.println();
                     removed--;
@@ -709,8 +714,7 @@ public class FFTAutoGen {
                     }
                 }
                 //System.out.println("Doing safe run");
-                if (SYMMETRY_DETECTION || USE_LIFTING)
-                    verifyRule(r, false,true);
+                safeRun(r, false);
 
 /*
                 if (!fft.verify(AUTOGEN_TEAM, true)) {
@@ -731,8 +735,7 @@ public class FFTAutoGen {
             for(Rule r : rg.rules) {
                 //System.out.println("Simplifying rule");
                 simplifyRule(r, false);
-                if (SYMMETRY_DETECTION || USE_LIFTING)
-                    verifyRule(r, false,true);
+                safeRun(r, false);
             }
         }
     }
@@ -790,6 +793,27 @@ public class FFTAutoGen {
             frontier.add(child);
         }
         reachableStates.get(child).addReachableParent(parent);
+    }
+
+    private static Rule liftRule(PropRule r, boolean lastRule) {
+        if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO LIFT RULE");
+        // attempt to lift propositional variables one at a time, sorted by the most occurring variable 1st
+        for (int prop : r.getSortedProps()) {
+            PredRule pr = r.liftAll(prop);
+            if (pr == null) // inconsistent
+                continue;
+            fft.replaceRule(r, pr);
+            if (DETAILED_DEBUG) System.out.println("VERIFYING LIFTED RULE: " + pr);
+            // we do not want to lift if the lifted rule does not apply to more states
+            if (verifyRule(pr, lastRule) && groundedAppliedMapSize != liftedAppliedMapSize) {
+                if (DETAILED_DEBUG) System.out.println("RULE SUCCESSFULLY LIFTED TO: " + pr);
+                return pr;
+            } else {
+                fft.replaceRule(pr, r);
+            }
+        }
+        if (DETAILED_DEBUG) System.out.println("FAILED TO LIFT RULE");
+        return r;
     }
 
     public static Map<FFTNode, FFTNode> getReachableStates() {

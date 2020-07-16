@@ -2,7 +2,7 @@ package fftlib.auxiliary;
 
 import fftlib.*;
 import fftlib.logic.literal.LiteralSet;
-import fftlib.logic.Action;
+import fftlib.logic.rule.Action;
 import fftlib.logic.literal.Literal;
 import fftlib.logic.literal.PropLiteral;
 import fftlib.logic.rule.PropRule;

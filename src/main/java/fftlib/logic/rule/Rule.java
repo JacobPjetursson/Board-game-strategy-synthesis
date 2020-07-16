@@ -3,7 +3,6 @@ package fftlib.logic.rule;
 import fftlib.GGPAutogen.GGPManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
-import fftlib.logic.Action;
 import fftlib.logic.literal.Literal;
 import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.literal.PropLiteral;
