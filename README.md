@@ -16,17 +16,15 @@ Project consists of 5 different programs:
 - Tic-tac-toe
 - Sim
 - Men's Morris (Six or 3)
-- Kulibrat
 - General Game Playing (GGP)
 
-Tic-tac-toe and Kulibrat offers GUI's for the respective games where it is possible to play around and test various strategies with FFT's
+Tic-tac-toe offers GUI's for the respective games where it is possible to play around and test various strategies with FFT's
 
 These programs can be run with the following commands:
 1. `mvn exec:java@tictactoe` *or simply* `mvn exec:java`
 2  `mvn exec:java@sim` 
 3  `mvn exec:java@morris`
-4. `mvn exec:java@kulibrat`
-5. `mvn exec:java@ggp`
+4. `mvn exec:java@ggp`
 
 ## Configuration
 
@@ -35,5 +33,4 @@ There are 6 configuration files in total that can alter the way the strategy is 
 2. *tictactoe.properties*: In this file it is possible to choose between regular or simple rules, where simple rules require 2-in-a-row for winning
 3. *sim.properties*: In this file it is possible to choose between regular and simple rules, where simple rules award win to first player to not get 6 lines in the hexagon.
 4. *mens_morris.properties*: In this file, you can choose between playing Six Men's Morris and Three Men's Morris.
-5. *kulibrat.properties*: In this file the board size can be altered, and the name of the database is specified.
-6. *ggp.properties*: The ggp game file path should be specified here.
+5. *ggp.properties*: The ggp game file path should be specified here.

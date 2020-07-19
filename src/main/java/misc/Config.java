@@ -24,7 +24,6 @@ public class Config {
     public static boolean SYMMETRY_DETECTION;
     public static boolean SIMPLIFY_AFTER_DEL;
     public static boolean NAIVE_RULE_GENERATION;
-    public static boolean MINIMIZE_RULE_BY_RULE;
     public static boolean SINGLE_THREAD;
     public static boolean SHOW_RULE_GROUPS;
     public static boolean USE_DEBUG_FILE;
@@ -35,19 +34,13 @@ public class Config {
     public static boolean USE_INVERTED_LIST_NODES_OPT;
     public static boolean USE_INVERTED_LIST_RULES_OPT;
     public static boolean USE_APPLY_OPT;
-    public static boolean USE_MINIMIZE_OPT;
+    public static boolean USE_OPTIMIZED_GENERATION;
     public static boolean USE_RULE_ORDERING;
     public static boolean USE_LIFTING;
     public static boolean MINIMIZE;
     public static boolean LIFT_BEFORE_SIMPLIFY;
     public static boolean LIFT_WHEN_MINIMIZING;
     public static boolean SAVE_FFT;
-
-    // KULIBRAT PROPERTIES
-    public static int BWIDTH;
-    public static int BHEIGHT;
-    public static boolean USE_DB;
-    public static String DB_PATH;
 
     // TIC TAC TOE PROPERTIES
     public static int TIC_TAC_TOE_RULES;
@@ -75,14 +68,12 @@ public class Config {
     private static void loadProperties() throws IOException {
         Properties global = new Properties();
         Properties tictactoe = new Properties();
-        Properties kulibrat = new Properties();
         Properties sim = new Properties();
         Properties morris = new Properties();
         Properties ggp = new Properties();
 
         global.load(new FileInputStream("properties/global.properties"));
         tictactoe.load(new FileInputStream("properties/tictactoe.properties"));
-        kulibrat.load(new FileInputStream("properties/kulibrat.properties"));
         sim.load(new FileInputStream("properties/sim.properties"));
         morris.load(new FileInputStream("properties/mens_morris.properties"));
         ggp.load(new FileInputStream("properties/ggp.properties"));
@@ -130,7 +121,6 @@ public class Config {
         ENABLE_GGP_PARSER = Boolean.parseBoolean(global.getProperty("enable_ggp_parser"));
         SHOW_GUI = Boolean.parseBoolean(global.getProperty("show_gui"));
         MINIMIZE_PRECONDITIONS = Boolean.parseBoolean(global.getProperty("minimize_preconditions"));
-        MINIMIZE_RULE_BY_RULE = Boolean.parseBoolean(global.getProperty("minimize_rule_by_rule"));
         SYMMETRY_DETECTION = Boolean.parseBoolean(global.getProperty("symmetry_detection"));
         SIMPLIFY_AFTER_DEL = Boolean.parseBoolean(global.getProperty("simplify_rules_after_deleting_states"));
         NAIVE_RULE_GENERATION = Boolean.parseBoolean(global.getProperty("naive_generation"));
@@ -147,13 +137,7 @@ public class Config {
         USE_INVERTED_LIST_NODES_OPT = Boolean.parseBoolean(global.getProperty("use_inverted_list_nodes_opt"));
         USE_INVERTED_LIST_RULES_OPT = Boolean.parseBoolean(global.getProperty("use_inverted_list_rules_opt"));
         USE_APPLY_OPT = Boolean.parseBoolean(global.getProperty("use_apply_opt"));
-        USE_MINIMIZE_OPT = Boolean.parseBoolean(global.getProperty("use_minimize_opt"));
-
-        // KULIBRAT
-        BWIDTH = Integer.parseInt(kulibrat.getProperty("boardWidth"));
-        BHEIGHT = Integer.parseInt(kulibrat.getProperty("boardHeight"));
-        USE_DB = Boolean.parseBoolean(kulibrat.getProperty("use_db"));
-        DB_PATH = kulibrat.getProperty("db_path");
+        USE_OPTIMIZED_GENERATION = Boolean.parseBoolean(global.getProperty("use_optimized_generation"));
 
         // TIC TAC TOE
         String rules = tictactoe.getProperty("rules");
@@ -194,7 +178,6 @@ public class Config {
 
         if (!MINIMIZE) {
             MINIMIZE_PRECONDITIONS = false;
-            MINIMIZE_RULE_BY_RULE = false;
         }
 
         // todo - disable/enable some stuff based on whether we have naive rule generation or not
@@ -218,9 +201,8 @@ public class Config {
         System.out.printf("%-40.50s %-40.50s\n", "Greedy Autogeneration:", GREEDY_AUTOGEN);
         System.out.printf("%-40.50s %-40.50s\n", "Minimize:", MINIMIZE);
         if (MINIMIZE) {
-            System.out.printf("%-40.50s %-40.50s\n", "Minimize rule by rule:", MINIMIZE_RULE_BY_RULE);
             System.out.printf("%-40.50s %-40.50s\n", "Minimize preconditions:", MINIMIZE_PRECONDITIONS);
-            System.out.printf("%-40.50s %-40.50s\n", "Use minimize optimization:", USE_MINIMIZE_OPT);
+            System.out.printf("%-40.50s %-40.50s\n", "Use optimized generation:", USE_OPTIMIZED_GENERATION);
 
         }
         System.out.printf("%-40.50s %-40.50s\n", "Use rule ordering:", USE_RULE_ORDERING);

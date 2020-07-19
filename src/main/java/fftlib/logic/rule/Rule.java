@@ -20,7 +20,7 @@ import java.util.Set;
 import static misc.Config.ENABLE_GGP_PARSER;
 import static misc.Config.SHOW_GUI;
 
-public abstract class Rule {
+public abstract class Rule implements RuleEntity {
 
 
     protected static final ArrayList<String> separators = new ArrayList<>(
@@ -140,6 +140,13 @@ public abstract class Rule {
         return apply(n.convert());
     }
 
+    public HashSet<FFTMove> apply(FFTNode n, boolean safe) {
+        HashSet<FFTMove> moves = apply(n.convert());
+        if (!moves.isEmpty() && safe)
+            n.setAppliedRule(this);
+        return moves;
+    }
+
     public abstract HashSet<FFTMove> apply(LiteralSet lSet);
 
     public Move apply(MachineState ms) throws MoveDefinitionException {
@@ -190,4 +197,17 @@ public abstract class Rule {
     }
 
     public abstract void setAction(Action action);
+
+    // used for ruleEntity
+    public int size() {
+        return 1;
+    }
+
+    public int getAmountOfPreconditions() {
+        return preconditions.size();
+    }
+
+    public boolean isLocked() {
+        return false;
+    }
 }

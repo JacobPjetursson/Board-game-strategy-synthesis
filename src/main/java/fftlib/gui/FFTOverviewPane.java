@@ -32,6 +32,7 @@ import static misc.Config.SHOW_RULE_GROUPS;
 import static misc.Globals.WIDTH;
 
 public class FFTOverviewPane extends VBox {
+    /*
     private int textFieldWidth = 150;
     private ListView<RulePane> lw;
     private Label title;
@@ -261,11 +262,11 @@ public class FFTOverviewPane extends VBox {
             fftStrs.add(fft.name);
         }
         changeBox.setItems(fftStrs);
-        showRuleGroups();
+        showFFT();
         lw.getSelectionModel().selectLast();
     }
 
-    private void showRuleGroups() {
+    private void showFFT() {
         // ListView
         ObservableList<RulePane> ruleGroups = FXCollections.observableArrayList();
         for (int i = 0; i < FFTManager.currFFT.ruleGroups.size(); i++) {
@@ -358,7 +359,7 @@ public class FFTOverviewPane extends VBox {
                     FFTManager.currFFT.ruleGroups.add(droppedIdx, rg_dragged);
 
                     event.setDropCompleted(true);
-                    showRuleGroups();
+                    showFFT();
                     lw.getSelectionModel().select(droppedIdx);
                 }
                 event.consume();
@@ -403,4 +404,6 @@ public class FFTOverviewPane extends VBox {
             }
         }
     }
+
+     */
 }

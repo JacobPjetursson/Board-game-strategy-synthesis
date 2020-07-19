@@ -2,6 +2,7 @@ package fftlib.gui;
 
 import fftlib.FFTManager;
 import fftlib.logic.rule.Rule;
+import fftlib.logic.rule.RuleEntity;
 import fftlib.logic.rule.RuleGroup;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
@@ -99,12 +100,13 @@ public class FFTFailurePane extends BorderPane {
     }
 
     private void showRuleGroups() {
+        /*
         ObservableList<VBox> ruleGroups = FXCollections.observableArrayList();
         boolean ruleApplied = false;
         int counter = 0;
-        for (int i = 0; i < FFTManager.currFFT.ruleGroups.size(); i++) {
+        for (int i = 0; i < FFTManager.currFFT.size(); i++) {
             // Rule group
-            RuleGroup rg = FFTManager.currFFT.ruleGroups.get(i);
+            RuleEntity re = FFTManager.currFFT.ruleEntities.get(i);
             VBox rgVBox = new VBox(10);
             rgVBox.setAlignment(Pos.CENTER);
             Label rgLabel = new Label((i + 1) + ": " + rg.name);
@@ -136,5 +138,7 @@ public class FFTFailurePane extends BorderPane {
         }
         lw.setItems(ruleGroups);
         lw.setMaxHeight(counter * ROW_SIZE);
+
+         */
     }
 }

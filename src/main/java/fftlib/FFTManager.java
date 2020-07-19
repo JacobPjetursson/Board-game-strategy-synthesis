@@ -110,16 +110,25 @@ public class FFTManager {
             writer = new BufferedWriter(new FileWriter(fftPath));
             StringBuilder fft_file = new StringBuilder();
             for (FFT fft : ffts) {
-                fft_file.append("{").append(fft.name).append("}\n");
-                for (RuleGroup rg : fft.ruleGroups) {
-                    fft_file.append("[").append(rg.name).append("]");
-                    if (rg.locked)
-                        fft_file.append("*");
-                    fft_file.append("\n");
-                    for (Rule r : rg.rules) {
+                fft_file.append("{").append(fft.name).append("\n");
+                for (RuleEntity re : fft.ruleEntities) {
+                    if (re instanceof RuleGroup) {
+                        RuleGroup rg = (RuleGroup) re;
+                        fft_file.append("[").append(rg.name);
+                        if (rg.locked)
+                            fft_file.append("*");
+                        fft_file.append("\n");
+                        for (Rule r : rg.rules)
+                            fft_file.append(
+                                    r.getPreconditions()).append(" -> ").append(r.getPreconditions()).append("\n");
+                        fft_file.append("]\n");
+
+                    } else {
+                        Rule r = (Rule) re;
                         fft_file.append(r.getPreconditions()).append(" -> ").append(r.getPreconditions()).append("\n");
                     }
                 }
+                fft_file.append("}\n");
             }
             writer.write(fft_file.toString());
             writer.close();
@@ -129,7 +138,7 @@ public class FFTManager {
         }
 
     }
-
+    // todo - fix
     public static void loadFFTs() {
         List<String> lines;
         // Create new file if not exists
@@ -139,22 +148,43 @@ public class FFTManager {
             if (!fftFile.createNewFile()) {
                 lines = Files.readAllLines(Paths.get(fftPath));
 
+                FFT f = null;
+                RuleGroup rg = null;
+                boolean addingRuleGroup = false;
+                boolean addingFFT = false;
                 for (String line : lines) {
                     if (line.startsWith("{")) {
-                        ffts.add(new FFT(line.substring(1, line.length() - 1)));
+                        f = new FFT(line.substring(1));
+                        addingFFT = true;
+                    } else if (!addingFFT) {
+                        System.err.println("Error in loading FFT from file: No fft defined");
+                        break;
                     }
-                    // Rulegroup name
+
                     else if (line.startsWith("[")) {
+                        addingRuleGroup = true;
+                        // Rulegroup start
                         int length = (line.endsWith("*")) ? line.length() - 2 : line.length() - 1;
-                        RuleGroup rg = new RuleGroup(line.substring(1, length));
+                        rg = new RuleGroup(line.substring(1, length));
                         if (line.endsWith("*"))
                             rg.locked = true;
-                        ffts.get(ffts.size()-1).addRuleGroup(rg);
-                    } else {
+                    } else if (line.startsWith("]")) {
+                        // Rulegroup end
+                        addingRuleGroup = false;
+                        f.addRuleGroup(rg);
+                    } else if (line.startsWith("}")) {
+                        ffts.add(f);
+                        addingFFT = false;
+                    }
+                    else {
                         String[] rule = line.split("->");
                         String clauseStr = rule[0].trim();
                         String actionStr = rule[1].trim();
-                        ffts.get(ffts.size()-1).append(new PropRule(clauseStr, actionStr));
+                        Rule r = new PropRule(clauseStr, actionStr);
+                        if (addingRuleGroup)
+                            rg.addRule(r);
+                        else
+                            f.append(r);
                     }
                 }
 

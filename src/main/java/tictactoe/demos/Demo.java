@@ -51,7 +51,6 @@ public class Demo {
         PropRule notdead = new PropRule(lSet, new Action("P1(1, 2)"));
 
         FFT fft = new FFT("Synthesis");
-        fft.addRuleGroup(new RuleGroup("Synthesis"));
         fft.append(test1);
         fft.append(dead1);
         fft.append(dead2);

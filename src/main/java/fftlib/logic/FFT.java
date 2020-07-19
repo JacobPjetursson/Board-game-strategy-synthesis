@@ -11,10 +11,7 @@ import fftlib.game.FFTNodeAndMove;
 import fftlib.game.FFTSolution;
 import fftlib.logic.literal.Literal;
 import fftlib.logic.literal.LiteralSet;
-import fftlib.logic.rule.Rule;
-import fftlib.logic.rule.PredRule;
-import fftlib.logic.rule.PropRule;
-import fftlib.logic.rule.RuleGroup;
+import fftlib.logic.rule.*;
 import misc.Config;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
@@ -36,7 +33,7 @@ import static misc.Globals.*;
 public class FFT {
     public String name;
     // used for a visual representation and for locking (preventing) a group of rules of being minimized
-    public ArrayList<RuleGroup> ruleGroups;
+    public ArrayList<RuleEntity> ruleEntities;
     // used for the efficient computation of looking up rules that apply
     // rulelist is only initialized after autogeneration, to avoid a bunch of unnecessary sorts
     private RuleList ruleList;
@@ -44,6 +41,8 @@ public class FFT {
 
 
     public FFTNodeAndMove failingPoint = null;
+
+    private boolean stronglyOptimal;
 
     // For concurrency purposes
     private static ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
@@ -53,18 +52,26 @@ public class FFT {
 
     public FFT(String name) {
         this.name = name;
-        ruleGroups = new ArrayList<>();
+        ruleEntities = new ArrayList<>();
     }
 
     public FFT(FFT duplicate) {
         this.name = duplicate.name;
-        ruleGroups = new ArrayList<>();
-        for (RuleGroup rg : duplicate.ruleGroups) {
-            ruleGroups.add(new RuleGroup(rg));
+        ruleEntities = new ArrayList<>();
+        for (RuleEntity re : duplicate.ruleEntities) {
+            ruleEntities.add(re.clone());
         }
         this.failingPoint = duplicate.failingPoint;
         if (ruleList != null)
             this.ruleList = new RuleList(duplicate.ruleList);
+    }
+
+    public void setStronglyOptimal(boolean stronglyOptimal) {
+        this.stronglyOptimal = stronglyOptimal;
+    }
+
+    public boolean isStronglyOptimal() {
+        return stronglyOptimal;
     }
 
     public void initializeRuleList() {
@@ -74,17 +81,25 @@ public class FFT {
         ruleList.sort();
     }
 
-    public int size() {
+    public int getAmountOfRules() {
         int size = 0;
-        for (RuleGroup rg : ruleGroups)
-            size += rg.rules.size();
+        for (RuleEntity re : ruleEntities)
+            size += re.size();
         return size;
     }
 
     public ArrayList<Rule> getRules() {
         ArrayList<Rule> rules = new ArrayList<>();
-        for (RuleGroup rg : ruleGroups)
-            rules.addAll(rg.rules);
+        for (RuleEntity re : ruleEntities) {
+            if (re instanceof  Rule) {
+                rules.add((Rule)re);
+
+            }
+            else {
+                RuleGroup rg = (RuleGroup) re;
+                rules.addAll(rg.rules);
+            }
+        }
         return rules;
     }
 
@@ -93,13 +108,12 @@ public class FFT {
     }
 
     public void addRuleGroup(RuleGroup ruleGroup) {
-        ruleGroups.add(ruleGroup);
+        ruleEntities.add(ruleGroup);
     }
 
     public void append(Rule r) {
-        r.setRuleIndex(size());
-        // add to last rulegroup
-        ruleGroups.get(ruleGroups.size()-1).rules.add(r);
+        r.setRuleIndex(getAmountOfRules());
+        ruleEntities.add(r);
         // add to sorted list of rules if initialized
         if (USE_APPLY_OPT && ruleList != null)
             ruleList.sortedAdd(r);
@@ -141,15 +155,18 @@ public class FFT {
         }
     }
 
-    public void removeRule(PropRule r) {
-        for (RuleGroup rg : ruleGroups)
-            removeRule(r, rg.rules.indexOf(r));
+    public void removeRule(Rule r, int entityIdx) {
+        removeRule(r, entityIdx, -1);
     }
 
     // faster since we don't have to search for rule
-    public void removeRule(Rule r, int index) {
-        for (RuleGroup rg : ruleGroups)
-            rg.rules.remove(index);
+    public void removeRule(Rule r, int entityIdx, int rgIdx) {
+        if (rgIdx == -1)
+            ruleEntities.remove(entityIdx);
+        else {
+            RuleGroup rg = (RuleGroup) ruleEntities.get(entityIdx);
+            rg.rules.remove(rgIdx);
+        }
 
         if (USE_APPLY_OPT && ruleList != null)
             ruleList.sortedRemove(r);
@@ -160,7 +177,16 @@ public class FFT {
     }
 
     public void addRule(Rule r, int index) {
-        ruleGroups.get(ruleGroups.size()-1).rules.add(index, r);
+        addRule(r, index, -1);
+    }
+
+    public void addRule(Rule r, int entIdx, int rgIdx) {
+        if (rgIdx == -1) {
+            ruleEntities.add(entIdx, r);
+        } else {
+            RuleGroup rg = (RuleGroup) ruleEntities.get(entIdx);
+            rg.rules.add(rgIdx, r);
+        }
 
         if (USE_APPLY_OPT && ruleList != null)
             ruleList.sortedAdd(r);
@@ -182,48 +208,35 @@ public class FFT {
         return true;
     }
 
-    public int getAmountOfRules() {
-        int ruleSize = 0;
-        for (RuleGroup rg : ruleGroups) {
-            ruleSize += rg.rules.size();
-        }
-        return ruleSize;
-    }
-
     public int getAmountOfPreconditions() {
         int precSize = 0;
-        for (RuleGroup rg : ruleGroups) {
-            precSize += rg.getAmountOfPreconditions();
-        }
+        for (RuleEntity re : ruleEntities)
+            precSize += re.getAmountOfPreconditions();
         return precSize;
     }
 
     public Rule getLastRule() {
-        RuleGroup last = ruleGroups.get(ruleGroups.size() - 1);
-        return last.rules.get(last.rules.size() - 1);
+        RuleEntity re = ruleEntities.get(ruleEntities.size()-1);
+        if (re instanceof Rule)
+            return (Rule) re;
+        RuleGroup rg = (RuleGroup) re;
+        return rg.rules.get(rg.size()-1);
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (RuleGroup rg : ruleGroups) {
-            sb.append(rg.name).append(":\n");
-            for (Rule r : rg.rules)
-                sb.append(r).append("\n");
+        for (RuleEntity re : ruleEntities) {
+            sb.append(re).append("\n");
         }
         return sb.toString();
     }
 
     public HashSet<FFTMove> apply_slow(FFTNode node, boolean safe) {
         HashSet<FFTMove> moves = new HashSet<>();
-        for (RuleGroup rg : ruleGroups) {
-            for (Rule r : rg.rules) {
-                moves = r.apply(node);
-                if (!moves.isEmpty()) {
-                    if (safe)
-                        node.setAppliedRule(r);
-                    return moves;
-                }
-            }
+        for (RuleEntity re : ruleEntities) {
+            moves = re.apply(node, safe);
+            if (!moves.isEmpty())
+                return moves;
         }
         return moves;
     }
@@ -233,7 +246,7 @@ public class FFT {
             return ruleList.apply(node, safe);
         if (USE_INVERTED_LIST_RULES_OPT)
             return invertedList.apply(node, safe);
-        return apply_slow(node, false);
+        return apply_slow(node, safe);
     }
 
     public HashSet<FFTMove> apply(FFTNode node) {
@@ -245,162 +258,71 @@ public class FFT {
     // Alternative: We can use r.apply(r') to determine the same thing.
     // Perhaps we can even use the invertedList/ruleList stuff
     public void removeDeadRules(Rule rule) {
-        for (RuleGroup rg : ruleGroups) {
-            ArrayList<Rule> rulesCopy = new ArrayList<>(rg.rules);
-            int removed = 0;
-            for (int i = 0; i < rulesCopy.size(); i++) {
-                Rule r = rulesCopy.get(i);
-                if (r.getRuleIndex() > rule.getRuleIndex() && !rule.apply(r.getAllPreconditions()).isEmpty()) {
-                    if (DETAILED_DEBUG)
-                        System.out.println("Removing dead rule at index " + r.getRuleIndex() + ": " + r);
-                    removeRule(r, i - removed);
-                    removed++;
+        ArrayList<RuleEntity> rulesCopy = new ArrayList<>(ruleEntities);
+        int removedEnts = 0;
+        for (int entIdx = 0; entIdx < rulesCopy.size(); entIdx++) {
+            RuleEntity re = rulesCopy.get(entIdx);
+            if (re instanceof RuleGroup) {
+                RuleGroup rg = (RuleGroup) re;
+                ArrayList<Rule> ruleGroupCopy = new ArrayList<>(rg.rules);
+                int removedRgs = 0;
+                for (int rgIdx = 0; rgIdx < ruleGroupCopy.size(); rgIdx++) {
+                    Rule r = ruleGroupCopy.get(rgIdx);
+                    if (isDead(rule, r)) {
+                        removeRule(r, entIdx - removedEnts, rgIdx - removedRgs);
+                        removedRgs++;
+                    }
+                }
+            }
+            else {
+                Rule r = (Rule) re;
+                if (isDead(rule, r)) {
+
+                    removeRule(r, entIdx - removedEnts);
+                    removedEnts++;
                 }
             }
         }
-
-
     }
 
-    public int minimize(int team, boolean minimize_precons) { // Returns amount of iterations
-        if (!verify(team, true)) {
-            System.out.println("FFT is not a winning strategy, so it can not be minimized");
-            return -1;
-        }
-
-        int ruleSize, precSize;
-        int i = 0;
-        do {
-            ruleSize = getAmountOfRules();
-            precSize = getAmountOfPreconditions();
-            i++;
-            System.out.println("Minimizing, iteration no. " + i);
-            minimizeRules(team, minimize_precons);
-            if (!MINIMIZE_RULE_BY_RULE && minimize_precons) {
-                if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
-                minimizePreconditions(team);
-            }
-        } while(ruleSize != getAmountOfRules() || precSize != getAmountOfPreconditions());
-        return i;
+    private boolean isDead(Rule first, Rule second) {
+        boolean dead = second.getRuleIndex() > first.getRuleIndex() &&
+                !first.apply(second.getAllPreconditions()).isEmpty();
+        if (dead && DETAILED_DEBUG)
+            System.out.println("Dead rule at index " + second.getRuleIndex() + ": " + second);
+        return dead;
     }
 
-    private ArrayList<Rule> minimizeRules(int team, boolean minimize_precons) {
-        ArrayList<Rule> redundantRules = new ArrayList<>();
-
-        for (RuleGroup rg : ruleGroups) {
-            if (rg.locked) // don't minimize if rulegroup is locked
-                continue;
-            ArrayList<Rule> rulesCopy = new ArrayList<>(rg.rules);
-            int removed = 0;
-            for (int i = 0; i < rulesCopy.size(); i++) {
-                if ((i - removed) >= rg.rules.size()) // remaining rules are removed
-                    break;
-                if (DETAILED_DEBUG || NAIVE_RULE_GENERATION)
-                    System.out.println("Remaining amount of rules: " + getAmountOfRules());
-                Rule r = rulesCopy.get(i);
-                if (!rg.rules.get(i - removed).equals(r)) {// some later rules deleted
-                    removed++;
-                    continue;
-                }
-                removeRule(r, i - removed);
-                removed++;
-
-                if (verify(team, true)) {
-                    redundantRules.add(r);
-                }
-                else {
-                    removed--;
-                    addRule(r, i - removed);
-
-                    if (MINIMIZE_RULE_BY_RULE && minimize_precons)
-                        minimizePreconditions(r, team);
-                }
-            }
-        }
-        return redundantRules;
-    }
-
-    private void minimizePreconditions(int team) {
-        for (RuleGroup rg : ruleGroups) {
-            if (rg.locked) continue; // don't minimize if rg is locked
-            for(Rule r : rg.rules) {
-                minimizePreconditions(r, team);
-            }
-        }
-    }
-
-    // TODO - fix this ugly beast, either by making common type for precons and sentences or by typecasting
-    private void minimizePreconditions(Rule r, int team) {
-        if (Config.ENABLE_GGP) {
-            Set<GdlSentence> sentences = new HashSet<>();
-            for (GdlSentence s : r.sentences)
-                sentences.add(s.clone());
-
-            for (GdlSentence s : sentences) {
-                r.removePrecondition(s);
-                if (!verify(team, true))
-                    r.addPrecondition(s);
-            }
-        } else {
-            LiteralSet precons = new LiteralSet(r.getPreconditions());
-            boolean simplified = false;
-            for (Literal l : precons) {
-                removePrecondition(r, l);
-                if (!verify(team, true))
-                    addPrecondition(r, l);
-                else
-                    simplified = true;
-            }
-            if (simplified)
-                removeDeadRules(r);
-
-            if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule)) {
-                PropRule propRule = (PropRule) r;
-                liftRule(propRule, team);
-            }
-        }
-    }
-
-    private void liftRule(PropRule r, int team) {
-        if (DETAILED_DEBUG) System.out.println("Attempting to lift rule: " + r);
-        for (int prop : r.getSortedProps()) {
-            PredRule pr = r.liftAll(prop);
-            if (pr == null) // inconsistent
-                continue;
-            replaceRule(r, pr);
-            if (verify(team, true)) {
-                if (DETAILED_DEBUG) System.out.println("Successfully lifted rule to: " + pr);
-                return;
-            } else {
-                replaceRule(pr, r);
-            }
-        }
-    }
-
+    // TODO - this function doesn't account for inverted lists
     public void replaceRule(Rule oldRule, Rule newRule) {
-        int rgIdx = -1;
-        int rIdx = -1;
-        for (int i = 0; i < ruleGroups.size(); i++) {
-            RuleGroup rg = ruleGroups.get(i);
-            for (int j = 0; j < rg.rules.size(); j++) {
-                Rule r = rg.rules.get(j);
+        ArrayList<RuleEntity> rulesCopy = new ArrayList<>(ruleEntities);
+        for (int i = 0; i < rulesCopy.size(); i++) {
+            RuleEntity re = rulesCopy.get(i);
+            if (re instanceof RuleGroup) {
+                RuleGroup rg = (RuleGroup) re;
+                ArrayList<Rule> rgCopy = new ArrayList<>(rg.rules);
+                for (int j = 0; j < rgCopy.size(); j++) {
+                    Rule r = rgCopy.get(j);
+                    if (oldRule == r) {
+                        removeRule(oldRule, i, j);
+                        addRule(newRule, i, j);
+                        return;
+                    }
+                }
+            } else {
+                Rule r = (Rule) ruleEntities.get(i);
                 if (oldRule == r) {
-                    rgIdx = i;
-                    rIdx = j;
+                    removeRule(oldRule, i);
+                    addRule(newRule, i);
+                    return;
                 }
 
             }
         }
-        if (rgIdx == -1) {
-            if (DETAILED_DEBUG) System.out.println("Error: Failed to find oldRule when replacing");
-            return;
-        }
-        ruleGroups.get(rgIdx).rules.set(rIdx, newRule);
+    }
 
-        if (ruleList != null) {
-            ruleList.sortedRemove(oldRule);
-            ruleList.sortedAdd(newRule);
-        }
+    public boolean verify(int team) {
+        return verify(team, stronglyOptimal);
     }
 
     public boolean verify(int team, boolean complete) {
@@ -498,7 +420,9 @@ public class FFT {
     }
 
     public Move apply(MachineState ms) throws MoveDefinitionException {
-        for (RuleGroup ruleGroup : ruleGroups) {
+        /*
+        for (RuleEntity re : ruleEntities) {
+            Move move = re.apply(ms);
             for (Rule rule : ruleGroup.rules) {
                     Move move = rule.apply(ms);
                     if (move != null) {
@@ -506,6 +430,8 @@ public class FFT {
                     }
             }
         }
+
+         */
         return null;
     }
 

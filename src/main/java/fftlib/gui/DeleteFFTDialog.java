@@ -16,7 +16,7 @@ public class DeleteFFTDialog extends ConfirmDialog {
         Stage stage = (Stage) getScene().getWindow();
         stage.close();
         FFTManager.deleteCurrFFT();
-        FFTOverviewPane.update();
+        //FFTOverviewPane.update();
     }
 
 

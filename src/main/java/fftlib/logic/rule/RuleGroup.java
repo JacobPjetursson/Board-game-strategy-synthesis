@@ -1,10 +1,14 @@
 package fftlib.logic.rule;
 
+import fftlib.game.FFTMove;
+import fftlib.game.FFTNode;
 import misc.Config;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
-public class RuleGroup {
+public class RuleGroup implements RuleEntity{
     public ArrayList<Rule> rules;
     public String name;
     public boolean locked; // Are we allowed to modify this rulegroup (e.g. minimize?)
@@ -57,5 +61,37 @@ public class RuleGroup {
             precons += (Config.ENABLE_GGP) ? r.sentences.size() : r.getPreconditions().size();
         }
         return precons;
+    }
+
+    @Override
+    public HashSet<FFTMove> apply(FFTNode n) {
+        return apply(n, false);
+    }
+
+    public HashSet<FFTMove> apply(FFTNode n, boolean safe) {
+        HashSet<FFTMove> moves = new HashSet<>();
+        for (Rule r : rules) {
+            moves = r.apply(n);
+            if (!moves.isEmpty()) {
+                if (safe)
+                    n.setAppliedRule(r);
+                return moves;
+            }
+        }
+        return moves;
+    }
+
+    @Override
+    public RuleEntity clone() {
+        return new RuleGroup(this);
+    }
+
+    @Override
+    public int size() {
+        return rules.size();
+    }
+
+    public boolean isLocked() {
+        return locked;
     }
 }

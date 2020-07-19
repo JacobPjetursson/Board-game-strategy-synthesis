@@ -1,5 +1,6 @@
 package fftlib.GGPAutogen;
 
+import fftlib.FFTAutoGen;
 import fftlib.logic.FFT;
 import fftlib.logic.rule.PropRule;
 import fftlib.logic.rule.RuleGroup;
@@ -47,8 +48,6 @@ public class Runner {
     private static void setup() throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
         long timeStart = System.currentTimeMillis();
         fft = new FFT("Synthesis");
-        rg = new RuleGroup("Synthesis");
-        fft.addRuleGroup(rg);
         MachineState initialState = GGPManager.getInitialState();
         Solver solver = new Solver();
         lookupTable = solver.solve();
@@ -74,7 +73,7 @@ public class Runner {
 
         System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
-        int it = fft.minimize(AUTOGEN_TEAM, Config.MINIMIZE_PRECONDITIONS);
+        int it = FFTAutoGen.minimize();
         System.out.println("Amount of rules after " + it + " minimize iterations: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions after " + it + " minimize iterations: " + fft.getAmountOfPreconditions());
 

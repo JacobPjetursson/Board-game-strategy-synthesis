@@ -8,10 +8,7 @@ import fftlib.game.FFTSolution;
 import fftlib.logic.FFT;
 import fftlib.logic.literal.Literal;
 import fftlib.logic.literal.LiteralSet;
-import fftlib.logic.rule.RuleGroup;
-import fftlib.logic.rule.Rule;
-import fftlib.logic.rule.PredRule;
-import fftlib.logic.rule.PropRule;
+import fftlib.logic.rule.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -88,6 +85,7 @@ public class FFTAutoGen {
         else
             makeRules();
 
+        fft.setStronglyOptimal(true);
         System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
         double autoGenTimeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
@@ -108,10 +106,7 @@ public class FFTAutoGen {
         //copy = new FFT(fft);
         timeStart = System.currentTimeMillis();
         if (MINIMIZE) {
-            if (USE_MINIMIZE_OPT)
-                i = minimizeOpt();
-            else
-                i = fft.minimize(AUTOGEN_TEAM, MINIMIZE_PRECONDITIONS);
+            i = minimize();
 
         }
         double timeSpentMinimize = (System.currentTimeMillis() - timeStart) / 1000.0;
@@ -155,7 +150,6 @@ public class FFTAutoGen {
     private static void setup(boolean existingFFT) {
         if (!existingFFT) {
             fft = new FFT("Synthesis");
-            fft.addRuleGroup(new RuleGroup("Synthesis"));
         }
 
         // Set reachable parents for all states
@@ -174,7 +168,7 @@ public class FFTAutoGen {
         Set<FFTNode> skippedNodes = new HashSet<>();
         while (applicableStates.size() > 0) {
             System.out.println("Remaining applicable states: " + applicableStates.size() +
-                    ". Current amount of rules: " + fft.size());
+                    ". Current amount of rules: " + fft.getAmountOfRules());
             Iterator<FFTNode> it = applicableStates.values().iterator();
             FFTNode node = it.next();
 
@@ -304,10 +298,14 @@ public class FFTAutoGen {
     }
 
     private static void safeRun(Rule r, Set<Rule> affectedRules, boolean lastRule) {
+        if (!USE_OPTIMIZED_GENERATION)
+            return;
         verifyRule(r, affectedRules, lastRule, true);
     }
 
     private static void safeRun(Rule r, boolean lastRule) {
+        if (!USE_OPTIMIZED_GENERATION)
+            return;
         verifyRule(r, null, lastRule, true);
     }
 
@@ -390,6 +388,8 @@ public class FFTAutoGen {
 
     private static boolean verifyRule(Rule r, Set<Rule> affectedRules, boolean lastRule, boolean safe) {
         //System.out.println("Verifying rule");
+        if (!USE_OPTIMIZED_GENERATION && !safe)
+            return fft.verify(AUTOGEN_TEAM);
         if (safe && DETAILED_DEBUG)
             System.out.println("DOING SAFE RUN");
         Map<FFTNode, Set<FFTMove>> appliedMap = new ConcurrentHashMap<>();
@@ -661,7 +661,7 @@ public class FFTAutoGen {
     }
 
     // assumes that the FFT is strongly optimal
-    private static int minimizeOpt() {
+    public static int minimize() {
         int ruleSize, precSize;
         int i = 0;
         do {
@@ -670,74 +670,63 @@ public class FFTAutoGen {
             i++;
             System.out.println("Minimizing, iteration no. " + i);
             minimizeRules();
-            if (!MINIMIZE_RULE_BY_RULE && MINIMIZE_PRECONDITIONS) {
-                if (DETAILED_DEBUG) System.out.println("Minimizing preconditions");
-                minimizePreconditions();
-            }
         } while (ruleSize != fft.getAmountOfRules() || precSize != fft.getAmountOfPreconditions());
         return i;
     }
 
     private static void minimizeRules() {
-        for (RuleGroup rg : fft.ruleGroups) {
-            if (rg.locked) // don't minimize if rulegroup is locked
-                continue;
-            ArrayList<Rule> rulesCopy = new ArrayList<>(rg.rules);
-            int removed = 0;
-            for (int i = 0; i < rulesCopy.size(); i++) {
-                if ((i - removed) >= rg.rules.size()) // remaining rules are removed
-                    break;
-
-                if (DETAILED_DEBUG || NAIVE_RULE_GENERATION)
-                    System.out.println("Remaining amount of rules: " + fft.size());
-                Rule r = rulesCopy.get(i);
-                if (!rg.rules.get(i - removed).equals(r)) {// some later rules deleted
-                    removed++;
-                    continue;
-                }
-                //System.out.println("Attempting to remove rule: " + r);
-                fft.removeRule(r, i - removed);
-                removed++;
-                if (!verifyRule(r, false)) {
-                    //System.out.println("failed to remove: " + r);
-                    //System.out.println();
-                    removed--;
-                    fft.addRule(r, i - removed);
-                    if (MINIMIZE_RULE_BY_RULE && MINIMIZE_PRECONDITIONS) {
-                        //System.out.println("Attempting to simplify rule: " + r);
-                        simplifyRule(r, false);
-                        //System.out.println();
-                        if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule)) {
-                            PropRule propRule = (PropRule) r;
-                            liftRule(propRule, false);
-                        }
-                    }
-                }
-                //System.out.println("Doing safe run");
-                safeRun(r, false);
-
-/*
-                if (!fft.verify(AUTOGEN_TEAM, true)) {
-                    System.out.println("Failed to verify the FFT!");
-                    System.out.println("failing point: " + fft.failingPoint);
-                    System.out.println("Exiting");
-                    System.exit(1);
-                }
-                System.out.println();
- */
-            }
-        }
+        minimizeList(fft.ruleEntities, -1);
     }
 
-    private static void minimizePreconditions() {
-        for (RuleGroup rg : fft.ruleGroups) {
-            if (rg.locked) continue; // don't minimize if rg is locked
-            for(Rule r : rg.rules) {
-                //System.out.println("Simplifying rule");
-                simplifyRule(r, false);
-                safeRun(r, false);
+    private static void minimizeList(ArrayList<? extends RuleEntity> rules, int listIdx) {
+        // if listIdx is -1, then we have the original list, otherwise a rulegroup
+        ArrayList<RuleEntity> rulesCopy = new ArrayList<>(rules);
+        int entityIdx, rgIdx;
+        int removed = 0;
+        for (int i = 0; i < rulesCopy.size(); i++) {
+            RuleEntity re = rulesCopy.get(i);
+            if (re.isLocked())
+                continue;
+            if ((i - removed) >= rules.size()) // remaining rules are removed
+                break;
+            if (DETAILED_DEBUG || NAIVE_RULE_GENERATION)
+                System.out.println("Remaining amount of rules: " + fft.getAmountOfRules());
+            if (!rules.get(i - removed).equals(re)) {// some later rules deleted
+                removed++;
+                continue;
+            }
+
+            if (listIdx == -1) {
+                entityIdx = i - removed;
+                rgIdx = -1;
+            } else {
+                entityIdx = listIdx;
+                rgIdx = i - removed;
+            }
+
+            if (re instanceof RuleGroup) {
+                RuleGroup rg = (RuleGroup) re;
+                minimizeList(rg.rules, entityIdx);
+            } else {
+                Rule r = (Rule) re;
+                fft.removeRule(r, entityIdx, rgIdx);
+
+                removed++;
+                if (!verifyRule(r, false)) {
+                    removed--;
+                    fft.addRule(r, entityIdx, rgIdx);
+                    if (MINIMIZE_PRECONDITIONS)
+                        simplifyRule(r, false);
+                    if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule)) {
+                        PropRule propRule = (PropRule) r;
+                        liftRule(propRule, false);
+                    }
+                    //System.out.println("Doing safe run");
+                    safeRun(r, false);
+                }
             }
         }
+
     }
 
     private static void findReachableStates() {

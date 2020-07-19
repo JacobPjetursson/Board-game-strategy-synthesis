@@ -24,9 +24,8 @@ public class Globals {
     public static final int HEIGHT = 700;
 
     // GAMES
-    public static final int KULIBRAT = 0;
-    public static final int TICTACTOE = 1;
-    public static final int SIM = 2;
+    public static final int TICTACTOE = 0;
+    public static final int SIM = 1;
 
     // AUTOGEN RULE ORDERINGS
     public static final int RULE_ORDERING_TERMINAL_FIRST = 0;

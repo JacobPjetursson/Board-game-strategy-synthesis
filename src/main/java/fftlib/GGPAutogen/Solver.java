@@ -1,7 +1,5 @@
 package fftlib.GGPAutogen;
 
-import kulibrat.game.Node;
-import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
@@ -9,10 +7,8 @@ import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
-import java.util.*;
-
-import static misc.Globals.PLAYER1;
-import static misc.Globals.PLAYER2;
+import java.util.HashMap;
+import java.util.List;
 
 
 public class Solver {
@@ -89,11 +85,6 @@ public class Solver {
             return mapping;
         }
 
-        boolean debug = false;
-        if (debug) {
-            testGameRules(ms);
-        }
-
 
         for (Move move : GGPManager.getLegalMoves(ms, stateRole)) {
             MachineState child = GGPManager.getNextState(ms, move);
@@ -143,101 +134,5 @@ public class Solver {
         }
         return 0;
     }
-
-    private boolean testGameRules(MachineState ms) throws MoveDefinitionException {
-        Node testState = new Node();
-        for (GdlSentence sentence : ms.getContents()) {
-            String s = sentence.toString();
-            if (s.contains("pieces_left redplayer ")) {
-                String pieces_red = Character.toString(s.split("pieces_left redplayer ")[1].charAt(0));
-                testState.setUnplaced(PLAYER1, Integer.parseInt(pieces_red));
-            }
-            else if (s.contains("pieces_left blackplayer ")) {
-                String pieces_black = Character.toString(s.split("pieces_left blackplayer ")[1].charAt(0));
-                testState.setUnplaced(PLAYER2, Integer.parseInt(pieces_black));
-            }
-            else if (s.contains("score redplayer ")) {
-                String score_red = Character.toString(s.split("score redplayer ")[1].charAt(0));
-                testState.setScore(PLAYER1, Integer.parseInt(score_red));
-            }
-            else if (s.contains("score blackplayer ")) {
-                String score_black = Character.toString(s.split("score blackplayer ")[1].charAt(0));
-                testState.setScore(PLAYER1, Integer.parseInt(score_black));
-            }
-            else if (s.contains("control redplayer")) {
-                testState.setTurn(PLAYER1);
-            }
-            else if (s.contains("control blackplayer")) {
-                testState.setTurn(PLAYER2);
-            }
-            else if (s.contains("cell ")) {
-                String cellInfo = s.split("cell ")[1];
-                String col = Character.toString(cellInfo.charAt(0));
-                String row = Character.toString(cellInfo.charAt(2));
-                String team = cellInfo.substring(4);
-                if (team.startsWith("red"))
-                    testState.setBoardEntry(Integer.parseInt(row) - 1, Integer.parseInt(col) - 1, PLAYER1);
-                else if (team.startsWith("black"))
-                    testState.setBoardEntry(Integer.parseInt(row) - 1, Integer.parseInt(col) - 1, PLAYER2);
-            }
-        }
-        List<Move> legalMoves = GGPManager.getLegalMoves(ms, GGPManager.getRole(ms));
-        Set<kulibrat.game.Move> kMoves = new HashSet<>();
-        for (Move move : legalMoves) {
-            String m = move.toString();
-            if (m.contains("add black ")) {
-                String add = m.split("add black ")[1];
-                int newCol = Integer.parseInt(Character.toString(add.charAt(0))) - 1;
-                int newRow = Integer.parseInt(Character.toString(add.charAt(2))) - 1;
-                kMoves.add(new kulibrat.game.Move(-1, -1, newRow, newCol, PLAYER2));
-            }
-            else if (m.contains("add red ")) {
-                String add = m.split("add red ")[1];
-                int newCol = Integer.parseInt(Character.toString(add.charAt(0))) - 1;
-                int newRow = Integer.parseInt(Character.toString(add.charAt(2))) - 1;
-                kMoves.add(new kulibrat.game.Move(-1, -1, newRow, newCol, PLAYER1));
-            }
-            else if (m.contains("remove black ")) {
-                String remove = m.split("remove black ")[1];
-                int oldCol = Integer.parseInt(Character.toString(remove.charAt(0))) - 1;
-                int oldRow = Integer.parseInt(Character.toString(remove.charAt(2))) - 1;
-                kMoves.add(new kulibrat.game.Move(oldRow, oldCol, -1, -1, PLAYER2));
-            }
-            else if (m.contains("remove red ")) {
-                String remove = m.split("remove red ")[1];
-                int oldCol = Integer.parseInt(Character.toString(remove.charAt(0))) - 1;
-                int oldRow = Integer.parseInt(Character.toString(remove.charAt(2))) - 1;
-                kMoves.add(new kulibrat.game.Move(oldRow, oldCol, -1, -1, PLAYER1));
-            }
-            else if (m.contains("move black ")) {
-                String moveStr = m.split("move black ")[1];
-                int oldCol = Integer.parseInt(Character.toString(moveStr.charAt(0))) - 1;
-                int oldRow = Integer.parseInt(Character.toString(moveStr.charAt(2))) - 1;
-                int newCol = Integer.parseInt(Character.toString(moveStr.charAt(4))) - 1;
-                int newRow = Integer.parseInt(Character.toString(moveStr.charAt(6))) - 1;
-                kMoves.add(new kulibrat.game.Move(oldRow, oldCol, newRow, newCol, PLAYER2));
-            } else if (m.contains("move red ")) {
-                String moveStr = m.split("move red ")[1];
-                int oldCol = Integer.parseInt(Character.toString(moveStr.charAt(0))) - 1;
-                int oldRow = Integer.parseInt(Character.toString(moveStr.charAt(2))) - 1;
-                int newCol = Integer.parseInt(Character.toString(moveStr.charAt(4))) - 1;
-                int newRow = Integer.parseInt(Character.toString(moveStr.charAt(6))) - 1;
-                kMoves.add(new kulibrat.game.Move(oldRow, oldCol, newRow, newCol, PLAYER1));
-            }
-        }
-        HashSet<kulibrat.game.Move> moveSet = new HashSet<>(testState.getLegalMoves());
-        if (maxSentences != ms.getContents().size() || !kMoves.equals(moveSet)) {
-            System.out.println("ERROR");
-            System.out.println("MACHINESTATE: " + ms);
-            System.out.println("TESTSTATE: " + testState);
-            System.out.println("TESTSTATE PIECES LEFT: " + testState.getUnplaced(PLAYER1) + " " + testState.getUnplaced(PLAYER2));
-            System.out.println("MACHINESTATE MOVES: " + legalMoves);
-            System.out.println("Translated moves: " + kMoves);
-            System.out.println("legal moves: " + testState.getLegalMoves());
-            System.out.println();
-        }
-        return true;
-    }
-
 }
 

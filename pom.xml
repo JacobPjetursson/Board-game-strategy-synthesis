@@ -163,12 +163,6 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>kulibrat</id>
-                        <configuration>
-                            <mainClass>kulibrat.main.Main</mainClass>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>sim</id>
                         <configuration>
                             <mainClass>sim.Main</mainClass>

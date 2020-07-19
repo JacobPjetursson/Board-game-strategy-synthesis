@@ -2,7 +2,7 @@ package tictactoe.gui;
 
 import fftlib.logic.FFT;
 import fftlib.game.FFTNode;
-import fftlib.gui.ShowFFTPane;
+import fftlib.gui.FFTPane;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
@@ -20,7 +20,7 @@ public class InfoPane extends AnchorPane {
     private Label skippedTurn;
     private Label turnNumberLabel;
     private Label turnLabel;
-    private ShowFFTPane showFFTPane;
+    private FFTPane FFTPane;
 
     private FFTNode node;
     private FFT currFFT;
@@ -52,18 +52,18 @@ public class InfoPane extends AnchorPane {
         AnchorPane.setRightAnchor(infoBox, 10.0);
 
         // ShowFFTPane
-        showFFTPane = new ShowFFTPane();
-        showFFTPane.setAlignment(Pos.CENTER);
-        AnchorPane.setTopAnchor(showFFTPane, 0.0);
-        AnchorPane.setBottomAnchor(showFFTPane, 0.0);
-        getChildren().add(showFFTPane);
+        FFTPane = new FFTPane();
+        FFTPane.setAlignment(Pos.CENTER);
+        AnchorPane.setTopAnchor(FFTPane, 0.0);
+        AnchorPane.setBottomAnchor(FFTPane, 0.0);
+        getChildren().add(FFTPane);
     }
 
     public void update(Controller cont) {
         currFFT = cont.getCurrFFT();
         node = cont.getNode();
         if (mode != AI_VS_AI)
-            showFFTPane.update(currFFT, node);
+            FFTPane.update(currFFT, node);
         turnNumberLabel.setText("Turns Played: " + cont.getTurnNo());
         skippedTurn.setText("");
         if (node.getTurn() == PLAYER1)

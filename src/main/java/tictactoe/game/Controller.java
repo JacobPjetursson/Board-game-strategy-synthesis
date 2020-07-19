@@ -98,8 +98,8 @@ public class Controller {
 
         FFTInteractivePane fftInteractivePane = new FFTInteractivePane();
         new Scene(fftInteractivePane, Globals.WIDTH, Globals.HEIGHT);
-        FFTOverviewPane fftOverviewPane = new FFTOverviewPane(primaryStage, fftInteractivePane);
-        new Scene(fftOverviewPane, Globals.WIDTH, Globals.HEIGHT);
+        //FFTOverviewPane fftOverviewPane = new FFTOverviewPane(primaryStage, fftInteractivePane);
+        //new Scene(fftOverviewPane, Globals.WIDTH, Globals.HEIGHT);
         
         playArea.update(this);
 
@@ -135,9 +135,9 @@ public class Controller {
 
         // FFTManager LISTENERS
         // edit fftManager button
-        editFFTButton.setOnAction(event -> {
-            primaryStage.setScene(fftOverviewPane.getScene());
-        });
+        //editFFTButton.setOnAction(event -> {
+        //    primaryStage.setScene(fftOverviewPane.getScene());
+        //});
 
         // add rule to FFT button
         addRuleFFTButton.setOnAction(event -> {
