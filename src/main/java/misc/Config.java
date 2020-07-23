@@ -34,7 +34,7 @@ public class Config {
     public static boolean USE_INVERTED_LIST_NODES_OPT;
     public static boolean USE_INVERTED_LIST_RULES_OPT;
     public static boolean USE_APPLY_OPT;
-    public static boolean USE_OPTIMIZED_GENERATION;
+    public static boolean USE_OPTIMIZED_MINIMIZE;
     public static boolean USE_RULE_ORDERING;
     public static boolean USE_LIFTING;
     public static boolean MINIMIZE;
@@ -137,7 +137,7 @@ public class Config {
         USE_INVERTED_LIST_NODES_OPT = Boolean.parseBoolean(global.getProperty("use_inverted_list_nodes_opt"));
         USE_INVERTED_LIST_RULES_OPT = Boolean.parseBoolean(global.getProperty("use_inverted_list_rules_opt"));
         USE_APPLY_OPT = Boolean.parseBoolean(global.getProperty("use_apply_opt"));
-        USE_OPTIMIZED_GENERATION = Boolean.parseBoolean(global.getProperty("use_optimized_generation"));
+        USE_OPTIMIZED_MINIMIZE = Boolean.parseBoolean(global.getProperty("use_optimized_minimize"));
 
         // TIC TAC TOE
         String rules = tictactoe.getProperty("rules");
@@ -202,7 +202,7 @@ public class Config {
         System.out.printf("%-40.50s %-40.50s\n", "Minimize:", MINIMIZE);
         if (MINIMIZE) {
             System.out.printf("%-40.50s %-40.50s\n", "Minimize preconditions:", MINIMIZE_PRECONDITIONS);
-            System.out.printf("%-40.50s %-40.50s\n", "Use optimized generation:", USE_OPTIMIZED_GENERATION);
+            System.out.printf("%-40.50s %-40.50s\n", "Use optimized minimize:", USE_OPTIMIZED_MINIMIZE);
 
         }
         System.out.printf("%-40.50s %-40.50s\n", "Use rule ordering:", USE_RULE_ORDERING);

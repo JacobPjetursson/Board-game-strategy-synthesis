@@ -1,8 +1,8 @@
 package tictactoe.gui;
 
-import fftlib.logic.FFT;
 import fftlib.game.FFTNode;
 import fftlib.gui.FFTPane;
+import fftlib.logic.FFT;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
@@ -63,7 +63,7 @@ public class InfoPane extends AnchorPane {
         currFFT = cont.getCurrFFT();
         node = cont.getNode();
         if (mode != AI_VS_AI)
-            FFTPane.update(currFFT, node);
+            FFTPane.update(node);
         turnNumberLabel.setText("Turns Played: " + cont.getTurnNo());
         skippedTurn.setText("");
         if (node.getTurn() == PLAYER1)

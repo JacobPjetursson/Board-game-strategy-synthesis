@@ -35,8 +35,8 @@ public class PropRule extends Rule {
     }
 
     public PropRule(LiteralSet precons, Action action) {
-        this.action = action;
-        this.preconditions = precons;
+        this.action = new Action(action);
+        this.preconditions = new LiteralSet(precons);
         setAllPreconditions();
         removeActionPrecons();
         if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
@@ -53,6 +53,8 @@ public class PropRule extends Rule {
         this.preconditions = new LiteralSet();
         this.allPreconditions = new LiteralSet();
         this.action = new Action();
+        if (SYMMETRY_DETECTION)
+            this.symmetryRules = new HashSet<>();
     }
 
     public PropRule(Set<GdlSentence> sentences) {
@@ -215,7 +217,7 @@ public class PropRule extends Rule {
         FFTMove m = match(this, lSet);
         if (m != null)
             moves.add(m);
-        if (/*m != null || */!SYMMETRY_DETECTION) {
+        if (!SYMMETRY_DETECTION) {
             return moves;
         }
 

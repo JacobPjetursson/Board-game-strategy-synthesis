@@ -1,12 +1,25 @@
 package fftlib.game;
 
+import fftlib.FFTManager;
 import fftlib.logic.rule.Action;
 
-public interface FFTMove {
+public abstract class FFTMove {
 
-    int getTeam();
+    public int team;
 
-    void setTeam(int team);
+    public int getTeam() {
+        return team;
+    }
 
-    Action convert();
+    void setTeam(int team) {
+        this.team = team;
+    }
+
+    public Action convert() {
+        return FFTManager.moveToAction.apply(this);
+    }
+
+    public abstract FFTMove clone();
+
+
 }

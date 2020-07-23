@@ -27,9 +27,6 @@ public class NavPane extends VBox {
     private Button restartButton;
     private Button menuButton;
     private Button editFFTButton;
-    private Button addRuleFFTButton;
-    private HBox automaticFFTBox;
-    private CheckBox automaticFFT;
     private VBox FFTWidgets;
     private VBox AIWidgets;
     private CheckBox helpHuman;
@@ -72,19 +69,8 @@ public class NavPane extends VBox {
         editFFTButton = new Button("Edit FFT");
         buttons.add(editFFTButton);
 
-        addRuleFFTButton = new Button("Add state to FFT");
-        buttons.add(addRuleFFTButton);
 
-        automaticFFT = new CheckBox();
-        automaticFFT.setSelected(true);
-        automaticFFT.setPrefSize(20, 20);
-        Label automaticLabel = new Label("Automatic FFT");
-        automaticLabel.setFont(Font.font("Verdana", 20));
-        automaticLabel.setPadding(new Insets(0, 0, 0, 5));
-        automaticFFTBox = new HBox(automaticFFT, automaticLabel);
-        automaticFFTBox.setAlignment(Pos.CENTER);
-
-        FFTWidgets = new VBox(editFFTButton, addRuleFFTButton, automaticFFTBox);
+        FFTWidgets = new VBox(editFFTButton);
         FFTWidgets.setSpacing(10);
         FFTWidgets.setAlignment(Pos.CENTER);
 
@@ -139,14 +125,6 @@ public class NavPane extends VBox {
 
     public Button getEditFFTButton() {
         return editFFTButton;
-    }
-
-    public Button getAddRuleFFTButton() {
-        return addRuleFFTButton;
-    }
-
-    public CheckBox getAutomaticFFTBox() {
-        return automaticFFT;
     }
 
     public Button getStartAIButton() {

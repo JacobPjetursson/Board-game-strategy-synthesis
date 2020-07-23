@@ -1,5 +1,6 @@
 package mens_morris;
 
+import fftlib.FFTAutoGen;
 import fftlib.FFTManager;
 import fftlib.game.FFTSolver;
 
@@ -11,6 +12,6 @@ public class Main {
         FFTManager.initialize(specs);
         FFTSolver.solveGame();
 
-        FFTManager.autogenFFT();
+        FFTAutoGen.synthesize();
     }
 }

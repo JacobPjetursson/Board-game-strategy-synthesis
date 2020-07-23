@@ -57,7 +57,6 @@ public class Demo {
         fft.append(notdead);
 
         System.out.println(fft);
-        fft.initializeRuleList();
         fft.removeDeadRules(test1);
         System.out.println(fft);
 

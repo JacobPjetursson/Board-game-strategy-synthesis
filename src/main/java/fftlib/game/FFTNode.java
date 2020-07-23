@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public abstract class FFTNode {
-    public int turn;
-    public boolean reachable = true;
-    public HashSet<FFTNode> reachableParents;
+    protected int turn;
+    private boolean reachable = true;
+    private HashSet<FFTNode> reachableParents;
 
     // cached literalSet
     private LiteralSet converted;
@@ -91,4 +91,6 @@ public abstract class FFTNode {
     public static FFTNode getInitialNode() {
         return FFTManager.initialFFTNode;
     }
+
+    public abstract FFTNode clone();
 }

@@ -1,14 +1,12 @@
 package tictactoe.game;
 
-import fftlib.logic.rule.Action;
-import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 
 import java.util.Objects;
 
 import static misc.Globals.PLAYER_NONE;
 
-public class Move implements FFTMove {
+public class Move extends FFTMove {
     public int row;
     public int col;
     public int team;
@@ -49,17 +47,9 @@ public class Move implements FFTMove {
         return Objects.hash(row, col, team);
     }
 
-    public int getTeam() {
-        return team;
-    }
-
     @Override
-    public Action convert() {
-        return FFTManager.moveToAction.apply(this);
-    }
-
-    public void setTeam(int team) {
-        this.team = team;
+    public FFTMove clone() {
+        return new Move(this);
     }
 
     public String toString() {

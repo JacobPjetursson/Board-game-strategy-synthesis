@@ -11,7 +11,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 public abstract class InputPane extends VBox {
-    TextField tf;
+    TextField textField;
 
     public InputPane(String labelText) {
         setAlignment(Pos.CENTER);
@@ -21,8 +21,8 @@ public abstract class InputPane extends VBox {
         label.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
         label.setAlignment(Pos.CENTER);
 
-        tf = new TextField();
-        tf.setMaxWidth(200);
+        textField = new TextField();
+        textField.setMaxWidth(200);
 
         Button saveBtn = new Button("Save");
         saveBtn.setAlignment(Pos.CENTER);
@@ -37,7 +37,7 @@ public abstract class InputPane extends VBox {
             stage.close();
         });
 
-        getChildren().addAll(label, tf, saveBtn, cancelBtn);
+        getChildren().addAll(label, textField, saveBtn, cancelBtn);
     }
 
     abstract void setSaveBtnMouseClicked();

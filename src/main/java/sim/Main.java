@@ -1,10 +1,8 @@
 package sim;
 
 import fftlib.*;
-import fftlib.game.FFTSolver;
 
 
-import static misc.Config.AUTOGEN_TEAM;
 import static misc.Globals.*;
 
 public class Main {
@@ -14,9 +12,7 @@ public class Main {
         Node n = new Node();
         GameSpecifics specs = new GameSpecifics();
         FFTManager.initialize(specs);
-        FFTSolver.solveGame();
-
-        FFTManager.autogenFFT();
+        FFTAutoGen.synthesize();
 
     }
 }

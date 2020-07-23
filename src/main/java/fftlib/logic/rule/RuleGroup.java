@@ -1,97 +1,106 @@
 package fftlib.logic.rule;
 
-import fftlib.game.FFTMove;
-import fftlib.game.FFTNode;
-import misc.Config;
+import fftlib.logic.FFT;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-public class RuleGroup implements RuleEntity{
-    public ArrayList<Rule> rules;
+public class RuleGroup {
+    public int startIdx, endIdx;
     public String name;
-    public boolean locked; // Are we allowed to modify this rulegroup (e.g. minimize?)
+    private boolean locked; // Are we allowed to modify this rulegroup (e.g. minimize?)
+    private FFT fft;
 
-    public RuleGroup(String name) {
-        rules = new ArrayList<>();
+    public RuleGroup(FFT f, String name) {
+        startIdx = -1;
+        endIdx = -1;
         this.name = name;
+        this.fft = f;
     }
 
-    public RuleGroup(String name, boolean locked) {
-        rules = new ArrayList<>();
-        this.name = name;
-        this.locked = locked;
-    }
+    public RuleGroup(FFT f, String name, int startIdx, int endIdx) {
+        this(f, name);
+        this.startIdx = startIdx;
+        this.endIdx = endIdx;
 
-    public RuleGroup(String name, ArrayList<Rule> rules) {
-        this.name = name;
-        this.rules = rules;
     }
 
     public RuleGroup(RuleGroup copy) {
-        this.rules = new ArrayList<>();
-        for (Rule r : copy.rules)
-            rules.add(r.clone());
         this.name = copy.name;
+        this.fft = copy.fft;
         this.locked = copy.locked;
-    }
-
-    public void addRule(Rule r) {
-        rules.add(r);
+        this.startIdx = copy.startIdx;
+        this.endIdx = copy.endIdx;
     }
 
     public void setLocked(boolean locked) {
         this.locked = locked;
+        for (Rule r : fft.getRules().subList(startIdx, endIdx))
+            r.setLocked(locked);
     }
 
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Printing rules in rg:\n");
-        sb.append("-----------------\n");
-        for (Rule r : rules)
-            sb.append(r).append("\n");
-        sb.append("-----------------\n");
-        return sb.toString();
-    }
-
-    public int getAmountOfPreconditions() {
-        int precons = 0;
-        for (Rule r : rules) {
-            precons += (Config.ENABLE_GGP) ? r.sentences.size() : r.getPreconditions().size();
+    public void updateIntervals(boolean removing, int idx) {
+        int changedIdx = (removing) ? -1 : 1;
+        if (idx < startIdx) { // before this rulegroup
+            startIdx += changedIdx;
+            endIdx += changedIdx;
+        } else if (idx < endIdx) { // in this rulegroup
+            endIdx += changedIdx;
         }
-        return precons;
     }
 
-    @Override
-    public HashSet<FFTMove> apply(FFTNode n) {
-        return apply(n, false);
-    }
-
-    public HashSet<FFTMove> apply(FFTNode n, boolean safe) {
-        HashSet<FFTMove> moves = new HashSet<>();
-        for (Rule r : rules) {
-            moves = r.apply(n);
-            if (!moves.isEmpty()) {
-                if (safe)
-                    n.setAppliedRule(r);
-                return moves;
-            }
+    // used for moving rules
+    public void updateIntervals(int oldIdx, int newIdx) {
+        // moved from below this rulegroup into this rulegroup
+        if (below(oldIdx) && inside(newIdx)) {
+            startIdx--;
         }
-        return moves;
+        // moved from above this rulegroup into this rulegroup
+        else if (above(oldIdx) && inside(newIdx)) {
+            endIdx++;
+        }
+        // moved from this rulegroup to below this rulegroup
+        if (inside(oldIdx) && below(newIdx)) {
+            startIdx++;
+        }
+        // moved from this rulegroup to above this rulegroup
+        if (inside(oldIdx) && above(newIdx)) {
+            endIdx--;
+        }
+        // moved from below to above this rulegroup
+        else if (below(oldIdx) && above(newIdx)) {
+            startIdx--;
+            endIdx--;
+        }
+        // moved from above to below this rulegroup
+        else if (above(oldIdx) && below(newIdx)) {
+            startIdx++;
+            endIdx++;
+        }
     }
 
-    @Override
-    public RuleEntity clone() {
+    private boolean below(int idx) {
+        return (idx < startIdx);
+    }
+
+    private boolean above(int idx) {
+        return idx >= endIdx;
+    }
+
+    private boolean inside(int idx) {
+        return idx >= startIdx && idx < endIdx;
+    }
+
+    public RuleGroup clone() {
         return new RuleGroup(this);
     }
 
-    @Override
     public int size() {
-        return rules.size();
+        return endIdx - startIdx;
     }
 
     public boolean isLocked() {
         return locked;
+    }
+
+    public String toString() {
+        return "[" + name + "," + startIdx + "," + endIdx + "]" + ", LOCKED: " + locked;
     }
 }

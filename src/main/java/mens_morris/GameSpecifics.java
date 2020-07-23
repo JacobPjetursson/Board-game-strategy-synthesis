@@ -7,7 +7,7 @@ import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 import fftlib.logic.literal.LiteralSet;
 import fftlib.gui.FFTFailNode;
-import fftlib.gui.InteractiveFFTNode;
+import fftlib.gui.FFTRuleEditPane;
 import fftlib.logic.rule.Action;
 import fftlib.logic.literal.Literal;
 import fftlib.logic.literal.PropLiteral;
@@ -161,7 +161,7 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public InteractiveFFTNode getInteractiveNode() {
+    public FFTRuleEditPane getInteractiveNode() {
         return null;
     }
 

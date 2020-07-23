@@ -10,10 +10,10 @@ import fftlib.game.FFTNode;
 import fftlib.game.FFTNodeAndMove;
 import fftlib.game.FFTSolution;
 import fftlib.logic.literal.Literal;
-import fftlib.logic.literal.LiteralSet;
-import fftlib.logic.rule.*;
+import fftlib.logic.rule.PropRule;
+import fftlib.logic.rule.Rule;
+import fftlib.logic.rule.RuleGroup;
 import misc.Config;
-import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
@@ -31,18 +31,17 @@ import static misc.Globals.*;
 
 
 public class FFT {
-    public String name;
-    // used for a visual representation and for locking (preventing) a group of rules of being minimized
-    public ArrayList<RuleEntity> ruleEntities;
+    private String name;
+    // used for a simple representation of the rules
+    private ArrayList<Rule> rules;
+    private ArrayList<RuleGroup> ruleGroups;
+    // used for a simple list of rules in correct order ,which is handy when minimizing
     // used for the efficient computation of looking up rules that apply
-    // rulelist is only initialized after autogeneration, to avoid a bunch of unnecessary sorts
     private RuleList ruleList;
-    private final InvertedList invertedList = new InvertedList(false);
+    private InvertedList invertedList;
 
 
-    public FFTNodeAndMove failingPoint = null;
-
-    private boolean stronglyOptimal;
+    private FFTNodeAndMove failingPoint = null;
 
     // For concurrency purposes
     private static ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
@@ -52,70 +51,66 @@ public class FFT {
 
     public FFT(String name) {
         this.name = name;
-        ruleEntities = new ArrayList<>();
+        rules = new ArrayList<>();
+        ruleGroups = new ArrayList<>();
+        ruleList = new RuleList();
+        invertedList = new InvertedList(false);
     }
 
     public FFT(FFT duplicate) {
         this.name = duplicate.name;
-        ruleEntities = new ArrayList<>();
-        for (RuleEntity re : duplicate.ruleEntities) {
-            ruleEntities.add(re.clone());
+        if (duplicate.failingPoint != null)
+            this.failingPoint = new FFTNodeAndMove(duplicate.failingPoint);
+
+        rules = new ArrayList<>();
+        for (Rule r : duplicate.rules) {
+            rules.add(r.clone());
         }
-        this.failingPoint = duplicate.failingPoint;
-        if (ruleList != null)
-            this.ruleList = new RuleList(duplicate.ruleList);
-    }
 
-    public void setStronglyOptimal(boolean stronglyOptimal) {
-        this.stronglyOptimal = stronglyOptimal;
-    }
+        ruleGroups = new ArrayList<>();
+        for (RuleGroup rg : duplicate.ruleGroups)
+            ruleGroups.add(new RuleGroup(this, rg.name, rg.startIdx, rg.endIdx));
 
-    public boolean isStronglyOptimal() {
-        return stronglyOptimal;
-    }
-
-    public void initializeRuleList() {
         ruleList = new RuleList();
-        for (Rule r : getRules())
-            ruleList.add(r); // can't be replaced by addAll since add() has been overridden
-        ruleList.sort();
+        for (Rule r : duplicate.ruleList)
+            ruleList.add(r.clone());
+
+        invertedList = new InvertedList(false);
+        for (Set<PropRule> set : duplicate.invertedList.ruleList) {
+            Set<PropRule> newSet = new HashSet<>();
+            for (PropRule r : set)
+                newSet.add(new PropRule(r));
+            invertedList.ruleList.add(newSet);
+        }
     }
 
     public int getAmountOfRules() {
-        int size = 0;
-        for (RuleEntity re : ruleEntities)
-            size += re.size();
-        return size;
+        return rules.size();
     }
 
     public ArrayList<Rule> getRules() {
-        ArrayList<Rule> rules = new ArrayList<>();
-        for (RuleEntity re : ruleEntities) {
-            if (re instanceof  Rule) {
-                rules.add((Rule)re);
-
-            }
-            else {
-                RuleGroup rg = (RuleGroup) re;
-                rules.addAll(rg.rules);
-            }
-        }
         return rules;
     }
 
-    public RuleList getRuleList() {
-        return ruleList;
+    public void addRuleGroup(RuleGroup ruleGroup) {
+        ruleGroups.add(ruleGroup);
     }
 
-    public void addRuleGroup(RuleGroup ruleGroup) {
-        ruleEntities.add(ruleGroup);
+    public void removeRuleGroup(RuleGroup rg, boolean deep) {
+        // if shallow remove, only remove rulegroup (name and interval)
+        // if deep remove, remove all rules in rulegroup
+        if (deep) {
+            ArrayList<Rule> rulesCopy = new ArrayList<>(rules);
+            rules.removeAll(rulesCopy.subList(rg.startIdx, rg.endIdx));
+        }
+        ruleGroups.remove(rg);
     }
 
     public void append(Rule r) {
         r.setRuleIndex(getAmountOfRules());
-        ruleEntities.add(r);
+        rules.add(r);
         // add to sorted list of rules if initialized
-        if (USE_APPLY_OPT && ruleList != null)
+        if (USE_APPLY_OPT)
             ruleList.sortedAdd(r);
         else if (USE_INVERTED_LIST_RULES_OPT) {
             // only works when no predicate rules and no symmetry
@@ -125,12 +120,12 @@ public class FFT {
     }
 
     public void removePrecondition(Rule r, Literal l) {
-        if (USE_APPLY_OPT && ruleList != null) {
+        if (USE_APPLY_OPT) {
             ruleList.sortedRemove(r);
             r.removePrecondition(l);
             ruleList.sortedAdd(r);
         } else if (USE_INVERTED_LIST_RULES_OPT) {
-            // no predicate rules or symmetry
+            // no predicate rules or symmetry allowed (yet)
             PropRule propRule = (PropRule) r;
             invertedList.remove(propRule);
             propRule.removePrecondition(l);
@@ -141,7 +136,7 @@ public class FFT {
     }
 
     public void addPrecondition(Rule r, Literal l) {
-        if (ruleList != null && USE_APPLY_OPT) {
+        if (USE_APPLY_OPT) {
             ruleList.sortedRemove(r);
             r.addPrecondition(l);
             ruleList.sortedAdd(r);
@@ -155,45 +150,52 @@ public class FFT {
         }
     }
 
-    public void removeRule(Rule r, int entityIdx) {
-        removeRule(r, entityIdx, -1);
-    }
-
     // faster since we don't have to search for rule
-    public void removeRule(Rule r, int entityIdx, int rgIdx) {
-        if (rgIdx == -1)
-            ruleEntities.remove(entityIdx);
-        else {
-            RuleGroup rg = (RuleGroup) ruleEntities.get(entityIdx);
-            rg.rules.remove(rgIdx);
-        }
+    public void removeRule(int idx) {
+        Rule r = rules.get(idx);
+        rules.remove(idx);
 
-        if (USE_APPLY_OPT && ruleList != null)
+        if (USE_APPLY_OPT)
             ruleList.sortedRemove(r);
         else if (USE_INVERTED_LIST_RULES_OPT) {
             PropRule propRule = (PropRule) r;
             invertedList.remove(propRule);
         }
+        updateRuleGroups(true, idx);
     }
 
-    public void addRule(Rule r, int index) {
-        addRule(r, index, -1);
-    }
 
-    public void addRule(Rule r, int entIdx, int rgIdx) {
-        if (rgIdx == -1) {
-            ruleEntities.add(entIdx, r);
-        } else {
-            RuleGroup rg = (RuleGroup) ruleEntities.get(entIdx);
-            rg.rules.add(rgIdx, r);
-        }
+    public void addRule(Rule r, int idx) {
+        rules.add(idx, r);
 
-        if (USE_APPLY_OPT && ruleList != null)
+        if (USE_APPLY_OPT)
             ruleList.sortedAdd(r);
         else if (USE_INVERTED_LIST_RULES_OPT) {
             PropRule propRule = (PropRule) r;
             invertedList.add(propRule);
         }
+        updateRuleGroups(false, idx);
+    }
+
+    public void moveRule(int oldIdx, int newIdx) {
+        Rule r = rules.get(oldIdx);
+        // remove
+        rules.remove(oldIdx);
+        if (USE_APPLY_OPT)
+            ruleList.sortedRemove(r);
+        else if (USE_INVERTED_LIST_RULES_OPT) {
+            PropRule propRule = (PropRule) r;
+            invertedList.remove(propRule);
+        }
+        // add
+        rules.add(newIdx, r);
+        if (USE_APPLY_OPT)
+            ruleList.sortedAdd(r);
+        else if (USE_INVERTED_LIST_RULES_OPT) {
+            PropRule propRule = (PropRule) r;
+            invertedList.add(propRule);
+        }
+        updateRuleGroups(oldIdx, newIdx);
     }
 
     public boolean isValid(int team) {
@@ -210,39 +212,80 @@ public class FFT {
 
     public int getAmountOfPreconditions() {
         int precSize = 0;
-        for (RuleEntity re : ruleEntities)
-            precSize += re.getAmountOfPreconditions();
+        for (Rule r : rules)
+            precSize += r.getAmountOfPreconditions();
         return precSize;
     }
 
+    public int size() {
+        return getAmountOfRules();
+    }
+
+    public ArrayList<RuleGroup> getRuleGroups() {
+        return ruleGroups;
+    }
+
+    public FFTNodeAndMove getFailingPoint() {
+        return failingPoint;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String newName) {
+        this.name = newName;
+    }
+
     public Rule getLastRule() {
-        RuleEntity re = ruleEntities.get(ruleEntities.size()-1);
-        if (re instanceof Rule)
-            return (Rule) re;
-        RuleGroup rg = (RuleGroup) re;
-        return rg.rules.get(rg.size()-1);
+        return rules.get(rules.size()-1);
+    }
+
+    // This function updates the indices at every rulegroup (relevant when minimizing or otherwise changing the FFT)
+    private void updateRuleGroups(boolean removing, int idx) {
+        for (RuleGroup rg : ruleGroups) {
+            rg.updateIntervals(removing, idx);
+        }
+    }
+
+    private void updateRuleGroups(int oldIdx, int newIdx) {
+        for (RuleGroup rg : ruleGroups) {
+            rg.updateIntervals(oldIdx, newIdx);
+        }
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (RuleEntity re : ruleEntities) {
-            sb.append(re).append("\n");
-        }
+        for (Rule r : rules)
+            sb.append(r).append("\n");
         return sb.toString();
+    }
+
+    // used for visualization
+    public Rule getAppliedRule(FFTNode node) {
+        for (Rule r : getRules()) {
+            if (!r.apply(node).isEmpty()) {
+                return r;
+            }
+        }
+        return null;
     }
 
     public HashSet<FFTMove> apply_slow(FFTNode node, boolean safe) {
         HashSet<FFTMove> moves = new HashSet<>();
-        for (RuleEntity re : ruleEntities) {
-            moves = re.apply(node, safe);
-            if (!moves.isEmpty())
+        for (Rule r : rules) {
+            moves = r.apply(node);
+            if (!moves.isEmpty()) {
+                if (safe)
+                    node.setAppliedRule(r);
                 return moves;
+            }
         }
         return moves;
     }
 
     public HashSet<FFTMove> apply(FFTNode node, boolean safe) {
-        if (USE_APPLY_OPT && ruleList != null)
+        if (USE_APPLY_OPT)
             return ruleList.apply(node, safe);
         if (USE_INVERTED_LIST_RULES_OPT)
             return invertedList.apply(node, safe);
@@ -258,30 +301,15 @@ public class FFT {
     // Alternative: We can use r.apply(r') to determine the same thing.
     // Perhaps we can even use the invertedList/ruleList stuff
     public void removeDeadRules(Rule rule) {
-        ArrayList<RuleEntity> rulesCopy = new ArrayList<>(ruleEntities);
-        int removedEnts = 0;
-        for (int entIdx = 0; entIdx < rulesCopy.size(); entIdx++) {
-            RuleEntity re = rulesCopy.get(entIdx);
-            if (re instanceof RuleGroup) {
-                RuleGroup rg = (RuleGroup) re;
-                ArrayList<Rule> ruleGroupCopy = new ArrayList<>(rg.rules);
-                int removedRgs = 0;
-                for (int rgIdx = 0; rgIdx < ruleGroupCopy.size(); rgIdx++) {
-                    Rule r = ruleGroupCopy.get(rgIdx);
-                    if (isDead(rule, r)) {
-                        removeRule(r, entIdx - removedEnts, rgIdx - removedRgs);
-                        removedRgs++;
-                    }
-                }
+        ArrayList<Rule> rulesCopy = new ArrayList<>(rules);
+        int removed = 0;
+        for (int i = 0; i < rulesCopy.size(); i++) {
+            Rule r = rulesCopy.get(i);
+            if (isDead(rule, r)) {
+                removeRule(i - removed);
+                removed++;
             }
-            else {
-                Rule r = (Rule) re;
-                if (isDead(rule, r)) {
 
-                    removeRule(r, entIdx - removedEnts);
-                    removedEnts++;
-                }
-            }
         }
     }
 
@@ -293,36 +321,16 @@ public class FFT {
         return dead;
     }
 
-    // TODO - this function doesn't account for inverted lists
     public void replaceRule(Rule oldRule, Rule newRule) {
-        ArrayList<RuleEntity> rulesCopy = new ArrayList<>(ruleEntities);
+        ArrayList<Rule> rulesCopy = new ArrayList<>(rules);
         for (int i = 0; i < rulesCopy.size(); i++) {
-            RuleEntity re = rulesCopy.get(i);
-            if (re instanceof RuleGroup) {
-                RuleGroup rg = (RuleGroup) re;
-                ArrayList<Rule> rgCopy = new ArrayList<>(rg.rules);
-                for (int j = 0; j < rgCopy.size(); j++) {
-                    Rule r = rgCopy.get(j);
-                    if (oldRule == r) {
-                        removeRule(oldRule, i, j);
-                        addRule(newRule, i, j);
-                        return;
-                    }
-                }
-            } else {
-                Rule r = (Rule) ruleEntities.get(i);
-                if (oldRule == r) {
-                    removeRule(oldRule, i);
-                    addRule(newRule, i);
-                    return;
-                }
-
+            Rule r = rulesCopy.get(i);
+            if (oldRule == r) {
+                removeRule(i);
+                addRule(newRule, i);
+                return;
             }
         }
-    }
-
-    public boolean verify(int team) {
-        return verify(team, stronglyOptimal);
     }
 
     public boolean verify(int team, boolean complete) {
@@ -371,14 +379,14 @@ public class FFT {
                                 frontier.add(nextNode);
                             }
                         } else if (complete) {
-                            failingPoint = new FFTNodeAndMove(node, m, true);
+                            failingPoint = new FFTNodeAndMove(node.clone(), m.clone(), true);
                             return false;
                         }
                     }
                 } else {
                     for (FFTMove m : moves) {
                         if (!optimalMoves.contains(m)) {
-                            failingPoint = new FFTNodeAndMove(node, m, false);
+                            failingPoint = new FFTNodeAndMove(node.clone(), m.clone(), false);
                             return false;
                         }
                         FFTNode nextNode = node.getNextNode(m);
@@ -474,7 +482,7 @@ public class FFT {
                         if (optimalMoves.contains(m)) {
                             addTask(node.getNextNode(m));
                         } else if (complete) {
-                            failingPoint = new FFTNodeAndMove(node, m, true);
+                            failingPoint = new FFTNodeAndMove(node.clone(), m.clone(), true);
                             failed = true;
                             return false;
                         }
@@ -482,7 +490,7 @@ public class FFT {
                 } else {
                     for (FFTMove m : moves) {
                         if (!optimalMoves.contains(m)) {
-                            failingPoint = new FFTNodeAndMove(node, m, false);
+                            failingPoint = new FFTNodeAndMove(node.clone(), m.clone(), false);
                             failed = true;
                             return false;
                         }

@@ -133,7 +133,7 @@ public class Runner {
     private static void makeRules() {
         while (!states.isEmpty()) {
 
-            System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + rg.rules.size());
+            System.out.println("Remaining states: " + states.size() + ". Current amount of rules: " + fft.getRules().size());
             MachineState state = states.iterator().next();
             PropRule r = addRule(state);
             states.remove(state);
@@ -162,7 +162,7 @@ public class Runner {
         Move bestMove = mapping.getMove();
 
         PropRule r = new PropRule(minSet, bestMove);
-        rg.rules.add(r);
+        fft.getRules().add(r);
 
         // DEBUG
         if (DETAILED_DEBUG) {

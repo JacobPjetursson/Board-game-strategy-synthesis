@@ -1,7 +1,7 @@
 package tictactoe.main;
 
+import fftlib.FFTAutoGen;
 import fftlib.FFTManager;
-import fftlib.game.FFTSolver;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -20,8 +20,7 @@ public class Main extends Application {
         else {
             GameSpecifics specs = new GameSpecifics();
             FFTManager.initialize(specs);
-            FFTSolver.solveGame();
-            FFTManager.autogenFFT();
+            FFTAutoGen.synthesize();
         }
     }
 

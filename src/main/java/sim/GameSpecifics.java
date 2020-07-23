@@ -4,7 +4,7 @@ import fftlib.auxiliary.Position;
 import fftlib.auxiliary.Transform;
 import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
-import fftlib.gui.InteractiveFFTNode;
+import fftlib.gui.FFTRuleEditPane;
 import fftlib.logic.literal.Literal;
 import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.literal.PropLiteral;
@@ -119,7 +119,7 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public InteractiveFFTNode getInteractiveNode() {
+    public FFTRuleEditPane getInteractiveNode() {
         return null;
     }
 

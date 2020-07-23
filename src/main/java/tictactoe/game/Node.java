@@ -100,6 +100,11 @@ public class Node extends FFTNode {
         return move;
     }
 
+    @Override
+    public FFTNode clone() {
+        return new Node(this);
+    }
+
     public void setMove(Move move) {
         this.move = move;
     }

@@ -8,9 +8,8 @@ import java.util.Objects;
 
 
 
-public class Move implements FFTMove {
+public class Move extends FFTMove {
 
-    public int team;
     public int oldRow, oldCol, newRow, newCol;
 
     public Move (int oldRow, int oldCol, int newRow, int newCol, int team) {
@@ -21,19 +20,12 @@ public class Move implements FFTMove {
         this.oldCol = oldCol;
     }
 
-    @Override
-    public int getTeam() {
-        return team;
-    }
-
-    @Override
-    public Action convert() {
-        return FFTManager.moveToAction.apply(this);
-    }
-
-    @Override
-    public void setTeam(int team) {
-        this.team = team;
+    public Move(Move duplicate) {
+        this.team = duplicate.team;
+        this.newRow = duplicate.newRow;
+        this.newCol = duplicate.newCol;
+        this.oldRow = duplicate.oldRow;
+        this.oldCol = duplicate.oldCol;
     }
 
     @Override
@@ -56,5 +48,10 @@ public class Move implements FFTMove {
     public String toString() {
         return String.format("(OLDROW: %s, OLDCOL: %s, NEWROW: %s, NEWCOL: %s, TEAM: %s)",
                 oldRow, oldCol, newRow, newCol, team);
+    }
+
+    @Override
+    public FFTMove clone() {
+        return new Move(this);
     }
 }

@@ -29,7 +29,7 @@ public class NodeMapping {
     public int getWinner() {
         if (score > 1000)
             return PLAYER1;
-        else if (score > 0)
+        else if (score >= 0)
             return PLAYER_NONE;
         else if (score < -1000)
             return PLAYER2;
@@ -37,6 +37,6 @@ public class NodeMapping {
     }
 
     public String toString() {
-        return move.toString() + " , SCORE: " + score;
+        return move.toString() + " , SCORE: " + score + " , WINNER: " + getWinner();
     }
 }

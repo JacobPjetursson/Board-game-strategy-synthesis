@@ -2,8 +2,8 @@ package fftlib.game;
 
 public class FFTNodeAndMove {
     public boolean random;
-    private FFTNode node;
-    private FFTMove move;
+    private final FFTNode node;
+    private final FFTMove move;
 
     // used for fft
     public FFTNodeAndMove(FFTNode node, FFTMove move, boolean random) {
@@ -16,6 +16,12 @@ public class FFTNodeAndMove {
         this.node = node;
         this.move = move;
         this.random = false;
+    }
+
+    public FFTNodeAndMove(FFTNodeAndMove nm) {
+        this.node = nm.node.clone();
+        this.move = nm.move.clone();
+        this.random = nm.random;
     }
 
     public FFTMove getMove() {

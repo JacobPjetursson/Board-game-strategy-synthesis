@@ -8,7 +8,7 @@ import fftlib.logic.literal.PropLiteral;
 import fftlib.logic.rule.Rule;
 import fftlib.logic.rule.PropRule;
 import fftlib.game.FFTNode;
-import fftlib.gui.InteractiveFFTNode;
+import fftlib.gui.FFTRuleEditPane;
 import tictactoe.game.Controller;
 import tictactoe.game.Move;
 import tictactoe.game.Node;
@@ -18,45 +18,31 @@ import tictactoe.gui.board.PlayBox.InteractivePlayBox;
 import static misc.Globals.*;
 import static tictactoe.gui.board.BoardTile.blueStr;
 
-public class InteractiveNode implements InteractiveFFTNode {
+public class RuleEditPane extends FFTRuleEditPane {
     private Controller cont;
-    private InteractivePlayBox pb;
-    private Rule rule;
-    private int perspective;
     private int tilesize;
-    private Move move;
-    private BoardTile actionTile;
+    InteractivePlayBox pb;
 
-    InteractiveNode(Controller cont) {
+    RuleEditPane(Controller cont) {
         this.cont = cont;
         this.rule = new PropRule();
         this.tilesize = 60;
-    }
-    @Override
-    public javafx.scene.Node getInteractiveNode(FFTNode fftNode) {
-        Node n = (Node) fftNode;
-        this.perspective = n.getTurn();
-        this.rule = getRuleFromState(n);
-
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
-        pb.update(n);
-        return pb;
+        this.node = pb;
     }
 
     @Override
-    public javafx.scene.Node getInteractiveNode(Rule r) {
+    public void update(Rule r) {
         this.rule = r.clone();
-        this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
-        this.move = (Move) r.getAction().convert();
-        actionTile = pb.getBoard().getTiles()[move.row][move.col];
-        actionTile.setAction(true);
+
+        //actionTile = pb.getBoard().getTiles()[move.row][move.col];
+        //actionTile.setAction(true);
 
         pb.update(r);
-
-        return pb;
     }
 
     public void setActionFromTile(BoardTile bt) {
+        /*
         for (int i = 1; i < 4; i++) {
             // todo
             Position pos = new Position(bt.getRow(), bt.getCol(), i);
@@ -71,13 +57,18 @@ public class InteractiveNode implements InteractiveFFTNode {
         this.move = new Move(bt.getRow(), bt.getCol(), perspective);
         this.rule.setAction(move.convert());
         pb.addHighlight(actionTile.getRow(), actionTile.getCol(), perspective, blueStr);
+
+         */
     }
 
     public void removeAction() {
+        /*
         actionTile.removeHighlight();
         rule.setAction(null);
         move = null;
         actionTile = null;
+
+         */
     }
 
     @Override
@@ -85,8 +76,8 @@ public class InteractiveNode implements InteractiveFFTNode {
         return rule;
     }
 
-    @Override
     public void setAction(Action a) {
+    /*
         this.rule.setAction(a);
         if (a == null)
             this.move = new Move();
@@ -95,17 +86,15 @@ public class InteractiveNode implements InteractiveFFTNode {
         actionTile = pb.getBoard().getTiles()[move.row][move.col];
         actionTile.setAction(true);
         pb.update(rule);
+     */
     }
-    private PropRule getRuleFromState(Node n) {
-        PropRule r = new PropRule();
-        r.setPreconditions(n.convert());
-        return r;
-    }
+
+
+    
     @Override
     public void clear() {
-        this.actionTile = null;
         this.rule = new PropRule();
-        this.move = null;
+        //pb.clear();
     }
 
     // TODO

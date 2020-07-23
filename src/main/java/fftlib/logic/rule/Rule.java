@@ -20,7 +20,7 @@ import java.util.Set;
 import static misc.Config.ENABLE_GGP_PARSER;
 import static misc.Config.SHOW_GUI;
 
-public abstract class Rule implements RuleEntity {
+public abstract class Rule {
 
 
     protected static final ArrayList<String> separators = new ArrayList<>(
@@ -37,6 +37,8 @@ public abstract class Rule implements RuleEntity {
 
     // index in FFT
     protected int ruleIndex = -1;
+
+    private boolean locked;
 
     public abstract void setRuleIndex(int index);
 
@@ -205,6 +207,10 @@ public abstract class Rule implements RuleEntity {
 
     public int getAmountOfPreconditions() {
         return preconditions.size();
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
 
     public boolean isLocked() {

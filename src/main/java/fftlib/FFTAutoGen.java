@@ -1,18 +1,18 @@
 package fftlib;
 
 import fftlib.auxiliary.NodeMap;
-import fftlib.game.FFTMove;
-import fftlib.game.FFTNode;
-import fftlib.game.FFTNodeAndMove;
-import fftlib.game.FFTSolution;
+import fftlib.game.*;
 import fftlib.logic.FFT;
 import fftlib.logic.literal.Literal;
 import fftlib.logic.literal.LiteralSet;
-import fftlib.logic.rule.*;
+import fftlib.logic.rule.PredRule;
+import fftlib.logic.rule.PropRule;
+import fftlib.logic.rule.Rule;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static fftlib.FFTManager.currFFT;
 import static misc.Config.*;
 import static misc.Globals.PLAYER1;
 
@@ -25,18 +25,21 @@ public class FFTAutoGen {
     // This is the set of states that the rules currently apply to (subset of reachable)
     private static NodeMap appliedStates;
 
-    private static FFT fft;
-
     private static FFT copy;
+
+    private static boolean minimizing;
 
     // used for checking whether lifting a rule applies to more states
     private static int groundedAppliedMapSize;
     private static int liftedAppliedMapSize;
 
-    public static FFT generateFFT(int team_) {
-        fft = new FFT("Synthesis");
-        AUTOGEN_TEAM = team_;
-        if (!fft.isValid(AUTOGEN_TEAM)) {
+    public static void synthesize() {
+        if (!FFTSolver.solved)
+            FFTSolver.solveGame();
+        if (currFFT == null)
+            currFFT = new FFT("Synthesis");
+
+        if (!currFFT.isValid(AUTOGEN_TEAM)) {
             System.err.println("Invalid fft");
             System.exit(1);
         }
@@ -45,10 +48,10 @@ public class FFTAutoGen {
             double avgRules = 0, avgPrecons = 0, avgTime = 0;
             for (int i = 0; i < BENCHMARK_NUMBER; i++) {
                 long timeStart = System.currentTimeMillis();
-                generate(false);
+                generate();
                 avgTime += (System.currentTimeMillis() - timeStart) / 1000.0;
-                avgRules += fft.getAmountOfRules();
-                avgPrecons += fft.getAmountOfPreconditions();
+                avgRules += currFFT.getAmountOfRules();
+                avgPrecons += currFFT.getAmountOfPreconditions();
             }
             avgTime /= BENCHMARK_NUMBER;
             avgRules /= BENCHMARK_NUMBER;
@@ -58,36 +61,24 @@ public class FFTAutoGen {
             System.out.println("Average no. of preconditions: " + avgPrecons);
         }
         else {
-            generate(false);
+            generate();
         }
-
-        return fft;
+        if (SAVE_FFT)
+            FFTManager.save();
     }
 
-    public static FFT generateFFT(int team_, FFT existingFFT) {
-        fft = existingFFT;
-        AUTOGEN_TEAM = team_;
-        if (!fft.isValid(AUTOGEN_TEAM)) {
-            System.err.println("Invalid fft");
-            System.exit(1);
-        }
-        generate(true);
-        return fft;
-    }
-
-    private static void generate(boolean existingFFT) {
+    private static void generate() {
         long timeStart = System.currentTimeMillis();
 
-        setup(existingFFT);
+        setup();
         System.out.println("Making rules");
         if (NAIVE_RULE_GENERATION)
             makeNaiveRules();
         else
             makeRules();
 
-        fft.setStronglyOptimal(true);
-        System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
-        System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
+        System.out.println("Amount of rules before minimizing: " + currFFT.getAmountOfRules());
+        System.out.println("Amount of preconditions before minimizing: " + currFFT.getAmountOfPreconditions());
         double autoGenTimeSpent = (System.currentTimeMillis() - timeStart) / 1000.0;
 
         /*
@@ -99,7 +90,7 @@ public class FFTAutoGen {
          */
 
         if (DETAILED_DEBUG) System.out.println("Rules before minimizing");
-        if (DETAILED_DEBUG) System.out.println(fft);
+        if (DETAILED_DEBUG) System.out.println(currFFT);
 
 
         int i = -1;
@@ -130,13 +121,13 @@ public class FFTAutoGen {
  */
 
         System.out.println("Final amount of rules after " + i +
-                " minimize iterations: " + fft.getAmountOfRules());
+                " minimize iterations: " + currFFT.getAmountOfRules());
         System.out.println("Final amount of preconditions after " + i +
-                " minimize iterations: " + fft.getAmountOfPreconditions());
+                " minimize iterations: " + currFFT.getAmountOfPreconditions());
         System.out.println("Time spent on Autogenerating: " + autoGenTimeSpent + " seconds");
         System.out.println("Time spent on minimizing: " + timeSpentMinimize + " seconds");
         System.out.println("Time spent in total: " + (timeSpentMinimize + autoGenTimeSpent) + " seconds");
-        System.out.println("Final rules: \n" + fft);
+        System.out.println("Final rules: \n" + currFFT);
 
         /*
         System.out.println("Set sizes after minimize:");
@@ -147,11 +138,7 @@ public class FFTAutoGen {
          */
     }
 
-    private static void setup(boolean existingFFT) {
-        if (!existingFFT) {
-            fft = new FFT("Synthesis");
-        }
-
+    private static void setup() {
         // Set reachable parents for all states
         if (!NAIVE_RULE_GENERATION)
             findReachableStates();
@@ -168,7 +155,7 @@ public class FFTAutoGen {
         Set<FFTNode> skippedNodes = new HashSet<>();
         while (applicableStates.size() > 0) {
             System.out.println("Remaining applicable states: " + applicableStates.size() +
-                    ". Current amount of rules: " + fft.getAmountOfRules());
+                    ". Current amount of rules: " + currFFT.getAmountOfRules());
             Iterator<FFTNode> it = applicableStates.values().iterator();
             FFTNode node = it.next();
 
@@ -196,9 +183,6 @@ public class FFTAutoGen {
             if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
             System.out.println();
         }
-        // initialize rule list
-        if (USE_APPLY_OPT)
-            fft.initializeRuleList();
     }
 
     private static void makeNaiveRules() {
@@ -229,25 +213,21 @@ public class FFTAutoGen {
             // if symmetry, only add rule if node is not covered
             // expand on all chosen moves, since symmetric rule can have several chosen moves
             if (SYMMETRY_DETECTION) {
-                Set<FFTMove> appliedMoves = fft.apply(node);
+                Set<FFTMove> appliedMoves = currFFT.apply(node);
                 if (appliedMoves.isEmpty()) {
                     PropRule r = PropRule.createRule(node, chosenMove);
                     //System.out.println("adding rule: " + r);
-                    fft.append(r);
+                    currFFT.append(r);
                     appliedMoves = r.apply(node);
                 }
                 //System.out.println("appliedMoves: " + appliedMoves);
                 for (FFTMove move : appliedMoves)
                     addNode(frontier, node, node.getNextNode(move));
             } else {
-                fft.append(PropRule.createRule(node, chosenMove));
+                currFFT.append(PropRule.createRule(node, chosenMove));
                 addNode(frontier, node, node.getNextNode(chosenMove));
             }
         }
-
-        // initialize rule list
-        if (USE_APPLY_OPT)
-            fft.initializeRuleList();
 
         System.out.println("Number of reachable states: " + reachableStates.size());
         System.out.println("Number of applied states: " + appliedStates.size());
@@ -258,7 +238,7 @@ public class FFTAutoGen {
         FFTMove bestMove = FFTSolution.queryNode(n).move;
 
         Rule r = new PropRule(stSet, bestMove.convert()); // rule from state-move pair
-        fft.append(r);
+        currFFT.append(r);
         // set of rules affected by deleing states when minimizing
         // if set to null then no rules will be added to set
         Set<Rule> affectedRules = null;
@@ -298,14 +278,10 @@ public class FFTAutoGen {
     }
 
     private static void safeRun(Rule r, Set<Rule> affectedRules, boolean lastRule) {
-        if (!USE_OPTIMIZED_GENERATION)
-            return;
         verifyRule(r, affectedRules, lastRule, true);
     }
 
     private static void safeRun(Rule r, boolean lastRule) {
-        if (!USE_OPTIMIZED_GENERATION)
-            return;
         verifyRule(r, null, lastRule, true);
     }
 
@@ -318,7 +294,7 @@ public class FFTAutoGen {
                 System.out.println("Rule already simplified");
                 continue;
             }
-            boolean lastRule = (fft.getLastRule() == r);
+            boolean lastRule = (currFFT.getLastRule() == r);
             Set<Rule> newAffectedRules = new HashSet<>();
             simplifyRule(r, lastRule);
             safeRun(r, newAffectedRules, lastRule);
@@ -348,10 +324,10 @@ public class FFTAutoGen {
         boolean simplified = false;
         for (Literal l : precons) {
             if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO REMOVE: " + l.getName());
-            fft.removePrecondition(r, l);
+            currFFT.removePrecondition(r, l);
             if (!verifyRule(r, lastRule)) {
                 if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.getName());
-                fft.addPrecondition(r, l);
+                currFFT.addPrecondition(r, l);
             } else {
                 simplified = true;
                 if (DETAILED_DEBUG) System.out.println("REMOVING PRECONDITION: " + l.getName());
@@ -359,7 +335,7 @@ public class FFTAutoGen {
             if (DETAILED_DEBUG) System.out.println("RULE IS NOW: " + r);
         }
         if (!lastRule && simplified)
-            fft.removeDeadRules(r);
+            currFFT.removeDeadRules(r);
     }
 
     private static void fillAppliedMap(
@@ -373,10 +349,10 @@ public class FFTAutoGen {
         if (!lastRule) { // replace value of all keys
             if (!SINGLE_THREAD) {
                 appliedMap.keySet().parallelStream().forEach(key ->
-                        appliedMap.replace(key, fft.apply(key, safe)));
+                        appliedMap.replace(key, currFFT.apply(key, safe)));
 
             } else {
-                appliedMap.replaceAll((k, v) -> fft.apply(k, safe));
+                appliedMap.replaceAll((k, v) -> currFFT.apply(k, safe));
             }
         }
 
@@ -388,8 +364,8 @@ public class FFTAutoGen {
 
     private static boolean verifyRule(Rule r, Set<Rule> affectedRules, boolean lastRule, boolean safe) {
         //System.out.println("Verifying rule");
-        if (!USE_OPTIMIZED_GENERATION && !safe)
-            return fft.verify(AUTOGEN_TEAM);
+        if (minimizing && !USE_OPTIMIZED_MINIMIZE)
+            return currFFT.verify(AUTOGEN_TEAM, true);
         if (safe && DETAILED_DEBUG)
             System.out.println("DOING SAFE RUN");
         Map<FFTNode, Set<FFTMove>> appliedMap = new ConcurrentHashMap<>();
@@ -584,7 +560,7 @@ public class FFTAutoGen {
             ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(child);
             //System.out.println("Optimal moves for child: " + child + " : " + optimalMoves);
             // find new move (if any)
-            Set<FFTMove> newMoves = fft.apply(child);
+            Set<FFTMove> newMoves = currFFT.apply(child);
             //System.out.println("newMoves: " + newMoves);
             if (newMoves.isEmpty()) {
                 if (safe) {
@@ -662,74 +638,57 @@ public class FFTAutoGen {
 
     // assumes that the FFT is strongly optimal
     public static int minimize() {
+        minimizing = true;
         int ruleSize, precSize;
         int i = 0;
         do {
-            ruleSize = fft.getAmountOfRules();
-            precSize = fft.getAmountOfPreconditions();
+            ruleSize = currFFT.getAmountOfRules();
+            precSize = currFFT.getAmountOfPreconditions();
             i++;
             System.out.println("Minimizing, iteration no. " + i);
             minimizeRules();
-        } while (ruleSize != fft.getAmountOfRules() || precSize != fft.getAmountOfPreconditions());
+        } while (ruleSize != currFFT.getAmountOfRules() || precSize != currFFT.getAmountOfPreconditions());
+        minimizing = false;
         return i;
     }
 
     private static void minimizeRules() {
-        minimizeList(fft.ruleEntities, -1);
-    }
-
-    private static void minimizeList(ArrayList<? extends RuleEntity> rules, int listIdx) {
-        // if listIdx is -1, then we have the original list, otherwise a rulegroup
-        ArrayList<RuleEntity> rulesCopy = new ArrayList<>(rules);
-        int entityIdx, rgIdx;
+        ArrayList<Rule> rulesCopy = new ArrayList<>(currFFT.getRules());
         int removed = 0;
         for (int i = 0; i < rulesCopy.size(); i++) {
-            RuleEntity re = rulesCopy.get(i);
-            if (re.isLocked())
+            Rule r = rulesCopy.get(i);
+            if (r.isLocked())
                 continue;
-            if ((i - removed) >= rules.size()) // remaining rules are removed
+            if ((i - removed) >= currFFT.getRules().size()) // remaining rules are removed
                 break;
             if (DETAILED_DEBUG || NAIVE_RULE_GENERATION)
-                System.out.println("Remaining amount of rules: " + fft.getAmountOfRules());
-            if (!rules.get(i - removed).equals(re)) {// some later rules deleted
+                System.out.println("Remaining amount of rules: " + currFFT.getAmountOfRules());
+            if (!currFFT.getRules().get(i - removed).equals(r)) { // some rules deleted
                 removed++;
                 continue;
             }
 
-            if (listIdx == -1) {
-                entityIdx = i - removed;
-                rgIdx = -1;
-            } else {
-                entityIdx = listIdx;
-                rgIdx = i - removed;
-            }
+            currFFT.removeRule(i - removed);
 
-            if (re instanceof RuleGroup) {
-                RuleGroup rg = (RuleGroup) re;
-                minimizeList(rg.rules, entityIdx);
-            } else {
-                Rule r = (Rule) re;
-                fft.removeRule(r, entityIdx, rgIdx);
-
-                removed++;
-                if (!verifyRule(r, false)) {
-                    removed--;
-                    fft.addRule(r, entityIdx, rgIdx);
-                    if (MINIMIZE_PRECONDITIONS)
-                        simplifyRule(r, false);
-                    if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule)) {
-                        PropRule propRule = (PropRule) r;
-                        liftRule(propRule, false);
-                    }
-                    //System.out.println("Doing safe run");
-                    safeRun(r, false);
+            removed++;
+            boolean verify = (USE_OPTIMIZED_MINIMIZE) ? verifyRule(r, false) : currFFT.verify(AUTOGEN_TEAM, true);
+            if (!verify) {
+                removed--;
+                currFFT.addRule(r, i - removed);
+                if (MINIMIZE_PRECONDITIONS)
+                    simplifyRule(r, false);
+                if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule)) {
+                    PropRule propRule = (PropRule) r;
+                    liftRule(propRule, false);
                 }
+                //System.out.println("Doing safe run");
+                if (USE_OPTIMIZED_MINIMIZE)
+                    safeRun(r, false);
             }
         }
-
     }
 
-    private static void findReachableStates() {
+    public static void findReachableStates() {
         int team = AUTOGEN_TEAM;
         FFTNode initialNode = FFTManager.initialFFTNode;
         LinkedList<FFTNode> frontier;
@@ -746,7 +705,7 @@ public class FFTAutoGen {
 
 
         reachableStates.put(initialNode, initialNode);
-        if (team == PLAYER1 && fft.apply(initialNode).isEmpty()) {
+        if (team == PLAYER1 && currFFT.apply(initialNode).isEmpty()) {
             applicableStates.put(initialNode);
         }
 
@@ -759,7 +718,7 @@ public class FFTAutoGen {
                     addNode(frontier, node, child);
                 continue;
             }
-            Set<FFTMove> chosenMoves = fft.apply(node);
+            Set<FFTMove> chosenMoves = currFFT.apply(node);
             if (!chosenMoves.isEmpty()) {
                 appliedStates.put(node);
                 for (FFTMove m : chosenMoves)
@@ -791,29 +750,18 @@ public class FFTAutoGen {
             PredRule pr = r.liftAll(prop);
             if (pr == null) // inconsistent
                 continue;
-            fft.replaceRule(r, pr);
+            currFFT.replaceRule(r, pr);
             if (DETAILED_DEBUG) System.out.println("VERIFYING LIFTED RULE: " + pr);
             // we do not want to lift if the lifted rule does not apply to more states
             if (verifyRule(pr, lastRule) && groundedAppliedMapSize != liftedAppliedMapSize) {
                 if (DETAILED_DEBUG) System.out.println("RULE SUCCESSFULLY LIFTED TO: " + pr);
                 return pr;
             } else {
-                fft.replaceRule(pr, r);
+                currFFT.replaceRule(pr, r);
             }
         }
         if (DETAILED_DEBUG) System.out.println("FAILED TO LIFT RULE");
         return r;
     }
-
-    public static Map<FFTNode, FFTNode> getReachableStates() {
-        return reachableStates;
-    }
-
-    public static NodeMap getAppliedStates() {
-        return appliedStates;
-    }
-
-
-
 }
 

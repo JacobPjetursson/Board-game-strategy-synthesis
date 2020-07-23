@@ -1,9 +1,7 @@
 package fftlib.gui;
 
 
-import fftlib.logic.FFT;
 import fftlib.logic.rule.Rule;
-import fftlib.logic.rule.RuleEntity;
 import fftlib.logic.rule.RuleGroup;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
@@ -20,17 +18,21 @@ import javafx.scene.text.TextAlignment;
 
 import java.util.HashSet;
 
+import static fftlib.FFTManager.currFFT;
+
 public class FFTPane extends VBox {
     Label title;
-    FFT fft;
     FFTNode node;
     private ListView<VBox> lw;
-    private static final double ROW_SIZE = 25.5;
+    private static final double RULE_SIZE = 25.5;
+    private static final double RULEGROUP_LABEL_SIZE = 32;
     private boolean ruleApplied;
+    private double size;
 
     public FFTPane() {
         setAlignment(Pos.CENTER);
-        title = new Label();
+
+        title = new Label(currFFT.getName());
         title.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
         title.setAlignment(Pos.CENTER);
         title.setTextAlignment(TextAlignment.CENTER);
@@ -39,62 +41,78 @@ public class FFTPane extends VBox {
         lw.setPickOnBounds(false);
         lw.setPrefHeight(500);
         lw.setPrefWidth(650);
-
-
         lw.setSelectionModel(new NoSelectionModel<>());
+
         setMargin(lw, new Insets(10.0));
 
         getChildren().addAll(title, lw);
     }
 
-    public void update(FFT fft, FFTNode node) {
-        this.fft = fft;
+    public void update(FFTNode node) {
         this.node = node;
-        title.setText(fft.name);
-        show();
+        refresh();
     }
 
-    public void show() {
-        ObservableList<VBox> ruleEntities = FXCollections.observableArrayList();
-        int index = 0;
-        boolean ruleApplied = false;
-        for (RuleEntity re : fft.ruleEntities) {
-            if (re instanceof RuleGroup) {
-                // Rule group
-                RuleGroup rg = (RuleGroup) re;
-                VBox rgVBox = new VBox(10);
-                rgVBox.setAlignment(Pos.CENTER_LEFT);
-                Label rgLabel = new Label(rg.name);
-                rgLabel.setFont(Font.font("Verdana", 18));
-                rgVBox.getChildren().add(rgLabel);
-                for (Rule r : rg.rules) {
-                    Label rLabel = getRuleLabel(r, index++);
-                    rgVBox.getChildren().add(rLabel);
+    public void refresh() {
+        title.setText(currFFT.getName());
+        ObservableList<VBox> rules = FXCollections.observableArrayList();
+        ruleApplied = false;
+
+        size = 0;
+        int i = 0;
+        while (i < currFFT.getRules().size()) {
+            // check if any rulegroup starts at index i
+            for (RuleGroup rg : currFFT.getRuleGroups()) {
+                if (i == rg.startIdx) {
+                    rules.add(getRuleGroupBox(rg));
+                    while (i < rg.endIdx && i < currFFT.getRules().size()) {
+                        Rule r = currFFT.getRules().get(i);
+                        rules.add(getRuleBox(r, i, true));
+                        i++;
+                    }
+                    break;
                 }
-                ruleEntities.add(rgVBox);
-            } else {
-                Rule r = (Rule) re;
-                VBox rVBox = new VBox(10);
-                Label rLabel = getRuleLabel(r, index++);
-                rVBox.getChildren().add(rLabel);
-                ruleEntities.add(rVBox);
+            }
+            if (i >= currFFT.getRules().size())
+                break;
+            Rule r = currFFT.getRules().get(i);
+            rules.add(getRuleBox(r, i, false));
+            i++;
+        }
+        // account for corner case where rulegroup is empty at end of rules
+        for (RuleGroup rg : currFFT.getRuleGroups()) {
+            if (rg.startIdx >= currFFT.size()) {
+                rules.add(getRuleGroupBox(rg));
             }
         }
-        lw.setItems(ruleEntities);
-        int rows = 0;
-        for (int i = 0; i < ruleEntities.size(); i++)
-            rows += ruleEntities.get(0).getChildren().size() + 1;
-        lw.setPrefHeight(rows * ROW_SIZE);
+
+        lw.setItems(rules);
+        lw.setPrefHeight(size);
     }
 
-    public Label getRuleLabel(Rule r, int index) {
-        Label rLabel = new Label((index) + ": " + r);
-        rLabel.setFont(Font.font("Verdana", 14));
+    public VBox getRuleBox(Rule r, int index, boolean inline) {
+        VBox ruleBox = new VBox(10);
+        String pfx = (inline) ? "   " : "";
+        Label rLabel = new Label(pfx + (index+1) + ": " + r);
+        rLabel.setFont(Font.font("Verdana", 13));
         HashSet<FFTMove> moves = r.apply(node);
         if (!ruleApplied && !moves.isEmpty()) {
             rLabel.setTextFill(Color.BLUE);
             ruleApplied = true;
         }
-        return rLabel;
+        ruleBox.getChildren().add(rLabel);
+        size += RULE_SIZE;
+        return ruleBox;
+    }
+
+    public VBox getRuleGroupBox(RuleGroup rg) {
+        Label rgLabel = new Label(rg.name);
+        rgLabel.setFont(Font.font("Verdana", 16));
+        rgLabel.setTextFill(Color.GRAY);
+
+        VBox rgLabelBox = new VBox(10);
+        rgLabelBox.getChildren().add(rgLabel);
+        size += RULEGROUP_LABEL_SIZE;
+        return rgLabelBox;
     }
 }

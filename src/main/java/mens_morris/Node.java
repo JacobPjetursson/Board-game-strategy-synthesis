@@ -173,6 +173,11 @@ public class Node extends FFTNode {
         return move;
     }
 
+    @Override
+    public FFTNode clone() {
+        return new Node(this);
+    }
+
     public void changeTurn() {
         if (turn == PLAYER1)
             turn = PLAYER2;

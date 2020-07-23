@@ -140,6 +140,11 @@ public class Node extends FFTNode {
         return move;
     }
 
+    @Override
+    public FFTNode clone() {
+        return new Node(this);
+    }
+
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append("TURN:").append(turn).append("; ");

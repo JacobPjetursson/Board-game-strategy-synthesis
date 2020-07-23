@@ -1,14 +1,12 @@
 package sim;
 
-import fftlib.logic.rule.Action;
-import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 
 import java.util.Objects;
 
 import static misc.Globals.PLAYER1;
 
-public class Move implements FFTMove {
+public class Move extends FFTMove {
 
     public int team;
     public Line line;
@@ -18,19 +16,14 @@ public class Move implements FFTMove {
         this.line = line;
     }
 
-    @Override
-    public int getTeam() {
-        return team;
+    public Move (Move dup) {
+        this.team = dup.team;
+        this.line = new Line(dup.line);
     }
 
     @Override
-    public Action convert() {
-        return FFTManager.moveToAction.apply(this);
-    }
-
-    @Override
-    public void setTeam(int team) {
-        this.team = team;
+    public FFTMove clone() {
+        return new Move(this);
     }
 
     @Override

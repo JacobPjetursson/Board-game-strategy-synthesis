@@ -1,13 +1,12 @@
 package misc.demos;
 
+import fftlib.FFTAutoGen;
 import fftlib.FFTManager;
-import fftlib.game.FFTSolver;
-import fftlib.logic.*;
+import fftlib.logic.rule.Rule;
 import tictactoe.FFT.GameSpecifics;
 
 
-import static misc.Config.AUTOGEN_TEAM;
-import static misc.Config.MINIMIZE_PRECONDITIONS;
+import java.util.ArrayList;
 
 public class Demo {
 
@@ -15,8 +14,9 @@ public class Demo {
         GameSpecifics gs = new GameSpecifics();
         FFTManager.initialize(gs);
 
-        System.out.println("Solving game");
-        FFTSolver.solveGame();
+        FFTAutoGen.synthesize();
+        ArrayList<Rule> rules = FFTManager.currFFT.getRules();
+
         //FFTManager.loadFFTs();
         //System.out.println("fft size: " + FFTManager.currFFT.size());
 

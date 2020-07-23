@@ -4,8 +4,7 @@ package fftlib.game;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static misc.Globals.PLAYER1;
-import static misc.Globals.PLAYER2;
+import static misc.Globals.*;
 
 public class FFTSolution{
 
@@ -76,25 +75,25 @@ public class FFTSolution{
     }
 
     // Outputs a string which is the amount of turns to a terminal node, based on a score from the database entry
-    public static String turnsToTerminal(int turn, FFTNode n) {
+    public static String turnsToTerminal(int team, FFTNode n) {
         if (queryNode(n) == null)
             return "0";
-        int score = queryNode(n).getScore();
+        NodeMapping nm = queryNode(n);
 
-        if (score > 0 && score < 1000) { // Draw
-            return "" + score;
+        if (nm.getWinner() == PLAYER_NONE) { // Draw
+            return "" + nm.getScore();
         }
-        else if (score > 0) {
-            if (turn == PLAYER2) {
-                return "" + (-2000 + score);
+        else if (nm.getWinner() == PLAYER1) {
+            if (team == PLAYER1) {
+                return "" + (2000 - nm.getScore());
             } else {
-                return "" + (2000 - score);
+                return "" + (-2000 + nm.getScore());
             }
         } else {
-            if (turn == PLAYER2) {
-                return "" + (2000 + score);
+            if (team == PLAYER2) {
+                return "" + (2000 + nm.getScore());
             } else {
-                return "" + (-2000 - score);
+                return "" + (-2000 - nm.getScore());
             }
         }
     }

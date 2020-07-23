@@ -15,8 +15,8 @@ import java.util.*;
 import static misc.Config.SINGLE_THREAD;
 
 public class InvertedList {
-    private ArrayList<Set<FFTNode>> nodeList = new ArrayList<>();
-    private ArrayList<Set<PropRule>> ruleList = new ArrayList<>();
+    public ArrayList<Set<FFTNode>> nodeList = new ArrayList<>();
+    public ArrayList<Set<PropRule>> ruleList = new ArrayList<>();
 
     public InvertedList(boolean storeNodes) {
         // add extra map to account for atom 1-indexing

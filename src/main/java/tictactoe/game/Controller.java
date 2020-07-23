@@ -1,12 +1,13 @@
 package tictactoe.game;
 
+import fftlib.FFTAutoGen;
+import fftlib.game.FFTMove;
 import fftlib.game.FFTSolution;
+import fftlib.game.FFTSolver;
 import fftlib.game.NodeMapping;
 import fftlib.logic.FFT;
 import fftlib.FFTManager;
-import fftlib.game.FFTSolver;
-import fftlib.gui.FFTInteractivePane;
-import fftlib.gui.FFTOverviewPane;
+import fftlib.gui.FFTEditPane;
 import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.scene.Scene;
@@ -17,7 +18,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import misc.Globals;
 import tictactoe.FFT.GameSpecifics;
-import tictactoe.FFT.InteractiveNode;
+import tictactoe.FFT.RuleEditPane;
 import tictactoe.ai.AI;
 import tictactoe.ai.FFTFollower;
 import tictactoe.ai.PerfectPlayer;
@@ -25,6 +26,7 @@ import tictactoe.gui.*;
 import tictactoe.gui.board.BoardTile;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 
 import static misc.Globals.*;
@@ -42,8 +44,6 @@ public class Controller {
     private Button stopAIButton;
     private Button editFFTButton;
     private Button reviewButton;
-    private Button addRuleFFTButton;
-    private CheckBox automaticFFTBox;
     private Thread aiThread;
     private NavPane navPane;
     private Node node;
@@ -51,7 +51,6 @@ public class Controller {
     private boolean endGamePopup;
     private ArrayList<NodeAndMove> previousStates;
     private Window window;
-    private boolean fftAutomaticMode;
     private boolean fftUserInteraction;
     private GameSpecifics gameSpecifics;
     private CheckBox helpHumanBox;
@@ -70,11 +69,11 @@ public class Controller {
 
         gameSpecifics = new GameSpecifics(this);
         FFTManager.initialize(gameSpecifics);
-        FFTSolver.solveGame();
         FFTManager.loadFFTs();
+        FFTSolver.solveGame();
         // Autogenerate
         if (ENABLE_AUTOGEN)
-            FFTManager.autogenFFT();
+            FFTAutoGen.synthesize();
 
 
         PlayPane playPane = new PlayPane(this);
@@ -91,15 +90,11 @@ public class Controller {
         startAIButton = navPane.getStartAIButton();
         stopAIButton = navPane.getStopAIButton();
         editFFTButton = navPane.getEditFFTButton();
-        addRuleFFTButton = navPane.getAddRuleFFTButton();
         reviewButton = navPane.getReviewButton();
-        automaticFFTBox = navPane.getAutomaticFFTBox();
         helpHumanBox = navPane.getHelpHumanBox();
 
-        FFTInteractivePane fftInteractivePane = new FFTInteractivePane();
-        new Scene(fftInteractivePane, Globals.WIDTH, Globals.HEIGHT);
-        //FFTOverviewPane fftOverviewPane = new FFTOverviewPane(primaryStage, fftInteractivePane);
-        //new Scene(fftOverviewPane, Globals.WIDTH, Globals.HEIGHT);
+        FFTEditPane fftEditPane = new FFTEditPane();
+        new Scene(fftEditPane, Globals.WIDTH, Globals.HEIGHT);
         
         playArea.update(this);
 
@@ -135,25 +130,10 @@ public class Controller {
 
         // FFTManager LISTENERS
         // edit fftManager button
-        //editFFTButton.setOnAction(event -> {
-        //    primaryStage.setScene(fftOverviewPane.getScene());
-        //});
-
-        // add rule to FFT button
-        addRuleFFTButton.setOnAction(event -> {
-            Scene scene = primaryStage.getScene();
-            primaryStage.setScene(fftInteractivePane.getScene());
-            fftInteractivePane.update(this.node);
-            fftInteractivePane.setPrevScene(scene);
-        });
-
-        // automatic mode
-        fftAutomaticMode = true;
-        automaticFFTBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
-            fftAutomaticMode = newValue;
-            if (fftAutomaticMode && (node.getTurn() == PLAYER2 && player2Instance == FFT) ||
-                    (node.getTurn() == PLAYER1 && player1Instance == FFT))
-                doAITurn();
+        editFFTButton.setOnAction(event -> {
+            Scene thisScene = primaryStage.getScene();
+            primaryStage.setScene(fftEditPane.getScene());
+            fftEditPane.setPrevScene(thisScene);
         });
 
         if (mode == HUMAN_VS_AI && player1Instance != HUMAN && node.getTurn() == PLAYER1) {
@@ -276,30 +256,20 @@ public class Controller {
     // The AI makes its turn, and the GUI is updated while doing so
     private void doAITurn() {
         fftUserInteraction = false;
-        boolean makeDefaultMove = false;
+        boolean makeRandomMove = false;
         int turn = node.getTurn();
         Move move;
         if (aiCross != null && turn == PLAYER1) {
             move = aiCross.makeMove(node);
             if (player1Instance == FFT && move == null)
-                makeDefaultMove = true;
+                makeRandomMove = true;
         } else {
             move = aiCircle.makeMove(node);
             if (player2Instance == FFT && move == null)
-                makeDefaultMove = true;
+                makeRandomMove = true;
         }
-        if (makeDefaultMove) {
-            if (fftAutomaticMode) {
-                System.out.println("Defaulting to random move");
-                move = getDefaultFFTMove();
-            } else {
-                System.out.println("Defaulting to user interaction");
-                fftUserInteraction = true;
-                if (helpHumanBox.isSelected())
-                    highlightHelp(true);
-                return;
-            }
-        }
+        if (makeRandomMove)
+            move = getRandomMove();
         node = node.getNextState(move);
         updatePostAITurn();
         if (Logic.gameOver(node)) return;
@@ -322,11 +292,11 @@ public class Controller {
     private void highlightHelp(boolean highlight) {
 
         Node n = new Node(node);
-        Move fftChosenMove = null;
+        HashSet<FFTMove> fftChosenMoves = new HashSet<>();
         ArrayList<Move> moves = Logic.legalMoves(node.getTurn(), node);
         if (highlight) {
             if (FFTManager.currFFT != null)
-                fftChosenMove = (Move) FFTManager.currFFT.apply(node).iterator().next(); // TODO
+                fftChosenMoves = FFTManager.currFFT.apply(node);
         }
         BoardTile[][] tiles = playArea.getPlayBox().getBoard().getTiles();
 
@@ -340,7 +310,7 @@ public class Controller {
                     if (m.col == aTile.getCol() && m.row == aTile.getRow()) {
                         Node next = n.getNextState(m);
                         NodeMapping nm = FFTSolution.queryNode(next);
-                        if (nm == null) {
+                        if (nm == null) { // terminal state
                             if (Logic.getWinner(next) == n.getTurn())
                                 aTile.setGreen();
                             else if (Logic.getWinner(next) == PLAYER_NONE)
@@ -357,38 +327,24 @@ public class Controller {
                         }
                     }
                 }
-                if (fftChosenMove != null && fftChosenMove.col == aTile.getCol() && fftChosenMove.row == aTile.getRow())
-                    aTile.setFFTChosen();
+                for (FFTMove move : fftChosenMoves) {
+                    Move m = (Move) move;
+                    if (m.col == aTile.getCol() && m.row == aTile.getRow())
+                        aTile.setFFTChosen();
+                }
             }
         }
 
-        // Turns to terminal
-        ArrayList<String> turnsToTerminalList = getScores(moves);
-
-        for (int i = 0; i < moves.size(); i++) {
-            Move m = moves.get(i);
+        for (Move m : moves) {
             String turns = "";
             if (highlight) {
-                turns = turnsToTerminalList.get(i);
+                turns = FFTSolution.turnsToTerminal(n.getTurn(), n.getNextNode(m));
             }
             tiles[m.row][m.col].setTurnsToTerminal(turns);
         }
     }
 
-    private ArrayList<String> getScores(ArrayList<Move> moves) {
-        ArrayList<String> turnsToTerminalList = new ArrayList<>();
-        for (Move m : moves) {
-            Node n = new Node(node).getNextState(m);
-            if (Logic.gameOver(n)) {
-                turnsToTerminalList.add("0");
-            } else {
-                turnsToTerminalList.add(FFTSolution.turnsToTerminal(node.getTurn(), n));
-            }
-        }
-        return turnsToTerminalList;
-    }
-
-    private Move getDefaultFFTMove() {
+    private Move getRandomMove() {
         Random r = new Random();
         int moveSize = node.getLegalMoves().size();
         int index = r.nextInt(moveSize);
@@ -474,7 +430,7 @@ public class Controller {
         this.previousStates = nodeAndMoves;
     }
 
-    public InteractiveNode getInteractiveNode() {
+    public RuleEditPane getInteractiveNode() {
         return gameSpecifics.interactiveNode;
     }
 

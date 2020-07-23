@@ -9,7 +9,7 @@ import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 
 public class FFTSolver{
-    private static boolean solved = false;
+    public static boolean solved = false;
     private static int CURR_MAX_DEPTH;
     private static int unexploredNodes = 0;
     private static int team = PLAYER1; // Always from player1
@@ -80,8 +80,11 @@ public class FFTSolver{
             score = childMapping.getScore();
 
             if (childMapping.getWinner() == PLAYER1) score--;
-            else if (childMapping.getWinner() == PLAYER2) score++;
-            else explored = false;
+            else {
+                score++;
+                if (childMapping.getWinner() == PLAYER2)
+                    explored = false;
+            }
 
             if (node.getTurn() == team) {
                 if (score > bestScore) {
