@@ -1,30 +1,26 @@
 package tictactoe.FFT;
 
 import fftlib.FFTManager;
-import fftlib.logic.rule.Action;
-import fftlib.logic.literal.Literal;
 import fftlib.auxiliary.Position;
-import fftlib.logic.literal.PropLiteral;
-import fftlib.logic.rule.Rule;
-import fftlib.logic.rule.PropRule;
-import fftlib.game.FFTNode;
+import fftlib.game.FFTMove;
 import fftlib.gui.FFTRuleEditPane;
+import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.PropLiteral;
+import fftlib.logic.rule.PropRule;
+import fftlib.logic.rule.Rule;
 import tictactoe.game.Controller;
 import tictactoe.game.Move;
-import tictactoe.game.Node;
 import tictactoe.gui.board.BoardTile;
 import tictactoe.gui.board.PlayBox.InteractivePlayBox;
 
+import static misc.Config.AUTOGEN_TEAM;
 import static misc.Globals.*;
-import static tictactoe.gui.board.BoardTile.blueStr;
 
 public class RuleEditPane extends FFTRuleEditPane {
-    private Controller cont;
     private int tilesize;
     InteractivePlayBox pb;
 
     RuleEditPane(Controller cont) {
-        this.cont = cont;
         this.rule = new PropRule();
         this.tilesize = 60;
         this.pb = new InteractivePlayBox(tilesize, CLICK_INTERACTIVE, cont);
@@ -33,97 +29,84 @@ public class RuleEditPane extends FFTRuleEditPane {
 
     @Override
     public void update(Rule r) {
-        this.rule = r.clone();
-
-        //actionTile = pb.getBoard().getTiles()[move.row][move.col];
-        //actionTile.setAction(true);
-
+        this.rule = r;
+        enable();
         pb.update(r);
-    }
-
-    public void setActionFromTile(BoardTile bt) {
-        /*
-        for (int i = 1; i < 4; i++) {
-            // todo
-            Position pos = new Position(bt.getRow(), bt.getCol(), i);
-            Literal l = new PropLiteral(Atoms.posToId.get(pos));
-            FFTManager.currFFT.removePrecondition(rule, l);
-        }
-        if (actionTile != null) {
-            actionTile.removeHighlight();
-            actionTile.setMandatory(false);
-        }
-        actionTile = bt;
-        this.move = new Move(bt.getRow(), bt.getCol(), perspective);
-        this.rule.setAction(move.convert());
-        pb.addHighlight(actionTile.getRow(), actionTile.getCol(), perspective, blueStr);
-
-         */
-    }
-
-    public void removeAction() {
-        /*
-        actionTile.removeHighlight();
-        rule.setAction(null);
-        move = null;
-        actionTile = null;
-
-         */
     }
 
     @Override
     public Rule getRule() {
         return rule;
     }
-
-    public void setAction(Action a) {
-    /*
-        this.rule.setAction(a);
-        if (a == null)
-            this.move = new Move();
-        else
-            this.move = (Move) a.convert();
-        actionTile = pb.getBoard().getTiles()[move.row][move.col];
-        actionTile.setAction(true);
-        pb.update(rule);
-     */
-    }
-
-
     
     @Override
     public void clear() {
-        this.rule = new PropRule();
-        //pb.clear();
+        pb.clear();
+        pb.setDisable(true);
     }
 
-    // TODO
-    public void updateRuleFromTile(BoardTile bt) {
-        /*
-        String p1Str = String.format("P1(%s, %s)", bt.getRow(), bt.getCol());
-        rule.removePrecondition(new Literal(p1Str));
-        String p2Str = String.format("P2(%s, %s)", bt.getRow(), bt.getCol());
-        rule.removePrecondition(new Literal(p2Str));
-        if (move != null && (move.col == bt.getCol() && move.row == bt.getRow())) {
-            removeAction();
+    public void disable() {
+        pb.setDisable(true);
+        pb.setOpacity(0.3);
+    }
+
+    public void enable() {
+        pb.setDisable(false);
+        pb.setOpacity(1.0);
+    }
+
+    public void update(BoardTile bt) {
+        fftEditPane.pushUndoStack();
+        Rule clone = rule.clone();
+        // start by clearing rule based on this tile
+        for (int occ = -PLAYER2; occ <= PLAYER2; occ++) {
+            if (occ == 0)
+                continue;
+            Position pos = new Position(bt.getRow(), bt.getCol(), occ);
+            int id = FFTManager.getIdFromPos.apply(pos);
+            Literal l = new PropLiteral(id);
+            rule.removePrecondition(l);
         }
-
-        if (bt.isMandatory()) {
-            Literal l;
-            if (bt.getTeam() == PLAYER_ANY) // Negated empty board = occupied board
-                l = new Literal(bt.getRow(), bt.getCol(), bt.getTeam(), !bt.isNegated());
-            else {
-                int tilePerspective;
-                if (perspective == PLAYER1)
-                    tilePerspective = bt.getTeam();
-                else
-                    tilePerspective = (bt.getTeam() == PLAYER1) ? PLAYER2 : PLAYER1;
-
-                l = new Literal(bt.getRow(), bt.getCol(), tilePerspective, bt.isNegated());
+        if (bt.isAction()) // action of rule will be reset again according to this tile
+            rule.removeAction();
+        FFTMove m = rule.getAction().convert();
+        if (m != null) { // action is set for the rule but not for the tile
+            Move move = (Move) m;
+            if (move.row == bt.getRow() && move.col == bt.getCol()) {// the position matches, so we have inconsistency
+                rule.removeAction();
             }
-            rule.addPrecondition(l);
         }
 
-         */
+        // set new properties of this tile
+        if (bt.isUsed() && !bt.isAction()) { // take action later
+            Position pos;
+            Literal l;
+            if (bt.getTeam() == 0) { // add two literals
+                int p1 = (bt.isNegated()) ? -PLAYER1 : PLAYER1;
+                int p2 = (bt.isNegated()) ? -PLAYER2 : PLAYER2;
+                pos = new Position(bt.getRow(), bt.getCol(), p1);
+                l = new PropLiteral(FFTManager.getIdFromPos.apply(pos));
+                rule.addPrecondition(l);
+
+                pos = new Position(bt.getRow(), bt.getCol(), p2);
+                l = new PropLiteral(FFTManager.getIdFromPos.apply(pos));
+                rule.addPrecondition(l);
+            } else {
+                int occ = (bt.isNegated()) ? -bt.getTeam() : bt.getTeam();
+                pos = new Position(bt.getRow(), bt.getCol(), occ);
+                l = new PropLiteral(FFTManager.getIdFromPos.apply(pos));
+                rule.addPrecondition(l);
+            }
+        }
+        // set action (if relevant)
+        if (bt.isAction()) {
+            Move move = new Move(bt.getRow(), bt.getCol(), AUTOGEN_TEAM);
+            rule.setAction(move.convert());
+        }
+
+        if (clone.equals(rule))
+            fftEditPane.popUndoStack();
+        fftEditPane.setRuleText(rule);
+        fftEditPane.showRules();
     }
 }

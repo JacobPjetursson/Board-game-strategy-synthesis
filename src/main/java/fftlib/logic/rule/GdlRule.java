@@ -28,12 +28,22 @@ public class GdlRule extends Rule {
     }
 
     @Override
+    public void removeAction() {
+
+    }
+
+    @Override
     public HashSet<FFTMove> apply(LiteralSet lSet) {
         return null;
     }
 
     @Override
     public void setAction(Action action) {
+
+    }
+
+    @Override
+    public void setPreconditions(LiteralSet preconditions) {
 
     }
 }

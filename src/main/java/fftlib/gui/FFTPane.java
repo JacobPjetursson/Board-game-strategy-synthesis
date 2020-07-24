@@ -63,17 +63,16 @@ public class FFTPane extends VBox {
         while (i < currFFT.getRules().size()) {
             // check if any rulegroup starts at index i
             for (RuleGroup rg : currFFT.getRuleGroups()) {
-                if (i == rg.startIdx) {
+                if (i == rg.startIdx && i < currFFT.size()) {
                     rules.add(getRuleGroupBox(rg));
-                    while (i < rg.endIdx && i < currFFT.getRules().size()) {
+                    while (i < rg.endIdx && i < currFFT.size()) {
                         Rule r = currFFT.getRules().get(i);
                         rules.add(getRuleBox(r, i, true));
                         i++;
                     }
-                    break;
                 }
             }
-            if (i >= currFFT.getRules().size())
+            if (i >= currFFT.size())
                 break;
             Rule r = currFFT.getRules().get(i);
             rules.add(getRuleBox(r, i, false));

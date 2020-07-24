@@ -12,7 +12,7 @@ import fftlib.logic.rule.Rule;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static fftlib.FFTManager.currFFT;
+import static fftlib.FFTManager.*;
 import static misc.Config.*;
 import static misc.Globals.PLAYER1;
 
@@ -37,7 +37,7 @@ public class FFTAutoGen {
         if (!FFTSolver.solved)
             FFTSolver.solveGame();
         if (currFFT == null)
-            currFFT = new FFT("Synthesis");
+            addNewFFT("Synthesis");
 
         if (!currFFT.isValid(AUTOGEN_TEAM)) {
             System.err.println("Invalid fft");

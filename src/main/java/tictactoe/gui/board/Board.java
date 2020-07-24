@@ -34,9 +34,8 @@ public class Board extends GridPane {
                 int stateTile = stateBoard[i][j];
                 // new piece added
                 if (tile.getPiece() == null && stateTile != 0) {
-                    tile.addPiece(stateTile);
+                    tile.drawPiece(stateTile);
                 }
-                tile.update();
             }
         }
     }

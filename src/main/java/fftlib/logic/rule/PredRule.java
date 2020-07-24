@@ -8,7 +8,6 @@ import fftlib.logic.literal.PredLiteral;
 
 import java.util.HashSet;
 
-// TODO - make common super class for Rule and PredRule
 public class PredRule extends Rule {
     private HashSet<PropRule> groundedPropRules;
     private boolean inconsistent;
@@ -32,6 +31,12 @@ public class PredRule extends Rule {
         if (l instanceof PredLiteral || !action.getPreconditions().contains(l))
             preconditions.add(l);
        initializeGroundedRules();
+    }
+
+    @Override
+    public void removeAction() {
+        this.action = new Action();
+        initializeGroundedRules();
     }
 
     public void removePrecondition(Literal l) {
@@ -168,6 +173,11 @@ public class PredRule extends Rule {
 
     @Override
     public void setAction(Action action) {
+
+    }
+
+    @Override
+    public void setPreconditions(LiteralSet preconditions) {
 
     }
 

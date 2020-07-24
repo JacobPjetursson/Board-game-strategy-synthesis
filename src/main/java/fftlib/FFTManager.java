@@ -41,7 +41,7 @@ public class FFTManager {
     public static int winner; // set by solver
     // Visual tool
     private static FFTFailNode failNode;
-    public static FFTRuleEditPane interactiveNode;
+    public static FFTRuleEditPane fftRuleEditPane;
     public static String[] playerNames;
     // Interface between domain specific and logic
     public static Function<Action, FFTMove> actionToMove;
@@ -83,7 +83,7 @@ public class FFTManager {
         legalIndices = gameSpecifics.legalIndices();
         // Visual Tool
         failNode = gameSpecifics.getFailNode();
-        interactiveNode = gameSpecifics.getInteractiveNode();
+        fftRuleEditPane = gameSpecifics.getInteractiveNode();
         playerNames = gameSpecifics.getPlayerNames();
         // Logic representation
         getGameAtoms = gameSpecifics::getGameAtoms;
@@ -192,7 +192,7 @@ public class FFTManager {
             fftIndex = 0;
         }
         else
-            currFFT = new FFT("Synthesis");
+            addNewFFT("Synthesis");
     }
 
     public static String getPlayerName(int team) {

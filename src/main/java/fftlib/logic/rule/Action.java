@@ -122,4 +122,13 @@ public class Action {
     public String toString() {
         return getFormattedString();
     }
+
+    public boolean isEmpty() {
+        return adds.isEmpty() && rems.isEmpty();
+    }
+
+    public void clear() {
+        adds.clear();
+        rems.clear();
+    }
 }

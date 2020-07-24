@@ -14,14 +14,14 @@ public class SymmetryRule extends Rule { // Simpler rule class for rules in symm
         this.preconditions = precons;
         this.action = action;
         this.parent = parent;
-        setAllPreconditions();
+        initializeAllPreconditions();
     }
 
     public SymmetryRule(SymmetryRule duplicate) {
         this.preconditions = new LiteralSet(duplicate.preconditions);
         this.action = new Action(duplicate.action);
         this.parent = duplicate.parent;
-        setAllPreconditions();
+        initializeAllPreconditions();
     }
 
     @Override
@@ -60,12 +60,22 @@ public class SymmetryRule extends Rule { // Simpler rule class for rules in symm
     }
 
     @Override
+    public void removeAction() {
+
+    }
+
+    @Override
     public HashSet<FFTMove> apply(LiteralSet lSet) {
         return null;
     }
 
     @Override
     public void setAction(Action action) {
+
+    }
+
+    @Override
+    public void setPreconditions(LiteralSet preconditions) {
 
     }
 

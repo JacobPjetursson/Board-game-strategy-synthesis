@@ -28,18 +28,19 @@ public class PropRule extends Rule {
         } else {
             this.action = parseAction(actionStr);
             this.preconditions = parsePreconditions(preconStr);
-            setAllPreconditions();
+            initializeAllPreconditions();
         }
         removeActionPrecons();
-        if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
+        initializeSymmetryRules();
     }
 
     public PropRule(LiteralSet precons, Action action) {
         this.action = new Action(action);
         this.preconditions = new LiteralSet(precons);
-        setAllPreconditions();
+        initializeAllPreconditions();
         removeActionPrecons();
-        if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
+        if (SYMMETRY_DETECTION)
+            initializeSymmetryRules();
     }
 
     // GDL Constructor
@@ -67,12 +68,8 @@ public class PropRule extends Rule {
         this.preconditions = new LiteralSet(duplicate.preconditions);
         this.allPreconditions = new LiteralSet(duplicate.allPreconditions);
         this.ruleIndex = duplicate.ruleIndex;
-        if (SYMMETRY_DETECTION) {
-            this.symmetryRules = new HashSet<>();
-            for (SymmetryRule symRule : duplicate.symmetryRules) {
-                this.symmetryRules.add(new SymmetryRule(symRule));
-            }
-        }
+        if (SYMMETRY_DETECTION)
+            initializeSymmetryRules();
     }
 
     public void setRuleIndex(int index) {
@@ -95,14 +92,23 @@ public class PropRule extends Rule {
         if (!action.getPreconditions().contains(l)) // do not include precondition from action
             preconditions.add(l);
         allPreconditions.add(l);
-        if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
+        if (SYMMETRY_DETECTION)
+            initializeSymmetryRules();
+    }
+
+    @Override
+    public void removeAction() {
+        this.action = new Action();
+        if (SYMMETRY_DETECTION)
+            initializeSymmetryRules();
     }
 
     public void removePrecondition(Literal l) {
         this.preconditions.remove(l);
         if (!action.getPreconditions().contains(l))
             this.allPreconditions.remove(l);
-        if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
+        if (SYMMETRY_DETECTION)
+            initializeSymmetryRules();
     }
 
     public void setAction(Action a) {
@@ -111,13 +117,15 @@ public class PropRule extends Rule {
         else
             this.action = a;
         removeActionPrecons();
-        if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
+        if (SYMMETRY_DETECTION)
+            initializeSymmetryRules();
     }
 
     // Gdl
     public void setMove(Move m) {
         this.move = m;
-        if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
+        if (SYMMETRY_DETECTION)
+            initializeSymmetryRules();
     }
 
     public void setPreconditions(LiteralSet precons) {
@@ -125,7 +133,8 @@ public class PropRule extends Rule {
             this.preconditions = new LiteralSet();
         else
             this.preconditions = precons;
-        if (SYMMETRY_DETECTION) this.symmetryRules = initializeSymmetryRules();
+        if (SYMMETRY_DETECTION)
+            initializeSymmetryRules();
     }
 
     // Gdl
@@ -197,11 +206,11 @@ public class PropRule extends Rule {
         }
     }
 
-    private HashSet<SymmetryRule> initializeSymmetryRules() {
+    private void initializeSymmetryRules() {
         HashSet<SymmetryRule> symRules = FFTManager.getSymmetryRules.apply(this);
         for (SymmetryRule r : symRules)
             r.setRuleIndex(this.ruleIndex);
-        return symRules;
+        this.symmetryRules = symRules;
     }
 
     public HashSet<SymmetryRule> getSymmetryRules() {

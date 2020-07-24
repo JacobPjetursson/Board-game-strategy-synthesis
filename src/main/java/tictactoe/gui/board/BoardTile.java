@@ -20,6 +20,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import tictactoe.game.Controller;
 
+import static misc.Config.AUTOGEN_TEAM;
 import static misc.Globals.*;
 
 public class BoardTile extends StackPane {
@@ -29,7 +30,7 @@ public class BoardTile extends StackPane {
     private int clickMode;
     private Node hoverNode = null;
     private boolean negated; // used for fft
-    private boolean mandatory; // used for fft
+    private boolean used; // used for fft
     private boolean isAction; // used for fft
     private Node highlightPiece = null;
     private Stage tileOptionsStage;
@@ -50,12 +51,13 @@ public class BoardTile extends StackPane {
     public static final String yellowStr = "-fx-background-color: rgb(255, 255, 0);";
 
     public BoardTile(int row, int col, int tilesize, int clickMode, Controller cont) {
+        // set values
         this.row = row;
         this.col = col;
-        this.team = PLAYER_ANY;
         this.tilesize = tilesize;
         this.clickMode = clickMode;
         this.cont = cont;
+        // style
         setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         setAlignment(Pos.CENTER);
@@ -64,6 +66,7 @@ public class BoardTile extends StackPane {
         turnsToTerminalLabel = new Label("");
         turnsToTerminalLabel.setFont(Font.font("Verdana", tilesize/4));
         turnsToTerminalLabel.setTextFill(Color.BLACK);
+        // mouse events
         setOnMouseEntered(me -> {
             if (isClickable() && hoverNode == null && piece == null) {
                 addHover(cont.getNode().getTurn());
@@ -82,12 +85,13 @@ public class BoardTile extends StackPane {
             }
             else if (clickMode == CLICK_DEFAULT && piece == null) {
                 getChildren().clear();
-                addPiece(cont.getNode().getTurn());
+                drawPiece(cont.getNode().getTurn());
                 cont.doHumanTurn(row, col);
 
             }
         });
 
+        // set some extra stuff if this tile is interactive (part of rulePane)
         if (clickMode == CLICK_INTERACTIVE) {
             tileOptionsPane = new TileOptionsPane(this);
             tileOptionsStage = new Stage();
@@ -95,37 +99,6 @@ public class BoardTile extends StackPane {
             tileOptionsStage.initModality(Modality.APPLICATION_MODAL);
             tileOptionsStage.initOwner(cont.getWindow());
         }
-    }
-
-    private void showInteractiveOptions() {
-        tileOptionsStage.show();
-    }
-
-    private boolean isClickable() {
-        if (clickMode == CLICK_INTERACTIVE)
-            return false;
-        return clickMode != CLICK_DISABLED && (cont.getPlayerInstance(cont.getNode().getTurn()) == HUMAN ||
-                (cont.getPlayerInstance(cont.getNode().getTurn()) == FFT && cont.getFFTAllowInteraction()));
-    }
-
-    public void setGreen() {
-        addHighlight(greenStr, team);
-    }
-
-    public void setYellow() {
-        addHighlight(yellowStr, team);
-    }
-
-    public void setRed() {
-        addHighlight(redStr, team);
-    }
-
-    public void removeColor() {
-        addHighlight(whiteStr, team);
-    }
-
-    public void setFFTChosen() {
-        addHighlight(blueStr, team);
     }
 
     public void setTurnsToTerminal(String turns) {
@@ -138,6 +111,7 @@ public class BoardTile extends StackPane {
         }
     }
 
+    // used both to color the tile but also to draw a shape in interactive mode (the action)
     public void addHighlight(String color, int team) {
         setStyle(color);
         if (clickMode != CLICK_DEFAULT) {
@@ -149,29 +123,44 @@ public class BoardTile extends StackPane {
         }
     }
 
+    // removes all color and also the highlighted piece, if present
     public void removeHighlight() {
         setStyle(whiteStr);
 
-        if (clickMode != CLICK_DEFAULT) {
-            if (highlightPiece != null)
-                getChildren().remove(highlightPiece);
-            if (clickMode == CLICK_INTERACTIVE) {
-                this.tileOptionsPane.actionCheckBox.setSelected(false);
-                isAction = false;
-            }
-        }
+        if (clickMode != CLICK_DEFAULT && highlightPiece != null)
+            getChildren().remove(highlightPiece);
     }
 
-    public void addPiece(int team) {
-        removePiece();
-        Node n = getPiece(team, false);
-        if (n != null) {
-            getChildren().add(n);
-            this.team = team;
-            this.piece = n;
-        }
+    // adds a gray piece on this tile which symbolizes that the player hovers over the tile
+    private void addHover(int team) {
+        Node n = getPiece(team, true);
+        hoverNode = n;
+        getChildren().add(n);
     }
 
+    private boolean isClickable() {
+        if (clickMode == CLICK_INTERACTIVE)
+            return false;
+        return clickMode != CLICK_DISABLED && (cont.getPlayerInstance(cont.getNode().getTurn()) == HUMAN ||
+                (cont.getPlayerInstance(cont.getNode().getTurn()) == FFT && cont.getFFTAllowInteraction()));
+    }
+
+    private void removeHover() {
+        if (hoverNode != null)
+            getChildren().remove(hoverNode);
+        hoverNode = null;
+    }
+
+    // All the functions only relevant for the rulePane when editing FFT's
+
+    public void clear() {
+        negated = false;
+        isAction = false;
+        team = PLAYER_NONE;
+        drawUsed(false);
+    }
+
+    // drawing functions equivalent to what is in the cell
     private Node getPiece(int team, boolean gray) {
         Node n = null;
         if (team == PLAYER1) {
@@ -182,20 +171,6 @@ public class BoardTile extends StackPane {
         return n;
     }
 
-    private void addHover(int team) {
-        Node n = getPiece(team, true);
-        hoverNode = n;
-        getChildren().add(n);
-    }
-
-    public int getTeam() {
-        return team;
-    }
-
-    public boolean isMandatory() {
-        return mandatory;
-    }
-
     private Group getCross(boolean hover) {
         Group g = new Group();
         Line vertical = new Line(-(tilesize/4), -(tilesize/4), tilesize/4, tilesize/4);
@@ -203,25 +178,6 @@ public class BoardTile extends StackPane {
         vertical.setStrokeWidth(tilesize/9);
         vertical.setSmooth(true);
         horizontal.setStrokeWidth(tilesize/9);
-        horizontal.setSmooth(true);
-        if (hover) {
-            horizontal.setStroke(gray);
-            vertical.setStroke(gray);
-        } else {
-            horizontal.setStroke(Color.BLACK);
-            vertical.setStroke(Color.BLACK);
-        }
-        g.getChildren().addAll(horizontal, vertical);
-        return g;
-    }
-
-    private Group getCross(boolean hover, int lineLength) {
-        Group g = new Group();
-        Line vertical = new Line(-lineLength, -lineLength, lineLength, lineLength);
-        Line horizontal = new Line(-lineLength, lineLength, lineLength, - lineLength);
-        vertical.setStrokeWidth(lineLength / 2);
-        vertical.setSmooth(true);
-        horizontal.setStrokeWidth(lineLength / 2);
         horizontal.setSmooth(true);
         if (hover) {
             horizontal.setStroke(gray);
@@ -245,12 +201,6 @@ public class BoardTile extends StackPane {
         return c;
     }
 
-    private Circle getCircle(boolean hover, int radius) {
-        Circle c = getCircle(hover);
-        c.setRadius(radius);
-        return c;
-    }
-
     private void drawRedCross() {
         if (redCross != null)
             return;
@@ -269,24 +219,97 @@ public class BoardTile extends StackPane {
         getChildren().add(redCross);
     }
 
-    private void removeRedCross() {
+    private void eraseRedCross() {
         getChildren().remove(redCross);
         redCross = null;
     }
 
-    private void removePiece() {
+    // adds a shape (piece) to this tile and removes the previous one
+    public void drawPiece(int team) {
+        erasePiece();
+        Node n = getPiece(team, false);
+        if (n != null) {
+            getChildren().add(n);
+            this.piece = n;
+        }
+    }
+
+    private void erasePiece() {
         if (piece != null) {
             getChildren().remove(piece);
         }
         piece = null;
-        team = PLAYER_ANY;
     }
 
-    private void removeHover() {
-        if (hoverNode != null)
-            getChildren().remove(hoverNode);
-        hoverNode = null;
+    public void drawAction(int team) {
+        tileOptionsPane.actionCheckBox.setSelected(true);
+        drawUsed(true);
+        addHighlight(blueStr, team);
+    }
 
+    public void eraseAction() {
+        tileOptionsPane.actionCheckBox.setSelected(false);
+        removeHighlight();
+    }
+
+    public void drawUsed(boolean used) {
+        tileOptionsPane.usedCheckBox.setSelected(used);
+
+        if (!used) {
+            drawNegated(false);
+            eraseAction();
+            erasePiece();
+            drawRedCross();
+        } else {
+            eraseRedCross();
+        }
+    }
+
+    // this function sets the tile when updating it from a rule
+    // it is the only combination with setAction() that has a functional and visual change
+    public void set(int team, boolean negated) {
+        this.team = team;
+        this.negated = negated;
+        this.used = true;
+
+        drawPiece(team);
+        drawUsed(true);
+        drawNegated(negated);
+    }
+
+    public void setAction(int team) {
+        this.isAction = true;
+        this.negated = false;
+        this.used = true;
+        this.team = team;
+
+        drawAction(team);
+    }
+
+    public void drawNegated(boolean negated) {
+        if (negated) {
+            setStyle(grayStr);
+        } else {
+            setStyle(whiteStr);
+        }
+    }
+
+    public String toString() {
+        return "ROW: " + row + " , COL: " + col + " , TEAM: " + team + " , USED: " + used + " , NEGATED: " + negated;
+    }
+
+    private void showInteractiveOptions() {
+        tileOptionsStage.show();
+    }
+
+    // getters and setters
+
+    public int getTeam() {
+        return team;
+    }
+
+    public boolean isUsed() {
+        return used;
     }
 
     public Node getPiece() {
@@ -305,60 +328,41 @@ public class BoardTile extends StackPane {
         return negated;
     }
 
-    public void update() {
-        if (clickMode == CLICK_INTERACTIVE)
-            setMandatory(piece != null);
+    public void setGreen() {
+        addHighlight(greenStr, team);
     }
 
-    public void setAction(boolean isAction) {
-        this.isAction = isAction;
-        tileOptionsPane.actionCheckBox.setSelected(isAction);
-        if (isAction) {
-            removePiece();
-            setNegated(false);
-            setMandatory(true);
-        } else {
-            setMandatory(false);
-        }
+    public void setYellow() {
+        addHighlight(yellowStr, team);
     }
 
-    public void setMandatory(boolean mandatory) {
-        this.mandatory = mandatory;
-        tileOptionsPane.mandatoryCheckBox.setSelected(mandatory);
-
-        if (!mandatory) {
-            negated = false;
-            setStyle(whiteStr);
-            removePiece();
-            drawRedCross();
-        } else {
-            removeRedCross();
-        }
+    public void setRed() {
+        addHighlight(redStr, team);
     }
 
-    public void setNegated(boolean negated) {
-        this.negated = negated;
+    public void removeColor() {
+        addHighlight(whiteStr, team);
+    }
 
-        if (negated) {
-            setStyle(grayStr);
-            setMandatory(true);
-        } else {
-            setStyle(whiteStr);
-        }
+    public void setFFTChosen() {
+        addHighlight(blueStr, team);
+    }
 
+    public boolean isAction() {
+        return isAction;
     }
 
     public class TileOptionsPane extends BorderPane {
         BoardTile bt;
-        GridPane interactiveGrid;
-        CheckBox mandatoryCheckBox;
+        GridPane choiceGrid;
+        CheckBox usedCheckBox;
         CheckBox actionCheckBox;
 
         TileOptionsPane(BoardTile bt) {
             this.bt = bt;
-            interactiveGrid = makeInteractiveGrid();
-            BorderPane.setMargin(interactiveGrid, new Insets(10));
-            setCenter(interactiveGrid);
+            choiceGrid = makeChoiceGrid();
+            BorderPane.setMargin(choiceGrid, new Insets(10));
+            setCenter(choiceGrid);
             setBottom(makeBottomPane());
         }
 
@@ -366,19 +370,19 @@ public class BoardTile extends StackPane {
             VBox bottomPane = new VBox(10);
             bottomPane.setAlignment(Pos.CENTER);
 
-            // Mandatory box
-            Label mandatoryLabel = new Label("Use this tile in the rule?");
-            mandatoryLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
-            mandatoryCheckBox = new CheckBox();
-            mandatoryCheckBox.setPrefSize(22, 22);
-            mandatoryCheckBox.pressedProperty().addListener((observableValue, oldValue, newValue) -> {
-                setMandatory(!mandatory);
-                cont.getInteractiveNode().updateRuleFromTile(bt);
+            // Used box
+            Label usedLabel = new Label("Use this tile in the rule?");
+            usedLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
+            usedCheckBox = new CheckBox();
+            usedCheckBox.setPrefSize(22, 22);
+            usedCheckBox.pressedProperty().addListener((observableValue, oldValue, newValue) -> {
+                used = !used;
+                cont.getInteractiveNode().update(bt);
                 close();
             });
-            HBox mandatoryHBox = new HBox(5, mandatoryLabel, mandatoryCheckBox);
-            mandatoryHBox.setAlignment(Pos.CENTER);
-            bottomPane.getChildren().add(mandatoryHBox);
+            HBox usedHBox = new HBox(5, usedLabel, usedCheckBox);
+            usedHBox.setAlignment(Pos.CENTER);
+            bottomPane.getChildren().add(usedHBox);
 
             // Action box
             Label actionLabel = new Label("Mark this tile as your action?");
@@ -387,11 +391,13 @@ public class BoardTile extends StackPane {
             actionCheckBox.setPrefSize(22, 22);
             actionCheckBox.pressedProperty().addListener((observable, oldValue, newValue) -> {
                 isAction = !isAction;
-                setAction(isAction);
-                if (isAction)
-                    cont.getInteractiveNode().setActionFromTile(bt);
+                if (newValue)
+                    team = AUTOGEN_TEAM;
                 else
-                    cont.getInteractiveNode().removeAction();
+                    team = PLAYER_NONE;
+
+                used = newValue;
+                cont.getInteractiveNode().update(bt);
                 close();
             });
 
@@ -409,11 +415,11 @@ public class BoardTile extends StackPane {
             return bottomPane;
         }
 
-        private GridPane makeInteractiveGrid() {
-            interactiveGrid = new GridPane();
-            interactiveGrid.setAlignment(Pos.CENTER);
-            interactiveGrid.setStyle(whiteStr);
-            interactiveGrid.setGridLinesVisible(true);
+        private GridPane makeChoiceGrid() {
+            choiceGrid = new GridPane();
+            choiceGrid.setAlignment(Pos.CENTER);
+            choiceGrid.setStyle(whiteStr);
+            choiceGrid.setGridLinesVisible(true);
 
             RowConstraints rc1 = new RowConstraints();
             rc1.setValignment(VPos.CENTER);
@@ -427,11 +433,11 @@ public class BoardTile extends StackPane {
             rc2.setPercentHeight(50);
             cc1.setPercentWidth(50);
             cc2.setPercentWidth(50);
-            interactiveGrid.getColumnConstraints().addAll(cc1, cc2);
-            interactiveGrid.getRowConstraints().addAll(rc1, rc2);
+            choiceGrid.getColumnConstraints().addAll(cc1, cc2);
+            choiceGrid.getRowConstraints().addAll(rc1, rc2);
 
-            Node cross = getCross(false, 80);
-            Node circle = getCircle(false, 80);
+            Node cross = getChoiceCross();
+            Node circle = getChoiceCircle();
             StackPane bpPane1 = new StackPane();
             StackPane bpPane2 = new StackPane();
             bpPane1.setAlignment(Pos.CENTER);
@@ -440,44 +446,75 @@ public class BoardTile extends StackPane {
             bpPane2.getChildren().add(circle);
 
             bpPane1.setOnMouseClicked(event -> {
-                setMandatory(true);
-                bt.addPiece(PLAYER1);
+                used = true;
+                team = PLAYER1;
                 close();
-                cont.getInteractiveNode().updateRuleFromTile(bt);
+                cont.getInteractiveNode().update(bt);
             });
 
             bpPane2.setOnMouseClicked(event -> {
-                setMandatory(true);
-                bt.addPiece(PLAYER2);
+                used = true;
+                team = PLAYER2;
                 close();
-                cont.getInteractiveNode().updateRuleFromTile(bt);
+                cont.getInteractiveNode().update(bt);
             });
 
             VBox paneGray = new VBox();
             paneGray.setStyle(grayStr);
             paneGray.setOnMouseClicked(event -> {
-                setNegated(true);
+                used = true;
+                negated = true;
                 close();
-                cont.getInteractiveNode().updateRuleFromTile(bt);
+                cont.getInteractiveNode().update(bt);
             });
 
             VBox paneWhite = new VBox();
             paneWhite.setStyle(whiteStr);
             paneWhite.setOnMouseClicked(event -> {
-                setNegated(false);
-                setMandatory(true);
-                removePiece();
-                cont.getInteractiveNode().updateRuleFromTile(bt);
+                used = true;
+                negated = false;
+                team = PLAYER_NONE;
+                cont.getInteractiveNode().update(bt);
 
                 close();
             });
 
-            interactiveGrid.add(bpPane1, 0, 0);
-            interactiveGrid.add(bpPane2, 1, 0);
-            interactiveGrid.add(paneWhite, 0, 1);
-            interactiveGrid.add(paneGray, 1, 1);
-            return interactiveGrid;
+            choiceGrid.add(bpPane1, 0, 0);
+            choiceGrid.add(bpPane2, 1, 0);
+            choiceGrid.add(paneWhite, 0, 1);
+            choiceGrid.add(paneGray, 1, 1);
+            return choiceGrid;
         }
+
+        private Group getChoiceCross() {
+            int lineLength = 80;
+            boolean hover = false;
+
+            Group g = new Group();
+            Line vertical = new Line(-lineLength, -lineLength, lineLength, lineLength);
+            Line horizontal = new Line(-lineLength, lineLength, lineLength, - lineLength);
+            vertical.setStrokeWidth(lineLength / 2);
+            vertical.setSmooth(true);
+            horizontal.setStrokeWidth(lineLength / 2);
+            horizontal.setSmooth(true);
+            if (hover) {
+                horizontal.setStroke(gray);
+                vertical.setStroke(gray);
+            } else {
+                horizontal.setStroke(Color.BLACK);
+                vertical.setStroke(Color.BLACK);
+            }
+            g.getChildren().addAll(horizontal, vertical);
+            return g;
+        }
+
+        private Circle getChoiceCircle() {
+            Circle c = getCircle(false);
+            c.setRadius(80);
+            return c;
+        }
+
+
 
         private void close() {
             Stage stage = (Stage) getScene().getWindow();

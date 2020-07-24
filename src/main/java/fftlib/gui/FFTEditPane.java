@@ -3,6 +3,7 @@ package fftlib.gui;
 import fftlib.FFTAutoGen;
 import fftlib.logic.FFT;
 import fftlib.FFTManager;
+import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.rule.PropRule;
 import fftlib.logic.rule.Rule;
 import fftlib.logic.rule.RuleGroup;
@@ -51,6 +52,7 @@ public class FFTEditPane extends BorderPane {
     private Button deleteRgBtn;
     private Button renameRgBtn;
     private Button undoBtn;
+    private Button clearRuleBtn;
 
     private VBox bottomBox;
 
@@ -176,7 +178,9 @@ public class FFTEditPane extends BorderPane {
         topBox.getChildren().addAll(fftPane, ruleLabel);
 
         // set center
-        ruleEditPane = interactiveNode;
+        ruleEditPane = fftRuleEditPane;
+        ruleEditPane.setFftEditPane(this);
+        ruleEditPane.disable();
 
         lw = new ListView<>();
         lw.setPickOnBounds(false);
@@ -185,12 +189,10 @@ public class FFTEditPane extends BorderPane {
         lw.requestFocus();
         showRules();
 
-        ruleEditPane = interactiveNode;
         HBox centerBox = new HBox(15, ruleEditPane.getNode(), lw);
         setCenter(centerBox);
         centerBox.setAlignment(Pos.CENTER);
         BorderPane.setAlignment(lw, Pos.CENTER);
-
         BorderPane.setMargin(centerBox, new Insets(15));
         BorderPane.setMargin(lw, new Insets(0, 0, 0, 0));
 
@@ -200,7 +202,6 @@ public class FFTEditPane extends BorderPane {
         bottomBox.setPadding(new Insets(15));
 
         // SET BUTTONS
-
         // TEAM BOX
         Label teamLabel = new Label("Team:");
         teamLabel.setFont(Font.font("Verdana", 15));
@@ -233,26 +234,7 @@ public class FFTEditPane extends BorderPane {
             newStage.show();
         });
 
-        // BACK BUTTON
-        Button back = new Button("Back");
-        back.setFont(Font.font("Verdana", 16));
-        back.setOnMouseClicked(event -> {
-            Stage stage = (Stage) getScene().getWindow();
-            stage.setScene(prevScene);
-
-            if (changes) {
-                // Chance to save to disk
-                Stage newStage = new Stage();
-                newStage.setScene(new Scene(
-                        new SaveFFTPane(), 500, 200));
-                newStage.initModality(Modality.APPLICATION_MODAL);
-                newStage.initOwner(getScene().getWindow());
-                newStage.setOnCloseRequest(Event::consume);
-                newStage.show();
-            }
-        });
-
-        // ADD RULE
+        // ADD RULE BUTTON
         Button addRuleBtn = new Button("Add rule");
         addRuleBtn.setStyle(greenBtnStyle);
         addRuleBtn.setFont(Font.font("Verdana", 16));
@@ -283,8 +265,11 @@ public class FFTEditPane extends BorderPane {
                 return;
             UndoItem item = popUndoStack();
             FFTManager.ffts = item.ffts;
-            currFFT = item.ffts.get(item.fftIndex);
+            setCurrFFT(item.fftIndex);
+            // refresh to reset everything, then set idx and show rules again after
             refresh();
+            this.selectedCellIdx = item.selectedIndex;
+            showRules();
         });
 
         // SAVE TO DISK BTN
@@ -334,6 +319,25 @@ public class FFTEditPane extends BorderPane {
             refresh();
         });
 
+        // CLEAR RULE BTN
+        clearRuleBtn = new Button("Clear rule");
+        clearRuleBtn.setFont(Font.font("Verdana", 16));
+        clearRuleBtn.setDisable(true);
+        clearRuleBtn.setOnMouseClicked(event -> {
+            int rIdx = getSelectedPane().rIdx;
+            Rule r = currFFT.getRules().get(rIdx);
+            if (r.isEmpty())
+                return;
+
+            pushUndoStack();
+            r.clear();
+
+            ruleLabel.setText("");
+            ruleEditPane.clear();
+            showRules();
+
+        });
+
         // RENAME RG BTN
         renameRgBtn = new Button("Rename rule group");
         renameRgBtn.setFont(Font.font("Verdana", 16));
@@ -367,32 +371,60 @@ public class FFTEditPane extends BorderPane {
             newStage.show();
         });
 
+        // BACK BUTTON
+        Button back = new Button("Back");
+        back.setFont(Font.font("Verdana", 16));
+        back.setOnMouseClicked(event -> {
+            Stage stage = (Stage) getScene().getWindow();
+            stage.setScene(prevScene);
+
+            if (changes) {
+                // Chance to save to disk
+                Stage newStage = new Stage();
+                newStage.setScene(new Scene(
+                        new SaveFFTPane(), 500, 200));
+                newStage.initModality(Modality.APPLICATION_MODAL);
+                newStage.initOwner(getScene().getWindow());
+                newStage.setOnCloseRequest(Event::consume);
+                newStage.show();
+            }
+        });
+
         // Glue everything together
-        HBox synthBox = new HBox(10);
-        synthBox.setAlignment(Pos.CENTER);
-        synthBox.getChildren().addAll(teamBox, verifyBtn, generateBtn, minimizeBtn);
+        HBox bottomBox1 = new HBox(10);
+        bottomBox1.setAlignment(Pos.CENTER);
+        bottomBox1.getChildren().addAll(teamBox, verifyBtn, generateBtn, minimizeBtn);
 
-        HBox ruleBtnBox = new HBox(10, addRgBtn, addRuleBtn, deleteRuleBtn, deleteRgBtn, renameRgBtn);
-        ruleBtnBox.setAlignment(Pos.CENTER);
 
-        HBox miscBox = new HBox(10, saveToDiskBtn, undoBtn);
+        HBox bottomBox2 = new HBox(5);
+        bottomBox2.setAlignment(Pos.CENTER);
+        bottomBox2.getChildren().addAll(addRgBtn, deleteRgBtn, renameRgBtn);
+
+        HBox ruleBox = new HBox(5);
+        ruleBox.setAlignment(Pos.CENTER);
+        ruleBox.getChildren().addAll(addRuleBtn, deleteRuleBtn, clearRuleBtn);
+
+        HBox miscBox = new HBox(5);
         miscBox.setAlignment(Pos.CENTER);
+        miscBox.getChildren().addAll(saveToDiskBtn, undoBtn);
+
+        HBox bottomBox3 = new HBox(25, ruleBox, miscBox);
+        bottomBox3.setAlignment(Pos.CENTER);
 
         VBox backBox = new VBox();
         backBox.setAlignment(Pos.CENTER_RIGHT);
         backBox.getChildren().add(back);
 
-        BorderPane miscPane = new BorderPane();
-        miscPane.setCenter(miscBox);
-        BorderPane.setMargin(miscBox, new Insets(0, 0, 0, 50));
-        miscPane.setRight(backBox);
+        BorderPane bottomBox3Pane = new BorderPane();
+        bottomBox3Pane.setCenter(bottomBox3);
+        BorderPane.setMargin(bottomBox3, new Insets(0, 0, 0, 50));
+        bottomBox3Pane.setRight(backBox);
 
-        bottomBox.getChildren().addAll(synthBox, ruleBtnBox, miscPane);
+        bottomBox.getChildren().addAll(bottomBox1, bottomBox2, bottomBox3Pane);
         setBottom(bottomBox);
         BorderPane.setAlignment(bottomBox, Pos.CENTER);
 
         // key event handlers
-
         lw.setOnKeyPressed(event -> {
 
             KeyCode code = event.getCode();
@@ -460,7 +492,6 @@ public class FFTEditPane extends BorderPane {
                 }
                 showRules();
             }
-
         });
 
         lw.setOnKeyReleased(event -> {
@@ -468,6 +499,10 @@ public class FFTEditPane extends BorderPane {
                 isShiftDown = false;
         });
 
+    }
+
+    public void setRuleText(Rule r) {
+        this.ruleLabel.setText(r.toString());
     }
 
     private RulePane getSelectedPane() {
@@ -487,8 +522,8 @@ public class FFTEditPane extends BorderPane {
         timeline.play();
     }
 
-    private void pushUndoStack() {
-        UndoItem uItem = new UndoItem();
+    public void pushUndoStack() {
+        UndoItem uItem = new UndoItem(selectedCellIdx);
         undoStack.push(uItem);
         undoBtn.setDisable(false);
         changes = true;
@@ -497,37 +532,19 @@ public class FFTEditPane extends BorderPane {
             undoStack.remove(undoStack.size() - 1);
     }
 
-    private UndoItem popUndoStack() {
+    public UndoItem popUndoStack() {
         UndoItem uItem = undoStack.pop();
         if (undoStack.empty())
             undoBtn.setDisable(true);
         return uItem;
     }
 
-    /*
-    public void update(FFTNode node) {
-        //selectedIndex = null;
-        FFTManager.interactiveNode.clear();
-        undoStack.clear();
-
-        deleteRuleBtn.setDisable(true);
-        //lw.getSelectionModel().clearSelection();
-
-        Node n = FFTManager.interactiveNode.getInteractiveNode(node);
-        addInteractiveNode(n);
-    }
-
-     */
-
-    public void clearRule() {
-        ruleLabel.setText("");
-        ruleEditPane.clear();
-    }
-
     public void refresh() {
-        clearRule();
+        ruleLabel.setText("");
         selectedCellIdx = -1;
+        ruleEditPane.clear();
         deleteRuleBtn.setDisable(true);
+        clearRuleBtn.setDisable(true);
         deleteRgBtn.setDisable(true);
         renameRgBtn.setDisable(true);
         // set options in fft box
@@ -580,7 +597,7 @@ public class FFTEditPane extends BorderPane {
         return -1;
     }
 
-    private void showRules() {
+    public void showRules() {
         ObservableList<RulePane> rules = FXCollections.observableArrayList();
 
         int i = 0;
@@ -588,7 +605,7 @@ public class FFTEditPane extends BorderPane {
         while (i < currFFT.getRules().size()) {
             // check if any rulegroup starts at index i
             for (RuleGroup rg : currFFT.getRuleGroups()) {
-                if (i == rg.startIdx) {
+                if (i == rg.startIdx && i < currFFT.size()) {
                     rules.add(new RulePane(rg));
                     size += RULEGROUP_LABEL_SIZE;
                     while (i < rg.endIdx && i < currFFT.getRules().size()) {
@@ -596,10 +613,9 @@ public class FFTEditPane extends BorderPane {
                         size += RULE_SIZE;
                         i++;
                     }
-                    break;
                 }
             }
-            if (i >= currFFT.getRules().size())
+            if (i >= currFFT.size())
                 break;
             rules.add(new RulePane(i));
             size += RULE_SIZE;
@@ -652,6 +668,7 @@ public class FFTEditPane extends BorderPane {
         return imgView;
     }
 
+    // HELPER CLASSES
     private class RulePane extends StackPane {
         Label label;
         // used if pane is the rule group label
@@ -696,16 +713,16 @@ public class FFTEditPane extends BorderPane {
             getChildren().add(label);
         }
 
-
-
         public void select() {
             // set buttons
             deleteRgBtn.setDisable(!isRuleGroup);
             renameRgBtn.setDisable(!isRuleGroup);
             deleteRuleBtn.setDisable(isRuleGroup);
+            clearRuleBtn.setDisable(isRuleGroup);
             if (isRuleGroup) {
                 // clear
-                clearRule();
+                ruleLabel.setText("");
+                ruleEditPane.disable();
             } else {
                 Rule r = currFFT.getRules().get(rIdx);
                 // set title
@@ -803,11 +820,13 @@ public class FFTEditPane extends BorderPane {
                     int idx = currFFT.size();
                     rg = new RuleGroup(currFFT, textField.getText(), idx, idx);
                     currFFT.addRuleGroup(rg);
+                    selectedCellIdx = lw.getItems().size();
                 }
 
                 Stage stage = (Stage) getScene().getWindow();
                 stage.close();
-                refresh();
+
+                showRules();
             }
         }
     }
@@ -892,7 +911,8 @@ public class FFTEditPane extends BorderPane {
                 // strategy might've been manually changed, so we need to find reachable states first
                 if (USE_OPTIMIZED_MINIMIZE)
                     FFTAutoGen.findReachableStates();
-                int iterations = FFTAutoGen.minimize();
+
+                FFTAutoGen.minimize();
                 int diffRules = ruleSize - FFTManager.currFFT.getAmountOfRules();
                 int diffPrecs = precSize - FFTManager.currFFT.getAmountOfPreconditions();
                 if (diffRules == 0 && diffPrecs == 0) {
@@ -1009,12 +1029,14 @@ public class FFTEditPane extends BorderPane {
     private static class UndoItem {
         public ArrayList<FFT> ffts;
         public int fftIndex;
+        public int selectedIndex;
 
-        public UndoItem() {
+        public UndoItem(int selectedIndex) {
             this.ffts = new ArrayList<>();
             for (FFT f : FFTManager.ffts)
                 this.ffts.add(new FFT(f));
             this.fftIndex = FFTManager.fftIndex;
+            this.selectedIndex = selectedIndex;
         }
     }
 

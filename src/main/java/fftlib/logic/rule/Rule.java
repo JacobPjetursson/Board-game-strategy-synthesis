@@ -22,7 +22,6 @@ import static misc.Config.SHOW_GUI;
 
 public abstract class Rule {
 
-
     protected static final ArrayList<String> separators = new ArrayList<>(
             Arrays.asList("and", "And", "AND", "&", "∧"));
     // preconditions are the preconditions visible to the human
@@ -56,6 +55,17 @@ public abstract class Rule {
 
     public Action getAction() {
         return action;
+    }
+
+    // used when visualizing a rule
+    public boolean isEmpty() {
+        return preconditions.isEmpty() && action.isEmpty();
+    }
+
+    // used when visualizing a rule
+    public void clear() {
+        preconditions.clear();
+        action.clear();
     }
 
     protected static ArrayList<String> prepPreconditions(String preconStr) {
@@ -138,6 +148,8 @@ public abstract class Rule {
 
     public abstract void addPrecondition(Literal l);
 
+    public abstract void removeAction();
+
     public HashSet<FFTMove> apply(FFTNode n) {
         return apply(n.convert());
     }
@@ -193,12 +205,14 @@ public abstract class Rule {
 
     }
 
-    public void setAllPreconditions() {
+    protected void initializeAllPreconditions() {
         allPreconditions = new LiteralSet(preconditions);
         allPreconditions.addAll(action.getPreconditions());
     }
 
     public abstract void setAction(Action action);
+
+    public abstract void setPreconditions(LiteralSet preconditions);
 
     // used for ruleEntity
     public int size() {
@@ -214,6 +228,6 @@ public abstract class Rule {
     }
 
     public boolean isLocked() {
-        return false;
+        return locked;
     }
 }

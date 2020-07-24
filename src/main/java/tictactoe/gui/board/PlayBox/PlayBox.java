@@ -10,8 +10,6 @@ import tictactoe.gui.board.Board;
 import tictactoe.gui.board.BoardTile;
 import tictactoe.gui.board.Player;
 
-import java.util.ArrayList;
-
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 
@@ -20,11 +18,9 @@ public class PlayBox extends Group {
     private Player circle;
     private Player cross;
     int clickMode;
-    ArrayList<BoardTile> highlights;
 
     public PlayBox(int tilesize, int clickMode, Controller cont) {
         this.clickMode = clickMode;
-        highlights = new ArrayList<>();
         VBox vbox = new VBox();
         vbox.setAlignment(Pos.CENTER);
         vbox.setStyle("-fx-background-color: rgb(255, 255, 255);");
@@ -48,18 +44,17 @@ public class PlayBox extends Group {
     public void addHighlight(int row, int col, int team, String color) {
         BoardTile t = board.getTiles()[row][col];
         t.addHighlight(color, team);
-        highlights.add(t);
     }
 
     void removeHighlights() {
-        for (BoardTile bt : highlights)
-            bt.removeHighlight();
-        highlights.clear();
+        for (BoardTile[] bt : board.getTiles())
+            for (BoardTile aTile : bt)
+                aTile.removeHighlight();
     }
 
     public void addPiece(Move m) {
         BoardTile t = board.getTiles()[m.row][m.col];
-        t.addPiece(m.team);
+        t.drawPiece(m.team);
     }
 
     public Board getBoard() {
