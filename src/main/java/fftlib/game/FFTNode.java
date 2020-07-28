@@ -110,7 +110,7 @@ public abstract class FFTNode {
     public abstract FFTMove getMove();
 
     public static FFTNode getInitialNode() {
-        return FFTManager.initialFFTNode;
+        return FFTManager.getInitialNode();
     }
 
     public abstract FFTNode clone();

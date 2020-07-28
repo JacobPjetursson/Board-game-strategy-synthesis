@@ -12,6 +12,7 @@ import fftlib.logic.rule.Action;
 import fftlib.logic.rule.PropRule;
 import fftlib.logic.rule.SymmetryRule;
 import misc.Config;
+import tictactoe.ai.Zobrist;
 import tictactoe.game.Controller;
 import tictactoe.game.Move;
 import tictactoe.game.Node;
@@ -175,6 +176,12 @@ public class GameSpecifics implements FFTGameSpecifics {
             indices.add(i);
         }
         return indices;
+    }
+
+    @Override
+    public void randomizeSeeds() {
+        Atoms.initialize();
+        Zobrist.initialize();
     }
 
     /*

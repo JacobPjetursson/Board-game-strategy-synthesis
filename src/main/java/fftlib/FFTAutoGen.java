@@ -49,6 +49,12 @@ public class FFTAutoGen {
             double avgRules = 0, avgPrecons = 0, avgTime = 0;
             for (int i = 0; i < BENCHMARK_NUMBER; i++) {
                 long timeStart = System.currentTimeMillis();
+                if (RANDOM_SEED) {
+                    // new seed messes up the game solution since we store by zobrist seed
+                    FFTManager.randomizeSeeds();
+                    FFTSolver.solved = false;
+                    FFTSolver.solveGame();
+                }
                 generate(existingFFT);
                 avgTime += (System.currentTimeMillis() - timeStart) / 1000.0;
                 avgRules += fft.getAmountOfRules();
@@ -181,7 +187,7 @@ public class FFTAutoGen {
         // make search through state space playing with the minimax strategy, adding a rule for each move chosen,
         // even the moves where all moves are optimal
         int team = AUTOGEN_TEAM;
-        FFTNode initialNode = FFTManager.initialFFTNode;
+        FFTNode initialNode = FFTManager.getInitialNode();
         LinkedList<FFTNode> frontier;
         frontier = new LinkedList<>();
         frontier.add(initialNode);
@@ -245,13 +251,13 @@ public class FFTAutoGen {
             r = liftRule((PropRule) r, true);
 
         Set<FFTNode> appliedSet = new HashSet<>();
-        simplifyRule(r, appliedSet, true);
+        simplifyRule(r, true);
 
         if (USE_LIFTING && !LIFT_BEFORE_SIMPLIFY) {
             r = liftRule((PropRule)r, true);
         }
         // symmetry and use_lifting can introduce new moves for an applied state, so we do a safe run at last
-        safeRun(r, appliedSet, true); // safe run where we know we have the final rule
+        safeRun(r, true); // safe run where we know we have the final rule
 
         System.out.println("added rule: " + r);
         if (SIMPLIFY_AFTER_DEL)
@@ -272,8 +278,8 @@ public class FFTAutoGen {
             boolean lastRule = (fft.getLastRule() == r);
             Set<Rule> newAffectedRules = new HashSet<>();
             Set<FFTNode> appliedSet = new HashSet<>();
-            simplifyRule(r, appliedSet, lastRule);
-            safeRun(r, appliedSet, lastRule);
+            simplifyRule(r, lastRule);
+            safeRun(r, lastRule);
             System.out.println("simplified to: " + r);
             System.out.println("newAffectedRules size: " + newAffectedRules.size());
             System.out.println("simplifying affected rules recursively");
@@ -282,12 +288,8 @@ public class FFTAutoGen {
         }
     }
 
-    private static void simplifyRule(Rule r, boolean lastRule) {
-        simplifyRule(r, null, lastRule);
-    }
-
     // if simplifying last rule, simplifying can not effect other rules, so it's simpler
-    private static void simplifyRule(Rule r, Set<FFTNode> appliedSet, boolean lastRule) {
+    private static void simplifyRule(Rule r, boolean lastRule) {
         if (DETAILED_DEBUG) System.out.println("SIMPLIFYING RULE: " + r);
         // make copy to avoid concurrentModificationException
         Collection<Literal> precons;
@@ -305,7 +307,7 @@ public class FFTAutoGen {
         for (Literal l : precons) {
             if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO REMOVE: " + l.getName());
             fft.removePrecondition(r, l);
-            if (!verifyRule(r, appliedSet, lastRule)) {
+            if (!verifyRule(r, lastRule)) {
                 if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.getName());
 
                 if (TESTING) {
@@ -348,46 +350,24 @@ public class FFTAutoGen {
 
     }
 
-    private static void safeRun(Rule r, Set<FFTNode> appliedSet, boolean lastRule) {
-        verifyRule(r, appliedSet, lastRule, true);
-        if (TESTING)
-            checkSetCorrectness();
-    }
-
     private static void safeRun(Rule r, boolean lastRule) {
-        verifyRule(r, null, lastRule, true);
+        verifyRule(r, lastRule, true);
         if (TESTING)
             checkSetCorrectness();
     }
 
     private static boolean verifyRule(Rule r, boolean lastRule) {
-        return verifyRule(r, null, lastRule, false);
+        return verifyRule(r, lastRule, false);
     }
 
-    private static boolean verifyRule(Rule r, Set<FFTNode> appliedSet, boolean lastRule) {
-        return verifyRule(r, appliedSet, lastRule, false);
-    }
-
-    // affectedRules is optimization, prevAppliedMap is used when symmetry is involved
-    private static boolean verifyRule(Rule r, Set<FFTNode> prevApplied,
-                                      boolean lastRule, boolean safe) {
+    // affectedRules is optimization
+    private static boolean verifyRule(Rule r, boolean lastRule, boolean safe) {
         System.out.println("Verifying rule");
         if (safe && DETAILED_DEBUG)
             System.out.println("DOING SAFE RUN");
         Map<FFTNode, RuleMapping> appliedMap = new ConcurrentHashMap<>();
 
         fillAppliedMap(r, appliedMap, lastRule);
-
-        // include applied states from previous verification
-        /*
-        if (prevApplied != null && lastRule) {
-            for (FFTNode prev : prevApplied) {
-                if (!appliedMap.containsKey(prev) && prev.isReachable())
-                    appliedMap.put(prev, new RuleMapping(r, prev));
-            }
-        }
-
-         */
 
         // suboptimalnodes contains all nodes that has a sub-optimal move or indirectly causes it through a chosenmove
         // addedNodes contains all nodes that has been added. deletedNodes does the opposite
@@ -418,30 +398,12 @@ public class FFTAutoGen {
             }
         }
 
-        // todo - find a way to change this
-        //if ((SYMMETRY_DETECTION || USE_LIFTING) && !safe)
-          //  undoChanges(addedNodes, deletedNodes, addedParentNodes, deletedParentNodes);
-
-        //if (TESTING)
-        //    checkSetCorrectness();
 
         // used for lifting
         if (r instanceof PredRule)
             liftedAppliedMapSize = appliedMap.size();
         else
             groundedAppliedMapSize = appliedMap.size();
-
-        // prevAppliedMap accumulates all the applied states for successful simplifications
-        // the point is that we need to re-use them if symmetry is enabled
-        // for instance if a state is made unreachable and later reachable within same rule simplification,
-        // that state should be included in appliedMap
-        // todo - look through addedNodes.get(applied) and add all nodes to prevAppliedMap where
-        //        the rule is equal to the this rule. That should be all we need
-        if (prevApplied != null)
-            for (FFTNode n : newAppliedNodes)
-                if (n.isReachable())
-                    prevApplied.add(n);
-
 
         return true;
     }
@@ -496,7 +458,6 @@ public class FFTAutoGen {
         for (Map.Entry<FFTNode, RuleMapping> entry : appliedMap.entrySet()) {
             FFTNode n = entry.getKey();
             System.out.println("Checking if node: " + n + " , is valid");
-            // this might happen if we use prevAppliedSet
             if (!n.isReachable()) {
                 System.out.println("node: " + n + " , is not reachable");
                 continue;
@@ -879,12 +840,10 @@ public class FFTAutoGen {
         }
     }
 
-    // todo - consider doing a check for sub-optimal here
-    // it is cost-free and would be nice for e.g. the minimizing function
+
     public static void findReachableStates() {
         int team = AUTOGEN_TEAM;
-        FFTNode initialNode = FFTManager.initialFFTNode.clone();
-        initialNode.setReachable(true);
+        FFTNode initialNode = FFTManager.getInitialNode();
         LinkedList<FFTNode> frontier;
         frontier = new LinkedList<>();
         frontier.add(initialNode);
@@ -951,7 +910,7 @@ public class FFTAutoGen {
             fft.replaceRule(r, pr);
             if (DETAILED_DEBUG) System.out.println("VERIFYING LIFTED RULE: " + pr);
             // we do not want to lift if the lifted rule does not apply to more states
-            if (verifyRule(pr, null, lastRule) && groundedAppliedMapSize != liftedAppliedMapSize) {
+            if (verifyRule(pr, lastRule) && groundedAppliedMapSize != liftedAppliedMapSize) {
                 if (DETAILED_DEBUG) System.out.println("RULE SUCCESSFULLY LIFTED TO: " + pr);
                 return pr;
             } else {
@@ -1037,7 +996,7 @@ public class FFTAutoGen {
                     FFTNode node = frontier.pop();
                     System.out.println("node: " + node + " , reachable parents: " + node.getReachableParents());
                     System.out.println("exists in copy: " + reachableCopy.containsKey(node));
-                    if (node.equals(initialFFTNode)) {
+                    if (node.equals(FFTManager.getInitialNode())) {
                         System.out.println("initial node found");
                         break;
                     }
@@ -1123,4 +1082,3 @@ public class FFTAutoGen {
         }
     }
 }
-

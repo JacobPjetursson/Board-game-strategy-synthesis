@@ -156,4 +156,10 @@ public class GameSpecifics implements FFTGameSpecifics {
         }
         return indices;
     }
+
+    @Override
+    public void randomizeSeeds() {
+        Atoms.initialize();
+        Zobrist.initialize();
+    }
 }

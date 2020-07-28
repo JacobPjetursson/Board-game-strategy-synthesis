@@ -20,6 +20,7 @@ public interface FFTGameSpecifics {
     HashSet<SymmetryRule> getSymmetryRules(PropRule propRule); // Domain specific
     int getMaxStateLiterals(); // Domain specific
     ArrayList<Integer> legalIndices(); // Domain specific
+    void randomizeSeeds(); // Domain specific
 
     FFTMove actionToMove(Action a); // Interface
     Action moveToAction(FFTMove m); // Interface

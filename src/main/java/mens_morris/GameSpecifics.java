@@ -230,4 +230,10 @@ public class GameSpecifics implements FFTGameSpecifics {
     public ArrayList<Integer> legalIndices() {
         return null;
     }
+
+    @Override
+    public void randomizeSeeds() {
+        Zobrist.initialize();
+        Atoms.initialize();
+    }
 }

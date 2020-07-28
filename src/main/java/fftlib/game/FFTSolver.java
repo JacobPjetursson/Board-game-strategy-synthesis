@@ -27,7 +27,7 @@ public class FFTSolver{
 
         int doneCounter = 0;
         long timeStart = System.currentTimeMillis();
-        FFTNode initialNode = FFTManager.initialFFTNode;
+        FFTNode initialNode = FFTManager.getInitialNode();
         while (!done) {
             CURR_MAX_DEPTH += 1;
             int prevSize = lookupTable.size();

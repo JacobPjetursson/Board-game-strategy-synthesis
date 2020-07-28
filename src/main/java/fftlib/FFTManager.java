@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 
 
 public class FFTManager {
+    private static FFTGameSpecifics gameSpecifics;
     // Misc
     public static int fftIndex = 0;
     public static ArrayList<FFT> ffts;
@@ -35,7 +36,6 @@ public class FFTManager {
     public static int gameBoardWidth;
     public static int gameBoardHeight;
     public static ArrayList<Integer> legalIndices;
-    public static FFTNode initialFFTNode;
     public static Function<PropRule, HashSet<SymmetryRule>> getSymmetryRules;
     public static int maxStateLiterals;
     public static int winner; // set by solver
@@ -64,41 +64,46 @@ public class FFTManager {
     public static final String orangeBtnStyle = "-fx-border-color: #000000; -fx-background-color: #ffa500;";
 
     // Most game-related classes are processed here
-    public static void initialize(FFTGameSpecifics gameSpecifics) {
+    public static void initialize(FFTGameSpecifics gameSpecs) {
+        gameSpecifics = gameSpecs;
         // Misc
         ffts = new ArrayList<>();
-        fftPath = gameSpecifics.getFFTFilePath();
+        fftPath = gameSpecs.getFFTFilePath();
         // Interface
-        actionToMove = gameSpecifics::actionToMove;
-        moveToAction = gameSpecifics::moveToAction;
-        gdlToRule = gameSpecifics::gdlToRule;
-        nodeToLiterals = gameSpecifics::nodeToLiterals;
+        actionToMove = gameSpecs::actionToMove;
+        moveToAction = gameSpecs::moveToAction;
+        gdlToRule = gameSpecs::gdlToRule;
+        nodeToLiterals = gameSpecs::nodeToLiterals;
         // Domain Specific
-        initialFFTNode = gameSpecifics.getInitialNode();
-        initialFFTNode.setReachable(true);
-        maxStateLiterals = gameSpecifics.getMaxStateLiterals();
-        getSymmetryRules = gameSpecifics::getSymmetryRules;
-        int[] dim = gameSpecifics.getBoardDim();
+        maxStateLiterals = gameSpecs.getMaxStateLiterals();
+        getSymmetryRules = gameSpecs::getSymmetryRules;
+        int[] dim = gameSpecs.getBoardDim();
         gameBoardHeight = dim[0];
         gameBoardWidth = dim[1];
-        legalIndices = gameSpecifics.legalIndices();
+        legalIndices = gameSpecs.legalIndices();
         // Visual Tool
-        failNode = gameSpecifics.getFailNode();
-        fftRuleEditPane = gameSpecifics.getInteractiveNode();
-        playerNames = gameSpecifics.getPlayerNames();
+        failNode = gameSpecs.getFailNode();
+        fftRuleEditPane = gameSpecs.getInteractiveNode();
+        playerNames = gameSpecs.getPlayerNames();
         // Logic representation
-        getGameAtoms = gameSpecifics::getGameAtoms;
-        getAtomId = gameSpecifics::getAtomId;
-        getAtomName = gameSpecifics::getAtomName;
-        getPosFromId = gameSpecifics::idToPos;
-        getIdFromPos = gameSpecifics::posToId;
-        getActionPreconditions = gameSpecifics::getActionPreconditions;
+        getGameAtoms = gameSpecs::getGameAtoms;
+        getAtomId = gameSpecs::getAtomId;
+        getAtomName = gameSpecs::getAtomName;
+        getPosFromId = gameSpecs::idToPos;
+        getIdFromPos = gameSpecs::posToId;
+        getActionPreconditions = gameSpecs::getActionPreconditions;
         sortedGameAtoms = getGameAtoms.get();
         sortedGameAtoms.sort(Collections.reverseOrder());
 
 
         // Try loading ffts from file in working directory
         //loadFFTs(fftPath);
+    }
+
+    public static FFTNode getInitialNode() {
+        FFTNode node = gameSpecifics.getInitialNode();
+        node.setReachable(true);
+        return node;
     }
 
     public static void save() {
@@ -211,6 +216,11 @@ public class FFTManager {
         FFTNode n = ps.getNode();
         ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(n);
         return failNode.getFailNode(ps, optimalMoves);
+    }
+
+    public static void randomizeSeeds() {
+        gameSpecifics.randomizeSeeds();
+
     }
 
 }

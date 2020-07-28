@@ -10,6 +10,10 @@ public class Zobrist {
     public static long[] turn;
 
     static {
+        initialize();
+    }
+
+    public static void initialize() {
         long range = Long.MAX_VALUE;
         Random r = new Random();
         int seed = (Config.RANDOM_SEED) ? r.nextInt() : Config.SEED;

@@ -30,6 +30,10 @@ public class Atoms {
     }
 
     static {
+        initialize();
+    }
+
+    public static void initialize() {
         stringToId = new HashMap<>();
         idToString = new HashMap<>();
         idToPos = new HashMap<>();

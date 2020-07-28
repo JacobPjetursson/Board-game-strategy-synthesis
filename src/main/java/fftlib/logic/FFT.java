@@ -62,24 +62,23 @@ public class FFT {
             this.failingPoint = new FFTNodeAndMove(duplicate.failingPoint);
 
         this.rules = new ArrayList<>();
-        for (Rule r : duplicate.rules) {
+        for (Rule r : duplicate.rules)
             this.rules.add(r.clone());
-        }
 
         this.ruleGroups = new ArrayList<>();
         for (RuleGroup rg : duplicate.ruleGroups)
             this.ruleGroups.add(new RuleGroup(this, rg.name, rg.startIdx, rg.endIdx));
 
-        this.ruleList = new RuleList();
-        for (Rule r : duplicate.ruleList)
-            ruleList.add(r.clone());
-
-        this.invertedList = new InvertedList(false);
-        for (Set<PropRule> set : duplicate.invertedList.ruleList) {
-            Set<PropRule> newSet = new HashSet<>();
-            for (PropRule r : set)
-                newSet.add(new PropRule(r));
-            this.invertedList.ruleList.add(newSet);
+        ruleList = new RuleList();
+        if (USE_APPLY_OPT) {
+            for (Rule r : this.rules)
+                ruleList.sortedAdd(r);
+        }
+        invertedList = new InvertedList(false);
+        if (USE_INVERTED_LIST_RULES_OPT) {
+            for (Rule r : this.rules) {
+                invertedList.add((PropRule)r);
+            }
         }
     }
 
@@ -112,7 +111,7 @@ public class FFT {
     public void append(Rule r) {
         r.setRuleIndex(size());
         rules.add(r);
-        // add to sorted list of rules if initialized
+        // add to sorted list of rules
         if (USE_APPLY_OPT)
             ruleList.sortedAdd(r);
         else if (USE_INVERTED_LIST_RULES_OPT) {
@@ -331,7 +330,7 @@ public class FFT {
     public boolean verifySingleThread(int team, boolean complete) {
         if (team == PLAYER_ANY)
             return verifySingleThread(PLAYER1, complete) && verifySingleThread(PLAYER2, complete);
-        FFTNode initialNode = FFTManager.initialFFTNode;
+        FFTNode initialNode = FFTManager.getInitialNode();
         LinkedList<FFTNode> frontier;
         frontier = new LinkedList<>();
         HashSet<FFTNode> closedSet = new HashSet<>();
@@ -394,7 +393,7 @@ public class FFT {
     public boolean verify_(int team, boolean complete) {
         if (team == PLAYER_ANY)
             return verify_(PLAYER1, complete) && verify_(PLAYER2, complete);
-        FFTNode initialNode = FFTManager.initialFFTNode;
+        FFTNode initialNode = FFTManager.getInitialNode();
         closedMap.clear();
         failed = false;
         // Check if win or draw is even possible
