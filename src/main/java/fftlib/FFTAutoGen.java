@@ -44,21 +44,12 @@ public class FFTAutoGen {
     public static void synthesize(FFT existingFFT) {
         if (!FFTSolver.solved)
             FFTSolver.solveGame();
-        if (existingFFT == null)
-            fft = new FFT("Synthesis");
-        else
-            fft = existingFFT;
-
-        if (!fft.isValid(AUTOGEN_TEAM)) {
-            System.err.println("Invalid fft");
-            System.exit(1);
-        }
 
         if (BENCHMARK_MODE) {
             double avgRules = 0, avgPrecons = 0, avgTime = 0;
             for (int i = 0; i < BENCHMARK_NUMBER; i++) {
                 long timeStart = System.currentTimeMillis();
-                generate();
+                generate(existingFFT);
                 avgTime += (System.currentTimeMillis() - timeStart) / 1000.0;
                 avgRules += fft.getAmountOfRules();
                 avgPrecons += fft.getAmountOfPreconditions();
@@ -71,14 +62,23 @@ public class FFTAutoGen {
             System.out.println("Average no. of preconditions: " + avgPrecons);
         }
         else {
-            generate();
+            generate(existingFFT);
         }
         addNewFFT(fft);
         if (SAVE_FFT)
             FFTManager.save();
     }
 
-    private static void generate() {
+    private static void generate(FFT existingFFT) {
+        if (existingFFT == null)
+            fft = new FFT("Synthesis");
+        else
+            fft = existingFFT.clone();
+
+        if (!fft.isValid(AUTOGEN_TEAM)) {
+            System.err.println("Invalid fft");
+            System.exit(1);
+        }
         long timeStart = System.currentTimeMillis();
 
         setup();
@@ -374,7 +374,7 @@ public class FFTAutoGen {
             System.out.println("DOING SAFE RUN");
         Map<FFTNode, Set<FFTMove>> appliedMap = new ConcurrentHashMap<>();
 
-        fillAppliedMap(r, appliedMap, lastRule, safe);
+        fillAppliedMap(r, appliedMap, false, safe);
         // check all states from previous successful verification again
 
         if (prevApplied != null && lastRule) {
@@ -411,7 +411,7 @@ public class FFTAutoGen {
             if (reachableStates.containsKey(subNode)) {
                 System.out.println("node: " + subNode + " is sub-optimal and still reachable!");
                 if (!isReachable(subNode, appliedMap)) {
-                    System.out.println("node: " + subNode + " , is not reachable!!");
+                    System.out.println("node: " + subNode + " , is not reachable after all!!");
                     checkedNodes.add(subNode);
                     continue;
                 }

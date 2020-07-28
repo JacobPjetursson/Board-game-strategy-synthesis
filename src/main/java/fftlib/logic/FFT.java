@@ -86,6 +86,10 @@ public class FFT {
         }
     }
 
+    public FFT clone() {
+        return new FFT(this);
+    }
+
     public int getAmountOfRules() {
         return rules.size();
     }
