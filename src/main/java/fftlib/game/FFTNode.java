@@ -49,9 +49,9 @@ public abstract class FFTNode {
         }
     }
 
-    public void setReachableParents(HashSet<FFTNode> parents) {
-        this.reachableParents = parents;
-        reachable = !parents.isEmpty();
+    public void clearReachableParents() {
+        reachableParents.clear();
+        reachable = false;
     }
 
     public Rule getAppliedRule() {
@@ -59,10 +59,6 @@ public abstract class FFTNode {
     }
 
     public void setAppliedRule(Rule r) {
-        if (r instanceof SymmetryRule) {
-            SymmetryRule symRule = (SymmetryRule) r;
-            r = symRule.getParent();
-        }
         appliedRule = r;
     }
 

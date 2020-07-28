@@ -5,10 +5,7 @@ import fftlib.GGPAutogen.Database;
 import fftlib.GGPAutogen.GGPManager;
 import fftlib.auxiliary.InvertedList;
 import fftlib.auxiliary.RuleList;
-import fftlib.game.FFTMove;
-import fftlib.game.FFTNode;
-import fftlib.game.FFTNodeAndMove;
-import fftlib.game.FFTSolution;
+import fftlib.game.*;
 import fftlib.logic.literal.Literal;
 import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.rule.PredRule;
@@ -267,47 +264,23 @@ public class FFT {
         return sb.toString();
     }
 
-    // used for visualization
-    public Rule getAppliedRule(FFTNode node) {
-        for (Rule r : getRules()) {
-            if (!r.apply(node).isEmpty()) {
-                return r;
-            }
-        }
-        return null;
-    }
-
-    public HashSet<FFTMove> apply_slow(FFTNode node, boolean safe) {
-        HashSet<FFTMove> moves = new HashSet<>();
+    public RuleMapping apply_slow(FFTNode node) {
+        HashSet<FFTMove> moves;
         for (Rule r : getRules()) {
             moves = r.apply(node);
             if (!moves.isEmpty()) {
-                /*
-                System.out.println("rule applies: " + r);
-                System.out.println("node: " + node);
-                System.out.println("node convert: " + node.convert());
-                System.out.println("moves: " + moves);
-                System.out.println();
-
-                 */
-                if (safe)
-                    node.setAppliedRule(r);
-                return moves;
+                return new RuleMapping(r, moves);
             }
         }
-        return moves;
+        return RuleMapping.NOMATCH;
     }
 
-    public HashSet<FFTMove> apply(FFTNode node, boolean safe) {
+    public RuleMapping apply(FFTNode node) {
         if (USE_APPLY_OPT)
-            return ruleList.apply(node, safe);
+            return ruleList.apply(node);
         if (USE_INVERTED_LIST_RULES_OPT)
-            return invertedList.apply(node, safe);
-        return apply_slow(node, safe);
-    }
-
-    public HashSet<FFTMove> apply(FFTNode node) {
-        return apply(node, false);
+            return invertedList.apply(node);
+        return apply_slow(node);
     }
 
     // for all rules r' with a higher index than r.index, check if r is subset of r'
@@ -382,7 +355,7 @@ public class FFT {
                         frontier.add(child);
                     }
             } else {
-                HashSet<FFTMove> moves = apply(node);
+                Set<FFTMove> moves = apply(node).getMoves();
                 ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(node);
                 // If move is null, check that all possible (random) moves are ok
                 if (moves.isEmpty()) {
@@ -474,7 +447,8 @@ public class FFT {
                 break;
             if (DETAILED_DEBUG || NAIVE_RULE_GENERATION)
                 System.out.println("Remaining amount of rules: " + getAmountOfRules());
-            if (!getRules().get(i - removed).equals(r)) { // some rules deleted
+            if (!getRules().get(i - removed).equals(r)) {
+                System.out.println("This rule has already been deleted");
                 removed++;
                 continue;
             }
@@ -570,7 +544,7 @@ public class FFT {
                     addTask(child);
                 }
             } else {
-                HashSet<FFTMove> moves = apply(node);
+                Set<FFTMove> moves = apply(node).getMoves();
                 ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(node);
                 // If move is null, check that all possible (random) moves are ok
                 if (moves.isEmpty()) {

@@ -28,6 +28,7 @@ import tictactoe.gui.board.BoardTile;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import static fftlib.FFTManager.currFFT;
 import static misc.Globals.*;
@@ -293,11 +294,11 @@ public class Controller {
     private void highlightHelp(boolean highlight) {
 
         Node n = new Node(node);
-        HashSet<FFTMove> fftChosenMoves = new HashSet<>();
+        Set<FFTMove> fftChosenMoves = new HashSet<>();
         ArrayList<Move> moves = Logic.legalMoves(node.getTurn(), node);
         if (highlight) {
             if (currFFT != null)
-                fftChosenMoves = currFFT.apply(node);
+                fftChosenMoves = currFFT.apply(node).getMoves();
         }
         BoardTile[][] tiles = playArea.getPlayBox().getBoard().getTiles();
 

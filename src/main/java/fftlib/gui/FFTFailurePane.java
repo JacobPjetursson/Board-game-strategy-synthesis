@@ -84,7 +84,7 @@ public class FFTFailurePane extends BorderPane {
             stage.setScene(editPane.getScene());
             Rule r = new PropRule(node.convert(), move.convert());
             if (!currFFT.getFailingPoint().random) {// insert new rule before the applied rule
-                Rule appliedRule = currFFT.getAppliedRule(node);
+                Rule appliedRule = currFFT.apply(node).getRule();
                 int idx = currFFT.getRules().indexOf(appliedRule);
                 editPane.addRule(idx, r);
             } else {

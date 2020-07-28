@@ -3,6 +3,7 @@ package fftlib.auxiliary;
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
+import fftlib.game.RuleMapping;
 import fftlib.logic.literal.Literal;
 import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.literal.PropLiteral;
@@ -34,20 +35,16 @@ public class RuleList extends ArrayList<Rule> {
         super();
     }
 
-    public HashSet<FFTMove> apply(FFTNode n, boolean safe) {
-        return findMoves(n, safe);
+    public RuleMapping apply(FFTNode n) {
+        return findMoves(n);
     }
 
-    public HashSet<FFTMove> apply(FFTNode n) {
-        return apply(n, false);
-    }
-
-    public HashSet<FFTMove> findMoves(FFTNode n, boolean safe) {
+    public RuleMapping findMoves(FFTNode n) {
         LiteralSet lSet = n.convert();
         List<Rule> appliedRules = findRules(lSet);
 
         if (appliedRules.isEmpty())
-            return new HashSet<>();
+            return RuleMapping.NOMATCH;
 
         int minIdx = Integer.MAX_VALUE;
         Rule firstRule = null;
@@ -57,18 +54,17 @@ public class RuleList extends ArrayList<Rule> {
                 firstRule = r;
             }
         }
-        if (safe)
-            n.setAppliedRule(firstRule);
         HashSet<FFTMove> moves = new HashSet<>();
         moves.add(firstRule.getAction().convert()); // can't be null
         if (!Config.SYMMETRY_DETECTION && !Config.USE_LIFTING)
-            return moves;
+            return new RuleMapping(firstRule, moves);
 
         for (Rule r : appliedRules)
-            if (r.getRuleIndex() == minIdx)
+            if (r.getRuleIndex() == minIdx) {
                 moves.add(r.getAction().convert());
+            }
 
-        return moves;
+        return new RuleMapping(firstRule, moves);
     }
 
     public List<Rule> findRules(LiteralSet lSet) {

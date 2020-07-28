@@ -4,6 +4,7 @@ import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 
 import java.util.HashSet;
+import java.util.Set;
 
 public class FFT_Follower {
     public int team;
@@ -16,7 +17,7 @@ public class FFT_Follower {
         if (FFTManager.currFFT == null)
             return null;
 
-        HashSet<FFTMove> moves = FFTManager.currFFT.apply(node);
+        Set<FFTMove> moves = FFTManager.currFFT.apply(node).getMoves();
         if (!moves.isEmpty())
             return moves.iterator().next();
 

@@ -154,13 +154,6 @@ public abstract class Rule {
         return apply(n.convert());
     }
 
-    public HashSet<FFTMove> apply(FFTNode n, boolean safe) {
-        HashSet<FFTMove> moves = apply(n.convert());
-        if (!moves.isEmpty() && safe)
-            n.setAppliedRule(this);
-        return moves;
-    }
-
     public abstract HashSet<FFTMove> apply(LiteralSet lSet);
 
     public Move apply(MachineState ms) throws MoveDefinitionException {

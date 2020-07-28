@@ -1,9 +1,6 @@
 package fftlib.auxiliary;
 
-import fftlib.game.FFTMove;
-import fftlib.game.FFTSolution;
-import fftlib.game.FFTNode;
-import fftlib.game.NodeMapping;
+import fftlib.game.*;
 import fftlib.logic.rule.Rule;
 
 import java.math.BigInteger;
@@ -98,41 +95,34 @@ public class NodeMap {
         return map;
     }
 
-    public void findNodes(Rule r, Map<FFTNode, Set<FFTMove>> appliedMap) {
-        findNodes(r, appliedMap, false);
-    }
-
-    public void findNodes(Rule r, Map<FFTNode, Set<FFTMove>> appliedMap, boolean safe) {
+    public void findNodes(Rule r, Map<FFTNode, RuleMapping> appliedMap) {
         if (sort == BITSTRING_SORT) {
             BigInteger code = r.getAllPreconditions().getBitString();
             // multithreading has bad performance
             for (Map.Entry<BigInteger, FFTNode> entry : codeMap.entrySet()) {
                 if (entry.getKey().compareTo(code) < 0)
                     break;
-                insert(entry.getValue(), r, appliedMap, safe);
+                insert(entry.getValue(), r, appliedMap);
 
             }
         }
         else if (USE_INVERTED_LIST_NODES_OPT) {
-            nodeList.findNodes(r, appliedMap, safe);
+            nodeList.findNodes(r, appliedMap);
         }
         else if (!SINGLE_THREAD) {
             values().parallelStream().forEach(node ->
-                    insert(node, r, appliedMap, safe));
+                    insert(node, r, appliedMap));
         } else {
             for (FFTNode n : values()) {
-                insert(n, r, appliedMap, safe);
+                insert(n, r, appliedMap);
             }
         }
     }
 
-    private void insert(FFTNode n, Rule r, Map<FFTNode, Set<FFTMove>> nodes, boolean safe) {
-        HashSet<FFTMove> moves = r.apply(n);
-        if (!moves.isEmpty()) {
-            nodes.put(n, moves);
-            if (safe)
-                n.setAppliedRule(r);
-        }
+    private void insert(FFTNode n, Rule r, Map<FFTNode, RuleMapping> nodes) {
+        Set<FFTMove> moves = r.apply(n);
+        if (!moves.isEmpty())
+            nodes.put(n, new RuleMapping(r, moves));
     }
 
     public void removeAll(Collection<FFTNode> nodes) {

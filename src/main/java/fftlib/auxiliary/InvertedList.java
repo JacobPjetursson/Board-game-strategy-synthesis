@@ -3,6 +3,7 @@ package fftlib.auxiliary;
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
+import fftlib.game.RuleMapping;
 import fftlib.logic.literal.Literal;
 import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.literal.PropLiteral;
@@ -66,14 +67,14 @@ public class InvertedList {
         }
     }
 
-    public HashSet<FFTMove> apply(FFTNode node, boolean safe) {
-        return findMoves(node, safe);
+    public RuleMapping apply(FFTNode node) {
+        return findMoves(node);
     }
 
-    public HashSet<FFTMove> findMoves(FFTNode node, boolean safe) {
+    public RuleMapping findMoves(FFTNode node) {
         LiteralSet nodeSet = node.convert();
         if (ruleList.isEmpty())
-            return new HashSet<>();
+            return RuleMapping.NOMATCH;
         // start by finding the smallest list, as well as all relevant lists
         ArrayList<Set<PropRule>> relevantSets = new ArrayList<>();
         Set<PropRule> smallest = null;
@@ -103,12 +104,10 @@ public class InvertedList {
         }
         HashSet<FFTMove> moves = new HashSet<>();
         if (firstRule == null) // no rule applies
-            return moves;
+            return RuleMapping.NOMATCH;
         moves.add(firstRule.getAction().convert()); // can't be null
-        if (safe)
-            node.setAppliedRule(firstRule);
         if (!Config.SYMMETRY_DETECTION && !Config.USE_LIFTING) {
-            return moves;
+            return new RuleMapping(firstRule, moves);
         }
 
         // pick up moves from other symmetric rules
@@ -116,17 +115,13 @@ public class InvertedList {
             if (r.getRuleIndex() == firstIndex)
                 moves.add(r.getAction().convert());
 
-        return moves;
-    }
-
-    public void findNodes(PropRule rule, Map<FFTNode, Set<FFTMove>> appliedMap) {
-        findNodes(rule, appliedMap, false);
+        return new RuleMapping(firstRule, moves);
     }
 
     // todo - ONLY WORKS WITH NON-SYMMETRY AND NO LIFTING
     // todo - we can fix it by calling findNodes for each symmetric rule,
     // todo      and concatenate the actions if multiple symmetries applies
-    public void findNodes(Rule rule, Map<FFTNode, Set<FFTMove>> appliedMap, boolean safe) {
+    public void findNodes(Rule rule, Map<FFTNode, RuleMapping> appliedMap) {
         if (nodeList.isEmpty())
             return;
         // start by finding the smallest list, as well as all relevant lists
@@ -147,22 +142,20 @@ public class InvertedList {
         // if element is in all lists, add to new set
         if (!SINGLE_THREAD) {
             smallest.parallelStream().forEach(node ->
-                    insert(relevantSets, node, rule, appliedMap, safe));
+                    insert(relevantSets, node, rule, appliedMap));
         } else {
             for (FFTNode node : smallest) {
-                insert(relevantSets, node, rule, appliedMap, safe);
+                insert(relevantSets, node, rule, appliedMap);
             }
         }
     }
 
     private static void insert(ArrayList<Set<FFTNode>> sets, FFTNode node,
-                               Rule rule, Map<FFTNode, Set<FFTMove>> appliedMap, boolean safe) {
+                               Rule rule, Map<FFTNode, RuleMapping> appliedMap) {
         if (nodeApplies(sets, node)) {
-            HashSet<FFTMove> ruleMoves = new HashSet<>();
+            Set<FFTMove> ruleMoves = new HashSet<>();
             ruleMoves.add(rule.getAction().convert());
-            appliedMap.put(node, ruleMoves);
-            if (safe)
-                node.setAppliedRule(rule);
+            appliedMap.put(node, new RuleMapping(rule, ruleMoves));
 
         }
     }
