@@ -20,6 +20,10 @@ public class RuleList extends ArrayList<Rule> {
     private static final RuleComparator rc = new RuleComparator();
     private static ArrayList<Integer> sortedAtoms;
     static {
+        initialize();
+    }
+
+    public static void initialize() {
         sortedAtoms = new ArrayList<>(FFTManager.sortedGameAtoms);
         // remove all negative atoms (since we dont use those in the ruleList)
         ArrayList<Integer> removeList = new ArrayList<>();
@@ -77,10 +81,10 @@ public class RuleList extends ArrayList<Rule> {
 
         ArrayList<Rule> appliedRules = new ArrayList<>();
         int atom = sortedAtoms.get(atomIdx++);
-        // todo
+
         Literal pos = new PropLiteral(atom);
-        String negName = "!" + pos.getName();
-        Literal neg = new PropLiteral(negName);
+        Literal neg = new PropLiteral(atom);
+        neg.setNegated(true);
 
         int posEnd = findInterval(pos, true, rules);
         int negStart = findInterval(neg, false, rules);

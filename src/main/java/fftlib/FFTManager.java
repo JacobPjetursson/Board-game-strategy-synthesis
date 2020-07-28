@@ -1,6 +1,7 @@
 package fftlib;
 
 import fftlib.auxiliary.Position;
+import fftlib.auxiliary.RuleList;
 import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.FFTRuleEditPane;
@@ -39,6 +40,7 @@ public class FFTManager {
     public static Function<PropRule, HashSet<SymmetryRule>> getSymmetryRules;
     public static int maxStateLiterals;
     public static int winner; // set by solver
+    public static boolean isCyclic;
     // Visual tool
     private static FFTFailNode failNode;
     public static FFTRuleEditPane fftRuleEditPane;
@@ -81,6 +83,7 @@ public class FFTManager {
         gameBoardHeight = dim[0];
         gameBoardWidth = dim[1];
         legalIndices = gameSpecs.legalIndices();
+        isCyclic = gameSpecs.isCyclic();
         // Visual Tool
         failNode = gameSpecs.getFailNode();
         fftRuleEditPane = gameSpecs.getInteractiveNode();
@@ -95,9 +98,6 @@ public class FFTManager {
         sortedGameAtoms = getGameAtoms.get();
         sortedGameAtoms.sort(Collections.reverseOrder());
 
-
-        // Try loading ffts from file in working directory
-        //loadFFTs(fftPath);
     }
 
     public static FFTNode getInitialNode() {
@@ -220,6 +220,9 @@ public class FFTManager {
 
     public static void randomizeSeeds() {
         gameSpecifics.randomizeSeeds();
+        sortedGameAtoms = getGameAtoms.get();
+        sortedGameAtoms.sort(Collections.reverseOrder());
+        RuleList.initialize();
 
     }
 

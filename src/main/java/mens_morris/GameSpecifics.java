@@ -236,4 +236,9 @@ public class GameSpecifics implements FFTGameSpecifics {
         Zobrist.initialize();
         Atoms.initialize();
     }
+
+    @Override
+    public boolean isCyclic() {
+        return true;
+    }
 }

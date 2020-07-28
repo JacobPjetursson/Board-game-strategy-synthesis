@@ -21,6 +21,7 @@ public interface FFTGameSpecifics {
     int getMaxStateLiterals(); // Domain specific
     ArrayList<Integer> legalIndices(); // Domain specific
     void randomizeSeeds(); // Domain specific
+    boolean isCyclic();
 
     FFTMove actionToMove(Action a); // Interface
     Action moveToAction(FFTMove m); // Interface

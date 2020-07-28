@@ -184,6 +184,11 @@ public class GameSpecifics implements FFTGameSpecifics {
         Zobrist.initialize();
     }
 
+    @Override
+    public boolean isCyclic() {
+        return false;
+    }
+
     /*
     public HashSet<LiteralSet> getCoveredStates(Rule rule) {
         HashSet<LiteralSet> states = new HashSet<>();
