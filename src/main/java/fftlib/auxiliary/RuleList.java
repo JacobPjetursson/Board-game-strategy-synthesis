@@ -9,6 +9,7 @@ import fftlib.logic.literal.PropLiteral;
 import fftlib.logic.rule.Rule;
 import fftlib.logic.rule.PredRule;
 import fftlib.logic.rule.PropRule;
+import fftlib.logic.rule.SymmetryRule;
 import misc.Config;
 
 import java.util.*;
@@ -31,13 +32,6 @@ public class RuleList extends ArrayList<Rule> {
 
     public RuleList() {
         super();
-    }
-
-    public RuleList(RuleList duplicate) {
-        super();
-        for (Rule r : duplicate) {
-            add(r.clone());
-        }
     }
 
     public HashSet<FFTMove> apply(FFTNode n, boolean safe) {
@@ -141,7 +135,7 @@ public class RuleList extends ArrayList<Rule> {
             for (Rule ru : pr.getGroundedPropRules())
                 this.add(ru);
         }
-        else {
+        else if (rule instanceof PropRule){
             PropRule r = (PropRule) rule;
             if (Config.SYMMETRY_DETECTION) {
                 for (Rule ru : r.getSymmetryRules())
@@ -149,6 +143,8 @@ public class RuleList extends ArrayList<Rule> {
             } else {
                 super.add(r);
             }
+        } else {
+            super.add(rule);
         }
         return true;
     }

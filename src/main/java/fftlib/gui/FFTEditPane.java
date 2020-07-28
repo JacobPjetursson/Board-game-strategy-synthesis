@@ -912,7 +912,7 @@ public class FFTEditPane extends BorderPane {
                 if (USE_OPTIMIZED_MINIMIZE)
                     FFTAutoGen.findReachableStates();
 
-                FFTAutoGen.minimize();
+                FFTAutoGen.minimize(currFFT);
                 int diffRules = ruleSize - FFTManager.currFFT.getAmountOfRules();
                 int diffPrecs = precSize - FFTManager.currFFT.getAmountOfPreconditions();
                 if (diffRules == 0 && diffPrecs == 0) {
@@ -1014,7 +1014,7 @@ public class FFTEditPane extends BorderPane {
                 msg = "Strategy is already strongly optimal";
                 changes = tempChanges;
             } else {
-                FFTAutoGen.synthesize();
+                FFTAutoGen.synthesize(currFFT);
                 msg = "Strongly optimal strategy succesfully generated";
                 pushUndoStack();
             }

@@ -6,11 +6,12 @@ import fftlib.logic.rule.Rule;
 import fftlib.logic.rule.SymmetryRule;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 
 public abstract class FFTNode {
     protected int turn;
-    private boolean reachable = true;
+    private boolean reachable;
     private HashSet<FFTNode> reachableParents;
 
     // cached literalSet
@@ -30,10 +31,27 @@ public abstract class FFTNode {
         reachable = true;
     }
 
+    public void addReachableParents(Collection<FFTNode> parents) {
+        for (FFTNode parent : parents) {
+            addReachableParent(parent);
+        }
+    }
+
     public void removeReachableParent(FFTNode parent) {
         reachableParents.remove(parent);
         if (reachableParents.isEmpty())
             reachable = false;
+    }
+
+    public void removeReachableParents(Collection<FFTNode> parents) {
+        for (FFTNode parent : parents) {
+            removeReachableParent(parent);
+        }
+    }
+
+    public void setReachableParents(HashSet<FFTNode> parents) {
+        this.reachableParents = parents;
+        reachable = !parents.isEmpty();
     }
 
     public Rule getAppliedRule() {
@@ -49,11 +67,18 @@ public abstract class FFTNode {
     }
 
     public HashSet<FFTNode> getReachableParents() {
+        if (reachableParents == null)
+            reachableParents = new HashSet<>();
         return reachableParents;
     }
 
     public boolean isReachable() {
         return reachable;
+    }
+
+    // used for setting the initial state
+    public void setReachable(boolean reachable) {
+        this.reachable = reachable;
     }
 
     public LiteralSet convert() {

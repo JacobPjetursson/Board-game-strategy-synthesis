@@ -2,11 +2,13 @@ package misc.demos;
 
 import fftlib.FFTAutoGen;
 import fftlib.FFTManager;
+import fftlib.game.FFTNode;
 import fftlib.logic.rule.Rule;
+import sim.Node;
 import tictactoe.FFT.GameSpecifics;
 
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class Demo {
 
@@ -14,8 +16,18 @@ public class Demo {
         GameSpecifics gs = new GameSpecifics();
         FFTManager.initialize(gs);
 
-        FFTAutoGen.synthesize();
-        ArrayList<Rule> rules = FFTManager.currFFT.getRules();
+        //FFTAutoGen.synthesize();
+        //ArrayList<Rule> rules = FFTManager.currFFT.getRules();
+
+        Map<FFTNode, Set<FFTNode>> testMap = new HashMap<>();
+        Node testNode = new Node();
+        testMap.put(testNode, new HashSet<>());
+        System.out.println(testMap.get(testNode));
+        Set<FFTNode> testSet = testMap.get(testNode);
+        testSet.add(testNode);
+        System.out.println(testMap.get(testNode));
+
+
 
         //FFTManager.loadFFTs();
         //System.out.println("fft size: " + FFTManager.currFFT.size());

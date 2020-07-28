@@ -40,6 +40,10 @@ public class NodeMap {
             nodeList = new InvertedList(true);
     }
 
+    public int getSort() {
+        return sort;
+    }
+
 
     public void put(FFTNode n) {
         if (USE_INVERTED_LIST_NODES_OPT)

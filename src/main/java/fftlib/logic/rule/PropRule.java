@@ -96,17 +96,17 @@ public class PropRule extends Rule {
             initializeSymmetryRules();
     }
 
-    @Override
-    public void removeAction() {
-        this.action = new Action();
-        if (SYMMETRY_DETECTION)
-            initializeSymmetryRules();
-    }
-
     public void removePrecondition(Literal l) {
         this.preconditions.remove(l);
         if (!action.getPreconditions().contains(l))
             this.allPreconditions.remove(l);
+        if (SYMMETRY_DETECTION)
+            initializeSymmetryRules();
+    }
+
+    @Override
+    public void removeAction() {
+        this.action = new Action();
         if (SYMMETRY_DETECTION)
             initializeSymmetryRules();
     }

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import static fftlib.auxiliary.Transform.*;
+import static misc.Config.SHOW_GUI;
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 
@@ -136,7 +137,7 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public FFTRuleEditPane getInteractiveNode() {
-        if (interactiveNode == null)
+        if (interactiveNode == null && SHOW_GUI)
             interactiveNode = new RuleEditPane(cont);
         return interactiveNode;
     }

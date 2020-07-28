@@ -10,6 +10,8 @@ import fftlib.game.FFTNode;
 import fftlib.game.FFTNodeAndMove;
 import fftlib.game.FFTSolution;
 import fftlib.logic.literal.Literal;
+import fftlib.logic.literal.LiteralSet;
+import fftlib.logic.rule.PredRule;
 import fftlib.logic.rule.PropRule;
 import fftlib.logic.rule.Rule;
 import fftlib.logic.rule.RuleGroup;
@@ -62,25 +64,25 @@ public class FFT {
         if (duplicate.failingPoint != null)
             this.failingPoint = new FFTNodeAndMove(duplicate.failingPoint);
 
-        rules = new ArrayList<>();
+        this.rules = new ArrayList<>();
         for (Rule r : duplicate.rules) {
-            rules.add(r.clone());
+            this.rules.add(r.clone());
         }
 
-        ruleGroups = new ArrayList<>();
+        this.ruleGroups = new ArrayList<>();
         for (RuleGroup rg : duplicate.ruleGroups)
-            ruleGroups.add(new RuleGroup(this, rg.name, rg.startIdx, rg.endIdx));
+            this.ruleGroups.add(new RuleGroup(this, rg.name, rg.startIdx, rg.endIdx));
 
-        ruleList = new RuleList();
+        this.ruleList = new RuleList();
         for (Rule r : duplicate.ruleList)
             ruleList.add(r.clone());
 
-        invertedList = new InvertedList(false);
+        this.invertedList = new InvertedList(false);
         for (Set<PropRule> set : duplicate.invertedList.ruleList) {
             Set<PropRule> newSet = new HashSet<>();
             for (PropRule r : set)
                 newSet.add(new PropRule(r));
-            invertedList.ruleList.add(newSet);
+            this.invertedList.ruleList.add(newSet);
         }
     }
 
@@ -107,7 +109,7 @@ public class FFT {
     }
 
     public void append(Rule r) {
-        r.setRuleIndex(getAmountOfRules());
+        r.setRuleIndex(size());
         rules.add(r);
         // add to sorted list of rules if initialized
         if (USE_APPLY_OPT)
@@ -273,9 +275,17 @@ public class FFT {
 
     public HashSet<FFTMove> apply_slow(FFTNode node, boolean safe) {
         HashSet<FFTMove> moves = new HashSet<>();
-        for (Rule r : rules) {
+        for (Rule r : getRules()) {
             moves = r.apply(node);
             if (!moves.isEmpty()) {
+                /*
+                System.out.println("rule applies: " + r);
+                System.out.println("node: " + node);
+                System.out.println("node convert: " + node.convert());
+                System.out.println("moves: " + moves);
+                System.out.println();
+
+                 */
                 if (safe)
                     node.setAppliedRule(r);
                 return moves;
@@ -354,6 +364,7 @@ public class FFT {
             return false;
         while (!frontier.isEmpty()) {
             FFTNode node = frontier.pop();
+            //System.out.println("popped node: " + node);
             if (node.isTerminal()) {
                 if (node.getWinner() == opponent) {
                     // Should not hit this given initial check
@@ -375,6 +386,7 @@ public class FFT {
                         if (optimalMoves.contains(m)) {
                             FFTNode nextNode = node.getNextNode(m);
                             if (!closedSet.contains(nextNode)) {
+                                //System.out.println("adding node: " + nextNode + " , from parent: " + node);
                                 closedSet.add(nextNode);
                                 frontier.add(nextNode);
                             }
@@ -391,6 +403,7 @@ public class FFT {
                         }
                         FFTNode nextNode = node.getNextNode(m);
                         if (!closedSet.contains(nextNode)) {
+                            //System.out.println("adding node: " + nextNode + " , from parent: " + node);
                             closedSet.add(nextNode);
                             frontier.add(nextNode);
                         }
@@ -428,19 +441,98 @@ public class FFT {
     }
 
     public Move apply(MachineState ms) throws MoveDefinitionException {
-        /*
-        for (RuleEntity re : ruleEntities) {
-            Move move = re.apply(ms);
-            for (Rule rule : ruleGroup.rules) {
-                    Move move = rule.apply(ms);
-                    if (move != null) {
-                        return move;
-                    }
+        return null;
+    }
+
+    // assumes that the FFT is strongly optimal
+    public int minimize() {
+        int ruleSize, precSize;
+        int i = 0;
+        do {
+            ruleSize = getAmountOfRules();
+            precSize = getAmountOfPreconditions();
+            i++;
+            System.out.println("Minimizing, iteration no. " + i);
+            minimizeRules();
+        } while (MINIMIZE_ITERATIVELY &&
+                (ruleSize != getAmountOfRules() || precSize != getAmountOfPreconditions()));
+        return i;
+    }
+
+    private void minimizeRules() {
+        ArrayList<Rule> rulesCopy = new ArrayList<>(getRules());
+        int removed = 0;
+        for (int i = 0; i < rulesCopy.size(); i++) {
+            Rule r = rulesCopy.get(i);
+            if (r.isLocked())
+                continue;
+            if ((i - removed) >= size()) // remaining rules are removed
+                break;
+            if (DETAILED_DEBUG || NAIVE_RULE_GENERATION)
+                System.out.println("Remaining amount of rules: " + getAmountOfRules());
+            if (!getRules().get(i - removed).equals(r)) { // some rules deleted
+                removed++;
+                continue;
+            }
+
+            removeRule(i - removed);
+            removed++;
+
+            if (!verify(AUTOGEN_TEAM, true)) {
+                removed--;
+                addRule(r, i - removed);
+                if (MINIMIZE_PRECONDITIONS)
+                    simplifyRule(r);
+                if (LIFT_WHEN_MINIMIZING && !(r instanceof PredRule)) {
+                    PropRule propRule = (PropRule) r;
+                    liftRule(propRule);
+                }
             }
         }
+    }
 
-         */
-        return null;
+    // if simplifying last rule, simplifying can not effect other rules, so it's simpler
+    private void simplifyRule(Rule r) {
+        if (DETAILED_DEBUG) System.out.println("SIMPLIFYING RULE: " + r);
+        LiteralSet precons = new LiteralSet(r.getPreconditions());
+
+        boolean simplified = false;
+        for (Literal l : precons) {
+            if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO REMOVE: " + l.getName());
+            removePrecondition(r, l);
+
+            if (!verify(AUTOGEN_TEAM, true)) {
+                if (DETAILED_DEBUG) System.out.println("FAILED TO REMOVE: " + l.getName());
+                addPrecondition(r, l);
+            } else {
+                simplified = true;
+                if (DETAILED_DEBUG) System.out.println("REMOVING PRECONDITION: " + l.getName());
+            }
+            if (DETAILED_DEBUG) System.out.println("SUCCESS, RULE IS NOW: " + r);
+        }
+        if (simplified)
+            removeDeadRules(r);
+    }
+
+    private Rule liftRule(PropRule r) {
+        if (DETAILED_DEBUG) System.out.println("ATTEMPTING TO LIFT RULE");
+        // attempt to lift propositional variables one at a time, sorted by the most occurring variable 1st
+        for (int prop : r.getSortedProps()) {
+            PredRule pr = r.liftAll(prop);
+            if (pr == null) // inconsistent
+                continue;
+            replaceRule(r, pr);
+            if (DETAILED_DEBUG) System.out.println("VERIFYING LIFTED RULE: " + pr);
+            // we do not want to lift if the lifted rule does not apply to more states
+            if (verify(AUTOGEN_TEAM, true)) {
+                if (DETAILED_DEBUG) System.out.println("RULE SUCCESSFULLY LIFTED TO: " + pr);
+                return pr;
+            } else {
+                replaceRule(pr, r);
+            }
+        }
+        if (DETAILED_DEBUG) System.out.println("FAILED TO LIFT RULE");
+        return r;
     }
 
     public class VerificationTask extends RecursiveTask<Boolean> {
@@ -593,6 +685,7 @@ public class FFT {
                 t.fork();
             }
         }
+
     }
 }
 

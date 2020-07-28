@@ -57,13 +57,6 @@ public class LiteralSet extends HashSet<Literal> {
         return removeAll;
     }
 
-    public LiteralSet applyAction(Action action) {
-        LiteralSet set = new LiteralSet(this);
-        set.addAll(action.adds);
-        set.removeAll(action.rems);
-        return set;
-    }
-
     public BigInteger getBitString() {
         return bitString;
     }

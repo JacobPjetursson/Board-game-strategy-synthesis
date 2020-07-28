@@ -48,8 +48,9 @@ public class Node extends FFTNode {
         for (int i = 0; i < node.board.length; i++) {
             board[i] = Arrays.copyOf(node.board[i], node.board[i].length);
         }
-        turn = node.turn;
-        move = node.move;
+        if (node.move != null)
+            this.move = new Move(node.move);
+        this.turn = node.turn;
         this.phase2 = node.phase2;
         this.canRemove = node.canRemove;
         unplaced = node.unplaced;
@@ -121,12 +122,6 @@ public class Node extends FFTNode {
                 (i != 4 || j != 3);
     }
 
-    public void setTurn(int newTurn) {
-        zobrist_key ^= Zobrist.turn[turn];
-        zobrist_key ^= Zobrist.turn[newTurn];
-        this.turn = newTurn;
-    }
-
     @Override
     public FFTNode getNextNode(FFTMove move) {
         return getNextState((Move) move);
@@ -183,10 +178,6 @@ public class Node extends FFTNode {
             turn = PLAYER2;
         else
             turn = PLAYER1;
-    }
-
-    public void setBoardEntry(int row, int col, int team) {
-        board[row][col] = team;
     }
 
     public String toString() {

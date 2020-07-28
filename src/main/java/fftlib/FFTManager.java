@@ -75,6 +75,7 @@ public class FFTManager {
         nodeToLiterals = gameSpecifics::nodeToLiterals;
         // Domain Specific
         initialFFTNode = gameSpecifics.getInitialNode();
+        initialFFTNode.setReachable(true);
         maxStateLiterals = gameSpecifics.getMaxStateLiterals();
         getSymmetryRules = gameSpecifics::getSymmetryRules;
         int[] dim = gameSpecifics.getBoardDim();
@@ -182,6 +183,12 @@ public class FFTManager {
         FFT newFFT = new FFT(name);
         ffts.add(newFFT);
         currFFT = newFFT;
+        fftIndex = ffts.size() - 1;
+    }
+
+    public static void addNewFFT(FFT fft) {
+        ffts.add(fft);
+        currFFT = fft;
         fftIndex = ffts.size() - 1;
     }
 

@@ -11,15 +11,15 @@ public abstract class FFTMove {
         return team;
     }
 
-    void setTeam(int team) {
-        this.team = team;
-    }
-
     public Action convert() {
         return FFTManager.moveToAction.apply(this);
     }
 
     public abstract FFTMove clone();
+
+    public abstract boolean equals(Object o);
+
+    public abstract int hashCode();
 
 
 }

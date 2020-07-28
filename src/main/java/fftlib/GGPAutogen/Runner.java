@@ -73,7 +73,7 @@ public class Runner {
 
         System.out.println("Amount of rules before minimizing: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions before minimizing: " + fft.getAmountOfPreconditions());
-        int it = FFTAutoGen.minimize();
+        int it = FFTAutoGen.minimize(fft);
         System.out.println("Amount of rules after " + it + " minimize iterations: " + fft.getAmountOfRules());
         System.out.println("Amount of preconditions after " + it + " minimize iterations: " + fft.getAmountOfPreconditions());
 

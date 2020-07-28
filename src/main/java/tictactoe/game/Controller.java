@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 
+import static fftlib.FFTManager.currFFT;
 import static misc.Globals.*;
 
 
@@ -73,7 +74,7 @@ public class Controller {
         FFTSolver.solveGame();
         // Autogenerate
         if (ENABLE_AUTOGEN)
-            FFTAutoGen.synthesize();
+            FFTAutoGen.synthesize(currFFT);
 
 
         PlayPane playPane = new PlayPane(this);
@@ -295,8 +296,8 @@ public class Controller {
         HashSet<FFTMove> fftChosenMoves = new HashSet<>();
         ArrayList<Move> moves = Logic.legalMoves(node.getTurn(), node);
         if (highlight) {
-            if (FFTManager.currFFT != null)
-                fftChosenMoves = FFTManager.currFFT.apply(node);
+            if (currFFT != null)
+                fftChosenMoves = currFFT.apply(node);
         }
         BoardTile[][] tiles = playArea.getPlayBox().getBoard().getTiles();
 
@@ -439,7 +440,7 @@ public class Controller {
     }
 
     public FFT getCurrFFT() {
-        return FFTManager.currFFT;
+        return currFFT;
     }
 
 }

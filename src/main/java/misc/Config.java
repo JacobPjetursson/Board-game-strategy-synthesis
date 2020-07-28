@@ -21,13 +21,14 @@ public class Config {
     public static boolean SHOW_GUI;
     public static int RULE_ORDERING;
     public static boolean MINIMIZE_PRECONDITIONS;
+    public static boolean MINIMIZE_ITERATIVELY;
     public static boolean SYMMETRY_DETECTION;
     public static boolean SIMPLIFY_AFTER_DEL;
     public static boolean NAIVE_RULE_GENERATION;
     public static boolean SINGLE_THREAD;
-    public static boolean SHOW_RULE_GROUPS;
     public static boolean USE_DEBUG_FILE;
     public static String DEBUG_FILENAME;
+    public static boolean TESTING;
     public static boolean BENCHMARK_MODE;
     public static int BENCHMARK_NUMBER;
     public static boolean USE_BITSTRING_SORT_OPT;
@@ -121,12 +122,13 @@ public class Config {
         ENABLE_GGP_PARSER = Boolean.parseBoolean(global.getProperty("enable_ggp_parser"));
         SHOW_GUI = Boolean.parseBoolean(global.getProperty("show_gui"));
         MINIMIZE_PRECONDITIONS = Boolean.parseBoolean(global.getProperty("minimize_preconditions"));
+        MINIMIZE_ITERATIVELY = Boolean.parseBoolean(global.getProperty("minimize_iteratively"));
         SYMMETRY_DETECTION = Boolean.parseBoolean(global.getProperty("symmetry_detection"));
         SIMPLIFY_AFTER_DEL = Boolean.parseBoolean(global.getProperty("simplify_rules_after_deleting_states"));
         NAIVE_RULE_GENERATION = Boolean.parseBoolean(global.getProperty("naive_generation"));
-        SHOW_RULE_GROUPS = Boolean.parseBoolean(global.getProperty("show_rule_groups"));
         // DEBUG AND TEST
         DETAILED_DEBUG = Boolean.parseBoolean(global.getProperty("detailedDebug"));
+        TESTING = Boolean.parseBoolean(global.getProperty("testing"));
         BENCHMARK_MODE = Boolean.parseBoolean(global.getProperty("benchmark_mode"));
         BENCHMARK_NUMBER = Integer.parseInt(global.getProperty("no_of_benchmarks"));
         USE_DEBUG_FILE = Boolean.parseBoolean(global.getProperty("use_debug_file"));
@@ -178,6 +180,7 @@ public class Config {
 
         if (!MINIMIZE) {
             MINIMIZE_PRECONDITIONS = false;
+            MINIMIZE_ITERATIVELY = false;
         }
 
         // todo - disable/enable some stuff based on whether we have naive rule generation or not
@@ -202,6 +205,7 @@ public class Config {
         System.out.printf("%-40.50s %-40.50s\n", "Minimize:", MINIMIZE);
         if (MINIMIZE) {
             System.out.printf("%-40.50s %-40.50s\n", "Minimize preconditions:", MINIMIZE_PRECONDITIONS);
+            System.out.printf("%-40.50s %-40.50s\n", "Minimize iteratively:", MINIMIZE_ITERATIVELY);
             System.out.printf("%-40.50s %-40.50s\n", "Use optimized minimize:", USE_OPTIMIZED_MINIMIZE);
 
         }
@@ -223,6 +227,7 @@ public class Config {
 
         System.out.printf("%-40.50s %-40.50s\n", "Detailed debug messages:", DETAILED_DEBUG);
         System.out.printf("%-40.50s %-40.50s\n", "Using debug file:", USE_DEBUG_FILE);
+        System.out.printf("%-40.50s %-40.50s\n", "Testing mode:", TESTING);
         System.out.printf("%-40.50s %-40.50s\n", "Random seed:", RANDOM_SEED);
         System.out.printf("%-40.50s %-40.50s\n", "Seed value:",SEED);
         System.out.printf("%-40.50s %-40.50s\n", "Save fft to disk:", SAVE_FFT);
