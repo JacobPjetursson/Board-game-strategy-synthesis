@@ -362,7 +362,6 @@ public class FFT {
                         if (optimalMoves.contains(m)) {
                             FFTNode nextNode = node.getNextNode(m);
                             if (!closedSet.contains(nextNode)) {
-                                //System.out.println("adding node: " + nextNode + " , from parent: " + node);
                                 closedSet.add(nextNode);
                                 frontier.add(nextNode);
                             }
@@ -379,7 +378,6 @@ public class FFT {
                         }
                         FFTNode nextNode = node.getNextNode(m);
                         if (!closedSet.contains(nextNode)) {
-                            //System.out.println("adding node: " + nextNode + " , from parent: " + node);
                             closedSet.add(nextNode);
                             frontier.add(nextNode);
                         }

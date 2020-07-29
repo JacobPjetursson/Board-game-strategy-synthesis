@@ -41,6 +41,7 @@ public class FFTManager {
     public static int maxStateLiterals;
     public static int winner; // set by solver
     public static boolean isCyclic;
+    public static FFTNode initialNode;
     // Visual tool
     private static FFTFailNode failNode;
     public static FFTRuleEditPane fftRuleEditPane;
@@ -84,6 +85,8 @@ public class FFTManager {
         gameBoardWidth = dim[1];
         legalIndices = gameSpecs.legalIndices();
         isCyclic = gameSpecs.isCyclic();
+        initialNode = gameSpecs.getInitialNode();
+        initialNode.setReachable(true);
         // Visual Tool
         failNode = gameSpecs.getFailNode();
         fftRuleEditPane = gameSpecs.getInteractiveNode();
@@ -101,9 +104,7 @@ public class FFTManager {
     }
 
     public static FFTNode getInitialNode() {
-        FFTNode node = gameSpecifics.getInitialNode();
-        node.setReachable(true);
-        return node;
+        return initialNode;
     }
 
     public static void save() {
@@ -223,6 +224,8 @@ public class FFTManager {
         sortedGameAtoms = getGameAtoms.get();
         sortedGameAtoms.sort(Collections.reverseOrder());
         RuleList.initialize();
+        initialNode = gameSpecifics.getInitialNode();
+        initialNode.setReachable(true);
 
     }
 
