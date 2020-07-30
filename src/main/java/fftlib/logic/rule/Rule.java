@@ -132,7 +132,7 @@ public abstract class Rule {
         if (ENABLE_GGP_PARSER) {
             // TODO
         }
-        String str = "IF [" + preconditions + "] THEN [" + action + "]";
+        String str = preconditions + " => " + action;
         if (!SHOW_GUI && ruleIndex != -1)
             str += " , index: " + ruleIndex;
         return str;

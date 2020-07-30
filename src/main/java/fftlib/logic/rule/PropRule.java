@@ -31,7 +31,8 @@ public class PropRule extends Rule {
             initializeAllPreconditions();
         }
         removeActionPrecons();
-        initializeSymmetryRules();
+        if (SYMMETRY_DETECTION)
+            initializeSymmetryRules();
     }
 
     public PropRule(LiteralSet precons, Action action) {
@@ -229,7 +230,6 @@ public class PropRule extends Rule {
         if (!SYMMETRY_DETECTION) {
             return moves;
         }
-
         for (SymmetryRule rule : symmetryRules) {
             m = match(rule, lSet);
             if (m != null)

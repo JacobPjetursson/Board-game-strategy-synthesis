@@ -193,7 +193,7 @@ public class Transform {
         Position pos = getPosFromId.apply(l.id);
         if (pos == null)
             return null;
-        preconBoard[pos.row][pos.col] = l.isNegated() ? -pos.occ : pos.occ;
+        preconBoard[pos.row][pos.col] = pos.occ;
         return preconBoard;
     }
 
