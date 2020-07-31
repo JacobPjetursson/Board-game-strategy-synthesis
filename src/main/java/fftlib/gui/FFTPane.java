@@ -24,7 +24,7 @@ public class FFTPane extends VBox {
     Label title;
     FFTNode node;
     private ListView<VBox> lw;
-    private static final double RULE_SIZE = 25.5;
+    private static final double RULE_SIZE = 29;
     private static final double RULEGROUP_LABEL_SIZE = 32;
     private boolean ruleApplied;
     private double size;

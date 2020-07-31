@@ -798,7 +798,8 @@ public class FFTAutoGen {
                 removed++;
                 continue;
             }
-            System.out.println("Attempting to remove rule: " + r);
+            if (DETAILED_DEBUG)
+                System.out.println("Attempting to remove rule: " + r);
             fft.removeRule(i - removed);
             removed++;
             if (!verifyRule(r, false)) {

@@ -1,3 +1,5 @@
+{}
+
 {Optimal strategy for cross}
 P1(0, 2) -> +P1(2, 0)
 P1(1, 0) -> +P1(1, 2)

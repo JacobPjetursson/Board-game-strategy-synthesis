@@ -3,6 +3,7 @@ package tictactoe.gui.board.PlayBox;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import tictactoe.game.Controller;
 import tictactoe.game.Move;
 import tictactoe.game.Node;
@@ -44,6 +45,11 @@ public class PlayBox extends Group {
     public void addHighlight(int row, int col, int team, String color) {
         BoardTile t = board.getTiles()[row][col];
         t.addHighlight(color, team);
+    }
+
+    public void highlightPiece(int row, int col, int team, Color color) {
+        BoardTile t = board.getTiles()[row][col];
+        t.highlightPiece(color, team);
     }
 
     void removeHighlights() {

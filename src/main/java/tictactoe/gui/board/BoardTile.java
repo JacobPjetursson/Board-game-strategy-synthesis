@@ -38,7 +38,8 @@ public class BoardTile extends StackPane {
     public TileOptionsPane tileOptionsPane;
 
     private Controller cont;
-    private Color gray = new Color(0, 0, 0, 0.25);
+    public static Color blue = new Color(0, 0, 1, 0.4);
+    public static Color green = new Color(0, 1, 0, 0.4);
     private Node piece;
     int team;
     Group redCross;
@@ -115,12 +116,16 @@ public class BoardTile extends StackPane {
     public void addHighlight(String color, int team) {
         setStyle(color);
         if (clickMode != CLICK_DEFAULT) {
-            if (highlightPiece != null)
-                getChildren().remove(highlightPiece);
-            highlightPiece = getPiece(team, true);
-            getChildren().add(highlightPiece);
+            highlightPiece(blue, team);
 
         }
+    }
+
+    public void highlightPiece(Color color, int team) {
+        if (highlightPiece != null)
+            getChildren().remove(highlightPiece);
+        highlightPiece = getPiece(team, color);
+        getChildren().add(highlightPiece);
     }
 
     // removes all color and also the highlighted piece, if present
@@ -133,7 +138,7 @@ public class BoardTile extends StackPane {
 
     // adds a gray piece on this tile which symbolizes that the player hovers over the tile
     private void addHover(int team) {
-        Node n = getPiece(team, true);
+        Node n = getPiece(team, Color.BLACK);
         hoverNode = n;
         getChildren().add(n);
     }
@@ -161,17 +166,17 @@ public class BoardTile extends StackPane {
     }
 
     // drawing functions equivalent to what is in the cell
-    private Node getPiece(int team, boolean gray) {
+    private Node getPiece(int team, Color color) {
         Node n = null;
         if (team == PLAYER1) {
-            n = getCross(gray);
+            n = getCross(color);
         } else if (team == PLAYER2) {
-            n = getCircle(gray);
+            n = getCircle(color);
         }
         return n;
     }
 
-    private Group getCross(boolean hover) {
+    private Group getCross(Color color) {
         Group g = new Group();
         Line vertical = new Line(-(tilesize/4), -(tilesize/4), tilesize/4, tilesize/4);
         Line horizontal = new Line(-(tilesize/4), tilesize/4, tilesize/4, -(tilesize/4));
@@ -179,25 +184,19 @@ public class BoardTile extends StackPane {
         vertical.setSmooth(true);
         horizontal.setStrokeWidth(tilesize/9);
         horizontal.setSmooth(true);
-        if (hover) {
-            horizontal.setStroke(gray);
-            vertical.setStroke(gray);
-        } else {
-            horizontal.setStroke(Color.BLACK);
-            vertical.setStroke(Color.BLACK);
-        }
+
+        horizontal.setStroke(color);
+        vertical.setStroke(color);
+
         g.getChildren().addAll(horizontal, vertical);
         return g;
     }
 
-    private Circle getCircle(boolean hover) {
+    private Circle getCircle(Color color) {
         Circle c = new Circle();
         c.setRadius(tilesize/2 - (tilesize/12));
         c.setStrokeWidth(0);
-        if (hover)
-            c.setFill(gray);
-        else
-            c.setFill(Color.BLACK);
+        c.setFill(color);
         return c;
     }
 
@@ -227,7 +226,7 @@ public class BoardTile extends StackPane {
     // adds a shape (piece) to this tile and removes the previous one
     public void drawPiece(int team) {
         erasePiece();
-        Node n = getPiece(team, false);
+        Node n = getPiece(team, Color.BLACK);
         if (n != null) {
             getChildren().add(n);
             this.piece = n;
@@ -244,7 +243,7 @@ public class BoardTile extends StackPane {
     public void drawAction(int team) {
         tileOptionsPane.actionCheckBox.setSelected(true);
         drawUsed(true);
-        addHighlight(blueStr, team);
+        highlightPiece(blue, team);
     }
 
     public void eraseAction() {
@@ -498,8 +497,8 @@ public class BoardTile extends StackPane {
             horizontal.setStrokeWidth(lineLength / 2);
             horizontal.setSmooth(true);
             if (hover) {
-                horizontal.setStroke(gray);
-                vertical.setStroke(gray);
+                horizontal.setStroke(blue);
+                vertical.setStroke(blue);
             } else {
                 horizontal.setStroke(Color.BLACK);
                 vertical.setStroke(Color.BLACK);
@@ -509,7 +508,7 @@ public class BoardTile extends StackPane {
         }
 
         private Circle getChoiceCircle() {
-            Circle c = getCircle(false);
+            Circle c = getCircle(Color.BLACK);
             c.setRadius(80);
             return c;
         }

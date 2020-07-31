@@ -30,10 +30,17 @@ public class InteractivePlayBox extends PlayBox {
             boolean negated = pos.occ < 0;
             BoardTile tile = tiles[pos.row][pos.col];
 
-            // if an atom appears for both players for same cell, we only set that cell once
-            // in that case, the cell is set with an occ of 0
+            // if an atom appears for both players for same cell, and this one is negated, then skip
             Position otherPos = getOtherPlayerPos(pos);
             Literal otherPlayerLit = new PropLiteral(FFTManager.getIdFromPos.apply(otherPos));
+            otherPlayerLit.setNegated(false);
+            if (r.getPreconditions().contains(otherPlayerLit))
+                continue;
+
+            // if an atom appears for both players for same cell, we only set that cell once
+            // in that case, the cell is set with an occ of 0
+            otherPos = getOtherPlayerPos(pos);
+            otherPlayerLit = new PropLiteral(FFTManager.getIdFromPos.apply(otherPos));
             if (r.getPreconditions().contains(otherPlayerLit))
                 tile.set(0, negated);
             else

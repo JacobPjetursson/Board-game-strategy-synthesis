@@ -43,7 +43,7 @@ import static misc.Globals.*;
 public class FFTEditPane extends BorderPane {
     private static final int textFieldWidth = 150;
     private static final double RULEGROUP_LABEL_SIZE = 35;
-    private static final double RULE_SIZE = 29.5;
+    private static final double RULE_SIZE = 33;
 
     private Label fftTitle;
     private Label ruleLabel;
@@ -928,6 +928,7 @@ public class FFTEditPane extends BorderPane {
             playMsg(msg, 5);
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
+            refresh();
         }
 
     }
@@ -1022,6 +1023,7 @@ public class FFTEditPane extends BorderPane {
             playMsg(msg, 5);
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
+            refresh();
         }
 
     }

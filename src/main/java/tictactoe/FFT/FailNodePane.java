@@ -27,11 +27,11 @@ public class FailNodePane implements FFTFailNode {
         PlayBox pb = new PlayBox(tilesize, CLICK_DISABLED, cont);
         pb.update(n);
         Platform.runLater(() -> {
-            pb.addHighlight(move.row, move.col, move.team, BoardTile.blueStr);
+            pb.highlightPiece(move.row, move.col, move.team, BoardTile.blue);
             for (Move m : optimalMoves) {
                 if (m.equals(move))
                     continue;
-                pb.addHighlight(m.row, m.col, m.team, BoardTile.greenStr);
+                pb.highlightPiece(m.row, m.col, m.team, BoardTile.green);
             }
         });
         return pb;
