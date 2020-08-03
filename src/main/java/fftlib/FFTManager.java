@@ -215,7 +215,7 @@ public class FFTManager {
     public static Node getFailNode() {
         FFTNodeAndMove ps = currFFT.getFailingPoint();
         FFTNode n = ps.getNode();
-        ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(n);
+        List<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(n);
         return failNode.getFailNode(ps, optimalMoves);
     }
 

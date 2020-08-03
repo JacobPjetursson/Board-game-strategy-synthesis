@@ -42,6 +42,7 @@ public class Config {
     public static boolean LIFT_BEFORE_SIMPLIFY;
     public static boolean LIFT_WHEN_MINIMIZING;
     public static boolean SAVE_FFT;
+    public static boolean CACHE_OPTIMAL_MOVES;
 
     // TIC TAC TOE PROPERTIES
     public static int TIC_TAC_TOE_RULES;
@@ -111,6 +112,7 @@ public class Config {
         }
 
         USE_RULE_ORDERING = Boolean.parseBoolean(global.getProperty("use_rule_ordering"));
+        CACHE_OPTIMAL_MOVES = Boolean.parseBoolean(global.getProperty("cache_optimal_moves"));
         MINIMIZE = Boolean.parseBoolean(global.getProperty("minimize"));
         USE_LIFTING = Boolean.parseBoolean(global.getProperty("use_lifting"));
         LIFT_BEFORE_SIMPLIFY = Boolean.parseBoolean(global.getProperty("lift_before_simplify"));
@@ -220,6 +222,7 @@ public class Config {
 
         }
         System.out.printf("%-40.50s %-40.50s\n", "Use apply optimization:", USE_APPLY_OPT);
+        System.out.printf("%-40.50s %-40.50s\n", "Cache optimal moves:", CACHE_OPTIMAL_MOVES);
         if (!SYMMETRY_DETECTION && !USE_LIFTING) {
             System.out.printf("%-40.50s %-40.50s\n", "Use bitstring sorting optimization:", USE_BITSTRING_SORT_OPT);
             System.out.printf("%-40.50s %-40.50s\n", "Use inverted list optimization for nodes:", USE_INVERTED_LIST_NODES_OPT);

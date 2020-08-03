@@ -11,6 +11,7 @@ import tictactoe.gui.board.BoardTile;
 import tictactoe.gui.board.PlayBox.PlayBox;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static misc.Globals.CLICK_DISABLED;
 
@@ -22,7 +23,7 @@ public class FailNodePane implements FFTFailNode {
         this.cont = cont;
     }
 
-    private PlayBox getFailNodePane(Node n, Move move, ArrayList<Move> optimalMoves) {
+    private PlayBox getFailNodePane(Node n, Move move, List<Move> optimalMoves) {
         int tilesize = 60;
         PlayBox pb = new PlayBox(tilesize, CLICK_DISABLED, cont);
         pb.update(n);
@@ -38,7 +39,7 @@ public class FailNodePane implements FFTFailNode {
     }
 
     @Override
-    public javafx.scene.Node getFailNode(FFTNodeAndMove ps, ArrayList<? extends FFTMove> optimalMoves) {
-        return getFailNodePane((Node) ps.getNode(), (Move) ps.getMove(), (ArrayList<Move>) optimalMoves);
+    public javafx.scene.Node getFailNode(FFTNodeAndMove ps, List<? extends FFTMove> optimalMoves) {
+        return getFailNodePane((Node) ps.getNode(), (Move) ps.getMove(), (List<Move>) optimalMoves);
     }
 }

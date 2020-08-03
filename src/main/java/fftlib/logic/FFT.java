@@ -355,7 +355,7 @@ public class FFT {
                     }
             } else {
                 Set<FFTMove> moves = apply(node).getMoves();
-                ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(node);
+                List<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(node);
                 // If move is null, check that all possible (random) moves are ok
                 if (moves.isEmpty()) {
                     for (FFTMove m : node.getLegalMoves()) {
@@ -542,7 +542,7 @@ public class FFT {
                 }
             } else {
                 Set<FFTMove> moves = apply(node).getMoves();
-                ArrayList<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(node);
+                List<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(node);
                 // If move is null, check that all possible (random) moves are ok
                 if (moves.isEmpty()) {
                     for (FFTMove m : node.getLegalMoves()) {

@@ -3,12 +3,16 @@ package fftlib.game;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import static misc.Config.CACHE_OPTIMAL_MOVES;
 import static misc.Globals.*;
 
 public class FFTSolution{
 
     private static HashMap<? extends FFTNode, NodeMapping> solution;
+    private static final Map<FFTNode, List<FFTMove>> cachedOptimalMoves = new HashMap<>();
 
     public static void setSolution(HashMap<? extends FFTNode, NodeMapping> lookupTable) {
         solution = lookupTable;
@@ -18,10 +22,18 @@ public class FFTSolution{
         return solution;
     }
 
-    public static ArrayList<? extends FFTMove> optimalMoves(FFTNode node) {
-        ArrayList<FFTMove> optimalMoves = new ArrayList<>();
+    public static List<? extends FFTMove> optimalMoves(FFTNode node) {
+        if (CACHE_OPTIMAL_MOVES) {
+            List<FFTMove> optimalMoves = cachedOptimalMoves.get(node);
+            if (optimalMoves != null)
+                return optimalMoves;
+        }
+
+        List<FFTMove> optimalMoves = new ArrayList<>();
         NodeMapping mapping = solution.get(node);
         if (mapping == null || mapping.getMove() == null) {
+            if (CACHE_OPTIMAL_MOVES)
+                cachedOptimalMoves.put(node, optimalMoves);
             return optimalMoves;
         }
         FFTNode next = node.getNextNode(mapping.getMove());
@@ -39,6 +51,8 @@ public class FFTSolution{
                         optimalMoves.add(m);
                 }
             }
+            if (CACHE_OPTIMAL_MOVES)
+                cachedOptimalMoves.put(node, optimalMoves);
             return optimalMoves;
         }
 
@@ -67,6 +81,8 @@ public class FFTSolution{
                     optimalMoves.add(m);
             }
         }
+        if (CACHE_OPTIMAL_MOVES)
+            cachedOptimalMoves.put(node, optimalMoves);
         return optimalMoves;
     }
 
