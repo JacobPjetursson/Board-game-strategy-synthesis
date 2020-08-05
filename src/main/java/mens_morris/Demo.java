@@ -10,7 +10,7 @@ import java.util.Scanner;
 import static mens_morris.Logic.POS_NONBOARD;
 
 public class Demo {
-    public static boolean PLAY_GAME = false;
+    public static boolean PLAY_GAME = true;
     public static void main(String[] args) {
         GameSpecifics specs = new GameSpecifics();
         FFTManager.initialize(specs);

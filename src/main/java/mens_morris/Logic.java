@@ -167,8 +167,6 @@ public class Logic {
     static void doTurn(Move m, Node node) {
         if (gameOver(node))
             return;
-        //if (node.canRemove)
-        //    System.out.println("canRemove true!");
 
         if (m.team != node.getTurn()) {
             System.out.println("Not your turn");
@@ -189,7 +187,7 @@ public class Logic {
 
         node.phase2 = isPhase2(node);
         if (isMill(m.newRow, m.newCol, m.team, node)) {
-            if (THREE_MENS)
+            if (!THREE_MENS)
                 node.canRemove = true;
             return;
         }
