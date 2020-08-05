@@ -8,6 +8,8 @@ import fftlib.logic.rule.SymmetryRule;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static misc.Config.SINGLE_THREAD;
+
 public abstract class FFTNode {
     protected int turn;
     private boolean reachable;
@@ -24,7 +26,10 @@ public abstract class FFTNode {
 
     public synchronized void addReachableParent(FFTNode parent) {
         if (reachableParents == null) {
-            reachableParents = ConcurrentHashMap.newKeySet();
+            if (SINGLE_THREAD)
+                reachableParents = new HashSet<>();
+            else
+                reachableParents = ConcurrentHashMap.newKeySet();
         }
         reachableParents.add(parent);
         reachable = true;
@@ -55,7 +60,10 @@ public abstract class FFTNode {
 
     public synchronized Set<FFTNode> getReachableParents() {
         if (reachableParents == null)
-            reachableParents = ConcurrentHashMap.newKeySet();
+            if (SINGLE_THREAD)
+                reachableParents = new HashSet<>();
+            else
+                reachableParents = ConcurrentHashMap.newKeySet();
         return reachableParents;
     }
 
@@ -64,13 +72,21 @@ public abstract class FFTNode {
     }
 
     public synchronized void addReachableParent(FFTNode parent, Map<FFTNode, Set<FFTNode>> addedParentNodes) {
-        if (reachableParents == null)
-            reachableParents = ConcurrentHashMap.newKeySet();
+        if (reachableParents == null) {
+            if (SINGLE_THREAD)
+                reachableParents = new HashSet<>();
+            else
+                reachableParents = ConcurrentHashMap.newKeySet();
+        }
+
         if (!reachableParents.contains(parent)) {
             reachableParents.add(parent);
             reachable = true;
-            Set<FFTNode> addParents = addedParentNodes.getOrDefault(
-                    this, ConcurrentHashMap.newKeySet());
+            Set<FFTNode> addParents;
+            if (SINGLE_THREAD)
+                addParents = addedParentNodes.getOrDefault(this, new HashSet<>());
+            else
+                addParents = addedParentNodes.getOrDefault(this, ConcurrentHashMap.newKeySet());
             addParents.add(parent);
             addedParentNodes.put(this, addParents);
         }
@@ -81,15 +97,22 @@ public abstract class FFTNode {
             reachableParents.remove(parent);
             if (reachableParents.isEmpty())
                 reachable = false;
-            Set<FFTNode> deletedParents = deletedParentNodes.getOrDefault(
-                    this, ConcurrentHashMap.newKeySet());
+            Set<FFTNode> deletedParents;
+            if (SINGLE_THREAD)
+                deletedParents = deletedParentNodes.getOrDefault(this, new HashSet<>());
+            else
+                deletedParents = deletedParentNodes.getOrDefault(this, ConcurrentHashMap.newKeySet());
             deletedParents.add(parent);
             deletedParentNodes.put(this, deletedParents);
         }
     }
 
     public synchronized void clearReachableParents(Map<FFTNode, Set<FFTNode>> deletedParentNodes) {
-        Set<FFTNode> deletedParents = deletedParentNodes.getOrDefault(this, ConcurrentHashMap.newKeySet());
+        Set<FFTNode> deletedParents;
+        if (SINGLE_THREAD)
+            deletedParents = deletedParentNodes.getOrDefault(this, new HashSet<>());
+        else
+            deletedParents = deletedParentNodes.getOrDefault(this, ConcurrentHashMap.newKeySet());
         deletedParents.addAll(reachableParents);
         deletedParentNodes.put(this, deletedParents);
         reachableParents.clear();
