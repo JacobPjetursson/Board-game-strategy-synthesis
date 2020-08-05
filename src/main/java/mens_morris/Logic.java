@@ -153,7 +153,12 @@ public class Logic {
                     p2Counter++;
             }
         }
-        return (p1Counter < 3 || p2Counter < 3);
+        // less than 3 pieces
+        if (p1Counter < 3 || p2Counter < 3)
+            return true;
+
+        // no legal moves from this node
+        return node.getLegalMoves().isEmpty();
     }
 
     // Finds the winner, granted that the game is over

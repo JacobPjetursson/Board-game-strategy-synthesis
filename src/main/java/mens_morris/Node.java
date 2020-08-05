@@ -25,7 +25,7 @@ public class Node extends FFTNode {
 
     // initial state
     public Node() {
-        turn = PLAYER1;
+        this.turn = PLAYER1;
         board = initBoard();
         phase2 = false;
         canRemove = false;
@@ -82,13 +82,13 @@ public class Node extends FFTNode {
                 }
             }
         }
-        hash ^= Zobrist.turn[turn];
+        hash ^= Zobrist.turn[this.turn];
         return hash;
     }
 
     private void updateHashCode(Node parent) {
         zobrist_key ^= Zobrist.turn[parent.turn];
-        zobrist_key ^= Zobrist.turn[turn];
+        zobrist_key ^= Zobrist.turn[this.turn];
 
         if (move.newRow != POS_NONBOARD) {
             int parent_occ = parent.board[move.newRow][move.newCol];
@@ -174,14 +174,14 @@ public class Node extends FFTNode {
     }
 
     public void changeTurn() {
-        if (turn == PLAYER1)
-            turn = PLAYER2;
+        if (this.turn == PLAYER1)
+            this.turn = PLAYER2;
         else
-            turn = PLAYER1;
+            this.turn = PLAYER1;
     }
 
     public String toString() {
         String phaseStr = (phase2) ? "2" : "1";
-        return Arrays.deepToString(board) + " , TURN: " + turn + ", PHASE: " + phaseStr;
+        return Arrays.deepToString(board) + " , TURN: " + turn + ", PHASE: " + phaseStr + ", CANREMOVE: " + canRemove;
     }
 }
