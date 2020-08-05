@@ -6,9 +6,11 @@ import static misc.Globals.*;
 public class NodeMapping {
     public int score;
     public FFTMove move;
+    public FFTNode node;
     public int depth;
 
-    public NodeMapping(FFTMove move, int score, int depth) {
+    public NodeMapping(FFTNode node, FFTMove move, int score, int depth) {
+        this.node = node;
         this.move = move;
         this.score = score;
         this.depth = depth;
@@ -24,6 +26,10 @@ public class NodeMapping {
 
     public FFTMove getMove() {
         return move;
+    }
+
+    public FFTNode getNode() {
+        return node;
     }
 
     public int getWinner() {

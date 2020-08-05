@@ -4,7 +4,10 @@ import fftlib.FFTManager;
 import misc.Config;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import static misc.Config.SINGLE_THREAD;
 import static misc.Globals.PLAYER1;
 import static misc.Globals.PLAYER2;
 
@@ -13,15 +16,19 @@ public class FFTSolver{
     private static int CURR_MAX_DEPTH;
     private static int unexploredNodes = 0;
     private static int team = PLAYER1; // Always from player1
-    private static HashMap<FFTNode, NodeMapping> lookupTable;
+    private static Map<FFTNode, NodeMapping> lookupTable;
 
     // Runs an iterative deepening minimax as the exhaustive brute-force for the lookupDB. The data is saved in the transpo table
-    public static HashMap<? extends FFTNode, NodeMapping> solveGame() {
+    public static Map<? extends FFTNode, NodeMapping> solveGame() {
         if (solved) {
             System.out.println("Game already solved once, returning immediately");
             return lookupTable;
         }
-        lookupTable = new HashMap<>();
+        if (SINGLE_THREAD)
+            lookupTable = new HashMap<>();
+        else
+            lookupTable = new ConcurrentHashMap<>();
+
         CURR_MAX_DEPTH = 0;
         boolean done = false;
 
@@ -68,7 +75,7 @@ public class FFTSolver{
         int score;
         boolean gameover = node.isTerminal();
         if (gameover || depth == 0) {
-            return new NodeMapping(bestMove, heuristic(node), depth);
+            return new NodeMapping(node, bestMove, heuristic(node), depth);
         }
         NodeMapping mapping = lookupTable.get(node);
         if (mapping != null && depth <= mapping.getDepth()) {
@@ -100,11 +107,11 @@ public class FFTSolver{
         }
         if (mapping == null || depth > mapping.getDepth()) {
             lookupTable.put(node,
-                    new NodeMapping(bestMove, bestScore, depth));
+                    new NodeMapping(node, bestMove, bestScore, depth));
         }
         if (!explored)
             unexploredNodes++;
-        return new NodeMapping(bestMove, bestScore, depth);
+        return new NodeMapping(node, bestMove, bestScore, depth);
     }
 
     // Heuristic function which values player1 with 2000 for a win, and -2000 for a loss. All other nodes are 0

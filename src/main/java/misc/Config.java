@@ -31,7 +31,6 @@ public class Config {
     public static boolean TESTING;
     public static boolean BENCHMARK_MODE;
     public static int BENCHMARK_NUMBER;
-    public static boolean USE_BITSTRING_SORT_OPT;
     public static boolean USE_INVERTED_LIST_NODES_OPT;
     public static boolean USE_INVERTED_LIST_RULES_OPT;
     public static boolean USE_APPLY_OPT;
@@ -137,7 +136,6 @@ public class Config {
         DEBUG_FILENAME = global.getProperty("debug_filename");
         SAVE_FFT = Boolean.parseBoolean(global.getProperty("save_fft"));
         SINGLE_THREAD = Boolean.parseBoolean(global.getProperty("single_thread"));
-        USE_BITSTRING_SORT_OPT = Boolean.parseBoolean(global.getProperty("use_bitstring_sorting_opt"));
         USE_INVERTED_LIST_NODES_OPT = Boolean.parseBoolean(global.getProperty("use_inverted_list_nodes_opt"));
         USE_INVERTED_LIST_RULES_OPT = Boolean.parseBoolean(global.getProperty("use_inverted_list_rules_opt"));
         USE_APPLY_OPT = Boolean.parseBoolean(global.getProperty("use_apply_opt"));
@@ -168,7 +166,6 @@ public class Config {
         // Tweaking configurations (certain configs can't overlap)
         // todo - make inverted list opt work with symmetric states (and lifting)
         if (SYMMETRY_DETECTION || USE_LIFTING) {
-            USE_BITSTRING_SORT_OPT = false;
             USE_INVERTED_LIST_NODES_OPT = false;
         }
 
@@ -224,7 +221,6 @@ public class Config {
         System.out.printf("%-40.50s %-40.50s\n", "Use apply optimization:", USE_APPLY_OPT);
         System.out.printf("%-40.50s %-40.50s\n", "Cache optimal moves:", CACHE_OPTIMAL_MOVES);
         if (!SYMMETRY_DETECTION && !USE_LIFTING) {
-            System.out.printf("%-40.50s %-40.50s\n", "Use bitstring sorting optimization:", USE_BITSTRING_SORT_OPT);
             System.out.printf("%-40.50s %-40.50s\n", "Use inverted list optimization for nodes:", USE_INVERTED_LIST_NODES_OPT);
         }
 

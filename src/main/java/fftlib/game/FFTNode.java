@@ -5,14 +5,13 @@ import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.rule.Rule;
 import fftlib.logic.rule.SymmetryRule;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class FFTNode {
     protected int turn;
     private boolean reachable;
-    private HashSet<FFTNode> reachableParents;
+    private Set<FFTNode> reachableParents;
 
     // cached literalSet
     private LiteralSet converted;
@@ -23,33 +22,76 @@ public abstract class FFTNode {
         return turn;
     }
 
-    public void addReachableParent(FFTNode parent) {
+    public synchronized void addReachableParent(FFTNode parent) {
         if (reachableParents == null) {
-            reachableParents = new HashSet<>();
+            reachableParents = ConcurrentHashMap.newKeySet();
         }
         reachableParents.add(parent);
         reachable = true;
     }
 
-    public void addReachableParents(Collection<FFTNode> parents) {
+    public synchronized void addReachableParents(Collection<FFTNode> parents) {
         for (FFTNode parent : parents) {
             addReachableParent(parent);
         }
     }
 
-    public void removeReachableParent(FFTNode parent) {
+    public synchronized void removeReachableParent(FFTNode parent) {
         reachableParents.remove(parent);
         if (reachableParents.isEmpty())
             reachable = false;
     }
 
-    public void removeReachableParents(Collection<FFTNode> parents) {
+    public synchronized void removeReachableParents(Collection<FFTNode> parents) {
         for (FFTNode parent : parents) {
             removeReachableParent(parent);
         }
     }
 
-    public void clearReachableParents() {
+    public synchronized void clearReachableParents() {
+        reachableParents.clear();
+        reachable = false;
+    }
+
+    public synchronized Set<FFTNode> getReachableParents() {
+        if (reachableParents == null)
+            reachableParents = ConcurrentHashMap.newKeySet();
+        return reachableParents;
+    }
+
+    public synchronized boolean isReachable() {
+        return reachable;
+    }
+
+    public synchronized void addReachableParent(FFTNode parent, Map<FFTNode, Set<FFTNode>> addedParentNodes) {
+        if (reachableParents == null)
+            reachableParents = ConcurrentHashMap.newKeySet();
+        if (!reachableParents.contains(parent)) {
+            reachableParents.add(parent);
+            reachable = true;
+            Set<FFTNode> addParents = addedParentNodes.getOrDefault(
+                    this, ConcurrentHashMap.newKeySet());
+            addParents.add(parent);
+            addedParentNodes.put(this, addParents);
+        }
+    }
+
+    public synchronized void removeReachableParent(FFTNode parent, Map<FFTNode, Set<FFTNode>> deletedParentNodes) {
+        if (reachableParents.contains(parent)) {
+            reachableParents.remove(parent);
+            if (reachableParents.isEmpty())
+                reachable = false;
+            Set<FFTNode> deletedParents = deletedParentNodes.getOrDefault(
+                    this, ConcurrentHashMap.newKeySet());
+            deletedParents.add(parent);
+            deletedParentNodes.put(this, deletedParents);
+        }
+    }
+
+    public synchronized void clearReachableParents(Map<FFTNode, Set<FFTNode>> deletedParentNodes) {
+        Set<FFTNode> deletedParents = deletedParentNodes.getOrDefault(this, ConcurrentHashMap.newKeySet());
+        deletedParents.addAll(reachableParents);
+        deletedParentNodes.put(this, deletedParents);
         reachableParents.clear();
         reachable = false;
     }
@@ -62,18 +104,8 @@ public abstract class FFTNode {
         appliedRule = r;
     }
 
-    public HashSet<FFTNode> getReachableParents() {
-        if (reachableParents == null)
-            reachableParents = new HashSet<>();
-        return reachableParents;
-    }
-
-    public boolean isReachable() {
-        return reachable;
-    }
-
     // used for setting the initial state
-    public void setReachable(boolean reachable) {
+    public synchronized void setReachable(boolean reachable) {
         this.reachable = reachable;
     }
 

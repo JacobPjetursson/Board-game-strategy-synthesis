@@ -5,6 +5,7 @@ import fftlib.logic.rule.Rule;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static misc.Config.*;
 import static misc.Globals.*;
@@ -15,20 +16,19 @@ import static misc.Globals.*;
  */
 public class NodeMap {
     public static final int NO_SORT = 0;
-    public static final int BITSTRING_SORT = 1;
     public static final int RULE_SORT = 2;
 
-    // TODO - super non-important, but would be nice to have this class represented as a single map somehow
-    private TreeMap<BigInteger, FFTNode> codeMap;
     private Map<FFTNode, FFTNode> map;
     private final int sort;
     private InvertedList nodeList;
 
     public NodeMap(int sort) {
         this.sort = sort;
-        if (sort == BITSTRING_SORT)
-            codeMap = new TreeMap<>(Comparator.reverseOrder());
+        // ignore sorts (for now) if multithreading
+        if (!SINGLE_THREAD)
+            map = new ConcurrentHashMap<>();
         else if (sort == RULE_SORT) {
+            // todo - make this concurrent
             map = new TreeMap<>(new NodeComparator());
         } else
             map = new HashMap<>();
@@ -42,11 +42,9 @@ public class NodeMap {
     }
 
 
-    public void put(FFTNode n) {
+    public void add(FFTNode n) {
         if (USE_INVERTED_LIST_NODES_OPT)
             nodeList.add(n);
-        if (sort == BITSTRING_SORT)
-            codeMap.put(n.convert().getBitString(), n);
         else
             map.put(n, n);
 
@@ -55,19 +53,11 @@ public class NodeMap {
     public FFTNode remove(FFTNode n) {
         if (USE_INVERTED_LIST_NODES_OPT)
             nodeList.remove(n);
-        if (sort == BITSTRING_SORT)
-            return codeMap.remove(n.convert().getBitString());
         return map.remove(n);
     }
 
     public Collection<FFTNode> values() {
-        if (sort == BITSTRING_SORT)
-            return codeMap.values();
         return map.values();
-    }
-
-    public FFTNode get(BigInteger key) {
-        return codeMap.get(key);
     }
 
     public FFTNode get(FFTNode key) {
@@ -75,20 +65,12 @@ public class NodeMap {
     }
 
     public int size() {
-        if (sort == BITSTRING_SORT)
-            return codeMap.size();
         return map.size();
     }
 
     public boolean contains(FFTNode n) {
-        if (sort == BITSTRING_SORT)
-            return codeMap.containsKey(n.convert().getBitString());
         return map.containsKey(n);
 
-    }
-
-    public TreeMap<BigInteger, FFTNode> getCodeMap() {
-        return codeMap;
     }
 
     public Map<FFTNode, FFTNode> getMap() {
@@ -96,26 +78,16 @@ public class NodeMap {
     }
 
     public void findNodes(Rule r, Map<FFTNode, RuleMapping> appliedMap) {
-        if (sort == BITSTRING_SORT) {
-            BigInteger code = r.getAllPreconditions().getBitString();
-            // multithreading has bad performance
-            for (Map.Entry<BigInteger, FFTNode> entry : codeMap.entrySet()) {
-                if (entry.getKey().compareTo(code) < 0)
-                    break;
-                insert(entry.getValue(), r, appliedMap);
-
-            }
-        }
-        else if (USE_INVERTED_LIST_NODES_OPT) {
+        if (USE_INVERTED_LIST_NODES_OPT) {
             nodeList.findNodes(r, appliedMap);
         }
         else if (!SINGLE_THREAD) {
             values().parallelStream().forEach(node ->
                     insert(node, r, appliedMap));
-        } else {
-            for (FFTNode n : values()) {
+        }
+        else {
+            for (FFTNode n : values())
                 insert(n, r, appliedMap);
-            }
         }
     }
 
@@ -132,7 +104,7 @@ public class NodeMap {
 
     public void putAll(Collection<FFTNode> nodes) {
         for (FFTNode n : nodes)
-            put(n);
+            add(n);
     }
 
 

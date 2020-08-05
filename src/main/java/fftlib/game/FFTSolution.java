@@ -5,21 +5,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static misc.Config.CACHE_OPTIMAL_MOVES;
+import static misc.Config.SINGLE_THREAD;
 import static misc.Globals.*;
 
 public class FFTSolution{
 
-    private static HashMap<? extends FFTNode, NodeMapping> solution;
-    private static final Map<FFTNode, List<FFTMove>> cachedOptimalMoves = new HashMap<>();
+    private static Map<? extends FFTNode, NodeMapping> solution;
+    private static final Map<FFTNode, List<FFTMove>> cachedOptimalMoves;
 
-    public static void setSolution(HashMap<? extends FFTNode, NodeMapping> lookupTable) {
-        solution = lookupTable;
+    static {
+        if (SINGLE_THREAD)
+            cachedOptimalMoves = new HashMap<>();
+        else
+            cachedOptimalMoves = new ConcurrentHashMap<>();
     }
 
-    public static HashMap<? extends FFTNode, NodeMapping> getSolution() {
-        return solution;
+    public static void setSolution(Map<? extends FFTNode, NodeMapping> lookupTable) {
+        solution = lookupTable;
     }
 
     public static List<? extends FFTMove> optimalMoves(FFTNode node) {
@@ -88,6 +93,13 @@ public class FFTSolution{
 
     public static NodeMapping queryNode(FFTNode n) {
         return solution.get(n);
+    }
+
+    public static FFTNode get(FFTNode n) {
+        NodeMapping nm = solution.get(n);
+        if (nm == null)
+            return null;
+        return nm.getNode();
     }
 
     // Outputs a string which is the amount of turns to a terminal node, based on a score from the database entry
