@@ -15,8 +15,6 @@ public class Logic {
     // Outputs a list of legal moves from a node
     static ArrayList<Move> legalMoves(int team, Node node) {
         ArrayList<Move> moves = new ArrayList<>();
-        if (gameOver(node))
-            return moves;
         int opponent = (team == PLAYER1) ? PLAYER2 : PLAYER1;
 
         for (int i = 0; i < node.board.length; i++) {
