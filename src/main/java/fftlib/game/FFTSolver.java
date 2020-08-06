@@ -8,8 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static misc.Config.SINGLE_THREAD;
-import static misc.Globals.PLAYER1;
-import static misc.Globals.PLAYER2;
+import static misc.Globals.*;
 
 public class FFTSolver{
     public static boolean solved = false;
@@ -86,10 +85,12 @@ public class FFTSolver{
             NodeMapping childMapping = minimax(child, depth - 1);
             score = childMapping.getScore();
 
-            if (childMapping.getWinner() == PLAYER1) score--;
+            if (childMapping.getWinner() == PLAYER1) {
+                score--;
+            }
             else {
                 score++;
-                if (childMapping.getWinner() == PLAYER2)
+                if (childMapping.getWinner() == PLAYER_NONE)
                     explored = false;
             }
 
