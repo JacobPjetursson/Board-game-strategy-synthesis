@@ -110,9 +110,8 @@ public abstract class Rule {
 
     static LiteralSet parsePreconditions(String preconStr) {
         LiteralSet literals = new LiteralSet();
-        for (String precons : prepPreconditions(preconStr)) {
+        for (String precons : prepPreconditions(preconStr))
             literals.add(new PropLiteral(precons));
-        }
         return literals;
     }
 

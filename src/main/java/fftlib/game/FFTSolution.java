@@ -27,6 +27,10 @@ public class FFTSolution{
         solution = lookupTable;
     }
 
+    public static Map<? extends FFTNode, NodeMapping> getSolution() {
+        return solution;
+    }
+
     public static List<? extends FFTMove> optimalMoves(FFTNode node) {
         if (CACHE_OPTIMAL_MOVES) {
             List<FFTMove> optimalMoves = cachedOptimalMoves.get(node);

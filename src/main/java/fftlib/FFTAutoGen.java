@@ -1,6 +1,6 @@
 package fftlib;
 
-import fftlib.auxiliary.NodeMap;
+import fftlib.auxiliary.algo.NodeMap;
 import fftlib.game.*;
 import fftlib.logic.FFT;
 import fftlib.logic.literal.Literal;
@@ -150,36 +150,22 @@ public class FFTAutoGen {
     }
 
     private static void makeRules() {
-        Set<FFTNode> skippedNodes = new HashSet<>();
-        while (applicableStates.size() > 0) {
-            System.out.println("Remaining applicable states: " + applicableStates.size() +
-                    ". Current amount of rules: " + fft.getAmountOfRules());
-            Iterator<FFTNode> it = applicableStates.values().iterator();
-            FFTNode node = it.next();
-
-            /*  //Skipping rules probably bad
-            boolean onlySkips = false;
-            while (skippedNodes.contains(node)) {
-                if (!it.hasNext()) {
-                    onlySkips = true;
-                    break;
-                }
-                node = it.next();
-            }
-            if (onlySkips)
-                break;
-
+        // iterate over solution and add if state is in applicable
+        for (FFTNode node : FFTSolution.getSolution().keySet()) {
+            if (!applicableStates.contains(node))
+                continue;
+            // skipping rules
             if (FFTSolution.optimalMoves(node).size() == node.getLegalMoves().size()) {
                 // don't need a rule for this state
-                System.out.println("Skipping rule");
-                skippedNodes.add(node);
+                System.out.println("All moves optimal, skipping rule");
                 continue;
             }
-            */
-
+            System.out.println("Remaining applicable states: " + applicableStates.size() +
+                    ". Current amount of rules: " + fft.getAmountOfRules());
             Rule r = addRule(node);
             if (DETAILED_DEBUG) System.out.println("FINAL RULE: " + r);
             System.out.println();
+
         }
     }
 
@@ -192,9 +178,15 @@ public class FFTAutoGen {
         frontier = new LinkedList<>();
         frontier.add(initialNode);
 
-        reachableStates = new NodeMap(NodeMap.NO_SORT);
-        appliedStates = new NodeMap(NodeMap.NO_SORT);
-        applicableStates = new NodeMap(NodeMap.NO_SORT);
+        reachableStates = new NodeMap(NodeMap.NO_TYPE);
+        int type = NodeMap.NO_TYPE;
+        if (USE_NODELIST)
+            type = NodeMap.TYPE_NODE_LIST;
+        else if (USE_INVERTED_LIST_NODES_OPT)
+            type = NodeMap.TYPE_INVERTED_LIST;
+
+        appliedStates = new NodeMap(type);
+        applicableStates = new NodeMap(type);
         reachableStates.add(initialNode);
         while (!frontier.isEmpty()) {
             FFTNode node = frontier.pop();
@@ -235,8 +227,6 @@ public class FFTAutoGen {
 
         Rule r = new PropRule(stSet, bestMove.convert()); // rule from state-move pair
         fft.append(r);
-        // set of rules affected by deleting states when minimizing
-        Set<Rule> affectedRules = new HashSet<>();
 
         // DEBUG
         if (DETAILED_DEBUG) {
@@ -255,32 +245,7 @@ public class FFTAutoGen {
         // symmetry and use_lifting can introduce new moves for an applied state, so we do a safe run at last
         safeRun(r, true); // safe run where we know we have the final rule
 
-        //System.out.println("added rule: " + r);
-        if (SIMPLIFY_AFTER_DEL)
-            simplifyAffectedRules(affectedRules);
-
         return r;
-    }
-
-    private static void simplifyAffectedRules(Set<Rule> affectedRules) {
-        System.out.println("No. of affected rules: " + affectedRules.size());
-        Set<Rule> simplified = new HashSet<>(); // keep track of rules already simplified in the recursion
-        for (Rule r : affectedRules) {
-            System.out.println("Simplifying: " + r);
-            if (simplified.contains(r)) {
-                System.out.println("Rule already simplified");
-                continue;
-            }
-            boolean lastRule = (fft.getLastRule() == r);
-            Set<Rule> newAffectedRules = new HashSet<>();
-            simplifyRule(r, lastRule);
-            safeRun(r, lastRule);
-            System.out.println("simplified to: " + r);
-            System.out.println("newAffectedRules size: " + newAffectedRules.size());
-            System.out.println("simplifying affected rules recursively");
-            simplifyAffectedRules(newAffectedRules);
-            simplified.addAll(newAffectedRules);
-        }
     }
 
     // if simplifying last rule, simplifying can not effect other rules, so it's simpler
@@ -344,7 +309,6 @@ public class FFTAutoGen {
         return verifyRule(r, lastRule, false);
     }
 
-    // affectedRules is optimization
     private static boolean verifyRule(Rule r, boolean lastRule, boolean safe) {
         //System.out.println("Verifying rule");
         if (safe && DETAILED_DEBUG)
@@ -495,18 +459,11 @@ public class FFTAutoGen {
             if (!lastRule || SYMMETRY_DETECTION || USE_LIFTING) {
                 //System.out.println("Checking if adding back transitions for node: " + n + " , is verified");
                 Collection<? extends FFTMove> moves;
-                if (chosenMoves.isEmpty()) {
-                    //System.out.println("Chosen moves empty");
+                if (chosenMoves.isEmpty())
                     moves = optimalMoves;
-                    if (!applicableStates.contains(n)) {
-                        //System.out.println("adding node: " + n + " , to applicableStates");
-                        applicableStates.add(n);
-                        addedNodes.get(APPLICABLE).add(n);
-
-                    }
-                } else {
+                else
                     moves = chosenMoves;
-                }
+
                 for (FFTMove m : moves) {
                     if (!addToSets(n, m, addedNodes, addedParentNodes, safe)) {
                         //System.out.println("Failed to add the transition from node: " + n + ", with move: " + m);
@@ -873,21 +830,16 @@ public class FFTAutoGen {
         LinkedList<FFTNode> frontier;
         frontier = new LinkedList<>();
         frontier.add(initialNode);
-        reachableStates = new NodeMap(NodeMap.NO_SORT);
-        appliedStates = new NodeMap(NodeMap.NO_SORT);
-        int sort = NodeMap.NO_SORT;
-        if (USE_RULE_ORDERING)
-            sort = NodeMap.RULE_SORT;
-        applicableStates = new NodeMap(sort);
+        reachableStates = new NodeMap(NodeMap.NO_TYPE);
+        int type = NodeMap.NO_TYPE;
+        if (USE_INVERTED_LIST_NODES_OPT)
+            type = NodeMap.TYPE_INVERTED_LIST;
+        else if (USE_NODELIST)
+            type = NodeMap.TYPE_NODE_LIST;
+        appliedStates = new NodeMap(type);
+        applicableStates = new NodeMap(type);
 
         reachableStates.add(initialNode);
-        if (team == PLAYER1) {
-            Set<FFTMove> moves = fft.apply(initialNode).getMoves();
-            if (moves.isEmpty())
-                applicableStates.add(initialNode);
-            else
-                appliedStates.add(initialNode);
-        }
 
         while (!frontier.isEmpty()) {
             FFTNode node = frontier.pop();
@@ -959,8 +911,8 @@ public class FFTAutoGen {
         }
         // make copy of sets
         HashMap<FFTNode, FFTNode> reachableCopy = new HashMap<>();
-        NodeMap applicableCopy = new NodeMap(applicableStates.getSort());
-        NodeMap appliedCopy = new NodeMap(appliedStates.getSort());
+        Set<FFTNode> applicableCopy = new HashSet<>();
+        Set<FFTNode> appliedCopy = new HashSet<>();
         for (FFTNode n : reachableStates.values()) {
             FFTNode cloned = n.clone();
             HashSet<FFTNode> reachable = new HashSet<>(n.getReachableParents());
@@ -992,13 +944,19 @@ public class FFTAutoGen {
             }
             System.exit(1);
         }
-
         if (applicableCopy.size() != applicableStates.size()) {
             System.out.println("applicable states size diff");
-            for (FFTNode n : applicableStates.getMap().keySet()) {
-                FFTNode existingNode = applicableCopy.get(n);
-                if (existingNode == null) {
+            for (FFTNode n : applicableStates.getAll()) {
+                boolean existingNode = applicableCopy.contains(n);
+                if (!existingNode) {
                     System.out.println("node: " + n + " , is in correct map but not in copy!");
+                }
+            }
+
+            for (FFTNode n : applicableCopy) {
+                boolean existingNode = applicableStates.contains(n);
+                if (!existingNode) {
+                    System.out.println("node: " + n + " , is in copy map but not in correct map!");
                 }
             }
             System.exit(1);
@@ -1006,9 +964,9 @@ public class FFTAutoGen {
 
         if (appliedCopy.size() != appliedStates.size()) {
             System.out.println("applied states size diff");
-            for (FFTNode n : appliedStates.getMap().keySet()) {
-                FFTNode existingNode = appliedCopy.get(n);
-                if (existingNode == null) {
+            for (FFTNode n : appliedStates.getAll()) {
+                boolean existingNode = appliedCopy.contains(n);
+                if (!existingNode) {
                     System.out.println("node: " + n + " , is in correct map but not in copy!");
                 }
             }
@@ -1080,6 +1038,12 @@ public class FFTAutoGen {
     }
 
     public static void checkVerification(Rule r, boolean complete, boolean expectedResult) {
+        boolean oldApply = USE_RULELIST;
+        boolean oldNodeInv = USE_INVERTED_LIST_NODES_OPT;
+        boolean oldRuleInv = USE_INVERTED_LIST_RULES_OPT;
+        USE_RULELIST = false;
+        USE_INVERTED_LIST_NODES_OPT = false;
+        USE_INVERTED_LIST_RULES_OPT = false;
         if (fft.verify(AUTOGEN_TEAM, complete) != expectedResult) {
             System.out.println("verification discrepancy!");
             System.out.println("expected verification to be: " + expectedResult);
@@ -1088,5 +1052,8 @@ public class FFTAutoGen {
             System.out.println("current rules: " + fft);
             System.exit(1);
         }
+        USE_RULELIST = oldApply;
+        USE_INVERTED_LIST_NODES_OPT = oldNodeInv;
+        USE_INVERTED_LIST_RULES_OPT = oldRuleInv;
     }
 }

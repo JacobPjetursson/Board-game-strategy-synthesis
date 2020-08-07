@@ -3,8 +3,8 @@ package fftlib.logic;
 import fftlib.FFTManager;
 import fftlib.GGPAutogen.Database;
 import fftlib.GGPAutogen.GGPManager;
-import fftlib.auxiliary.InvertedList;
-import fftlib.auxiliary.RuleList;
+import fftlib.auxiliary.algo.InvertedList;
+import fftlib.auxiliary.algo.RuleList;
 import fftlib.game.*;
 import fftlib.logic.literal.Literal;
 import fftlib.logic.literal.LiteralSet;
@@ -70,7 +70,7 @@ public class FFT {
             this.ruleGroups.add(new RuleGroup(this, rg.name, rg.startIdx, rg.endIdx));
 
         ruleList = new RuleList();
-        if (USE_APPLY_OPT) {
+        if (USE_RULELIST) {
             for (Rule r : this.rules)
                 ruleList.sortedAdd(r);
         }
@@ -112,7 +112,7 @@ public class FFT {
         r.setRuleIndex(size());
         rules.add(r);
         // add to sorted list of rules
-        if (USE_APPLY_OPT)
+        if (USE_RULELIST)
             ruleList.sortedAdd(r);
         else if (USE_INVERTED_LIST_RULES_OPT) {
             // only works when no predicate rules and no symmetry
@@ -122,7 +122,7 @@ public class FFT {
     }
 
     public void removePrecondition(Rule r, Literal l) {
-        if (USE_APPLY_OPT) {
+        if (USE_RULELIST) {
             ruleList.sortedRemove(r);
             r.removePrecondition(l);
             ruleList.sortedAdd(r);
@@ -138,7 +138,7 @@ public class FFT {
     }
 
     public void addPrecondition(Rule r, Literal l) {
-        if (USE_APPLY_OPT) {
+        if (USE_RULELIST) {
             ruleList.sortedRemove(r);
             r.addPrecondition(l);
             ruleList.sortedAdd(r);
@@ -157,7 +157,7 @@ public class FFT {
         Rule r = rules.get(idx);
         rules.remove(idx);
 
-        if (USE_APPLY_OPT)
+        if (USE_RULELIST)
             ruleList.sortedRemove(r);
         else if (USE_INVERTED_LIST_RULES_OPT) {
             PropRule propRule = (PropRule) r;
@@ -170,7 +170,7 @@ public class FFT {
     public void addRule(Rule r, int idx) {
         rules.add(idx, r);
 
-        if (USE_APPLY_OPT)
+        if (USE_RULELIST)
             ruleList.sortedAdd(r);
         else if (USE_INVERTED_LIST_RULES_OPT) {
             PropRule propRule = (PropRule) r;
@@ -183,7 +183,7 @@ public class FFT {
         Rule r = rules.get(oldIdx);
         // remove
         rules.remove(oldIdx);
-        if (USE_APPLY_OPT)
+        if (USE_RULELIST)
             ruleList.sortedRemove(r);
         else if (USE_INVERTED_LIST_RULES_OPT) {
             PropRule propRule = (PropRule) r;
@@ -191,7 +191,7 @@ public class FFT {
         }
         // add
         rules.add(newIdx, r);
-        if (USE_APPLY_OPT)
+        if (USE_RULELIST)
             ruleList.sortedAdd(r);
         else if (USE_INVERTED_LIST_RULES_OPT) {
             PropRule propRule = (PropRule) r;
@@ -275,7 +275,7 @@ public class FFT {
     }
 
     public RuleMapping apply(FFTNode node) {
-        if (USE_APPLY_OPT)
+        if (USE_RULELIST)
             return ruleList.apply(node);
         if (USE_INVERTED_LIST_RULES_OPT)
             return invertedList.apply(node);

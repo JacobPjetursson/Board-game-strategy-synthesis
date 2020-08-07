@@ -1,9 +1,8 @@
-package fftlib.auxiliary;
+package fftlib.auxiliary.algo;
 
 import fftlib.game.*;
 import fftlib.logic.rule.Rule;
 
-import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,71 +14,97 @@ import static misc.Globals.*;
  * It helps compress a lot of the code in the FFTAutoGen class
  */
 public class NodeMap {
-    public static final int NO_SORT = 0;
-    public static final int RULE_SORT = 2;
+
+    public static final int NO_TYPE = 0;
+    public static final int TYPE_NODE_LIST = 2;
+    public static final int TYPE_INVERTED_LIST = 3;
 
     private Map<FFTNode, FFTNode> map;
-    private final int sort;
-    private InvertedList nodeList;
+    private final int type;
 
-    public NodeMap(int sort) {
-        this.sort = sort;
+    private InvertedList invertedList;
+    private NodeList nodeList;
+
+    public NodeMap(int type) {
+        this.type = type;
         // ignore sorts (for now) if multithreading
-        if (!SINGLE_THREAD)
-            map = new ConcurrentHashMap<>();
-        else if (sort == RULE_SORT) {
-            // todo - make this concurrent
-            map = new TreeMap<>(new NodeComparator());
-        } else
-            map = new HashMap<>();
-
-        if (USE_INVERTED_LIST_NODES_OPT)
-            nodeList = new InvertedList(true);
+        if (type == NO_TYPE) {
+            if (SINGLE_THREAD)
+                map = new HashMap<>();
+            else
+                map = new ConcurrentHashMap<>();
+        }
+        else if (type == TYPE_NODE_LIST) {
+            nodeList = new NodeList();
+        }
+        else if (type == TYPE_INVERTED_LIST)
+            invertedList = new InvertedList(true);
     }
 
-    public int getSort() {
-        return sort;
+    public int getType() {
+        return type;
     }
 
 
     public void add(FFTNode n) {
-        if (USE_INVERTED_LIST_NODES_OPT)
-            nodeList.add(n);
+        if (type == TYPE_INVERTED_LIST)
+            invertedList.add(n);
+        else if (type == TYPE_NODE_LIST)
+            nodeList.sortedAdd(n);
         else
             map.put(n, n);
 
     }
 
-    public FFTNode remove(FFTNode n) {
-        if (USE_INVERTED_LIST_NODES_OPT)
-            nodeList.remove(n);
-        return map.remove(n);
+    public void remove(FFTNode n) {
+        if (type == TYPE_INVERTED_LIST)
+            invertedList.remove(n);
+        else if (type == TYPE_NODE_LIST)
+            nodeList.sortedRemove(n);
+        else
+            map.remove(n);
     }
 
+    // NOTE: only works for NO_TYPE
     public Collection<FFTNode> values() {
         return map.values();
     }
 
+    // NOTE: only works for NO_TYPE
     public FFTNode get(FFTNode key) {
         return map.get(key);
     }
 
     public int size() {
-        return map.size();
+        if (type == NO_TYPE)
+            return map.size();
+        if (type == TYPE_INVERTED_LIST)
+            return -1; // hard to determine number of unique elements in this structure
+        return nodeList.size();
     }
 
     public boolean contains(FFTNode n) {
-        return map.containsKey(n);
-
+        if (type == NO_TYPE)
+            return map.containsKey(n);
+        if (type == TYPE_INVERTED_LIST)
+            return invertedList.contains(n);
+        return nodeList.sortedContains(n);
     }
 
-    public Map<FFTNode, FFTNode> getMap() {
-        return map;
+    public Collection<FFTNode> getAll() {
+        if (type == NO_TYPE)
+            return map.keySet();
+        if (type == TYPE_INVERTED_LIST)
+            return invertedList.getAll();
+        return nodeList;
     }
 
     public void findNodes(Rule r, Map<FFTNode, RuleMapping> appliedMap) {
         if (USE_INVERTED_LIST_NODES_OPT) {
-            nodeList.findNodes(r, appliedMap);
+            invertedList.findNodes(r, appliedMap);
+        }
+        else if (USE_NODELIST) {
+            nodeList.findNodes(r,appliedMap);
         }
         else if (!SINGLE_THREAD) {
             values().parallelStream().forEach(node ->
@@ -107,7 +132,20 @@ public class NodeMap {
             add(n);
     }
 
+    public Map<FFTNode, FFTNode> getMap() {
+        return map;
+    }
 
+    public NodeList getNodeList() {
+        return nodeList;
+    }
+
+    public InvertedList getInvertedList() {
+        return invertedList;
+    }
+
+
+    // todo - use this some other place
     // Allows us to sort the nodes based on custom values, such as which node is closed to a terminal node
     public static class NodeComparator implements Comparator<FFTNode> {
         @Override

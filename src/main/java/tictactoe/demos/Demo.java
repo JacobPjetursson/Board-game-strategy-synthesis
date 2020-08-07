@@ -1,13 +1,11 @@
 package tictactoe.demos;
 
 import fftlib.FFTManager;
+import fftlib.auxiliary.algo.NodeList;
+import fftlib.game.FFTNode;
 import fftlib.game.FFTSolver;
-import fftlib.logic.*;
-import fftlib.logic.literal.LiteralSet;
-import fftlib.logic.literal.PropLiteral;
-import fftlib.logic.rule.Action;
 import fftlib.logic.rule.PropRule;
-import fftlib.logic.rule.RuleGroup;
+import fftlib.logic.rule.Rule;
 import tictactoe.FFT.GameSpecifics;
 import tictactoe.game.Move;
 import tictactoe.game.Node;
@@ -18,56 +16,33 @@ public class Demo {
         GameSpecifics gs = new GameSpecifics();
         FFTManager.initialize(gs);
         FFTSolver.solveGame();
-        // make testrules
-        LiteralSet lSet = new LiteralSet();
-        PropRule test1 = new PropRule(lSet, new Action("P1(1, 1)"));
-
-        lSet = new LiteralSet();
-        lSet.add(new PropLiteral("P1(0, 0)"));
-        PropRule dead1 = new PropRule(lSet, new Action("P1(1, 1)"));
-
-        lSet = new LiteralSet();
-        lSet.add(new PropLiteral("P1(0, 0)"));
-        lSet.add(new PropLiteral("P2(2, 2)"));
-        lSet.add(new PropLiteral("!P1(2, 2)"));
-        lSet.add(new PropLiteral("!P2(0, 0)"));
-        lSet.add(new PropLiteral("!P1(1, 1)"));
-        lSet.add(new PropLiteral("P2(0, 2)"));
-        lSet.add(new PropLiteral("P1(0, 1)"));
-        lSet.add(new PropLiteral("P2(0, 2)"));
-        lSet.add(new PropLiteral("!P1(0, 2)"));
-        lSet.add(new PropLiteral("!P2(0, 1)"));
-        lSet.add(new PropLiteral("!P1(1, 2)"));
-        lSet.add(new PropLiteral("P2(1, 2)"));
-        PropRule dead2 = new PropRule(lSet, new Action("P1(1, 1)"));
-        LiteralSet testSet = new LiteralSet(dead2.getPreconditions());
-        System.out.println(testSet);
-        LiteralSet testSet1 = new LiteralSet(dead2.getPreconditions());
-        System.out.println(testSet1);
-        System.out.println(dead2.getPreconditions());
-
-
-        lSet = new LiteralSet();
-        PropRule notdead = new PropRule(lSet, new Action("P1(1, 2)"));
-
-        FFT fft = new FFT("Synthesis");
-        fft.append(test1);
-        fft.append(dead1);
-        fft.append(dead2);
-        fft.append(notdead);
-
-        System.out.println(fft);
-        fft.removeDeadRules(test1);
-        System.out.println(fft);
 
         // make testNodes
         Node testNode1 = new Node();
         Node testNode2 = testNode1.getNextNode(new Move(0, 0, 1));
-        System.out.println("apply testnode1: " + testNode1);
-        System.out.println("testNode1 applies with move: " + fft.apply(testNode1));
-        System.out.println("apply testnode2: " + testNode2);
-        System.out.println("testNode2 applies with move: " + fft.apply(testNode2));
+        Node testNode3 = testNode2.getNextNode(new Move(1, 1, 2));
+        Node testNode4 = testNode3.getNextNode(new Move(2, 2, 1));
+        Node testNode5 = testNode4.getNextNode(new Move(1, 0, 2));
+        NodeList nl = new NodeList();
 
+        nl.sortedAdd(testNode1);
+        nl.sortedAdd(testNode2);
+        nl.sortedAdd(testNode3);
+        nl.sortedAdd(testNode4);
+        nl.sortedAdd(testNode5);
+        for (FFTNode n : nl) {
+            System.out.println(n);
+        }
+        System.out.println();
+
+        // make testrule
+        Rule r = new PropRule("P1(0, 0)", "+P2(1, 2)");
+        System.out.println("rule: " + r);
+
+        // find matching rules
+        System.out.println("maching nodes:");
+        for (FFTNode n : nl.findNodes(r.getAllPreconditions()))
+            System.out.println(n);
 
         /*
 

@@ -1,4 +1,4 @@
-package fftlib.auxiliary;
+package fftlib.auxiliary.algo;
 
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;

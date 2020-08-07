@@ -221,8 +221,9 @@ public class PropRule extends Rule {
     public HashSet<FFTMove> apply(LiteralSet lSet) {
         HashSet<FFTMove> moves = new HashSet<>();
         // make quick test by bitstring comparisons
-        if (!SYMMETRY_DETECTION && getBitString().compareTo(lSet.getBitString()) > 0)
-            return moves;
+        // benchmarked: compareTo is rather slow
+        //if (!SYMMETRY_DETECTION && getBitString().compareTo(lSet.getBitString()) > 0)
+        //    return moves;
 
         FFTMove m = match(this, lSet);
         if (m != null)
@@ -231,6 +232,7 @@ public class PropRule extends Rule {
             return moves;
         }
         for (SymmetryRule rule : symmetryRules) {
+            // benchmarked: not worth using compareTo here
             m = match(rule, lSet);
             if (m != null)
                 moves.add(m);

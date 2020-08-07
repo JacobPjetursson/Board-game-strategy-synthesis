@@ -1,4 +1,4 @@
-package fftlib.auxiliary;
+package fftlib.auxiliary.algo;
 
 import fftlib.FFTManager;
 import fftlib.game.FFTMove;
@@ -16,28 +16,36 @@ import java.util.*;
 import static misc.Config.SINGLE_THREAD;
 
 public class InvertedList {
-    public ArrayList<Set<FFTNode>> nodeList = new ArrayList<>();
-    public ArrayList<Set<PropRule>> ruleList = new ArrayList<>();
+    public ArrayList<Set<FFTNode>> nodes = new ArrayList<>();
+    public ArrayList<Set<PropRule>> rules = new ArrayList<>();
 
     public InvertedList(boolean storeNodes) {
         // add extra map to account for atom 1-indexing
         if (storeNodes)
-            nodeList.add(new HashSet<>());
+            nodes.add(new HashSet<>());
         else
-            ruleList.add(new HashSet<>());
+            rules.add(new HashSet<>());
 
         for (int ignored : FFTManager.getGameAtoms.get()) {
             if (storeNodes)
-                nodeList.add(new HashSet<>());
+                nodes.add(new HashSet<>());
             else
-                ruleList.add(new HashSet<>());
+                rules.add(new HashSet<>());
         }
+    }
+
+    public Set<FFTNode> getAll() {
+        Set<FFTNode> all = new HashSet<>();
+        for (int i : FFTManager.getGameAtoms.get()) {
+            all.addAll(nodes.get(i));
+        }
+        return all;
     }
 
     public void add(FFTNode node) {
         LiteralSet lSet = node.convert();
         for (Literal l : lSet)
-            nodeList.get(l.id).add(node);
+            nodes.get(l.id).add(node);
     }
 
     // need to add both positive and negated atom if it is not present in the preconditions
@@ -49,20 +57,20 @@ public class InvertedList {
             neg.setNegated(true);
             // add if contains pos or does not contain neg
             if (precons.contains(pos) || !precons.contains(neg))
-                ruleList.get(pos.id).add(rule);
+                rules.get(pos.id).add(rule);
             if (precons.contains(neg) || !precons.contains(pos))
-                ruleList.get(neg.id).add(rule);
+                rules.get(neg.id).add(rule);
 
         }
     }
 
     public void remove(FFTNode node) {
-        for (Set<FFTNode> set : nodeList)
+        for (Set<FFTNode> set : nodes)
             set.remove(node);
     }
 
     public void remove(PropRule rule) {
-        for (Set<PropRule> set : ruleList) {
+        for (Set<PropRule> set : rules) {
             set.remove(rule);
         }
     }
@@ -73,7 +81,7 @@ public class InvertedList {
 
     public RuleMapping findMoves(FFTNode node) {
         LiteralSet nodeSet = node.convert();
-        if (ruleList.isEmpty())
+        if (rules.isEmpty())
             return RuleMapping.NOMATCH;
         // start by finding the smallest list, as well as all relevant lists
         ArrayList<Set<PropRule>> relevantSets = new ArrayList<>();
@@ -81,7 +89,7 @@ public class InvertedList {
 
         int smallestSize = Integer.MAX_VALUE;
         for (Literal l : nodeSet) {
-            Set<PropRule> invertedEntry = ruleList.get(l.id);
+            Set<PropRule> invertedEntry = rules.get(l.id);
             relevantSets.add(invertedEntry);
             if (invertedEntry.size() < smallestSize) {
                 smallestSize = invertedEntry.size();
@@ -122,7 +130,7 @@ public class InvertedList {
     // todo - we can fix it by calling findNodes for each symmetric rule,
     // todo      and concatenate the actions if multiple symmetries applies
     public void findNodes(Rule rule, Map<FFTNode, RuleMapping> appliedMap) {
-        if (nodeList.isEmpty())
+        if (nodes.isEmpty())
             return;
         // start by finding the smallest list, as well as all relevant lists
         ArrayList<Set<FFTNode>> relevantSets = new ArrayList<>();
@@ -130,7 +138,7 @@ public class InvertedList {
 
         int smallestSize = Integer.MAX_VALUE;
         for (Literal l : rule.getAllPreconditions()) {
-            Set<FFTNode> invertedEntry = nodeList.get(l.id);
+            Set<FFTNode> invertedEntry = nodes.get(l.id);
             relevantSets.add(invertedEntry);
             if (invertedEntry.size() < smallestSize) {
                 smallestSize = invertedEntry.size();
@@ -178,14 +186,14 @@ public class InvertedList {
     }
 
     public boolean contains(PropRule rule) {
-        for (Set<PropRule> set : ruleList)
+        for (Set<PropRule> set : rules)
             if (set.contains(rule))
                 return true;
         return false;
     }
 
     public boolean contains(FFTNode node) {
-        for (Set<FFTNode> set : nodeList)
+        for (Set<FFTNode> set : nodes)
             if (set.contains(node))
                 return true;
         return false;

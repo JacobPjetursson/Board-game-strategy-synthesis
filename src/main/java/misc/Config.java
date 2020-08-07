@@ -23,7 +23,6 @@ public class Config {
     public static boolean MINIMIZE_PRECONDITIONS;
     public static boolean MINIMIZE_ITERATIVELY;
     public static boolean SYMMETRY_DETECTION;
-    public static boolean SIMPLIFY_AFTER_DEL;
     public static boolean NAIVE_RULE_GENERATION;
     public static boolean SINGLE_THREAD;
     public static boolean USE_DEBUG_FILE;
@@ -33,7 +32,8 @@ public class Config {
     public static int BENCHMARK_NUMBER;
     public static boolean USE_INVERTED_LIST_NODES_OPT;
     public static boolean USE_INVERTED_LIST_RULES_OPT;
-    public static boolean USE_APPLY_OPT;
+    public static boolean USE_RULELIST;
+    public static boolean USE_NODELIST;
     public static boolean USE_OPTIMIZED_MINIMIZE;
     public static boolean USE_RULE_ORDERING;
     public static boolean USE_LIFTING;
@@ -125,7 +125,6 @@ public class Config {
         MINIMIZE_PRECONDITIONS = Boolean.parseBoolean(global.getProperty("minimize_preconditions"));
         MINIMIZE_ITERATIVELY = Boolean.parseBoolean(global.getProperty("minimize_iteratively"));
         SYMMETRY_DETECTION = Boolean.parseBoolean(global.getProperty("symmetry_detection"));
-        SIMPLIFY_AFTER_DEL = Boolean.parseBoolean(global.getProperty("simplify_rules_after_deleting_states"));
         NAIVE_RULE_GENERATION = Boolean.parseBoolean(global.getProperty("naive_generation"));
         // DEBUG AND TEST
         DETAILED_DEBUG = Boolean.parseBoolean(global.getProperty("detailedDebug"));
@@ -138,7 +137,8 @@ public class Config {
         SINGLE_THREAD = Boolean.parseBoolean(global.getProperty("single_thread"));
         USE_INVERTED_LIST_NODES_OPT = Boolean.parseBoolean(global.getProperty("use_inverted_list_nodes_opt"));
         USE_INVERTED_LIST_RULES_OPT = Boolean.parseBoolean(global.getProperty("use_inverted_list_rules_opt"));
-        USE_APPLY_OPT = Boolean.parseBoolean(global.getProperty("use_apply_opt"));
+        USE_RULELIST = Boolean.parseBoolean(global.getProperty("use_rulelist"));
+        USE_NODELIST = Boolean.parseBoolean(global.getProperty("use_nodelist"));
         USE_OPTIMIZED_MINIMIZE = Boolean.parseBoolean(global.getProperty("use_optimized_minimize"));
 
         // TIC TAC TOE
@@ -169,9 +169,6 @@ public class Config {
             USE_INVERTED_LIST_NODES_OPT = false;
         }
 
-        if (USE_INVERTED_LIST_RULES_OPT)
-            USE_APPLY_OPT = false;
-
         if (!USE_LIFTING) {
             LIFT_WHEN_MINIMIZING = false;
             LIFT_BEFORE_SIMPLIFY = false;
@@ -197,7 +194,6 @@ public class Config {
 
         System.out.printf("%-40.50s %-40.50s\n", "Autogen perspective:", perspectiveStr);
         System.out.printf("%-40.50s %-40.50s\n", "Symmetry detection:", SYMMETRY_DETECTION);
-        System.out.printf("%-40.50s %-40.50s\n", "Simplify after state deletion:", SIMPLIFY_AFTER_DEL);
         System.out.printf("%-40.50s %-40.50s\n", "Naive rule generation:", NAIVE_RULE_GENERATION);
         System.out.printf("%-40.50s %-40.50s\n", "Single thread:", SINGLE_THREAD);
         System.out.printf("%-40.50s %-40.50s\n", "Greedy Autogeneration:", GREEDY_AUTOGEN);
@@ -218,7 +214,8 @@ public class Config {
             System.out.printf("%-40.50s %-40.50s\n", "Lift when minimizing:", LIFT_WHEN_MINIMIZING);
 
         }
-        System.out.printf("%-40.50s %-40.50s\n", "Use apply optimization:", USE_APPLY_OPT);
+        System.out.printf("%-40.50s %-40.50s\n", "Use rulelist optimization:", USE_RULELIST);
+        System.out.printf("%-40.50s %-40.50s\n", "Use nodelist optimization:", USE_NODELIST);
         System.out.printf("%-40.50s %-40.50s\n", "Cache optimal moves:", CACHE_OPTIMAL_MOVES);
         if (!SYMMETRY_DETECTION && !USE_LIFTING) {
             System.out.printf("%-40.50s %-40.50s\n", "Use inverted list optimization for nodes:", USE_INVERTED_LIST_NODES_OPT);

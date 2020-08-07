@@ -12,7 +12,6 @@ public class PropLiteral extends Literal {
         try {
             this.id = FFTManager.getAtomId.apply(name);
         } catch (Exception e) {
-            System.err.println("Literal name: " + name + " not recognized");
             e.printStackTrace();
             System.exit(1);
         }

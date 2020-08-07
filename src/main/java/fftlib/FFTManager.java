@@ -1,7 +1,8 @@
 package fftlib;
 
 import fftlib.auxiliary.Position;
-import fftlib.auxiliary.RuleList;
+import fftlib.auxiliary.algo.NodeList;
+import fftlib.auxiliary.algo.RuleList;
 import fftlib.game.*;
 import fftlib.gui.FFTFailNode;
 import fftlib.gui.FFTRuleEditPane;
@@ -224,6 +225,7 @@ public class FFTManager {
         sortedGameAtoms = getGameAtoms.get();
         sortedGameAtoms.sort(Collections.reverseOrder());
         RuleList.initialize();
+        NodeList.initialize();
         initialNode = gameSpecifics.getInitialNode();
         initialNode.setReachable(true);
 
