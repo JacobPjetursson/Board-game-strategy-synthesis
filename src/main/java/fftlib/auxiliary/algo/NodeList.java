@@ -43,11 +43,6 @@ public class NodeList extends ArrayList<FFTNode> {
         super();
     }
 
-    public synchronized boolean sortedContains(FFTNode n) {
-        int index = Collections.binarySearch(this, n, nc);
-        return index >= 0;
-    }
-
     public void findNodes(Rule r, Map<FFTNode, RuleMapping> appliedMap) {
         if (SYMMETRY_DETECTION && !(r instanceof SymmetryRule)) {
             PropRule propRule = (PropRule) r;
@@ -64,15 +59,7 @@ public class NodeList extends ArrayList<FFTNode> {
             FFTMove m = r.getAction().convert();
             List<FFTNode> nodes = findNodes(lSet);
             Consumer<FFTNode> addToSet = (node -> {
-                RuleMapping existing = appliedMap.get(node);
-                if (existing != null) {// in case of symmetry
-                    existing.getMoves().add(m);
-                }
-                else {
-                    Set<FFTMove> moves = new HashSet<>();
-                    moves.add(m);
-                    appliedMap.put(node, new RuleMapping(r, moves));
-                }
+                node.addToAppliedMap(appliedMap, r, m);
             });
 
             if (SINGLE_THREAD)
@@ -160,6 +147,11 @@ public class NodeList extends ArrayList<FFTNode> {
             return false; // no element
         remove(index);
         return true;
+    }
+
+    public synchronized boolean sortedContains(FFTNode n) {
+        int index = Collections.binarySearch(this, n, nc);
+        return index >= 0;
     }
 
     private static class NodeComparator implements Comparator<FFTNode> {

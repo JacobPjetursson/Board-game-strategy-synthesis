@@ -71,6 +71,7 @@ public abstract class FFTNode {
         return reachable;
     }
 
+    // below functions are used to lock certain blocks
     public synchronized void addReachableParent(FFTNode parent, Map<FFTNode, Set<FFTNode>> addedParentNodes) {
         if (reachableParents == null) {
             if (SINGLE_THREAD)
@@ -117,6 +118,18 @@ public abstract class FFTNode {
         deletedParentNodes.put(this, deletedParents);
         reachableParents.clear();
         reachable = false;
+    }
+
+    public synchronized void addToAppliedMap(Map<FFTNode, RuleMapping> map, Rule r, FFTMove m) {
+        RuleMapping existing = map.get(this);
+        if (existing != null) {// in case of symmetry
+            existing.getMoves().add(m);
+        }
+        else {
+            Set<FFTMove> moves = new HashSet<>();
+            moves.add(m);
+            map.put(this, new RuleMapping(r, moves));
+        }
     }
 
     public Rule getAppliedRule() {
