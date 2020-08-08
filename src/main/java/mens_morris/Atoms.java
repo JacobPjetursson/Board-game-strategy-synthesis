@@ -21,6 +21,8 @@ public class Atoms {
     public static HashMap<Literal, LiteralSet> remToPrecons; // precondition for removing piece
     public static ArrayList<Integer> gameAtoms;
 
+    public static final int NUMBER_OF_ATOMS = (THREE_MENS) ? 20 : 35;
+
     public static void addToSets(int id, String name, int row, int col, int occ) {
         gameAtoms.add(id);
         stringToId.put(name, id);
@@ -47,8 +49,7 @@ public class Atoms {
         if (!Config.RANDOM_SEED)
             random.setSeed(Config.SEED);
         LinkedList<Integer> ids = new LinkedList<>();
-        int max = (THREE_MENS) ? 40 : 70;
-        for (int i = 1; i <= max; i++)
+        for (int i = 1; i <= NUMBER_OF_ATOMS; i++)
             ids.add(i);
         Collections.shuffle(ids, random);
 
@@ -60,7 +61,7 @@ public class Atoms {
         stringToId.put("p1Turn", id);
         idToString.put(id, "p1Turn");
 
-        id = ids.pop();
+        id = id + NUMBER_OF_ATOMS;
         gameAtoms.add(id);
         stringToId.put("!p1Turn", id);
         idToString.put(id, "!p1Turn");
@@ -70,7 +71,7 @@ public class Atoms {
         stringToId.put("phase2", id);
         idToString.put(id, "phase2");
 
-        id = ids.pop();
+        id = id + NUMBER_OF_ATOMS;
         gameAtoms.add(id);
         stringToId.put("!phase2", id);
         idToString.put(id, "!phase2");
@@ -81,7 +82,7 @@ public class Atoms {
             stringToId.put("canRemove", id);
             idToString.put(id, "canRemove");
 
-            id = ids.pop();
+            id = id + NUMBER_OF_ATOMS;
             gameAtoms.add(id);
             stringToId.put("!canRemove", id);
             idToString.put(id, "!canRemove");
@@ -95,17 +96,15 @@ public class Atoms {
                 s = String.format("P1(%s, %s)", i, j);
                 addToSets(id, s, i, j, PLAYER1);
 
-                id = ids.pop();
                 s = String.format("!P1(%s, %s)", i, j);
-                addToSets(id, s, i, j, -PLAYER1);
+                addToSets(id + NUMBER_OF_ATOMS, s, i, j, -PLAYER1);
 
                 id = ids.pop();
                 s = String.format("P2(%s, %s)", i, j);
                 addToSets(id, s, i, j, PLAYER2);
 
-                id = ids.pop();
                 s = String.format("!P2(%s, %s)", i, j);
-                addToSets(id, s, i, j, -PLAYER2);
+                addToSets(id + NUMBER_OF_ATOMS, s, i, j, -PLAYER2);
 
                 // Make sure new position is empty
                 LiteralSet addPrecons = new LiteralSet();

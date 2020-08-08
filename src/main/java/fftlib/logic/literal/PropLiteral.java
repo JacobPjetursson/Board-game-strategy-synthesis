@@ -4,6 +4,8 @@ import fftlib.FFTManager;
 
 public class PropLiteral extends Literal {
 
+    public static final int NUMBER_OF_ATOMS = FFTManager.numberOfAtoms;
+
     public PropLiteral(int id) {
         this.id = id;
     }
@@ -28,12 +30,10 @@ public class PropLiteral extends Literal {
 
     @Override
     public void setNegated(boolean negated) {
-        String name = getName();
-        if (negated && !name.startsWith("!")) {
-            this.id = FFTManager.getAtomId.apply("!" + name);
-        } else if (name.startsWith("!")){
-            this.id = FFTManager.getAtomId.apply(name.substring(1));
-        }
+        if (negated && this.id <= NUMBER_OF_ATOMS) {
+            this.id += NUMBER_OF_ATOMS;
+        } else if (!negated && this.id > NUMBER_OF_ATOMS)
+            this.id -= NUMBER_OF_ATOMS;
     }
 
     @Override

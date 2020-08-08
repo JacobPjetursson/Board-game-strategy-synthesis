@@ -39,7 +39,7 @@ public class FFTManager {
     public static int gameBoardHeight;
     public static ArrayList<Integer> legalIndices;
     public static Function<PropRule, HashSet<SymmetryRule>> getSymmetryRules;
-    public static int maxStateLiterals;
+    public static int numberOfAtoms;
     public static int winner; // set by solver
     public static boolean isCyclic;
     public static FFTNode initialNode;
@@ -79,7 +79,7 @@ public class FFTManager {
         gdlToRule = gameSpecs::gdlToRule;
         nodeToLiterals = gameSpecs::nodeToLiterals;
         // Domain Specific
-        maxStateLiterals = gameSpecs.getMaxStateLiterals();
+        numberOfAtoms = gameSpecs.getNumberOfAtoms();
         getSymmetryRules = gameSpecs::getSymmetryRules;
         int[] dim = gameSpecs.getBoardDim();
         gameBoardHeight = dim[0];

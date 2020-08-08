@@ -76,6 +76,7 @@ public class RuleList extends ArrayList<Rule> {
     }
 
     private List<Rule> filterByAtom(int atomIdx, LiteralSet lSet, List<Rule> rules) {
+        // rules is never empty since we only call function if non-empty
         if (atomIdx >= sortedAtoms.size())
             return rules;
 

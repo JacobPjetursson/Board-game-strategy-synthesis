@@ -165,8 +165,8 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public int getMaxStateLiterals() {
-        return 9;
+    public int getNumberOfAtoms() {
+        return 18;
     }
 
     @Override

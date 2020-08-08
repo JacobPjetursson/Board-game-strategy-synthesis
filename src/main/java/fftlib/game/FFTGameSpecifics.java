@@ -18,7 +18,7 @@ public interface FFTGameSpecifics {
     int[] getBoardDim(); // Domain specific
     FFTNode getInitialNode(); // Domain specific
     HashSet<SymmetryRule> getSymmetryRules(PropRule propRule); // Domain specific
-    int getMaxStateLiterals(); // Domain specific
+    int getNumberOfAtoms(); // Domain specific
     ArrayList<Integer> legalIndices(); // Domain specific
     void randomizeSeeds(); // Domain specific
     boolean isCyclic();

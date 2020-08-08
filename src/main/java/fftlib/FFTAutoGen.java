@@ -581,7 +581,7 @@ public class FFTAutoGen {
     }
 
     private static boolean addToSets(FFTNode node, FFTMove move, List<Set<FFTNode>> addedNodes,
-                                  Map<FFTNode, Set<FFTNode>> addedParentNodes,
+                                     Map<FFTNode, Set<FFTNode>> addedParentNodes,
                                      boolean safe) {
         LinkedList<FFTNodeAndMove> frontier = new LinkedList<>();
         Set<FFTNode> closedSet = new HashSet<>(); // prevent looping when not safe

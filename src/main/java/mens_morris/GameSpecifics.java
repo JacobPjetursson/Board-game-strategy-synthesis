@@ -220,10 +220,10 @@ public class GameSpecifics implements FFTGameSpecifics {
     }
 
     @Override
-    public int getMaxStateLiterals() {
+    public int getNumberOfAtoms() {
         if (THREE_MENS)
-            return 11; // 9 + 2
-        return 19; // 16 + 3
+            return 20; // 18 + 2
+        return 35; // 32 + 3
     }
 
     @Override

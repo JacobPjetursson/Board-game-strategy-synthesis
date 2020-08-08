@@ -20,6 +20,8 @@ public class Atoms {
     public static HashMap<Position, Integer> posToId;
     public static HashMap<Action, LiteralSet> actionToPrecons;
 
+    public static final int NUMBER_OF_ATOMS = 18;
+
     public static void addToSets(int id, String name, int row, int col, int occ) {
         gameAtoms.add(id);
         stringToId.put(name, id);
@@ -45,7 +47,7 @@ public class Atoms {
         if (!Config.RANDOM_SEED)
             random.setSeed(Config.SEED);
         LinkedList<Integer> ids = new LinkedList<>();
-        for (int i = 1; i <= 36; i++)
+        for (int i = 1; i <= NUMBER_OF_ATOMS; i++)
             ids.add(i);
         Collections.shuffle(ids, random);
 
@@ -57,17 +59,16 @@ public class Atoms {
                 s = String.format("P1(%s, %s)", i, j);
                 addToSets(id, s, i, j, PLAYER1);
 
-                id = ids.pop();
+                // add number of atoms to all negative atoms, so we can easily change negation
                 s = String.format("!P1(%s, %s)", i, j);
-                addToSets(id, s, i, j, -PLAYER1);
+                addToSets(id + NUMBER_OF_ATOMS, s, i, j, -PLAYER1);
 
                 id = ids.pop();
                 s = String.format("P2(%s, %s)", i, j);
                 addToSets(id, s, i, j, PLAYER2);
 
-                id = ids.pop();
                 s = String.format("!P2(%s, %s)", i, j);
-                addToSets(id, s, i, j, -PLAYER2);
+                addToSets(id + NUMBER_OF_ATOMS, s, i, j, -PLAYER2);
 
                 LiteralSet actionPrecons = new LiteralSet();
                 actionPrecons.add(new PropLiteral(String.format("!P1(%s, %s)", i, j)));

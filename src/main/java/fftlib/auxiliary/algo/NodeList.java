@@ -84,20 +84,30 @@ public class NodeList extends ArrayList<FFTNode> {
         Literal neg = new PropLiteral(atom);
         neg.setNegated(true);
 
+        List<FFTNode> posList = null;
+        List<FFTNode> negList = null;
+
         // find interval
         int posEnd = findInterval(pos, nodes);
-        List<FFTNode> posList = nodes.subList(0, posEnd);
-        List<FFTNode> negList = nodes.subList(posEnd, nodes.size());
+        if (posEnd != 0)
+            posList = nodes.subList(0, posEnd);
+        if (posEnd != nodes.size())
+            negList = nodes.subList(posEnd, nodes.size());
+
         if (lSet.contains(pos)) {
             // rule contains pos, add posList
-            matchingNodes.addAll(filterByAtom(atomIdx, lSet, posList));
+            if (posList != null)
+                matchingNodes.addAll(filterByAtom(atomIdx, lSet, posList));
         } else if (lSet.contains(neg)) {
             // rule contains neg, add negList
-            matchingNodes.addAll(filterByAtom(atomIdx, lSet, negList));
+            if (negList != null)
+                matchingNodes.addAll(filterByAtom(atomIdx, lSet, negList));
         } else {
             // rule contains neither, add both
-            matchingNodes.addAll(filterByAtom(atomIdx, lSet, posList));
-            matchingNodes.addAll(filterByAtom(atomIdx, lSet, negList));
+            if (posList != null)
+                matchingNodes.addAll(filterByAtom(atomIdx, lSet, posList));
+            if (negList != null)
+                matchingNodes.addAll(filterByAtom(atomIdx, lSet, negList));
         }
         return matchingNodes;
     }
@@ -135,9 +145,11 @@ public class NodeList extends ArrayList<FFTNode> {
     // maintains ordering
     public synchronized void sortedAdd(FFTNode node) {
         int index = Collections.binarySearch(this, node, nc);
-        if (index < 0)
+        if (index < 0) {
             index = -index - 1;
-        add(index, node);
+            add(index, node);
+        }
+        // don't allow add if already exists
     }
 
     // n + log(n) instead of (n + n)
