@@ -18,7 +18,7 @@ public abstract class FFTNode {
     // cached literalSet
     private LiteralSet converted;
 
-    private Rule appliedRule; // the current rule that applies to this state
+    private RuleMapping appliedRuleMapping; // the current rule that applies to this state
 
     public int getTurn() {
         return turn;
@@ -132,12 +132,12 @@ public abstract class FFTNode {
         }
     }
 
-    public Rule getAppliedRule() {
-        return appliedRule;
+    public RuleMapping getAppliedRuleMapping() {
+        return appliedRuleMapping;
     }
 
-    public void setAppliedRule(Rule r) {
-        appliedRule = r;
+    public void setAppliedRuleMapping(RuleMapping rm) {
+        appliedRuleMapping = rm;
     }
 
     // used for setting the initial state

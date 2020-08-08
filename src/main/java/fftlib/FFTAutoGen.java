@@ -27,7 +27,9 @@ public class FFTAutoGen {
     private static NodeMap appliedStates;
 
     private static FFT fft;
+    // used to keep track of where in the autogeneration process we are
     private static boolean minimizing;
+    private static boolean deletingRule;
 
     // used for checking whether lifting a rule applies to more states
     private static int groundedAppliedMapSize;
@@ -285,14 +287,36 @@ public class FFTAutoGen {
 
         applicableStates.findNodes(r, appliedMap);
 
-        if (!lastRule) { // replace value of all keys
-            if (!SINGLE_THREAD) {
-                appliedMap.keySet().parallelStream().forEach(key ->
-                        appliedMap.replace(key, fft.apply(key)));
-
-            } else {
-                appliedMap.replaceAll((k, v) -> fft.apply(k));
+        // replace function
+        Consumer<FFTNode> replaceMethod = (node -> {
+            // we deleted a rule and a previous rule applied, so we replace it with whatever
+            if (minimizing && deletingRule) {
+                // need to simply replace with whichever rule (if any) the state is now covered by
+                appliedMap.replace(node, fft.apply(node));
+                return;
             }
+
+            RuleMapping nodeRm = node.getAppliedRuleMapping();
+            RuleMapping appliedRm = appliedMap.get(node);
+            // no rule applied to node previously, so we don't need to replace anything
+            if (nodeRm == null || nodeRm == RuleMapping.NOMATCH)
+                return;
+
+            // rule applied previously with lower index, so we put that rule back
+            if (nodeRm.getRule().getRuleIndex() < appliedRm.getRule().getRuleIndex()) {
+                // So check if rule in node is lower index than the rule in appliedMap
+                // if so, then modifying this rule won't affect it,
+                // so we replace it with the (old) rule that applied
+                appliedMap.put(node, nodeRm);
+            }
+            // rule applied with higher index, meaning it is the new applied rule, so we don't do anything
+        });
+
+        if (!lastRule) { // replace value of all keys
+            if (!SINGLE_THREAD)
+                appliedMap.keySet().parallelStream().forEach(replaceMethod);
+            else
+                appliedMap.keySet().forEach(replaceMethod);
         }
 
     }
@@ -319,8 +343,6 @@ public class FFTAutoGen {
         else
             appliedMap = new ConcurrentHashMap<>();
 
-        fillAppliedMap(r, appliedMap, lastRule);
-
         // suboptimalnodes contains all nodes that has a sub-optimal move or indirectly causes it through a chosenmove
         // addedNodes contains all nodes that has been added. deletedNodes does the opposite
         // addedParentNodes contains all the newly added reachable parents of a given state
@@ -328,8 +350,11 @@ public class FFTAutoGen {
         List<Set<FFTNode>> deletedNodes = new ArrayList<>();
         Set<FFTNode> suboptimalNodes;
         Map<FFTNode, Set<FFTNode>> addedParentNodes, deletedParentNodes;
+        // this map contains all links between relevant states and their rulemappings
+        Map<FFTNode, RuleMapping> newAppliedRules;
         if (SINGLE_THREAD) {
             suboptimalNodes = new HashSet<>();
+            newAppliedRules = new HashMap<>();
             addedParentNodes = new HashMap<>();
             deletedParentNodes = new HashMap<>();
             for (int i = 0; i < 3; i++) {
@@ -338,6 +363,7 @@ public class FFTAutoGen {
             }
         } else {
             suboptimalNodes = ConcurrentHashMap.newKeySet();
+            newAppliedRules = new ConcurrentHashMap<>();
             addedParentNodes = new ConcurrentHashMap<>();
             deletedParentNodes = new ConcurrentHashMap<>();
             for (int i = 0; i < 3; i++) {
@@ -346,7 +372,8 @@ public class FFTAutoGen {
             }
         }
 
-        updateSetsAll(appliedMap, suboptimalNodes, addedNodes, deletedNodes,
+        fillAppliedMap(r, appliedMap, lastRule);
+        updateSetsAll(appliedMap, newAppliedRules, suboptimalNodes, addedNodes, deletedNodes,
                 addedParentNodes, deletedParentNodes, lastRule, safe);
 
         //System.out.println("Verification complete, doing checks");
@@ -366,6 +393,11 @@ public class FFTAutoGen {
             liftedAppliedMapSize = appliedMap.size();
         else
             groundedAppliedMapSize = appliedMap.size();
+
+        // set all applied rules to respective states
+        for (Map.Entry<FFTNode, RuleMapping> entry : newAppliedRules.entrySet()) {
+            entry.getKey().setAppliedRuleMapping(entry.getValue());
+        }
 
         return true;
     }
@@ -408,7 +440,9 @@ public class FFTAutoGen {
         }
     }
 
-    private static void updateSetsAll(Map<FFTNode, RuleMapping> appliedMap, Set<FFTNode> suboptimalNodes,
+    private static void updateSetsAll(Map<FFTNode, RuleMapping> appliedMap,
+                                      Map<FFTNode, RuleMapping> newAppliedRules,
+                                      Set<FFTNode> suboptimalNodes,
                                       List<Set<FFTNode>> addedNodes,
                                       List<Set<FFTNode>> deletedNodes,
                                       Map<FFTNode, Set<FFTNode>> addedParentNodes,
@@ -465,11 +499,11 @@ public class FFTAutoGen {
                     moves = chosenMoves;
 
                 for (FFTMove m : moves) {
-                    if (!addToSets(n, m, addedNodes, addedParentNodes, safe)) {
+                    if (!addToSets(n, m, addedNodes, addedParentNodes, newAppliedRules, safe)) {
                         //System.out.println("Failed to add the transition from node: " + n + ", with move: " + m);
                         suboptimalNodes.add(n);
                         // we need to undo the nodes we added so that other addToSets can fail for same node
-                        removeFromSets(n, m, deletedNodes, deletedParentNodes,
+                        removeFromSets(n, m, newAppliedRules, deletedNodes, deletedParentNodes,
                                 appliedMap, reachables,false);
                         break;
                     }
@@ -501,14 +535,14 @@ public class FFTAutoGen {
             // remove all except for chosenMoves
             for (FFTMove m : optimalMoves) {
                 if (!chosenMoves.contains(m))
-                    removeFromSets(n, m, deletedNodes, deletedParentNodes,
+                    removeFromSets(n, m, newAppliedRules, deletedNodes, deletedParentNodes,
                             appliedMap, reachables, FFTManager.isCyclic);
             }
         });
 
         // ADJUST METHOD
         Consumer<Map.Entry<FFTNode, RuleMapping>> adjustMethod = (entry -> {
-            adjustSets(entry.getKey(), entry.getValue(), addedNodes, deletedNodes, safe);
+            adjustSets(entry.getKey(), entry.getValue(), newAppliedRules, addedNodes, deletedNodes, safe);
         });
 
 
@@ -529,6 +563,7 @@ public class FFTAutoGen {
     // removes all children from the sets recursively. Stops if the state is still reachable after removing the link
     // takes the addNodes/addParentNodes as argument to prevent deleting if it is made reachable in addToSets
     private static void removeFromSets(FFTNode n, FFTMove m,
+                                       Map<FFTNode, RuleMapping> newAppliedRules,
                                        List<Set<FFTNode>> deletedNodes,
                                        Map<FFTNode, Set<FFTNode>> deletedParentNodes,
                                        Map<FFTNode, RuleMapping> appliedMap, Set<FFTNode> reachables,
@@ -551,14 +586,15 @@ public class FFTAutoGen {
             //System.out.println("existing child: " + existingChild + " , still reachable");
             return;
         }
-        remove(existingChild, deletedNodes, deletedParentNodes);
+        remove(existingChild, deletedNodes, deletedParentNodes, newAppliedRules);
         for (FFTMove move : existingChild.getLegalMoves())
-            removeFromSets(existingChild, move, deletedNodes, deletedParentNodes,
+            removeFromSets(existingChild, move, newAppliedRules, deletedNodes, deletedParentNodes,
                     appliedMap, reachables, removeCycles);
     }
 
     private static void remove(FFTNode n, List<Set<FFTNode>> deletedNodes,
-                               Map<FFTNode, Set<FFTNode>> deletedParentNodes) {
+                               Map<FFTNode, Set<FFTNode>> deletedParentNodes,
+                               Map<FFTNode, RuleMapping> newAppliedRules) {
         //System.out.println("removing node: " + n + " , from everything");
         if (reachableStates.contains(n)) {
             //System.out.println("removing node: " + n + " , from reachable");
@@ -576,12 +612,14 @@ public class FFTAutoGen {
             deletedNodes.get(APPLIED).add(n);
         }
         n.clearReachableParents(deletedParentNodes);
+        newAppliedRules.put(n, RuleMapping.NOMATCH);
         //System.out.println("deleted node:" + n + " , from everything");
         //System.out.println("reachable parents: " + n.getReachableParents() + " , reachable: " + n.isReachable());
     }
 
     private static boolean addToSets(FFTNode node, FFTMove move, List<Set<FFTNode>> addedNodes,
                                      Map<FFTNode, Set<FFTNode>> addedParentNodes,
+                                     Map<FFTNode, RuleMapping> newAppliedRules,
                                      boolean safe) {
         LinkedList<FFTNodeAndMove> frontier = new LinkedList<>();
         Set<FFTNode> closedSet = new HashSet<>(); // prevent looping when not safe
@@ -634,7 +672,7 @@ public class FFTAutoGen {
             RuleMapping rm = fft.apply(child);
             Set<FFTMove> newMoves = rm.getMoves();
             //System.out.println("newMoves: " + newMoves);
-            adjustSets(child, rm, addedNodes, new ArrayList<>(), safe);
+            adjustSets(child, rm, newAppliedRules, addedNodes, new ArrayList<>(), safe);
 
             if (newMoves.isEmpty()) {
                 // check that every move is legal if minimizing
@@ -658,7 +696,8 @@ public class FFTAutoGen {
         return true;
     }
 
-    public static void adjustSets(FFTNode n, RuleMapping rm, List<Set<FFTNode>> addedNodes,
+    public static void adjustSets(FFTNode n, RuleMapping rm, Map<FFTNode, RuleMapping> newAppliedRules,
+                                  List<Set<FFTNode>> addedNodes,
                                   List<Set<FFTNode>> deletedNodes, boolean safe) {
         //System.out.println("adjusting sets for node:" + n);
         //System.out.println("chosenMoves:" + rm.getMoves());
@@ -669,6 +708,7 @@ public class FFTAutoGen {
         Set<FFTMove> chosenMoves = rm.getMoves();
         // when deleting a rule, chosenMoves might be empty and state is no longer applied
         if (chosenMoves.isEmpty() || simplifyingLastRule(rm, safe)) {
+            newAppliedRules.put(n, RuleMapping.NOMATCH);
             if (appliedStates.contains(n)) {
                 //System.out.println("removing node " + n + " , from appliedStates");
                 appliedStates.remove(n);
@@ -681,6 +721,7 @@ public class FFTAutoGen {
                 addedNodes.get(APPLICABLE).add(n);
             }
         } else {
+            newAppliedRules.put(n, rm);
             if (!appliedStates.contains(n)) {
                 //System.out.println("adding node " + n + " , to appliedStates");
                 addedNodes.get(APPLIED).add(n);
@@ -799,9 +840,11 @@ public class FFTAutoGen {
             }
             if (DETAILED_DEBUG)
                 System.out.println("Attempting to remove rule: " + r);
+            deletingRule = true;
             fft.removeRule(i - removed);
             removed++;
             if (!verifyRule(r, false)) {
+                deletingRule = false;
                 if (TESTING) {
                     checkVerification(r, true, false);
                 }
@@ -821,6 +864,7 @@ public class FFTAutoGen {
                 }
             }
             safeRun(r, false);
+            deletingRule = false;
         }
     }
 

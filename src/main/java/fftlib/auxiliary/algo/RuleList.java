@@ -180,15 +180,19 @@ public class RuleList extends ArrayList<Rule> {
             if (Config.SYMMETRY_DETECTION) {
                 for (Rule ru : r.getSymmetryRules()) {
                     int index = Collections.binarySearch(this, ru, rc);
-                    if (index < 0)
+                    if (index < 0) {
                         index = -index - 1;
-                    add(index, ru);
+                        add(index, ru);
+                    }
+                    // only add if it doesnt exist
                 }
             } else {
                 int index = Collections.binarySearch(this, r, rc);
-                if (index < 0)
+                if (index < 0) {
                     index = -index - 1;
-                add(index, r);
+                    add(index, r);
+                }
+                // only add if it doesnt exist
             }
         }
     }
