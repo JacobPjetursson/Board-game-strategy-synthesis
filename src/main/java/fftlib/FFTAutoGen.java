@@ -395,9 +395,14 @@ public class FFTAutoGen {
             groundedAppliedMapSize = appliedMap.size();
 
         // set all applied rules to respective states
-        for (Map.Entry<FFTNode, RuleMapping> entry : newAppliedRules.entrySet()) {
-            entry.getKey().setAppliedRuleMapping(entry.getValue());
-        }
+        Consumer<Map.Entry<FFTNode, RuleMapping>> setRuleMappingMethod = (entry -> {
+           entry.getKey().setAppliedRuleMapping(entry.getValue());
+        });
+
+        if (!SINGLE_THREAD)
+            newAppliedRules.entrySet().parallelStream().forEach(setRuleMappingMethod);
+        else
+            newAppliedRules.entrySet().forEach(setRuleMappingMethod);
 
         return true;
     }
