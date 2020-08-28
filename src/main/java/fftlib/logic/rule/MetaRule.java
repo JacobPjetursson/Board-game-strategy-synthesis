@@ -2,27 +2,27 @@ package fftlib.logic.rule;
 
 import fftlib.logic.FFT;
 
-public class RuleGroup {
+public class MetaRule {
     public int startIdx, endIdx;
     public String name;
-    private boolean locked; // Are we allowed to modify this rulegroup (e.g. minimize?)
+    private boolean locked; // Are we allowed to modify this metarule (e.g. minimize?)
     private FFT fft;
 
-    public RuleGroup(FFT f, String name) {
+    public MetaRule(FFT f, String name) {
         startIdx = -1;
         endIdx = -1;
         this.name = name;
         this.fft = f;
     }
 
-    public RuleGroup(FFT f, String name, int startIdx, int endIdx) {
+    public MetaRule(FFT f, String name, int startIdx, int endIdx) {
         this(f, name);
         this.startIdx = startIdx;
         this.endIdx = endIdx;
 
     }
 
-    public RuleGroup(RuleGroup copy) {
+    public MetaRule(MetaRule copy) {
         this.name = copy.name;
         this.fft = copy.fft;
         this.locked = copy.locked;
@@ -38,38 +38,38 @@ public class RuleGroup {
 
     public void updateIntervals(boolean removing, int idx) {
         int changedIdx = (removing) ? -1 : 1;
-        if (idx < startIdx) { // before this rulegroup
+        if (idx < startIdx) { // before this metarule
             startIdx += changedIdx;
             endIdx += changedIdx;
-        } else if (idx < endIdx) { // in this rulegroup
+        } else if (idx < endIdx) { // in this metarule
             endIdx += changedIdx;
         }
     }
 
     // used for moving rules
     public void updateIntervals(int oldIdx, int newIdx) {
-        // moved from below this rulegroup into this rulegroup
+        // moved from below this metarule into this metarule
         if (below(oldIdx) && inside(newIdx)) {
             startIdx--;
         }
-        // moved from above this rulegroup into this rulegroup
+        // moved from above this metarule into this metarule
         else if (above(oldIdx) && inside(newIdx)) {
             endIdx++;
         }
-        // moved from this rulegroup to below this rulegroup
+        // moved from this metarule to below this metarule
         if (inside(oldIdx) && below(newIdx)) {
             startIdx++;
         }
-        // moved from this rulegroup to above this rulegroup
+        // moved from this metarule to above this metarule
         if (inside(oldIdx) && above(newIdx)) {
             endIdx--;
         }
-        // moved from below to above this rulegroup
+        // moved from below to above this metarule
         else if (below(oldIdx) && above(newIdx)) {
             startIdx--;
             endIdx--;
         }
-        // moved from above to below this rulegroup
+        // moved from above to below this metarule
         else if (above(oldIdx) && below(newIdx)) {
             startIdx++;
             endIdx++;
@@ -88,8 +88,8 @@ public class RuleGroup {
         return idx >= startIdx && idx < endIdx;
     }
 
-    public RuleGroup clone() {
-        return new RuleGroup(this);
+    public MetaRule clone() {
+        return new MetaRule(this);
     }
 
     public int size() {

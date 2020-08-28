@@ -65,17 +65,17 @@ public class Demo {
 /*
  */
 /*
-        System.out.println("rules size: " + fft.ruleGroups.get(0).rules.size());
+        System.out.println("rules size: " + fft.metarules.get(0).rules.size());
         System.out.println("ruleList size: " + fft.getRuleList().size());
-        Rule r = fft.ruleGroups.get(0).rules.get(5);
+        Rule r = fft.metarules.get(0).rules.get(5);
         System.out.println("Removing rule: " + r);
         fft.remove(r);
-        System.out.println("rules size: " + fft.ruleGroups.get(0).rules.size());
+        System.out.println("rules size: " + fft.metarules.get(0).rules.size());
         System.out.println("ruleList size: " + fft.getRuleList().size());
         System.out.println("Adding back rule");
-        fft.ruleGroups.get(0).rules.add(5, r);
+        fft.metarules.get(0).rules.add(5, r);
         fft.getRuleList().sortedAdd(r);
-        for (Rule ru : fft.ruleGroups.get(0).rules) {
+        for (Rule ru : fft.metaRules.get(0).rules) {
             if (ru.getRuleIndex() == 5)
                 System.out.println("CMON MAN");
         }

@@ -2,7 +2,7 @@ package fftlib.gui;
 
 
 import fftlib.logic.rule.Rule;
-import fftlib.logic.rule.RuleGroup;
+import fftlib.logic.rule.MetaRule;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 import javafx.collections.FXCollections;
@@ -24,8 +24,11 @@ public class FFTPane extends VBox {
     Label title;
     FFTNode node;
     private ListView<VBox> lw;
-    private static final double RULE_SIZE = 29;
-    private static final double RULEGROUP_LABEL_SIZE = 32;
+    private static final int FONTSIZE_TITLE = 28; // 18 is default
+    private static final int FONTSIZE_RULE = 24; // 13 is default
+    private static final int FONTSIZE_METARULE = 28; // 16 is default
+    private static final double RULE_SIZE = 40; // 29 is default
+    private static final double METARULE_LABEL_SIZE = 46; // 32 is default
     private boolean ruleApplied;
     private double size;
 
@@ -33,7 +36,7 @@ public class FFTPane extends VBox {
         setAlignment(Pos.CENTER);
 
         title = new Label(currFFT.getName());
-        title.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
+        title.setFont(Font.font("Verdana", FontWeight.BOLD, FONTSIZE_TITLE));
         title.setAlignment(Pos.CENTER);
         title.setTextAlignment(TextAlignment.CENTER);
 
@@ -61,11 +64,11 @@ public class FFTPane extends VBox {
         size = 0;
         int i = 0;
         while (i < currFFT.getRules().size()) {
-            // check if any rulegroup starts at index i
-            for (RuleGroup rg : currFFT.getRuleGroups()) {
-                if (i == rg.startIdx && i < currFFT.size()) {
-                    rules.add(getRuleGroupBox(rg));
-                    while (i < rg.endIdx && i < currFFT.size()) {
+            // check if any metarule starts at index i
+            for (MetaRule mr : currFFT.getMetaRules()) {
+                if (i == mr.startIdx && i < currFFT.size()) {
+                    rules.add(getMetaRuleBox(mr));
+                    while (i < mr.endIdx && i < currFFT.size()) {
                         Rule r = currFFT.getRules().get(i);
                         rules.add(getRuleBox(r, i, true));
                         i++;
@@ -78,10 +81,10 @@ public class FFTPane extends VBox {
             rules.add(getRuleBox(r, i, false));
             i++;
         }
-        // account for corner case where rulegroup is empty at end of rules
-        for (RuleGroup rg : currFFT.getRuleGroups()) {
-            if (rg.startIdx >= currFFT.size()) {
-                rules.add(getRuleGroupBox(rg));
+        // account for corner case where metarule is empty at end of rules
+        for (MetaRule mr : currFFT.getMetaRules()) {
+            if (mr.startIdx >= currFFT.size()) {
+                rules.add(getMetaRuleBox(mr));
             }
         }
 
@@ -93,7 +96,7 @@ public class FFTPane extends VBox {
         VBox ruleBox = new VBox(10);
         String pfx = (inline) ? "   " : "";
         Label rLabel = new Label(pfx + (index+1) + ": " + r);
-        rLabel.setFont(Font.font("Verdana", 13));
+        rLabel.setFont(Font.font("Verdana", FONTSIZE_RULE));
         HashSet<FFTMove> moves = r.apply(node);
         if (!ruleApplied && !moves.isEmpty()) {
             rLabel.setTextFill(Color.BLUE);
@@ -104,14 +107,14 @@ public class FFTPane extends VBox {
         return ruleBox;
     }
 
-    public VBox getRuleGroupBox(RuleGroup rg) {
-        Label rgLabel = new Label(rg.name);
-        rgLabel.setFont(Font.font("Verdana", 16));
+    public VBox getMetaRuleBox(MetaRule mr) {
+        Label rgLabel = new Label(mr.name);
+        rgLabel.setFont(Font.font("Verdana", FONTSIZE_METARULE));
         rgLabel.setTextFill(Color.GRAY);
 
         VBox rgLabelBox = new VBox(10);
         rgLabelBox.getChildren().add(rgLabel);
-        size += RULEGROUP_LABEL_SIZE;
+        size += METARULE_LABEL_SIZE;
         return rgLabelBox;
     }
 }

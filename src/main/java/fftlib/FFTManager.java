@@ -114,17 +114,16 @@ public class FFTManager {
             writer = new BufferedWriter(new FileWriter(fftPath));
             StringBuilder fft_file = new StringBuilder();
             for (FFT fft : ffts) {
-                fft_file.append("{").append(fft.getName()).append("\n");
+                fft_file.append("{").append(fft.getName()).append("}\n");
                 for (Rule r : fft.getRules())
                     fft_file.append(r.getPreconditions()).append(" -> ").append(r.getAction()).append("\n");
-                fft_file.append("}\n");
-                for (RuleGroup rg : fft.getRuleGroups()) {
-                    fft_file.append("[").append(rg.name);
-                    if (rg.isLocked())
+                for (MetaRule mr : fft.getMetaRules()) {
+                    fft_file.append("[").append(mr.name).append(",");
+                    fft_file.append(mr.startIdx).append(",");
+                    fft_file.append(mr.endIdx).append("]");
+                    if (mr.isLocked())
                         fft_file.append("*");
                     fft_file.append("\n");
-                    fft_file.append(rg.startIdx).append("\n");
-                    fft_file.append(rg.endIdx).append("\n");
                 }
                 fft_file.append("\n");
             }
@@ -160,8 +159,10 @@ public class FFTManager {
                         int length = (locked) ? line.length() - 2 : line.length() - 1;
                         String trimmed = line.substring(1, length);
                         String[] parts = trimmed.split(",");
-                        RuleGroup rg = new RuleGroup(f, parts[0], Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
-                        f.addRuleGroup(rg);
+                        MetaRule mr = new MetaRule(f, parts[0],
+                                Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+                        mr.setLocked(locked);
+                        f.addMetaRule(mr);
 
                     }
                     else {
@@ -172,7 +173,8 @@ public class FFTManager {
                         f.append(r);
                     }
                 }
-
+                if (f != null)
+                    ffts.add(f);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -214,10 +216,8 @@ public class FFTManager {
     }
 
     public static Node getFailNode() {
-        FFTNodeAndMove ps = currFFT.getFailingPoint();
-        FFTNode n = ps.getNode();
-        List<? extends FFTMove> optimalMoves = FFTSolution.optimalMoves(n);
-        return failNode.getFailNode(ps, optimalMoves);
+        FFTNode n = currFFT.getFailingPoint();
+        return failNode.getFailNode(n);
     }
 
     public static void randomizeSeeds() {

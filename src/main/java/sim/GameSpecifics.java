@@ -78,8 +78,6 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public String getFFTFilePath() {
-        if (Config.ENABLE_GGP_PARSER)
-            return "FFTs/sim_GGP_FFT.txt";
         return "FFTs/simFFT.txt";
     }
 

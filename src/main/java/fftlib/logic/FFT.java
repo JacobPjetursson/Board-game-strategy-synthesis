@@ -11,7 +11,7 @@ import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.rule.PredRule;
 import fftlib.logic.rule.PropRule;
 import fftlib.logic.rule.Rule;
-import fftlib.logic.rule.RuleGroup;
+import fftlib.logic.rule.MetaRule;
 import misc.Config;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
@@ -33,14 +33,14 @@ public class FFT {
     private String name;
     // used for a simple representation of the rules
     private ArrayList<Rule> rules;
-    private ArrayList<RuleGroup> ruleGroups;
+    private ArrayList<MetaRule> metaRules;
     // used for a simple list of rules in correct order ,which is handy when minimizing
     // used for the efficient computation of looking up rules that apply
     private RuleList ruleList;
     private InvertedList invertedList;
 
 
-    private FFTNodeAndMove failingPoint = null;
+    private FFTNode failingPoint = null;
 
     // For concurrency purposes
     private static ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
@@ -51,7 +51,7 @@ public class FFT {
     public FFT(String name) {
         this.name = name;
         rules = new ArrayList<>();
-        ruleGroups = new ArrayList<>();
+        metaRules = new ArrayList<>();
         ruleList = new RuleList();
         invertedList = new InvertedList(false);
     }
@@ -59,15 +59,15 @@ public class FFT {
     public FFT(FFT duplicate) {
         this.name = duplicate.name;
         if (duplicate.failingPoint != null)
-            this.failingPoint = new FFTNodeAndMove(duplicate.failingPoint);
+            this.failingPoint = duplicate.failingPoint.clone();
 
         this.rules = new ArrayList<>();
         for (Rule r : duplicate.rules)
             this.rules.add(r.clone());
 
-        this.ruleGroups = new ArrayList<>();
-        for (RuleGroup rg : duplicate.ruleGroups)
-            this.ruleGroups.add(new RuleGroup(this, rg.name, rg.startIdx, rg.endIdx));
+        this.metaRules = new ArrayList<>();
+        for (MetaRule mr : duplicate.metaRules)
+            this.metaRules.add(new MetaRule(this, mr.name, mr.startIdx, mr.endIdx));
 
         ruleList = new RuleList();
         if (USE_RULELIST) {
@@ -94,18 +94,18 @@ public class FFT {
         return rules;
     }
 
-    public void addRuleGroup(RuleGroup ruleGroup) {
-        ruleGroups.add(ruleGroup);
+    public void addMetaRule(MetaRule metaRule) {
+        metaRules.add(metaRule);
     }
 
-    public void removeRuleGroup(RuleGroup rg, boolean deep) {
-        // if shallow remove, only remove rulegroup (name and interval)
-        // if deep remove, remove all rules in rulegroup
+    public void removeMetaRule(MetaRule mr, boolean deep) {
+        // if shallow remove, only remove metarule (name and interval)
+        // if deep remove, remove all rules in metarule
         if (deep) {
             ArrayList<Rule> rulesCopy = new ArrayList<>(rules);
-            rules.removeAll(rulesCopy.subList(rg.startIdx, rg.endIdx));
+            rules.removeAll(rulesCopy.subList(mr.startIdx, mr.endIdx));
         }
-        ruleGroups.remove(rg);
+        metaRules.remove(mr);
     }
 
     public void append(Rule r) {
@@ -163,7 +163,7 @@ public class FFT {
             PropRule propRule = (PropRule) r;
             invertedList.remove(propRule);
         }
-        updateRuleGroups(true, idx);
+        updateMetaRules(true, idx);
     }
 
 
@@ -176,7 +176,7 @@ public class FFT {
             PropRule propRule = (PropRule) r;
             invertedList.add(propRule);
         }
-        updateRuleGroups(false, idx);
+        updateMetaRules(false, idx);
     }
 
     public void moveRule(int oldIdx, int newIdx) {
@@ -197,7 +197,7 @@ public class FFT {
             PropRule propRule = (PropRule) r;
             invertedList.add(propRule);
         }
-        updateRuleGroups(oldIdx, newIdx);
+        updateMetaRules(oldIdx, newIdx);
     }
 
     public boolean isValid(int team) {
@@ -223,11 +223,11 @@ public class FFT {
         return getAmountOfRules();
     }
 
-    public ArrayList<RuleGroup> getRuleGroups() {
-        return ruleGroups;
+    public ArrayList<MetaRule> getMetaRules() {
+        return metaRules;
     }
 
-    public FFTNodeAndMove getFailingPoint() {
+    public FFTNode getFailingPoint() {
         return failingPoint;
     }
 
@@ -243,16 +243,16 @@ public class FFT {
         return rules.get(rules.size()-1);
     }
 
-    // This function updates the indices at every rulegroup (relevant when minimizing or otherwise changing the FFT)
-    private void updateRuleGroups(boolean removing, int idx) {
-        for (RuleGroup rg : ruleGroups) {
-            rg.updateIntervals(removing, idx);
+    // This function updates the indices at every metarule (relevant when minimizing or otherwise changing the FFT)
+    private void updateMetaRules(boolean removing, int idx) {
+        for (MetaRule mr : metaRules) {
+            mr.updateIntervals(removing, idx);
         }
     }
 
-    private void updateRuleGroups(int oldIdx, int newIdx) {
-        for (RuleGroup rg : ruleGroups) {
-            rg.updateIntervals(oldIdx, newIdx);
+    private void updateMetaRules(int oldIdx, int newIdx) {
+        for (MetaRule mr : metaRules) {
+            mr.updateIntervals(oldIdx, newIdx);
         }
     }
 
@@ -366,14 +366,14 @@ public class FFT {
                                 frontier.add(nextNode);
                             }
                         } else if (complete) {
-                            failingPoint = new FFTNodeAndMove(node.clone(), m.clone(), true);
+                            failingPoint = node.clone();
                             return false;
                         }
                     }
                 } else {
                     for (FFTMove m : moves) {
                         if (!optimalMoves.contains(m)) {
-                            failingPoint = new FFTNodeAndMove(node.clone(), m.clone(), false);
+                            failingPoint = node.clone();
                             return false;
                         }
                         FFTNode nextNode = node.getNextNode(m);
@@ -549,7 +549,7 @@ public class FFT {
                         if (optimalMoves.contains(m)) {
                             addTask(node.getNextNode(m));
                         } else if (complete) {
-                            failingPoint = new FFTNodeAndMove(node.clone(), m.clone(), true);
+                            failingPoint = node.clone();
                             failed = true;
                             return false;
                         }
@@ -557,7 +557,7 @@ public class FFT {
                 } else {
                     for (FFTMove m : moves) {
                         if (!optimalMoves.contains(m)) {
-                            failingPoint = new FFTNodeAndMove(node.clone(), m.clone(), false);
+                            failingPoint = node.clone();
                             failed = true;
                             return false;
                         }

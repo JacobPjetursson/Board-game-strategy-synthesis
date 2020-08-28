@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.Random;
 
+import static misc.Globals.PLAYER1;
+import static misc.Globals.PLAYER2;
+
 // Is useful for all position-based games
 // team is the occupation of the position, e.g. cross or nought for tic-tac-toe
 public class Position {
@@ -64,5 +67,14 @@ public class Position {
     @Override
     public String toString() {
         return "Row: " + row + " , Col: " + col + " , Occ: " + occ;
+    }
+
+    public static Position getOtherPlayerPos(Position pos) {
+        int otherTeam;
+        if (pos.occ < 0)
+            otherTeam = (pos.occ == -PLAYER1) ? -PLAYER2 : -PLAYER1;
+        else
+            otherTeam = (pos.occ == PLAYER1) ? PLAYER2 : PLAYER1;
+        return new Position(pos.row, pos.col, otherTeam);
     }
 }

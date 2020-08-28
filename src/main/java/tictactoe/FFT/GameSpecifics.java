@@ -96,8 +96,6 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public String getFFTFilePath() {
-        if (Config.ENABLE_GGP_PARSER)
-            return "FFTs/tictactoe_GGP_FFT.txt";
         return "FFTs/tictactoeFFT.txt";
     }
 

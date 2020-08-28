@@ -83,7 +83,7 @@ public class ReviewPane extends VBox {
 
             String moveStr = String.format("Add piece at (row, col):\n" +
                             "         (%d, %d)", ps.getMove().row + 1, ps.getMove().col + 1);
-            if (Config.ENABLE_GGP_PARSER)
+            if (Config.USE_GGP_NOTATION)
                 moveStr = String.format("Set mark at (x,y):\n" +
                             "        (%d, %d)", ps.getMove().col + 1, ps.getMove().row + 1);
             Label moveL = new Label(moveStr);

@@ -17,7 +17,7 @@ public class Config {
     public static boolean RANDOM_SEED;
     public static int SEED;
     public static boolean ENABLE_GGP;
-    public static boolean ENABLE_GGP_PARSER;
+    public static boolean USE_GGP_NOTATION;
     public static boolean SHOW_GUI;
     public static int RULE_ORDERING;
     public static boolean MINIMIZE_PRECONDITIONS;
@@ -120,7 +120,7 @@ public class Config {
         RANDOM_SEED = Boolean.parseBoolean(global.getProperty("random_seed"));
         SEED = Integer.parseInt(global.getProperty("seed"));
         ENABLE_GGP = Boolean.parseBoolean(global.getProperty("enable_ggp"));
-        ENABLE_GGP_PARSER = Boolean.parseBoolean(global.getProperty("enable_ggp_parser"));
+        USE_GGP_NOTATION = Boolean.parseBoolean(global.getProperty("use_ggp_notation"));
         SHOW_GUI = Boolean.parseBoolean(global.getProperty("show_gui"));
         MINIMIZE_PRECONDITIONS = Boolean.parseBoolean(global.getProperty("minimize_preconditions"));
         MINIMIZE_ITERATIVELY = Boolean.parseBoolean(global.getProperty("minimize_iteratively"));

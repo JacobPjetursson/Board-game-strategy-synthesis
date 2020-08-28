@@ -106,7 +106,7 @@ public class FFTSolution{
         return nm.getNode();
     }
 
-    // Outputs a string which is the amount of turns to a terminal node, based on a score from the database entry
+    // Outputs a string which is the number of turns to a terminal node, based on a score from the database entry
     public static String turnsToTerminal(int team, FFTNode n) {
         if (queryNode(n) == null)
             return "0";
@@ -117,15 +117,15 @@ public class FFTSolution{
         }
         else if (nm.getWinner() == PLAYER1) {
             if (team == PLAYER1) {
-                return "" + (2000 - nm.getScore());
+                return "" + Math.abs(2000 - nm.getScore());
             } else {
-                return "" + (-2000 + nm.getScore());
+                return "" + Math.abs(-2000 + nm.getScore());
             }
         } else {
             if (team == PLAYER2) {
-                return "" + (2000 + nm.getScore());
+                return "" + Math.abs(2000 + nm.getScore());
             } else {
-                return "" + (-2000 - nm.getScore());
+                return "" + Math.abs(-2000 - nm.getScore());
             }
         }
     }

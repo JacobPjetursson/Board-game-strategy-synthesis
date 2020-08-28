@@ -21,15 +21,10 @@ public class PropRule extends Rule {
 
     // parsing constructor
     public PropRule(String preconStr, String actionStr) {
-        if (ENABLE_GGP_PARSER) {
-            PropRule r = FFTManager.gdlToRule.apply(preconStr, actionStr);
-            this.action = r.action;
-            this.preconditions = r.preconditions;
-        } else {
-            this.action = parseAction(actionStr);
-            this.preconditions = parsePreconditions(preconStr);
-            initializeAllPreconditions();
-        }
+
+        this.action = parseAction(actionStr);
+        this.preconditions = parsePreconditions(preconStr);
+        initializeAllPreconditions();
         removeActionPrecons();
         if (SYMMETRY_DETECTION)
             initializeSymmetryRules();
@@ -71,6 +66,7 @@ public class PropRule extends Rule {
         this.ruleIndex = duplicate.ruleIndex;
         if (SYMMETRY_DETECTION)
             initializeSymmetryRules();
+        this.locked = duplicate.locked;
     }
 
     public void setRuleIndex(int index) {

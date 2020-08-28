@@ -1,6 +1,8 @@
 package fftlib.logic.rule;
 
+import fftlib.FFTManager;
 import fftlib.GGPAutogen.GGPManager;
+import fftlib.auxiliary.Position;
 import fftlib.game.FFTMove;
 import fftlib.game.FFTNode;
 import fftlib.logic.literal.Literal;
@@ -17,7 +19,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static misc.Config.ENABLE_GGP_PARSER;
+import static misc.Config.USE_GGP_NOTATION;
 import static misc.Config.SHOW_GUI;
 
 public abstract class Rule {
@@ -37,7 +39,7 @@ public abstract class Rule {
     // index in FFT
     protected int ruleIndex = -1;
 
-    private boolean locked;
+    boolean locked;
 
     public abstract void setRuleIndex(int index);
 
@@ -128,13 +130,62 @@ public abstract class Rule {
             return str;
         }
 
-        if (ENABLE_GGP_PARSER) {
-            // TODO
+        String str;
+        if (USE_GGP_NOTATION) {
+            str = getGGPString();
         }
-        String str = preconditions + " => " + action;
+        else {
+            str = preconditions + " => " + action;
+        }
         if (!SHOW_GUI && ruleIndex != -1)
             str += " , index: " + ruleIndex;
         return str;
+    }
+
+    // only works for tic tac toe
+    public String getGGPString() {
+        StringBuilder preStr = new StringBuilder();
+        char[] players = new char[] {'b', 'x', 'o'};
+        LiteralSet preClone = new LiteralSet(preconditions);
+        // preconditions
+        if (preClone.isEmpty())
+            preStr.append("T ");
+        else {
+            for (Literal l : preconditions) {
+                if (!preClone.contains(l))
+                    continue;
+                char[] digits = l.getName().replaceAll("\\D+","").toCharArray();
+                int p = Character.getNumericValue(digits[0]);
+                String neg = l.isNegated() ? "¬" : "";
+                if (preStr.length() > 0)
+                    preStr.append("∧ ");
+
+                // check for existence of literal for opponent in same cell
+                // this is to convert !(cell 1 1 x) /\ !(cell 1 1 o) to (cell 1 1 b)
+                Position pos = FFTManager.getPosFromId.apply(l.id);
+                Position otherPos = Position.getOtherPlayerPos(pos);
+                Literal otherPlayerLit = new PropLiteral(FFTManager.getIdFromPos.apply(otherPos));
+                if (preClone.contains(otherPlayerLit)) {
+                    preClone.remove(otherPlayerLit);
+                    neg = "";
+                    p = 0;
+                }
+
+                preStr.append(String.format(neg + "(cell %c %c %c) ", digits[1]+1, digits[2]+1, players[p]));
+            }
+        }
+        preStr.append("=> ");
+        // action
+        StringBuilder actStr = new StringBuilder();
+        for (Literal l : action.adds) {
+            if (actStr.length() > 0)
+                actStr.append(", ");
+            char[] digits = l.getName().replaceAll("\\D+","").toCharArray();
+            int p = Character.getNumericValue(digits[0]);
+            actStr.append(String.format("(mark %c %c %c) ", digits[1]+1, digits[2]+1, players[p]));
+        }
+
+        return preStr.toString() + actStr.toString();
     }
 
     public static PropRule createRule(FFTNode n, FFTMove m) {

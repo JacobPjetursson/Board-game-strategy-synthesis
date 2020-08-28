@@ -305,6 +305,7 @@ public class Controller {
         for (BoardTile[] tile : tiles) {
             for (BoardTile aTile : tile) {
                 aTile.removeColor();
+                aTile.removeHighlight();
                 aTile.setTurnsToTerminal("");
                 if (!highlight)
                     continue;
@@ -332,7 +333,7 @@ public class Controller {
                 for (FFTMove move : fftChosenMoves) {
                     Move m = (Move) move;
                     if (m.col == aTile.getCol() && m.row == aTile.getRow())
-                        aTile.setFFTChosen();
+                        aTile.setFFTChosen(m.team);
                 }
             }
         }

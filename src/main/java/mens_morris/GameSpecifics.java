@@ -117,8 +117,6 @@ public class GameSpecifics implements FFTGameSpecifics {
 
     @Override
     public String getFFTFilePath() {
-        if (Config.ENABLE_GGP_PARSER)
-            return "FFTs/mens_morris_GGP_FFT.txt";
         return "FFTs/mens_morris_FFT.txt";
     }
 

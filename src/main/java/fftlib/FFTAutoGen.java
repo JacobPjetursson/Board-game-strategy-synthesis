@@ -15,7 +15,6 @@ import java.util.function.Consumer;
 
 import static fftlib.FFTManager.addNewFFT;
 import static misc.Config.*;
-import static misc.Globals.PLAYER1;
 
 public class FFTAutoGen {
     // States that are reachable when playing with a partial or total strategy
@@ -839,7 +838,8 @@ public class FFTAutoGen {
             if (DETAILED_DEBUG || NAIVE_RULE_GENERATION)
                 System.out.println("Remaining amount of rules: " + fft.getAmountOfRules());
             if (!fft.getRules().get(i - removed).equals(r)) {
-                System.out.println("This rule has already been deleted");
+                if (DETAILED_DEBUG)
+                    System.out.println("This rule has already been deleted");
                 removed++;
                 continue;
             }

@@ -11,7 +11,7 @@ import static misc.Globals.*;
 
 public class Logic {
 
-    static ArrayList<Move> legalMoves(int team, Node node) {
+    public static ArrayList<Move> legalMoves(int team, Node node) {
         ArrayList<Move> list = new ArrayList<>();
         int[][] board = node.getBoard();
         for (int i = 0; i < board.length; i++) {

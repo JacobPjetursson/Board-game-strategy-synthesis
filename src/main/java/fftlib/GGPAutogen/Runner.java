@@ -3,7 +3,7 @@ package fftlib.GGPAutogen;
 import fftlib.FFTAutoGen;
 import fftlib.logic.FFT;
 import fftlib.logic.rule.PropRule;
-import fftlib.logic.rule.RuleGroup;
+import fftlib.logic.rule.MetaRule;
 import misc.Config;
 import org.ggp.base.util.gdl.grammar.GdlSentence;
 import org.ggp.base.util.statemachine.MachineState;
@@ -24,7 +24,7 @@ public class Runner {
     private static PriorityQueue<MachineState> states;
 
     private static FFT fft;
-    private static RuleGroup rg;
+    private static MetaRule mr;
     private static Role p1Role, p2Role;
 
     private static int winner;

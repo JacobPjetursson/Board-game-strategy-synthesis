@@ -3,10 +3,9 @@ package fftlib.gui;
 import fftlib.FFTAutoGen;
 import fftlib.logic.FFT;
 import fftlib.FFTManager;
-import fftlib.logic.literal.LiteralSet;
 import fftlib.logic.rule.PropRule;
 import fftlib.logic.rule.Rule;
-import fftlib.logic.rule.RuleGroup;
+import fftlib.logic.rule.MetaRule;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
@@ -42,8 +41,14 @@ import static misc.Globals.*;
 
 public class FFTEditPane extends BorderPane {
     private static final int textFieldWidth = 150;
-    private static final double RULEGROUP_LABEL_SIZE = 35;
-    private static final double RULE_SIZE = 33;
+    private static final double RULEGROUP_LABEL_SIZE = 46; // 35
+    private static final double RULE_SIZE = 40; // 33
+
+    private static final int FONTSIZE_TITLE = 32; // 18 is default
+    private static final int FONTSIZE_RULE = 20; // 13 is default
+    private static final int FONTSIZE_RULEGROUP = 24; // 16 is default
+    private static final int RULE_LABEL_WIDTH = 850;
+
 
     private Label fftTitle;
     private Label ruleLabel;
@@ -87,7 +92,7 @@ public class FFTEditPane extends BorderPane {
         // make fft title
         BorderPane fftPane = new BorderPane();
         fftTitle = new Label(currFFT.getName());
-        fftTitle.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        fftTitle.setFont(Font.font("Verdana", FontWeight.BOLD, FONTSIZE_TITLE));
         fftTitle.setAlignment(Pos.CENTER);
         fftTitle.setTextAlignment(TextAlignment.CENTER);
         fftPane.setCenter(fftTitle);
@@ -124,7 +129,7 @@ public class FFTEditPane extends BorderPane {
         // delete fft
         Button deleteFFTBtn = new Button("Delete FFT");
         deleteFFTBtn.setMinWidth(150);
-        deleteFFTBtn.setFont(Font.font("Verdana", 16));
+        deleteFFTBtn.setFont(Font.font("Verdana", 18));
         deleteFFTBtn.setStyle(redBtnStyle);
         deleteFFTBtn.setOnAction(event -> {
             Stage newStage = new Stage();
@@ -140,7 +145,7 @@ public class FFTEditPane extends BorderPane {
         Button addFFTBtn = new Button("Add new FFT");
         addFFTBtn.setMinWidth(150);
         addFFTBtn.setStyle(greenBtnStyle);
-        addFFTBtn.setFont(Font.font("Verdana", 16));
+        addFFTBtn.setFont(Font.font("Verdana", 18));
         addFFTBtn.setOnAction(event -> {
             Stage newStage = new Stage();
             newStage.setScene(new Scene(
@@ -156,7 +161,7 @@ public class FFTEditPane extends BorderPane {
         renameFFTBtn.setStyle(blueBtnStyle);
         renameFFTBtn.setMinWidth(180);
         renameFFTBtn.setMaxWidth(180);
-        renameFFTBtn.setFont(Font.font("Verdana", 16));
+        renameFFTBtn.setFont(Font.font("Verdana", 18));
         renameFFTBtn.setOnAction(event -> {
             Stage newStage = new Stage();
             newStage.setScene(new Scene(
@@ -172,9 +177,11 @@ public class FFTEditPane extends BorderPane {
 
         // make rule label
         ruleLabel = new Label();
-        ruleLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 16));
+        ruleLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
         ruleLabel.setAlignment(Pos.CENTER);
         ruleLabel.setTextAlignment(TextAlignment.CENTER);
+        ruleLabel.setWrapText(true);
+        ruleLabel.setMaxWidth(RULE_LABEL_WIDTH);
         topBox.getChildren().addAll(fftPane, ruleLabel);
 
         // set center
@@ -204,7 +211,7 @@ public class FFTEditPane extends BorderPane {
         // SET BUTTONS
         // TEAM BOX
         Label teamLabel = new Label("Team:");
-        teamLabel.setFont(Font.font("Verdana", 15));
+        teamLabel.setFont(Font.font("Verdana", 17));
         ChoiceBox<String> teamChoice = new ChoiceBox<>();
         teamChoice.setMinWidth(textFieldWidth);
         teamChoice.setMaxWidth(textFieldWidth);
@@ -222,7 +229,7 @@ public class FFTEditPane extends BorderPane {
 
         // VERIFICATION
         Button verifyBtn = new Button("Verify");
-        verifyBtn.setFont(Font.font("Verdana", 16));
+        verifyBtn.setFont(Font.font("Verdana", 18));
         verifyBtn.setTooltip(new Tooltip("Checks if the current FFT is strongly/weakly optimal"));
 
         verifyBtn.setOnMouseClicked(event -> {
@@ -237,18 +244,18 @@ public class FFTEditPane extends BorderPane {
         // ADD RULE BUTTON
         Button addRuleBtn = new Button("Add rule");
         addRuleBtn.setStyle(greenBtnStyle);
-        addRuleBtn.setFont(Font.font("Verdana", 16));
+        addRuleBtn.setFont(Font.font("Verdana", 18));
         addRuleBtn.setOnMouseClicked(event -> {
             appendRule(new PropRule());
         });
 
-        Button addRgBtn = new Button("Add rule group");
+        Button addRgBtn = new Button("Add meta rule");
         addRgBtn.setStyle(greenBtnStyle);
-        addRgBtn.setFont(Font.font("Verdana", 16));
+        addRgBtn.setFont(Font.font("Verdana", 18));
         addRgBtn.setOnMouseClicked(event -> {
             Stage newStage = new Stage();
             newStage.setScene(new Scene(
-                    new NameRGPane("Write name of rule group", false), 500, 200));
+                    new NameRGPane("Write name of meta rule", false), 500, 200));
             newStage.initModality(Modality.APPLICATION_MODAL);
             newStage.initOwner(getScene().getWindow());
             newStage.setOnCloseRequest(Event::consume);
@@ -259,7 +266,7 @@ public class FFTEditPane extends BorderPane {
         undoBtn = new Button("Undo");
         undoBtn.setDisable(true);
         undoBtn.setStyle(orangeBtnStyle);
-        undoBtn.setFont(Font.font("Verdana", 16));
+        undoBtn.setFont(Font.font("Verdana", 18));
         undoBtn.setOnMouseClicked(event -> {
             if (undoStack.empty()) // shouldn't be possible
                 return;
@@ -272,19 +279,19 @@ public class FFTEditPane extends BorderPane {
             showRules();
         });
 
-        // SAVE TO DISK BTN
-        Button saveToDiskBtn = new Button("Save to disk");
-        saveToDiskBtn.setStyle(blueBtnStyle);
-        saveToDiskBtn.setFont(Font.font("Verdana", 16));
-        saveToDiskBtn.setOnMouseClicked(event -> {
+        // SAVE BTN
+        Button saveBtn = new Button("Save");
+        saveBtn.setStyle(blueBtnStyle);
+        saveBtn.setFont(Font.font("Verdana", 18));
+        saveBtn.setOnMouseClicked(event -> {
             save();
-            playMsg("FFT successfully saved to disk", 3);
+            playMsg("FFT successfully saved", 3);
             changes = false;
         });
 
         // MINIMIZE BTN
         Button minimizeBtn = new Button("Minimize");
-        minimizeBtn.setFont(Font.font("Verdana", 16));
+        minimizeBtn.setFont(Font.font("Verdana", 18));
         minimizeBtn.setOnMouseClicked(event -> {
 
             Stage newStage = new Stage();
@@ -297,7 +304,7 @@ public class FFTEditPane extends BorderPane {
 
         // SYNTHESIZE FFT BTN
         Button generateBtn = new Button("Synthesize");
-        generateBtn.setFont(Font.font("Verdana", 16));
+        generateBtn.setFont(Font.font("Verdana", 18));
         generateBtn.setOnMouseClicked(event -> {
             Stage newStage = new Stage();
             newStage.setScene(new Scene(
@@ -310,7 +317,7 @@ public class FFTEditPane extends BorderPane {
         // DELETE RULE BTN
         deleteRuleBtn = new Button("Delete rule");
         deleteRuleBtn.setStyle(redBtnStyle);
-        deleteRuleBtn.setFont(Font.font("Verdana", 16));
+        deleteRuleBtn.setFont(Font.font("Verdana", 18));
         deleteRuleBtn.setDisable(true);
         deleteRuleBtn.setOnMouseClicked(event -> {
             pushUndoStack();
@@ -321,7 +328,7 @@ public class FFTEditPane extends BorderPane {
 
         // CLEAR RULE BTN
         clearRuleBtn = new Button("Clear rule");
-        clearRuleBtn.setFont(Font.font("Verdana", 16));
+        clearRuleBtn.setFont(Font.font("Verdana", 18));
         clearRuleBtn.setDisable(true);
         clearRuleBtn.setOnMouseClicked(event -> {
             int rIdx = getSelectedPane().rIdx;
@@ -339,14 +346,14 @@ public class FFTEditPane extends BorderPane {
         });
 
         // RENAME RG BTN
-        renameRgBtn = new Button("Rename rule group");
-        renameRgBtn.setFont(Font.font("Verdana", 16));
+        renameRgBtn = new Button("Rename meta rule");
+        renameRgBtn.setFont(Font.font("Verdana", 18));
         renameRgBtn.setStyle(blueBtnStyle);
         renameRgBtn.setDisable(true);
         renameRgBtn.setOnMouseClicked(event -> {
             Stage newStage = new Stage();
             newStage.setScene(new Scene(
-                    new NameRGPane("Rename rule group", true), 500, 200));
+                    new NameRGPane("Rename meta rule", true), 500, 200));
             newStage.initModality(Modality.APPLICATION_MODAL);
             newStage.initOwner(getScene().getWindow());
             newStage.setOnCloseRequest(Event::consume);
@@ -354,14 +361,14 @@ public class FFTEditPane extends BorderPane {
         });
 
         // DELETE RG BTN
-        deleteRgBtn = new Button("Delete rule group");
-        deleteRgBtn.setFont(Font.font("Verdana", 16));
+        deleteRgBtn = new Button("Delete meta rule");
+        deleteRgBtn.setFont(Font.font("Verdana", 18));
         deleteRgBtn.setStyle(redBtnStyle);
         deleteRgBtn.setDisable(true);
         deleteRgBtn.setOnMouseClicked(event -> {
             // Confirmation on delete
-            RuleGroup rg = getSelectedPane().rg;
-            String labelText = "Are you sure you want to delete the rule group:\n" + rg.name;
+            MetaRule mr = getSelectedPane().mr;
+            String labelText = "Are you sure you want to delete the meta rule:\n" + mr.name;
             Stage newStage = new Stage();
             newStage.setScene(new Scene(
                     new DeleteRGDialog(labelText), 500, 150));
@@ -373,13 +380,13 @@ public class FFTEditPane extends BorderPane {
 
         // BACK BUTTON
         Button back = new Button("Back");
-        back.setFont(Font.font("Verdana", 16));
+        back.setFont(Font.font("Verdana", 18));
         back.setOnMouseClicked(event -> {
             Stage stage = (Stage) getScene().getWindow();
             stage.setScene(prevScene);
 
             if (changes) {
-                // Chance to save to disk
+                // Chance to save
                 Stage newStage = new Stage();
                 newStage.setScene(new Scene(
                         new SaveFFTPane(), 500, 200));
@@ -406,7 +413,7 @@ public class FFTEditPane extends BorderPane {
 
         HBox miscBox = new HBox(5);
         miscBox.setAlignment(Pos.CENTER);
-        miscBox.getChildren().addAll(saveToDiskBtn, undoBtn);
+        miscBox.getChildren().addAll(saveBtn, undoBtn);
 
         HBox bottomBox3 = new HBox(25, ruleBox, miscBox);
         bottomBox3.setAlignment(Pos.CENTER);
@@ -435,7 +442,7 @@ public class FFTEditPane extends BorderPane {
             RulePane selectedPane = getSelectedPane();
             RulePane newPane;
 
-            if (!isShiftDown || selectedPane.isRuleGroup) {
+            if (!isShiftDown || selectedPane.isMetaRule) {
                 // determine if we will be moving position
                 int changedIdx = 0;
                 if (code == KeyCode.DOWN && (selectedCellIdx < lw.getItems().size()-1))
@@ -453,17 +460,17 @@ public class FFTEditPane extends BorderPane {
 
                 if (code == KeyCode.DOWN) {
                     // get corner cases out of the way
-                    // move down when we are in bottom of current rulegroup (no movement)
-                    if (selectedPane.inRuleGroup &&
-                            selectedPane.rIdx == (selectedPane.rg.endIdx-1)) {
-                        selectedPane.rg.endIdx--;
+                    // move down when we are in bottom of current metarule (no movement)
+                    if (selectedPane.inMetaRule &&
+                            selectedPane.rIdx == (selectedPane.mr.endIdx-1)) {
+                        selectedPane.mr.endIdx--;
                     } else if (selectedCellIdx < lw.getItems().size() - 1) {
                         selectedCellIdx++;
                         newPane = getSelectedPane();
-                        // move down into rulegroup when we are not in rulegroup
-                        if (!selectedPane.inRuleGroup &&
-                                newPane.isRuleGroup && (selectedPane.rIdx == newPane.rg.startIdx-1)) {
-                            newPane.rg.startIdx--;
+                        // move down into metarule when we are not in metarule
+                        if (!selectedPane.inMetaRule &&
+                                newPane.isMetaRule && (selectedPane.rIdx == newPane.mr.startIdx-1)) {
+                            newPane.mr.startIdx--;
                         }
                         // regular move
                         else {
@@ -473,17 +480,17 @@ public class FFTEditPane extends BorderPane {
                 } else if (code == KeyCode.UP && selectedCellIdx > 0) {
                     selectedCellIdx--;
                     newPane = getSelectedPane();
-                    // move up into rulegroup when we are not in rulegroup
-                    if (!selectedPane.inRuleGroup && newPane.inRuleGroup &&
-                            selectedPane.rIdx == (newPane.rg.endIdx)) {
-                        newPane.rg.endIdx++;
+                    // move up into metarule when we are not in metarule
+                    if (!selectedPane.inMetaRule && newPane.inMetaRule &&
+                            selectedPane.rIdx == (newPane.mr.endIdx)) {
+                        newPane.mr.endIdx++;
                         // we don't move the rule anywhere, just change indentation
                         selectedCellIdx++;
                     }
-                    // move up when we are in top of current rulegroup
-                    else if (selectedPane.inRuleGroup &&
-                            selectedPane.rIdx == (selectedPane.rg.startIdx)) {
-                        selectedPane.rg.startIdx++;
+                    // move up when we are in top of current metarule
+                    else if (selectedPane.inMetaRule &&
+                            selectedPane.rIdx == (selectedPane.mr.startIdx)) {
+                        selectedPane.mr.startIdx++;
                     } // regular move
                     else {
                         currFFT.moveRule(selectedPane.rIdx, newPane.rIdx);
@@ -511,7 +518,7 @@ public class FFTEditPane extends BorderPane {
 
     private void playMsg(String msg, int seconds) {
         Label msgLabel = new Label(msg);
-        msgLabel.setFont(Font.font("Verdana", 16));
+        msgLabel.setFont(Font.font("Verdana", 18));
         msgLabel.setAlignment(Pos.CENTER);
         msgLabel.setTextAlignment(TextAlignment.CENTER);
 
@@ -588,7 +595,7 @@ public class FFTEditPane extends BorderPane {
     private int findRuleIdx(Rule r) {
         for (int i = 0; i < lw.getItems().size(); i++) {
             RulePane rp = lw.getItems().get(i);
-            if (!rp.isRuleGroup) {
+            if (!rp.isMetaRule) {
                 Rule paneRule = currFFT.getRules().get(rp.rIdx);
                 if (paneRule.equals(r))
                     return i;
@@ -603,13 +610,13 @@ public class FFTEditPane extends BorderPane {
         int i = 0;
         double size = 0;
         while (i < currFFT.getRules().size()) {
-            // check if any rulegroup starts at index i
-            for (RuleGroup rg : currFFT.getRuleGroups()) {
-                if (i == rg.startIdx && i < currFFT.size()) {
-                    rules.add(new RulePane(rg));
+            // check if any metarule starts at index i
+            for (MetaRule mr : currFFT.getMetaRules()) {
+                if (i == mr.startIdx && i < currFFT.size()) {
+                    rules.add(new RulePane(mr));
                     size += RULEGROUP_LABEL_SIZE;
-                    while (i < rg.endIdx && i < currFFT.getRules().size()) {
-                        rules.add(new RulePane(i, rg));
+                    while (i < mr.endIdx && i < currFFT.getRules().size()) {
+                        rules.add(new RulePane(i, mr));
                         size += RULE_SIZE;
                         i++;
                     }
@@ -621,10 +628,10 @@ public class FFTEditPane extends BorderPane {
             size += RULE_SIZE;
             i++;
         }
-        // account for corner case where rulegroup is empty at end of rules
-        for (RuleGroup rg : currFFT.getRuleGroups()) {
-            if (rg.startIdx >= currFFT.size())
-            rules.add(new RulePane(rg));
+        // account for corner case where metarule is empty at end of rules
+        for (MetaRule mr : currFFT.getMetaRules()) {
+            if (mr.startIdx >= currFFT.size())
+            rules.add(new RulePane(mr));
             size += RULEGROUP_LABEL_SIZE;
         }
 
@@ -638,13 +645,13 @@ public class FFTEditPane extends BorderPane {
         }
     }
 
-    private Node getRuleGroupLock(RuleGroup rg) {
+    private Node getMetaRuleLock(MetaRule mr) {
         URL urlLock = this.getClass().getClassLoader().getResource("lock.png");
         URL urlunlock = this.getClass().getClassLoader().getResource("unlock.png");
         Image lockImg = new Image(urlLock.toExternalForm());
         Image unlockImg = new Image(urlunlock.toExternalForm());
         ImageView imgView = new ImageView();
-        if (rg.isLocked())
+        if (mr.isLocked())
             imgView.setImage(lockImg);
         else
             imgView.setImage(unlockImg);
@@ -656,12 +663,12 @@ public class FFTEditPane extends BorderPane {
         imgView.setOnMouseClicked(event -> {
             pushUndoStack();
             // change lock
-            if (rg.isLocked()) {
+            if (mr.isLocked()) {
                 imgView.setImage(unlockImg);
-                rg.setLocked(false);
+                mr.setLocked(false);
             } else {
                 imgView.setImage(lockImg);
-                rg.setLocked(true);
+                mr.setLocked(true);
             }
         });
 
@@ -671,55 +678,57 @@ public class FFTEditPane extends BorderPane {
     // HELPER CLASSES
     private class RulePane extends StackPane {
         Label label;
-        // used if pane is the rule group label
-        RuleGroup rg;
-        boolean isRuleGroup;
+        // used if pane is the meta rule label
+        MetaRule mr;
+        boolean isMetaRule;
         // used if pane is a normal rule
         int rIdx;
-        boolean inRuleGroup;
+        boolean inMetaRule;
 
-        RulePane(RuleGroup rg) {
+        RulePane(MetaRule mr) {
             super();
             setAlignment(Pos.CENTER_LEFT);
-            this.rg = rg;
-            isRuleGroup = true;
-            inRuleGroup = true;
+            this.mr = mr;
+            isMetaRule = true;
+            inMetaRule = true;
 
-            this.label = new Label(rg.name);
-            label.setFont(Font.font("Verdana", 18));
+            this.label = new Label(mr.name);
+            label.setFont(Font.font("Verdana", FONTSIZE_RULEGROUP));
             HBox rgBox = new HBox(20);
             rgBox.setAlignment(Pos.CENTER_LEFT);
-            rgBox.getChildren().addAll(label, getRuleGroupLock(rg));
+            rgBox.getChildren().addAll(label, getMetaRuleLock(mr));
             getChildren().add(rgBox);
         }
 
-        RulePane(int idx, RuleGroup rg) { // rule entry
+        RulePane(int idx, MetaRule mr) { // rule entry
             this(idx);
-            this.inRuleGroup = true;
-            this.rg = rg;
+            this.inMetaRule = true;
+            this.mr = mr;
             Rule r = currFFT.getRules().get(rIdx);
-            this.label.setText("   " + (idx + 1) + ": " + r);
+            this.label.setText("  *  " + (idx + 1) + ": " + r);
+            label.setFont(Font.font("Verdana", FONTSIZE_RULE - 2));
+
         }
 
         RulePane(int idx) { // rule entry
             super();
             this.rIdx = idx;
-            this.inRuleGroup = false;
+            this.inMetaRule = false;
             Rule r = currFFT.getRules().get(rIdx);
             setAlignment(Pos.CENTER_LEFT);
 
             this.label = new Label((idx + 1) + ": " + r);
-            label.setFont(Font.font("Verdana", 14));
+            label.setFont(Font.font("Verdana", FONTSIZE_RULE));
             getChildren().add(label);
         }
 
         public void select() {
             // set buttons
-            deleteRgBtn.setDisable(!isRuleGroup);
-            renameRgBtn.setDisable(!isRuleGroup);
-            deleteRuleBtn.setDisable(isRuleGroup);
-            clearRuleBtn.setDisable(isRuleGroup);
-            if (isRuleGroup) {
+            deleteRgBtn.setDisable(!isMetaRule);
+            renameRgBtn.setDisable(!isMetaRule);
+            deleteRuleBtn.setDisable(isMetaRule);
+            clearRuleBtn.setDisable(isMetaRule);
+            if (isMetaRule) {
                 // clear
                 ruleLabel.setText("");
                 ruleEditPane.disable();
@@ -751,7 +760,7 @@ public class FFTEditPane extends BorderPane {
                 setGraphic(null);
             } else {
                 Label l = item.label;
-                if (item.isRuleGroup) {
+                if (item.isMetaRule) {
                     l.setTextFill(Color.GRAY);
                 } else {
                     l.setTextFill(Color.BLACK);
@@ -772,12 +781,12 @@ public class FFTEditPane extends BorderPane {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
             pushUndoStack();
-            deleteRuleGroup();
+            deleteMetaRule();
         }
 
-        private void deleteRuleGroup() {
-            RuleGroup rg = getSelectedPane().rg;
-            currFFT.removeRuleGroup(rg, true);
+        private void deleteMetaRule() {
+            MetaRule mr = getSelectedPane().mr;
+            currFFT.removeMetaRule(mr, true);
             refresh();
         }
     }
@@ -811,15 +820,15 @@ public class FFTEditPane extends BorderPane {
             String text = textField.getText().trim();
             if (!text.isEmpty()) {
                 pushUndoStack();
-                RuleGroup rg;
+                MetaRule mr;
                 if (rename) {
-                    rg = getSelectedPane().rg;
-                    rg.name = textField.getText();
+                    mr = getSelectedPane().mr;
+                    mr.name = textField.getText();
                 } else {
-                    // startidx, endidx is just above last rule (so no rules in rg yet)
+                    // startidx, endidx is just above last rule (so no rules in mr yet)
                     int idx = currFFT.size();
-                    rg = new RuleGroup(currFFT, textField.getText(), idx, idx);
-                    currFFT.addRuleGroup(rg);
+                    mr = new MetaRule(currFFT, textField.getText(), idx, idx);
+                    currFFT.addMetaRule(mr);
                     selectedCellIdx = lw.getItems().size();
                 }
 
@@ -859,7 +868,7 @@ public class FFTEditPane extends BorderPane {
     public class SaveFFTPane extends ConfirmDialog {
 
         SaveFFTPane() {
-            super("You have unsaved changes to the FFT.\n Do you want to save them to disk now?");
+            super("You have unsaved changes to the FFT.\n Do you want to save them now?");
         }
 
         @Override
@@ -876,7 +885,7 @@ public class FFTEditPane extends BorderPane {
 
         MinimizeFFTPane() {
             Label label = new Label("Minimize the FFT");
-            label.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
+            label.setFont(Font.font("Verdana", FontWeight.BOLD, 17));
             label.setAlignment(Pos.CENTER);
             label.setTextAlignment(TextAlignment.CENTER);
 
@@ -937,7 +946,7 @@ public class FFTEditPane extends BorderPane {
         VerifyFFTPane() {
 
             Label label = new Label("Verify the FFT: " + currFFT.getName());
-            label.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
+            label.setFont(Font.font("Verdana", FontWeight.BOLD, 17));
             label.setAlignment(Pos.CENTER);
             label.setTextAlignment(TextAlignment.CENTER);
 
@@ -984,7 +993,7 @@ public class FFTEditPane extends BorderPane {
         GenerateFFTPane() {
 
             Label label = new Label("Synthesize an optimal strategy for " + FFTManager.getPlayerName(AUTOGEN_TEAM));
-            label.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
+            label.setFont(Font.font("Verdana", FontWeight.BOLD, 17));
             label.setAlignment(Pos.CENTER);
             label.setTextAlignment(TextAlignment.CENTER);
 

@@ -65,7 +65,7 @@ public class BoardTile extends StackPane {
         setPrefSize(tilesize, tilesize);
         setStyle("-fx-background-color: rgb(255, 255, 255);");
         turnsToTerminalLabel = new Label("");
-        turnsToTerminalLabel.setFont(Font.font("Verdana", tilesize/4));
+        turnsToTerminalLabel.setFont(Font.font("Verdana", tilesize/3));
         turnsToTerminalLabel.setTextFill(Color.BLACK);
         // mouse events
         setOnMouseEntered(me -> {
@@ -115,7 +115,7 @@ public class BoardTile extends StackPane {
     // used both to color the tile but also to draw a shape in interactive mode (the action)
     public void addHighlight(String color, int team) {
         setStyle(color);
-        if (clickMode != CLICK_DEFAULT) {
+        if (clickMode == CLICK_INTERACTIVE) {
             highlightPiece(blue, team);
 
         }
@@ -132,7 +132,7 @@ public class BoardTile extends StackPane {
     public void removeHighlight() {
         setStyle(whiteStr);
 
-        if (clickMode != CLICK_DEFAULT && highlightPiece != null)
+        if (highlightPiece != null)
             getChildren().remove(highlightPiece);
     }
 
@@ -341,10 +341,11 @@ public class BoardTile extends StackPane {
 
     public void removeColor() {
         addHighlight(whiteStr, team);
+
     }
 
-    public void setFFTChosen() {
-        addHighlight(blueStr, team);
+    public void setFFTChosen(int team) {
+        highlightPiece(blue, team);
     }
 
     public boolean isAction() {
