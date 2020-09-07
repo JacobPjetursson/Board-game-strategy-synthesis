@@ -39,10 +39,6 @@ public class FFTAutoGen {
     private static final int APPLICABLE = 1;
     private static final int APPLIED = 2;
 
-    private static int appliedSize = 0;
-    private static int extraSize = 0;
-    private static int totalsize = 0;
-
     public static void synthesize() {
         synthesize(null);
     }
@@ -138,14 +134,6 @@ public class FFTAutoGen {
         System.out.println("Time spent on minimizing: " + timeSpentMinimize + " seconds");
         System.out.println("Time spent in total: " + (timeSpentMinimize + autoGenTimeSpent) + " seconds");
         System.out.println("Final rules: \n" + fft);
-
-        System.out.println("applied size: " + appliedSize);
-        System.out.println("extra size: " + extraSize);
-        System.out.println("total size: " + totalsize);
-        appliedSize = 0;
-        extraSize = 0;
-        totalsize = 0;
-
     }
 
     private static void setup() {
@@ -302,7 +290,6 @@ public class FFTAutoGen {
             // we deleted a rule and a previous rule applied, so we replace it with whatever
             if (minimizing && deletingRule) {
                 // need to simply replace with whichever rule (if any) the state is now covered by
-                appliedSize++;
                 appliedMap.replace(node, fft.apply(node));
                 return;
             }
@@ -310,21 +297,17 @@ public class FFTAutoGen {
             RuleMapping nodeRm = node.getAppliedRuleMapping();
             RuleMapping appliedRm = appliedMap.get(node);
             // no rule applied to node previously, so we don't need to replace anything
-            if (nodeRm == null || nodeRm == RuleMapping.NOMATCH) {
-                appliedSize++;
+            if (nodeRm == null || nodeRm == RuleMapping.NOMATCH)
                 return;
-            }
 
             // rule applied previously with lower index, so we put that rule back
             if (nodeRm.getRule().getRuleIndex() < appliedRm.getRule().getRuleIndex()) {
                 // So check if rule in node is lower index than the rule in appliedMap
                 // if so, then modifying this rule won't affect it,
                 // so we replace it with the (old) rule that applied
-                extraSize++;
                 appliedMap.put(node, nodeRm);
             }
             // rule applied with higher index, meaning it is the new applied rule, so we don't do anything
-            appliedSize++;
         });
 
         if (!lastRule) { // replace value of all keys
@@ -333,15 +316,6 @@ public class FFTAutoGen {
             else
                 appliedMap.keySet().forEach(replaceMethod);
         }
-
-        Map<FFTNode, RuleMapping> testMap = new ConcurrentHashMap<>();
-        if (lastRule) {
-            appliedSize += appliedMap.size();
-
-            appliedStates.findNodes(r, testMap);
-            extraSize += testMap.size();
-        }
-        totalsize += (applicableStates.size() + appliedStates.size());
     }
 
     private static void safeRun(Rule r, boolean lastRule) {
