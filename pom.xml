@@ -147,7 +147,7 @@
                     <execution>
                         <id>demo</id>
                         <configuration>
-                            <mainClass>misc.demos.Demo</mainClass>
+                            <mainClass>misc.tests.Test</mainClass>
                         </configuration>
                     </execution>
                     <execution>

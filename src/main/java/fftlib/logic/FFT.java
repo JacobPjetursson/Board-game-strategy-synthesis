@@ -340,7 +340,6 @@ public class FFT {
             return false;
         while (!frontier.isEmpty()) {
             FFTNode node = frontier.pop();
-            //System.out.println("popped node: " + node);
             if (node.isTerminal()) {
                 if (node.getWinner() == opponent) {
                     // Should not hit this given initial check
