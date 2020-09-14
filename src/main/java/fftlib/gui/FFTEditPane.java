@@ -1014,8 +1014,6 @@ public class FFTEditPane extends BorderPane {
 
         private void generateAndClose() {
             boolean tempChanges = changes;
-            boolean oldSymmetry = SYMMETRY_DETECTION; // fixme - temporary!
-            SYMMETRY_DETECTION = true;
 
             String msg;
             if (!currFFT.verify(AUTOGEN_TEAM, false)) { // error, not a winning strategy
@@ -1035,8 +1033,6 @@ public class FFTEditPane extends BorderPane {
             Stage stage = (Stage) getScene().getWindow();
             stage.close();
             refresh();
-
-            SYMMETRY_DETECTION = oldSymmetry;
         }
 
     }

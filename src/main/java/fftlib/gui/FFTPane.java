@@ -19,6 +19,7 @@ import javafx.scene.text.TextAlignment;
 import java.util.HashSet;
 
 import static fftlib.FFTManager.currFFT;
+import static misc.Config.SYMMETRY_DETECTION;
 
 public class FFTPane extends VBox {
     Label title;
@@ -57,6 +58,8 @@ public class FFTPane extends VBox {
     }
 
     public void refresh() {
+        boolean oldSymmetry = SYMMETRY_DETECTION;
+        SYMMETRY_DETECTION = false;
         title.setText(currFFT.getName());
         ObservableList<VBox> rules = FXCollections.observableArrayList();
         ruleApplied = false;
@@ -90,6 +93,7 @@ public class FFTPane extends VBox {
 
         lw.setItems(rules);
         lw.setPrefHeight(size);
+        SYMMETRY_DETECTION = oldSymmetry;
     }
 
     public VBox getRuleBox(Rule r, int index, boolean inline) {
