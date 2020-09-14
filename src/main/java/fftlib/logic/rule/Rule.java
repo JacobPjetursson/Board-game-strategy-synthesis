@@ -130,12 +130,14 @@ public abstract class Rule {
             return str;
         }
 
-        String str;
+        String str = "";
         if (USE_GGP_NOTATION) {
             str = getGGPString();
         }
         else {
-            str = preconditions + " => " + action;
+            if (preconditions.isEmpty())
+                str += "T";
+            str += preconditions + " => " + action;
         }
         if (!SHOW_GUI && ruleIndex != -1)
             str += " , index: " + ruleIndex;

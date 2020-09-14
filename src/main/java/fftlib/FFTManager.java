@@ -116,7 +116,7 @@ public class FFTManager {
             for (FFT fft : ffts) {
                 fft_file.append("{").append(fft.getName()).append("}\n");
                 for (Rule r : fft.getRules())
-                    fft_file.append(r.getPreconditions()).append(" -> ").append(r.getAction()).append("\n");
+                    fft_file.append(r.getPreconditions()).append(" => ").append(r.getAction()).append("\n");
                 for (MetaRule mr : fft.getMetaRules()) {
                     fft_file.append("[").append(mr.name).append(",");
                     fft_file.append(mr.startIdx).append(",");
@@ -166,7 +166,7 @@ public class FFTManager {
 
                     }
                     else {
-                        String[] rule = line.split("->");
+                        String[] rule = line.split("=>");
                         String clauseStr = rule[0];
                         String actionStr = rule[1];
                         Rule r = new PropRule(clauseStr, actionStr);
